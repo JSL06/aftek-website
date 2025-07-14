@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -144,4 +145,152 @@
     loadTranslations('en');
   </script>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Translation Editor</title>
+  <style>
+    body { font-family: sans-serif; background: #f8f9fa; margin: 0; padding: 0; }
+    .container { max-width: 900px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 32px; }
+    h1 { margin-top: 0; }
+    select, button, input, textarea { font-size: 1rem; }
+    .lang-select { margin-bottom: 24px; }
+    .row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+    .key { width: 30%; font-weight: bold; color: #555; }
+    .value { width: 70%; }
+    textarea { width: 100%; min-height: 40px; resize: vertical; }
+    .actions { margin-top: 24px; }
+    .success { color: green; }
+    .error { color: red; }
+    .section-title { margin-top: 32px; font-size: 1.2em; color: #333; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Website Translation Editor</h1>
+    <div class="lang-select">
+      <label for="language">Select Language: </label>
+      <select id="language"></select>
+    </div>
+    <form id="editor"></form>
+    <div class="actions">
+      <button id="saveBtn" type="button">Save Changes</button>
+      <span id="status"></span>
+    </div>
+  </div>
+  <script>
+    const languageSelect = document.getElementById('language');
+    const editorForm = document.getElementById('editor');
+    const saveBtn = document.getElementById('saveBtn');
+    const statusSpan = document.getElementById('status');
+    let translations = {};
+    let currentLang = 'en';
+
+    // Group keys by section (prefix before first dot)
+    function groupBySection(obj) {
+      const grouped = {};
+      Object.keys(obj).forEach(key => {
+        const section = key.split('.')[0];
+        if (!grouped[section]) grouped[section] = [];
+        grouped[section].push({ key, value: obj[key] });
+      });
+      return grouped;
+    }
+
+    function renderEditor() {
+      editorForm.innerHTML = '';
+      const grouped = groupBySection(translations);
+      Object.keys(grouped).forEach(section => {
+        const sectionTitle = document.createElement('div');
+        sectionTitle.className = 'section-title';
+        sectionTitle.textContent = section.charAt(0).toUpperCase() + section.slice(1);
+        editorForm.appendChild(sectionTitle);
+        grouped[section].forEach(({ key, value }) => {
+          const row = document.createElement('div');
+          row.className = 'row';
+          const keyDiv = document.createElement('div');
+          keyDiv.className = 'key';
+          keyDiv.textContent = key;
+          const valueDiv = document.createElement('div');
+          valueDiv.className = 'value';
+          const textarea = document.createElement('textarea');
+          textarea.value = value;
+          textarea.name = key;
+          valueDiv.appendChild(textarea);
+          row.appendChild(keyDiv);
+          row.appendChild(valueDiv);
+          editorForm.appendChild(row);
+        });
+      });
+    }
+
+    function loadLanguages() {
+      fetch('/api/languages')
+        .then(res => res.json())
+        .then(langs => {
+          languageSelect.innerHTML = '';
+          langs.forEach(lang => {
+            const opt = document.createElement('option');
+            opt.value = lang.code;
+            opt.textContent = `${lang.name} (${lang.code})`;
+            languageSelect.appendChild(opt);
+          });
+        });
+    }
+
+    function loadTranslations(lang) {
+      fetch(`/api/translations/${lang}`)
+        .then(res => res.json())
+        .then(data => {
+          translations = data;
+          renderEditor();
+        })
+        .catch(() => {
+          translations = {};
+          renderEditor();
+        });
+    }
+
+    languageSelect.addEventListener('change', e => {
+      currentLang = e.target.value;
+      loadTranslations(currentLang);
+      statusSpan.textContent = '';
+    });
+
+    saveBtn.addEventListener('click', () => {
+      const formData = new FormData(editorForm);
+      const updated = {};
+      for (let [key, value] of formData.entries()) {
+        updated[key] = value;
+      }
+      fetch(`/api/translations/${currentLang}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      })
+        .then(res => res.json())
+        .then(result => {
+          if (result.success) {
+            statusSpan.textContent = 'Saved!';
+            statusSpan.className = 'success';
+          } else {
+            statusSpan.textContent = 'Error saving.';
+            statusSpan.className = 'error';
+          }
+        })
+        .catch(() => {
+          statusSpan.textContent = 'Error saving.';
+          statusSpan.className = 'error';
+        });
+    });
+
+    // Initial load
+    loadLanguages();
+    languageSelect.value = 'en';
+    loadTranslations('en');
+  </script>
+</body>
+>>>>>>> 8f1a792a58507ae54dbf3ae5d14d955801c27444
 </html> 

@@ -4,4 +4,8 @@ set PATH=%NODEPATH%;%PATH%
 if exist node_modules rd /s /q node_modules
 if exist package-lock.json del package-lock.json
 call "%NODEPATH%\npm.cmd" install
+<<<<<<< HEAD
 pause
+=======
+pause
+>>>>>>> 8f1a792a58507ae54dbf3ae5d14d955801c27444
