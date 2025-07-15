@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "build:dev": "vite build --mode development",
+    "dev": ".\\node-v22.17.0-win-x64\\node-v22.17.0-win-x64\\node.exe .\\node_modules\\vite\\bin\\vite.js",
+    "build": ".\\node-v22.17.0-win-x64\\node-v22.17.0-win-x64\\node.exe .\\node_modules\\vite\\bin\\vite.js build",
+    "build:dev": ".\\node-v22.17.0-win-x64\\node-v22.17.0-win-x64\\node.exe .\\node_modules\\vite\\bin\\vite.js build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": ".\\node-v22.17.0-win-x64\\node-v22.17.0-win-x64\\node.exe .\\node_modules\\vite\\bin\\vite.js preview"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
