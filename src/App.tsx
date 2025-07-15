@@ -40,12 +40,15 @@ const ConditionalChatbot = () => {
   return !isAdmin ? <Chatbot /> : null;
 };
 
+// Get basename for GitHub Pages
+const basename = import.meta.env.PROD ? '/aftek-website' : '';
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename={basename}>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Layout />}>
