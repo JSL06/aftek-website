@@ -32,7 +32,7 @@ const Footer = () => {
               <a href="https://www.rlapolymers.com.au/" target="_blank" rel="noopener noreferrer" className="hover:underline">{t('footer.rlaPolymers')}</a>
             </li>
             <li>
-              <a href="#" className="hover:underline">{t('footer.ccMagazine')}</a>
+              <a href="https://www.facebook.com/candc.media" target="_blank" rel="noopener noreferrer" className="hover:underline">{t('footer.ccMagazine')}</a>
             </li>
           </ul>
         </div>

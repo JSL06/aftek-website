@@ -142,8 +142,13 @@ html, body {
   font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
 }
 
-/* Use Times New Roman for Japanese and Chinese text */
-:lang(ja), :lang(zh), :lang(zh-Hans), :lang(zh-Hant) {
+/* Use Times New Roman for Japanese and Simplified Chinese text */
+:lang(ja), :lang(zh-Hans) {
+  font-family: 'Times New Roman', Times, serif !important;
+}
+
+/* Ensure all text elements use Times New Roman for Japanese and Simplified Chinese */
+:lang(ja) *, :lang(zh-Hans) * {
   font-family: 'Times New Roman', Times, serif !important;
 }
 

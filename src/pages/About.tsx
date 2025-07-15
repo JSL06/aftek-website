@@ -71,20 +71,33 @@ const About = () => {
 
   // Determine font family based on language
   let fontFamily = 'Palatino Linotype, Book Antiqua, Palatino, serif';
-  if (['简体', '繁體', '日本語'].includes(currentLanguage)) {
-    fontFamily = 'Hiragino Sans GB, sans-serif';
+  if (['zh-Hans', 'ja'].includes(currentLanguage)) {
+    fontFamily = 'Times New Roman, Times, serif';
   }
 
   // Leadership team state
   const [leadership, setLeadership] = useState([]);
   useEffect(() => {
     const fetchLeadership = async () => {
+      try {
       const { data, error } = await supabase
         .from('leadership')
         .select('*')
         .eq('isActive', true)
         .order('display_order', { ascending: true });
-      if (!error) setLeadership(data || []);
+        
+        if (error) {
+          // Silently handle the error - table might not exist or have different structure
+          console.warn('Leadership table not available:', error.message);
+          setLeadership([]);
+        } else {
+          setLeadership(data || []);
+        }
+      } catch (err) {
+        // Catch any other errors and handle silently
+        console.warn('Failed to fetch leadership data:', err);
+        setLeadership([]);
+      }
     };
     fetchLeadership();
   }, []);
@@ -99,10 +112,10 @@ const About = () => {
           <h1 className="uniform-page-title">{t('about.title')}</h1>
         </div>
         {/* Mission Statement */}
-        <h2 className="text-2xl font-bold text-center mb-4" style={{ fontFamily }}>{t('mission.title')}</h2>
+        <h2 className="text-2xl font-bold text-center mb-4" style={{ fontFamily }}>{t('home.mission.title')}</h2>
         <div className="text-center text-lg mb-8" style={{ fontFamily }}>
-          <p className="mb-6">{t('mission.paragraph1')}</p>
-          <p>{t('mission.paragraph2')}</p>
+          <p className="mb-6">{t('home.mission.paragraph1')}</p>
+          <p>{t('home.mission.paragraph2')}</p>
         </div>
         {/* Value Boxes */}
         <div className="flex flex-col md:flex-row gap-6 justify-center mb-16">

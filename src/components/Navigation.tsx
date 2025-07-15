@@ -35,7 +35,15 @@ const Navigation = () => {
     { label: t('nav.contact'), path: '/contact', page: 'contact' },
   ];
 
-  const languages: Language[] = ['EN', '繁體', '简体', 'ไทย', '日本語', '한국어', 'Tiếng Việt'];
+  const languageOptions = [
+    { code: 'en', display: 'English' },
+    { code: 'zh-Hant', display: '繁體中文' },
+    { code: 'zh-Hans', display: '简体中文' },
+    { code: 'th', display: 'ไทย' },
+    { code: 'ja', display: '日本語' },
+    { code: 'ko', display: '한국어' },
+    { code: 'vi', display: 'Tiếng Việt' }
+  ];
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
@@ -84,13 +92,11 @@ const Navigation = () => {
               value={currentLanguage}
               onChange={(e) => changeLanguage(e.target.value as Language)}
             >
-              <option value="EN">English</option>
-              <option value="繁體">繁體中文</option>
-              <option value="简体">简体中文</option>
-              <option value="ไทย">ไทย</option>
-              <option value="日本語">日本語</option>
-              <option value="한국어">한국어</option>
-              <option value="Tiếng Việt">Tiếng Việt</option>
+              {languageOptions.map((lang) => (
+                <option key={lang.code} value={lang.code}>
+                  {lang.display}
+                </option>
+              ))}
             </select>
           </div>
         </div>

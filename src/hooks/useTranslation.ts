@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+// Import local translation files
+import enTranslations from '@/locales/en';
+import jaTranslations from '@/locales/ja';
+import koTranslations from '@/locales/ko';
+import thTranslations from '@/locales/th';
+import viTranslations from '@/locales/vi';
+import zhHansTranslations from '@/locales/zh-Hans';
+import zhHantTranslations from '@/locales/zh-Hant';
+
 export type Language = 'en' | 'ja' | 'ko' | 'th' | 'vi' | 'zh-Hans' | 'zh-Hant';
 
 interface Translation {
@@ -11,10 +20,21 @@ interface Translation {
 }
 
 interface Translations {
-  [key: string]: string;
+  [key: string]: string | string[];
 }
 
-// Fallback translations in case database is not available
+// Local translations object
+const localTranslations: { [K in Language]: Translations } = {
+  'en': enTranslations,
+  'ja': jaTranslations,
+  'ko': koTranslations,
+  'th': thTranslations,
+  'vi': viTranslations,
+  'zh-Hans': zhHansTranslations,
+  'zh-Hant': zhHantTranslations,
+};
+
+// Basic fallback translations for critical navigation items
 const fallbackTranslations: { [key: string]: { [K in Language]: string } } = {
   // Navigation
   'nav.home': {
@@ -87,7 +107,7 @@ export const useTranslation = () => {
   const [translations, setTranslations] = useState<Translations>({});
   const [loading, setLoading] = useState(true);
 
-  // Fetch translations from Supabase
+  // Fetch translations from Supabase with local fallback
   const fetchTranslations = async (language: Language) => {
     try {
       const { data, error } = await supabase
@@ -97,29 +117,25 @@ export const useTranslation = () => {
 
       if (error) {
         console.error('Error fetching translations:', error);
-        // Use fallback translations if database fails
-        const fallback = fallbackTranslations;
-        const fallbackTrans: Translations = {};
-        Object.keys(fallback).forEach(key => {
-          fallbackTrans[key] = fallback[key][language] || fallback[key]['en'] || key;
-        });
-        setTranslations(fallbackTrans);
+        // Use local translations as primary fallback
+        setTranslations(localTranslations[language] || localTranslations['en']);
       } else {
         const trans: Translations = {};
         data?.forEach(item => {
           trans[item.key] = item.value;
         });
+        
+        // If database has translations, use them; otherwise use local
+        if (Object.keys(trans).length > 0) {
         setTranslations(trans);
+        } else {
+          setTranslations(localTranslations[language] || localTranslations['en']);
+        }
       }
     } catch (error) {
       console.error('Error fetching translations:', error);
-      // Use fallback translations
-      const fallback = fallbackTranslations;
-      const fallbackTrans: Translations = {};
-      Object.keys(fallback).forEach(key => {
-        fallbackTrans[key] = fallback[key][language] || fallback[key]['en'] || key;
-      });
-      setTranslations(fallbackTrans);
+      // Use local translations as fallback
+      setTranslations(localTranslations[language] || localTranslations['en']);
     } finally {
       setLoading(false);
     }
@@ -127,6 +143,8 @@ export const useTranslation = () => {
 
   useEffect(() => {
     fetchTranslations(currentLanguage);
+    // Set the lang attribute on initial load
+    document.documentElement.lang = currentLanguage;
   }, [currentLanguage]);
 
   // Listen for language changes from other components
@@ -145,16 +163,34 @@ export const useTranslation = () => {
   }, [currentLanguage]);
 
   const t = (key: string): string => {
+    const getValue = (value: string | string[] | undefined): string => {
+      if (Array.isArray(value)) {
+        return value.join(', ');
+      }
+      return value || key;
+    };
+
     if (loading) {
-      // Return fallback while loading
-      const fallback = fallbackTranslations[key];
-      return fallback?.[currentLanguage] || fallback?.['en'] || key;
+      // Return local translations while loading
+      const localTrans = localTranslations[currentLanguage] || localTranslations['en'];
+      return getValue(localTrans[key]) || fallbackTranslations[key]?.[currentLanguage] || fallbackTranslations[key]?.['en'] || key;
     }
-    return translations[key] || key;
+    
+    // Return from current translations (database or local)
+    const translation = translations[key];
+    if (translation) {
+      return getValue(translation);
+    }
+    
+    // Final fallback to local translations
+    const localTrans = localTranslations[currentLanguage] || localTranslations['en'];
+    return getValue(localTrans[key]) || fallbackTranslations[key]?.[currentLanguage] || fallbackTranslations[key]?.['en'] || key;
   };
 
   const changeLanguage = (language: Language) => {
     setCurrentLanguage(language);
+    // Set the lang attribute on the HTML element for CSS language selectors
+    document.documentElement.lang = language;
     // Dispatch event for other components
     window.dispatchEvent(new CustomEvent('languageChange', { detail: language }));
   };

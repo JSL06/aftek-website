@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
+import HomeTest from "./pages/Home-test";
 import About from "./pages/About";
 import Products from "./pages/Products";
 import Projects from "./pages/Projects";
@@ -53,6 +54,7 @@ const App = () => (
           {/* Public Routes */}
           <Route path="/" element={<Layout />}>
             <Route index element={<ProtectedPage pageName="home"><Home /></ProtectedPage>} />
+            <Route path="test" element={<ProtectedPage pageName="home"><HomeTest /></ProtectedPage>} />
             <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
             <Route path="products" element={<ProtectedPage pageName="products"><Products /></ProtectedPage>} />
             <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />

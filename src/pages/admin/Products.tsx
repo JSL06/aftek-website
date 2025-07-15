@@ -20,25 +20,47 @@ interface Product {
   description: string;
   features?: string | string[] | null;
   image?: string;
-  price?: number;
   rating?: number;
   in_stock?: boolean;
   created_at?: string;
   size?: string;
   names?: { [key: string]: string };
+  isFeatured?: boolean;
 }
 
 const FEATURE_OPTIONS = [
+  // Application Environment
+  'Indoor Use',
+  'Outdoor Use',
+  'Underwater',
+  'High Traffic Areas',
+  'Chemical Exposure',
+  
+  // Performance Properties
   'Waterproof',
   'UV Resistant',
   'Flexible',
   'Fast Cure',
   'High Strength',
   'Low Odor',
-  'Eco-Friendly',
   'Chemical Resistant',
-  'Easy Application',
-  'Long Lifespan',
+  'Temperature Resistant',
+  
+  // Base Type
+  'Polyurethane',
+  'Silicone',
+  'Acrylic',
+  'Epoxy',
+  'Hybrid',
+  'Cement Based',
+  
+  // Special Features
+  'Eco Friendly',
+  'Fire Resistant',
+  'Anti Microbial',
+  'Self Leveling',
+  'Quick Setting',
+  'Paintable'
 ];
 
 const Products = () => {
@@ -47,7 +69,6 @@ const Products = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
-  // Remove 'rating' from formData initial state
   const [formData, setFormData] = useState({
     name: '',
     category: '',
@@ -56,9 +77,14 @@ const Products = () => {
     image: '',
     in_stock: true,
     size: '',
+    // isFeatured: false, // Temporarily disabled due to schema cache issue
   });
 
-  const [filters, setFilters] = useState<ProductFilters>({ search: '', category: [], features: [] });
+  const [filters, setFilters] = useState<ProductFilters>({ 
+    search: '', 
+    category: [], // Multiple categories
+    features: [] as string[]
+  });
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
   const categories = [
@@ -86,20 +112,33 @@ const Products = () => {
       );
     }
     
-    // Category filter - now handles multiple categories
+    // Category filter - show products if they match ANY of the selected categories
+    // If no categories selected, show all products
     if (filters.category.length > 0) {
-      filtered = filtered.filter(product => filters.category.includes(product.category));
+      filtered = filtered.filter(product => 
+        product.category && filters.category.includes(product.category)
+      );
     }
     
-    // Features filter
+    // Features filter - show products if they have ANY of the selected features
     if (filters.features.length > 0) {
       filtered = filtered.filter(product => {
-        const safeFeatures = Array.isArray(product.features)
-          ? product.features
-          : typeof product.features === 'string' && product.features.length > 0
-            ? [product.features]
-            : [];
-        return filters.features.some(feature => safeFeatures.includes(feature));
+        // Handle different types of features data
+        let productFeatures: string[] = [];
+        
+        if (Array.isArray(product.features)) {
+          productFeatures = product.features;
+        } else if (typeof product.features === 'string' && product.features.length > 0) {
+          productFeatures = [product.features];
+        }
+        
+        // Check if product has ANY of the selected features
+        return filters.features.some(selectedFeature => 
+          productFeatures.some(productFeature => 
+            productFeature.toLowerCase().includes(selectedFeature.toLowerCase()) ||
+            selectedFeature.toLowerCase().includes(productFeature.toLowerCase())
+          )
+        );
       });
     }
     
@@ -115,7 +154,7 @@ const Products = () => {
     try {
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, category, description, features, image, in_stock, size, specifications, names, related_products');
+        .select('id, name, category, description, features, image, in_stock, size, specifications, names, related_products, isActive');
       
       if (error) {
         console.error('Error fetching products:', error);
@@ -138,6 +177,7 @@ const Products = () => {
       image: '',
       in_stock: true,
       size: '',
+      // isFeatured: false, // Temporarily disabled
     });
     setShowForm(true);
   };
@@ -156,6 +196,7 @@ const Products = () => {
       image: product.image || '',
       in_stock: product.in_stock !== false,
       size: product.size || '',
+      // isFeatured: product.isFeatured || false, // Temporarily disabled
     });
     setShowForm(true);
   };
@@ -171,17 +212,22 @@ const Products = () => {
     try {
       if (editingProduct && editingProduct.id) {
         // Update existing product
+        const updateData: any = {
+          name: formData.name,
+          category: formData.category,
+          description: formData.description,
+          features: formData.features,
+          image: formData.image,
+          in_stock: formData.in_stock,
+          size: formData.size,
+        };
+        
+        // Temporarily disable isFeatured until schema cache is refreshed
+        // updateData.isFeatured = formData.isFeatured;
+        
         const { error } = await supabase
           .from('products')
-          .update({
-            name: formData.name,
-            category: formData.category,
-            description: formData.description,
-            features: formData.features,
-            image: formData.image,
-            in_stock: formData.in_stock,
-            size: formData.size
-          })
+          .update(updateData)
           .eq('id', editingProduct.id);
         
         if (error) {
@@ -192,17 +238,23 @@ const Products = () => {
         }
       } else {
         // Add new product
+        const insertData: any = {
+          name: formData.name,
+          category: formData.category,
+          description: formData.description,
+          features: formData.features,
+          image: formData.image,
+          in_stock: formData.in_stock,
+          size: formData.size,
+          isActive: true,
+        };
+        
+        // Temporarily disable isFeatured until schema cache is refreshed
+        // insertData.isFeatured = formData.isFeatured;
+        
         const { error } = await supabase
           .from('products')
-          .insert([{
-            name: formData.name,
-            category: formData.category,
-            description: formData.description,
-            features: formData.features,
-            image: formData.image,
-            in_stock: formData.in_stock,
-            size: formData.size
-          }]);
+          .insert([insertData]);
         
         if (error) {
           console.error('Error adding product:', error);
@@ -365,6 +417,17 @@ const Products = () => {
                 <Label htmlFor="in_stock">In Stock</Label>
               </div>
 
+              {/* Temporarily disabled due to schema cache issue
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="isFeatured"
+                  checked={formData.isFeatured}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isFeatured: checked }))}
+                />
+                <Label htmlFor="isFeatured">Featured on Homepage</Label>
+              </div>
+              */}
+
               <div>
                 <Label htmlFor="size">Size</Label>
                 <select
@@ -498,6 +561,13 @@ const Products = () => {
                         <Badge variant={product.in_stock ? "default" : "destructive"}>
                           {product.in_stock ? 'In Stock' : 'Out of Stock'}
                         </Badge>
+                        {/* Temporarily disabled: Featured badge
+                        {product.isFeatured && (
+                          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                            ⭐ Featured
+                          </Badge>
+                        )}
+                        */}
                       </div>
                       <div className="flex gap-2">
                         <Button size="sm" variant="outline" onClick={() => handleEdit(product)}>

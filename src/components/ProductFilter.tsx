@@ -12,15 +12,15 @@ interface ProductFilterProps {
 
 export interface ProductFilters {
   search: string;
-  category: string[];
-  features: string[];
+  category: string[]; // Multiple category selection
+  features: string[]; // Multiple features selection
 }
 
 const ProductFilter = ({ onFilterChange }: ProductFilterProps) => {
   const { t } = useTranslation();
   const [filters, setFilters] = useState<ProductFilters>({
     search: '',
-    category: [],
+    category: [], // Empty array for no categories selected
     features: []
   });
 
@@ -46,52 +46,63 @@ const ProductFilter = ({ onFilterChange }: ProductFilterProps) => {
     applicationEnvironment: {
       title: t('features.application_environment'),
       features: [
-        t('features.indoor_use'),
-        t('features.outdoor_use'),
-        t('features.chemical_resistance')
+        'Indoor Use',
+        'Outdoor Use',
+        'Underwater',
+        'High Traffic Areas',
+        'Chemical Exposure'
       ]
     },
     performanceProperties: {
-      title: t('features.key_performance_properties'),
+      title: t('features.performance_properties'),
       features: [
-        t('features.waterproof'),
-        t('features.fire_resistant'),
-        t('features.weather_resistant'),
-        t('features.fast_curing'),
-        t('features.high_strength')
+        'Waterproof',
+        'UV Resistant',
+        'Flexible',
+        'Fast Cure',
+        'High Strength',
+        'Low Odor',
+        'Chemical Resistant',
+        'Temperature Resistant'
       ]
     },
     baseType: {
       title: t('features.base_type'),
       features: [
-        t('features.water_based'),
-        t('features.solvent_based')
+        'Polyurethane',
+        'Silicone',
+        'Acrylic',
+        'Epoxy',
+        'Hybrid',
+        'Cement Based'
       ]
     },
     specialFeatures: {
       title: t('features.special_features'),
       features: [
-        t('features.nontoxic'),
-        t('features.self_leveling'),
-        t('features.anti_slip'),
-        t('features.uv_resistant'),
-        t('features.temperature_resistant')
+        'Eco Friendly',
+        'Fire Resistant',
+        'Anti Microbial',
+        'Self Leveling',
+        'Quick Setting',
+        'Paintable'
       ]
     }
   };
 
   const updateFilters = (newFilters: Partial<ProductFilters>) => {
-    const updated = { ...filters, ...newFilters };
-    setFilters(updated);
-    onFilterChange(updated);
+    const updatedFilters = { ...filters, ...newFilters };
+    setFilters(updatedFilters);
+    onFilterChange(updatedFilters);
   };
 
   const clearFilters = () => {
-    const cleared = { search: '', category: [], features: [] };
-    setFilters(cleared);
-    onFilterChange(cleared);
+    const clearedFilters = { search: '', category: [], features: [] };
+    setFilters(clearedFilters);
+    onFilterChange(clearedFilters);
   };
 
+  // Multiple category selection - toggle each category in/out of array
   const toggleCategory = (categoryId: string) => {
     const newCategories = filters.category.includes(categoryId)
       ? filters.category.filter(c => c !== categoryId)
@@ -124,19 +135,19 @@ const ProductFilter = ({ onFilterChange }: ProductFilterProps) => {
       onClear={clearFilters}
       hasActiveFilters={hasActiveFilters}
     >
-      {/* Categories */}
+      {/* Categories - Multiple Selection */}
       <FilterCategory title={t('filter.category')}>
         {categories.map((category) => (
           <FilterButton
             key={category.id}
             label={category.label}
-            isSelected={Boolean(filters.category.includes(category.id))}
+            isSelected={filters.category.includes(category.id)}
             onClick={() => toggleCategory(category.id)}
           />
         ))}
       </FilterCategory>
 
-      {/* Feature Categories */}
+      {/* Feature Categories - Multiple Selection */}
       <div className="space-y-4">
         <h4 className="text-sm font-medium text-foreground">{t('filter.features')}</h4>
         
@@ -161,7 +172,7 @@ const ProductFilter = ({ onFilterChange }: ProductFilterProps) => {
                     <FilterButton
                       key={feature}
                       label={feature}
-                      isSelected={Boolean(filters.features.includes(feature))}
+                      isSelected={filters.features.includes(feature)}
                       onClick={() => toggleFeature(feature)}
                       className="text-xs"
                     />

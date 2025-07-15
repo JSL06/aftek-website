@@ -43,8 +43,10 @@ const zhHant = {
   'home.explore.title': '探索我們的解決方案',
   'home.explore.products.title': '我們的產品',
   'home.explore.products.desc': '探索我們全方位的建築化學品，從防水薄膜到高性能黏合劑，專為滿足現代建築專案的嚴格要求而設計。',
+  'home.explore.products.btn': '查看產品',
   'home.explore.articles.title': '最新文章',
   'home.explore.articles.desc': '透過我們專家和技術專家團隊的最新行業洞察、技術指南和建築最佳實務保持資訊更新。',
+  'home.explore.articles.btn': '閱讀文章',
   
   'home.brochure.title': '下載我們的目錄',
   'home.brochure.desc': '下載我們的綜合手冊，包含技術規格、應用指南和案例研究。',
@@ -65,6 +67,11 @@ const zhHant = {
   'home.projects.project3.location': '新加坡',
   'home.projects.project3.image': '無塵室安裝',
   'home.projects.project3.category': '高科技',
+
+  // Recommended Products
+  'home.recommended.title': '推薦產品',
+  'home.recommended.subtitle': '探索我們最受歡迎和值得信賴的建築解決方案',
+  'home.recommended.viewAll': '查看所有產品',
   
   'home.reviews.title': '客戶評價',
   'home.reviews.quote1': 'Aftek的防水解決方案對我們的高層建築專案非常出色。他們的技術支援團隊在整個施工過程中提供了優秀的指導。',
@@ -96,6 +103,19 @@ const zhHant = {
   'footer.privacy': '隱私政策',
   'footer.terms': '服務條款',
 
+  // Footer - Additional Keys
+  'footer.relatedPlatforms': '相關平台',
+  'footer.rlaPolymers': 'RLA聚合物',
+  'footer.ccMagazine': 'CC雜誌',
+  'footer.contactUs': '聯絡我們',
+  'footer.phone': '電話',
+  'footer.hours': '營業時間',
+  'footer.address': '地址',
+  'footer.addressValue': '台灣台北市大安區信義路二段123號 106',
+  'footer.email': '電子郵件',
+  'footer.otherPlatforms': '其他平台',
+  'footer.rightsReserved': '版權所有。',
+
   // Navigation Items
   'nav.waterproofing': '防水',
   'nav.sealants': '密封劑與黏合劑', 
@@ -111,7 +131,7 @@ const zhHant = {
   'ui.contactUs': '聯絡我們',
   'ui.getQuote': '取得報價',
   'ui.backToProducts': '返回產品',
-  
+
   // Chatbot
   'chatbot.title': '我們如何協助您？',
   'chatbot.placeholder': '詢問我們的產品...',
@@ -119,6 +139,7 @@ const zhHant = {
   'chatbot.typing': '輸入中...',
 
   // About Page
+  'about.title': '關於我們',
   'about.hero.title': '關於Aftek',
   'about.hero.subtitle': '透過創新建築解決方案建立卓越',
   'about.mission.title': '我們的使命',
@@ -132,6 +153,40 @@ const zhHant = {
   'about.team.title': '領導團隊',
   'about.history.title': '我們的歷史',
   'about.history.content': '成立於1990年，Aftek從本地供應商發展為區域建築化學品領導者，為台灣、東南亞及其他地區的重大專案提供服務。',
+
+  // About Page - Values
+  'about.value.quality': '卓越品質',
+  'about.value.quality.desc': '我們在所有產品和服務中保持最高標準，確保每個建築專案的可靠性和耐久性。',
+  'about.value.innovation': '創新領導力',
+  'about.value.innovation.desc': '我們持續投資於研發，為建築行業帶來尖端解決方案。',
+  'about.value.sustainability': '環境責任',
+  'about.value.sustainability.desc': '我們致力於可持續實務和環保產品，為後代保護我們的環境。',
+
+  // About Page - Timeline
+  'about.timeline.2008.1': '成立Aftek有限公司，專注於建築化學解決方案',
+  'about.timeline.2009.1': '推出防水薄膜產品線',
+  'about.timeline.2009.2': '拓展至東南亞市場',
+  'about.timeline.2009.3': '在越南開設首個國際辦事處',
+  'about.timeline.2009.4': '與歐洲技術提供商建立合作夥伴關係',
+  'about.timeline.2011.1': '引入先進的密封劑和黏合劑技術',
+  'about.timeline.2013.1': '在台北建立研發中心',
+  'about.timeline.2014.1': '推出高性能地板解決方案',
+  'about.timeline.2015.1': '擴建生產設施以滿足不斷增長的需求',
+  'about.timeline.2017.1': '獲得品質管理ISO認證',
+  'about.timeline.2018.1': '推出技術支援和培訓數位平台',
+
+  // About Page - CTA
+  'about.ctaTitle': '準備好與我們合作了嗎？',
+  'about.ctaDesc': '立即聯繫我們的團隊討論您的建築材料需求，發現我們的創新解決方案如何增強您的下一個專案。',
+  'about.ctaAbout': '觀看公司影片',
+  'about.ctaBrochure': '下載手冊',
+
+  // About Page - Contact
+  'about.contactTitle': '聯繫我們',
+  'about.address': '地址：',
+  'about.addressValue': '台灣新北市中和區建康路37號10樓',
+  'about.email': '電子郵件：',
+  'about.phone': '電話：',
 
   // Contact Page
   'contact.title': '聯絡我們',
@@ -175,6 +230,11 @@ const zhHant = {
   'products.features': '主要特性',
   'products.applications': '應用',
   'products.downloads': '下載',
+  'products.showing': '顯示 {count} 個產品，共 {total} 個',
+  'products.filtered': '已過濾自',
+  'products.total': '總計',
+  'products.page': '第',
+  'products.of': '頁，共',
 
   // Projects Page
   'projects.title': '我們的專案',
@@ -197,7 +257,7 @@ const zhHant = {
   'articles.categories.case_studies': '案例研究',
   'articles.categories.product_updates': '產品更新',
   'articles.categories.company_news': '公司新聞',
-
+  
   // Error Pages
   'error.notFound.title': '頁面未找到',
   'error.notFound.message': '您查找的頁面不存在。',
@@ -221,6 +281,40 @@ const zhHant = {
   'exploded.products.recommended': '推薦產品',
   'exploded.products.application': '應用區域',
   'exploded.products.seeAll': '查看所有產品',
+
+  // Product Filter
+  'filter.title': '篩選產品',
+  'filter.search_placeholder': '搜尋產品...',
+  'filter.category': '類別',
+  'filter.features': '功能',
+
+  // Product Categories
+  'category.waterproofing': '防水',
+  'category.sealants_adhesives': '密封劑與黏合劑',
+  'category.redimix': 'Redi-Mix G&M',
+  'category.flooring': '地板系統',
+  'category.others': '其他（隔熱、塗料）',
+
+  // Product Features
+  'features.application_environment': '應用環境',
+  'features.indoor_use': '室內使用',
+  'features.outdoor_use': '室外使用',
+  'features.chemical_resistance': '抗化學腐蝕',
+  'features.key_performance_properties': '關鍵性能特性',
+  'features.waterproof': '防水',
+  'features.fire_resistant': '阻燃',
+  'features.weather_resistant': '耐候',
+  'features.fast_curing': '快速固化',
+  'features.high_strength': '高強度',
+  'features.base_type': '基材類型',
+  'features.water_based': '水性',
+  'features.solvent_based': '溶劑型',
+  'features.special_features': '特殊功能',
+  'features.nontoxic': '無毒',
+  'features.self_leveling': '自流平',
+  'features.anti_slip': '防滑',
+  'features.uv_resistant': '抗紫外線',
+  'features.temperature_resistant': '耐溫',
 };
 
 export default zhHant; 

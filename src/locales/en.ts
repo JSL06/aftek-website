@@ -43,8 +43,10 @@ const en = {
   'home.explore.title': 'Explore Our Solutions',
   'home.explore.products.title': 'Our Products',
   'home.explore.products.desc': 'Discover our comprehensive range of construction chemicals, from waterproofing membranes to high-performance adhesives, designed to meet the demanding requirements of modern construction projects.',
+  'home.explore.products.btn': 'View Products',
   'home.explore.articles.title': 'Latest Articles',
   'home.explore.articles.desc': 'Stay informed with the latest industry insights, technical guides, and construction best practices from our team of experts and technical specialists.',
+  'home.explore.articles.btn': 'Read Articles',
   
   'home.brochure.title': 'Download Our Catalog',
   'home.brochure.desc': 'Download our comprehensive brochure featuring technical specifications, application guides, and case studies.',
@@ -65,6 +67,11 @@ const en = {
   'home.projects.project3.location': 'Singapore',
   'home.projects.project3.image': 'Clean Room Installation',
   'home.projects.project3.category': 'High-Tech',
+
+  // Recommended Products
+  'home.recommended.title': 'Recommended Products',
+  'home.recommended.subtitle': 'Discover our most popular and trusted construction solutions',
+  'home.recommended.viewAll': 'View All Products',
   
   'home.reviews.title': 'Client Reviews',
   'home.reviews.quote1': 'Aftek\'s waterproofing solutions have been exceptional for our high-rise projects. Their technical support team provided excellent guidance throughout the entire application process.',
@@ -96,6 +103,19 @@ const en = {
   'footer.privacy': 'Privacy Policy',
   'footer.terms': 'Terms of Service',
 
+  // Footer - Additional Keys
+  'footer.relatedPlatforms': 'Related Platforms',
+  'footer.rlaPolymers': 'RLA Polymers',
+  'footer.ccMagazine': 'CC Magazine',
+  'footer.contactUs': 'Contact Us',
+  'footer.phone': 'Phone',
+  'footer.hours': 'Business Hours',
+  'footer.address': 'Address',
+  'footer.addressValue': 'No. 123, Section 2, Xinyi Road, Da\'an District, Taipei City 106, Taiwan',
+  'footer.email': 'Email',
+  'footer.otherPlatforms': 'Other Platforms',
+  'footer.rightsReserved': 'All rights reserved.',
+
   // Navigation Items
   'nav.waterproofing': 'Waterproofing',
   'nav.sealants': 'Sealants & Adhesives', 
@@ -111,7 +131,7 @@ const en = {
   'ui.contactUs': 'Contact Us',
   'ui.getQuote': 'Get Quote',
   'ui.backToProducts': 'Back to Products',
-  
+
   // Chatbot
   'chatbot.title': 'How can we help?',
   'chatbot.placeholder': 'Ask about our products...',
@@ -119,6 +139,7 @@ const en = {
   'chatbot.typing': 'Typing...',
 
   // About Page
+  'about.title': 'About Us',
   'about.hero.title': 'About Aftek',
   'about.hero.subtitle': 'Building excellence through innovative construction solutions',
   'about.mission.title': 'Our Mission',
@@ -132,6 +153,40 @@ const en = {
   'about.team.title': 'Leadership Team',
   'about.history.title': 'Our History',
   'about.history.content': 'Founded in 1990, Aftek has grown from a local supplier to a regional leader in construction chemicals, serving major projects across Taiwan, Southeast Asia, and beyond.',
+
+  // About Page - Values
+  'about.value.quality': 'Quality Excellence',
+  'about.value.quality.desc': 'We maintain the highest standards in all our products and services, ensuring reliability and durability in every construction project.',
+  'about.value.innovation': 'Innovation Leadership',
+  'about.value.innovation.desc': 'We continuously invest in research and development to bring cutting-edge solutions to the construction industry.',
+  'about.value.sustainability': 'Environmental Responsibility',
+  'about.value.sustainability.desc': 'We are committed to sustainable practices and eco-friendly products that protect our environment for future generations.',
+
+  // About Page - Timeline
+  'about.timeline.2008.1': 'Established Aftek Co., Ltd. with focus on construction chemical solutions',
+  'about.timeline.2009.1': 'Launched waterproofing membrane product line',
+  'about.timeline.2009.2': 'Expanded into Southeast Asian markets',
+  'about.timeline.2009.3': 'Opened first international office in Vietnam',
+  'about.timeline.2009.4': 'Partnership with European technology providers',
+  'about.timeline.2011.1': 'Introduced advanced sealant and adhesive technologies',
+  'about.timeline.2013.1': 'Established research and development center in Taipei',
+  'about.timeline.2014.1': 'Launched high-performance flooring solutions',
+  'about.timeline.2015.1': 'Expanded production facilities to meet growing demand',
+  'about.timeline.2017.1': 'Received ISO certification for quality management',
+  'about.timeline.2018.1': 'Launched digital platform for technical support and training',
+
+  // About Page - CTA
+  'about.ctaTitle': 'Ready to Work With Us?',
+  'about.ctaDesc': 'Contact our team today to discuss your construction material needs and discover how our innovative solutions can enhance your next project.',
+  'about.ctaAbout': 'Watch Company Video',
+  'about.ctaBrochure': 'Download Brochure',
+
+  // About Page - Contact
+  'about.contactTitle': 'Get in Touch',
+  'about.address': 'Address:',
+  'about.addressValue': '10F., No. 37, Jiankang Rd., Zhonghe Dist., New Taipei City 235, Taiwan',
+  'about.email': 'Email:',
+  'about.phone': 'Phone:',
 
   // Contact Page
   'contact.title': 'Contact Us',
@@ -175,6 +230,11 @@ const en = {
   'products.features': 'Key Features',
   'products.applications': 'Applications',
   'products.downloads': 'Downloads',
+  'products.showing': 'Showing {count} of {total} products',
+  'products.filtered': 'filtered from',
+  'products.total': 'total',
+  'products.page': 'Page',
+  'products.of': 'of',
 
   // Projects Page
   'projects.title': 'Our Projects',
@@ -197,7 +257,7 @@ const en = {
   'articles.categories.case_studies': 'Case Studies',
   'articles.categories.product_updates': 'Product Updates',
   'articles.categories.company_news': 'Company News',
-
+  
   // Error Pages
   'error.notFound.title': 'Page Not Found',
   'error.notFound.message': 'The page you are looking for does not exist.',
@@ -221,6 +281,40 @@ const en = {
   'exploded.products.recommended': 'Recommended Products',
   'exploded.products.application': 'Application Area',
   'exploded.products.seeAll': 'See All Products',
+
+  // Product Filter
+  'filter.title': 'Filter Products',
+  'filter.search_placeholder': 'Search products...',
+  'filter.category': 'Categories',
+  'filter.features': 'Features',
+
+  // Product Categories
+  'category.waterproofing': 'Waterproofing',
+  'category.sealants_adhesives': 'Sealants & Adhesives',
+  'category.redimix': 'Redi-Mix G&M',
+  'category.flooring': 'Flooring Systems',
+  'category.others': 'Others (Insulation, Coatings)',
+
+  // Product Features
+  'features.application_environment': 'Application Environment',
+  'features.indoor_use': 'Indoor Use',
+  'features.outdoor_use': 'Outdoor Use',
+  'features.chemical_resistance': 'Chemical Resistance',
+  'features.key_performance_properties': 'Key Performance Properties',
+  'features.waterproof': 'Waterproof',
+  'features.fire_resistant': 'Fire Resistant',
+  'features.weather_resistant': 'Weather Resistant',
+  'features.fast_curing': 'Fast Curing',
+  'features.high_strength': 'High Strength',
+  'features.base_type': 'Base Type',
+  'features.water_based': 'Water-Based',
+  'features.solvent_based': 'Solvent-Based',
+  'features.special_features': 'Special Features',
+  'features.nontoxic': 'Non-Toxic',
+  'features.self_leveling': 'Self-Leveling',
+  'features.anti_slip': 'Anti-Slip',
+  'features.uv_resistant': 'UV Resistant',
+  'features.temperature_resistant': 'Temperature Resistant',
 };
 
 export default en; 

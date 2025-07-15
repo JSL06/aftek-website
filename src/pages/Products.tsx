@@ -7,6 +7,15 @@ import PdfViewer from '@/components/PdfViewer';
 import { useTranslation } from '@/hooks/useTranslation';
 import { FileText, Sparkles, Star, Tag } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 interface Product {
   id: string;
@@ -15,7 +24,6 @@ interface Product {
   description: string;
   features?: string | string[] | null;
   image?: string;
-  price?: number;
   rating?: number;
   in_stock?: boolean;
   created_at?: string;
@@ -31,6 +39,8 @@ const Products = () => {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<ProductFilters>({ search: '', category: [], features: [] });
+  const [currentPage, setCurrentPage] = useState(1);
+  const PRODUCTS_PER_PAGE = 20;
 
   // Fetch products
   useEffect(() => {
@@ -57,7 +67,7 @@ const Products = () => {
     fetchProducts();
   }, []);
 
-  // Filter products whenever products or filters change
+  // Filter and sort products whenever products or filters change
   useEffect(() => {
     let filtered = [...products];
     
@@ -81,26 +91,90 @@ const Products = () => {
       });
     }
 
-    // Features filter
+    // Features filter - show products if they have ANY of the selected features
     if (filters.features.length > 0) {
       filtered = filtered.filter(product => {
-        const safeFeatures = Array.isArray(product.features)
-          ? product.features
-          : typeof product.features === 'string' && product.features.length > 0
-            ? [product.features]
-            : [];
-        return filters.features.some(feature => safeFeatures.includes(feature));
+        // Handle different types of features data
+        let productFeatures: string[] = [];
+        
+        if (Array.isArray(product.features)) {
+          productFeatures = product.features;
+        } else if (typeof product.features === 'string' && product.features.length > 0) {
+          productFeatures = [product.features];
+        }
+        
+        // Check if product has ANY of the selected features
+        return filters.features.some(selectedFeature => 
+          productFeatures.some(productFeature => 
+            productFeature.toLowerCase().includes(selectedFeature.toLowerCase()) ||
+            selectedFeature.toLowerCase().includes(productFeature.toLowerCase())
+          )
+        );
       });
     }
 
+    // Sort alphabetically by product name (or translated name if available)
+    filtered.sort((a, b) => {
+      const nameA = (a.names?.[currentLanguage] || a.name || '').toLowerCase();
+      const nameB = (b.names?.[currentLanguage] || b.name || '').toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+
     setFilteredProducts(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [products, filters, currentLanguage]);
 
   const handleFilterChange = (newFilters: ProductFilters) => {
     setFilters(newFilters);
   };
 
-  const displayProducts = filteredProducts;
+  // Calculate pagination
+  const totalProducts = filteredProducts.length;
+  const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE);
+  const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+  const endIndex = startIndex + PRODUCTS_PER_PAGE;
+  const currentProducts = filteredProducts.slice(startIndex, endIndex);
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisible = 5;
+    
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push('ellipsis');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1);
+        pages.push('ellipsis');
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push('ellipsis');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('ellipsis');
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="min-h-screen pt-32 bg-gradient-subtle">
@@ -108,14 +182,30 @@ const Products = () => {
         <div className="title-container">
           <h1 className="uniform-page-title">{t('products.title')}</h1>
         </div>
+        
         {/* Product Filter */}
         <ProductFilter onFilterChange={handleFilterChange} />
+
+        {/* Results summary */}
+        <div className="mb-6 text-center">
+          <p className="text-muted-foreground">
+            {t('products.showing')
+              .replace('{count}', currentProducts.length.toString())
+              .replace('{total}', totalProducts.toString())} 
+            {totalProducts !== products.length && ` (${t('products.filtered')} ${products.length} ${t('products.total')})`}
+          </p>
+          {totalPages > 1 && (
+            <p className="text-sm text-muted-foreground mt-1">
+              {t('products.page')} {currentPage} {t('products.of')} {totalPages}
+            </p>
+          )}
+        </div>
 
         {/* Product Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {loading ? (
             <p>{t('products.loading')}</p>
-          ) : displayProducts.map((product, index) => (
+          ) : currentProducts.map((product, index) => (
             <Card 
               key={product.id} 
               className="border-0 shadow-card hover:shadow-elegant transition-smooth group bg-white hover:bg-gray-50 cursor-pointer rounded-xl"
@@ -142,9 +232,6 @@ const Products = () => {
                       </div>
                     )}
                   </div>
-                  <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
-                    {product.description}
-                  </p>
                   
                   {/* Category Badge */}
                   <div className="flex items-center mb-4">
@@ -157,32 +244,17 @@ const Products = () => {
                     const safeFeatures = Array.isArray(product.features) ? product.features : [];
                     if (safeFeatures.length > 0) {
                       return (
-                    <div className="flex flex-wrap gap-2 mb-6">
-                          {safeFeatures.slice(0, 3).map((feature: string, idx: number) => (
-                        <span 
-                          key={idx}
-                          className="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full font-medium hover:bg-primary/20 transition-smooth"
-                        >
-                          {feature}
+                        <div className="flex items-center mb-6">
+                          <Sparkles className="h-4 w-4 text-muted-foreground mr-2" />
+                          <span className="text-primary font-medium text-sm">
+                            {safeFeatures.slice(0, 3).join(', ')}
+                            {safeFeatures.length > 3 && ` +${safeFeatures.length - 3} more`}
                         </span>
-                      ))}
-                          {safeFeatures.length > 3 && (
-                        <span className="px-3 py-1 bg-muted text-muted-foreground text-xs rounded-full font-medium">
-                              +{safeFeatures.length - 3} more
-                        </span>
-                      )}
                     </div>
                       );
                     }
                     return null;
                   })()}
-
-                  {/* Price if available */}
-                  {product.price && (
-                    <div className="mb-4">
-                      <span className="text-green-600 font-semibold">{product.price}</span>
-                    </div>
-                  )}
 
                   <div className="flex gap-3">
                     <Button 
@@ -201,12 +273,44 @@ const Products = () => {
           ))}
         </div>
         
-        {/* Results Count */}
-        <div className="text-center mb-8">
-          <p className="text-muted-foreground">
-            {t('products.showing').replace('{count}', displayProducts.length.toString()).replace('{total}', products.length.toString())}
-          </p>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center mb-16">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+                
+                {getPageNumbers().map((pageNum, index) => (
+                  <PaginationItem key={index}>
+                    {pageNum === 'ellipsis' ? (
+                      <PaginationEllipsis />
+                    ) : (
+                      <PaginationLink
+                        onClick={() => handlePageChange(pageNum as number)}
+                        isActive={currentPage === pageNum}
+                        className="cursor-pointer"
+                      >
+                        {pageNum}
+                      </PaginationLink>
+                    )}
+                  </PaginationItem>
+                ))}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
         </div>
+        )}
         
         {/* Technical Support */}
         <section className="py-20 bg-muted/30">

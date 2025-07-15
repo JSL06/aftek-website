@@ -43,7 +43,7 @@ const ProductDetail = () => {
         setLoadingRelated(true);
         const { data: relatedData, error: relatedError } = await supabase
           .from('products')
-          .select('id, name, category, description, image, names')
+          .select('id, name, category, description, image, features, names')
           .in('id', data.related_products);
         
         if (!relatedError && relatedData) {
@@ -131,27 +131,13 @@ const ProductDetail = () => {
                 <span className="text-primary font-medium">{product.category}</span>
               </div>
 
-              {/* Description */}
-              <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-                {product.description}
-              </p>
+              {/* Product description */}
+              <div className="mb-6">
+                <p className="text-gray-600 leading-relaxed">
+                  {product.description}
+                </p>
+              </div>
 
-              {/* Price if available */}
-              {product.price && (
-                <div className="mb-6">
-                  <span className="text-2xl text-green-600 font-semibold">{product.price}</span>
-                </div>
-              )}
-
-              {/* Size if available */}
-              {product.size && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-2">Size</h3>
-                  <span className="px-4 py-2 bg-primary/10 text-primary rounded-full font-medium">
-                    {product.size}
-                  </span>
-                </div>
-              )}
             </div>
 
             {/* Features */}
@@ -175,10 +161,6 @@ const ProductDetail = () => {
             <div className="flex gap-4 pt-6">
               <Button size="lg" className="flex-1">
                 {t('ui.contactUs')}
-              </Button>
-              <Button variant="outline" size="lg" className="flex-1">
-                <ExternalLink className="h-4 w-4 mr-2" />
-                {t('ui.viewSpecs')}
               </Button>
             </div>
           </div>
@@ -236,6 +218,34 @@ const ProductDetail = () => {
                           <p className="text-muted-foreground text-sm line-clamp-2">
                             {relatedProduct.description}
                           </p>
+                          
+                          {/* Features for related products */}
+                          {(() => {
+                            const safeFeatures = Array.isArray(relatedProduct.features) 
+                              ? relatedProduct.features 
+                              : typeof relatedProduct.features === 'string' && relatedProduct.features.length > 0
+                                ? [relatedProduct.features]
+                                : [];
+                            
+                            if (safeFeatures.length > 0) {
+                              return (
+                                <div className="flex flex-wrap gap-1 mt-3 mb-2">
+                                  {safeFeatures.slice(0, 2).map((feature, index) => (
+                                    <span key={index} className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
+                                      {feature}
+                                    </span>
+                                  ))}
+                                  {safeFeatures.length > 2 && (
+                                    <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">
+                                      +{safeFeatures.length - 2}
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
+                          
                           <div className="mt-4">
                             <span className="text-xs text-primary font-medium">
                               {relatedProduct.category}

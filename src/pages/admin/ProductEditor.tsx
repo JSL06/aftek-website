@@ -77,14 +77,22 @@ const ProductEditor = () => {
 
   const handleSave = async () => {
     setLoading(true);
+    // Get form values
+    const nameEl = document.getElementById('name') as HTMLInputElement;
+    const categoryEl = document.getElementById('category') as HTMLSelectElement;
+    const descriptionEl = document.getElementById('description') as HTMLTextAreaElement;
+    const specificationsEl = document.getElementById('specifications') as HTMLTextAreaElement;
+    const imageEl = document.getElementById('image') as HTMLInputElement;
+    const datasheetEl = document.getElementById('datasheet') as HTMLInputElement;
+    
     // Compose product data
     const productData = {
-      name: editingProduct?.name || '',
-      category: editingProduct?.category || '',
-      description: editingProduct?.description || '',
-      specifications: editingProduct?.specifications || '',
-      image: editingProduct?.image || '',
-      datasheet: editingProduct?.datasheet || '',
+      name: nameEl?.value || '',
+      category: categoryEl?.value || '',
+      description: descriptionEl?.value || '',
+      specifications: specificationsEl?.value || '',
+      image: imageEl?.value || '',
+      datasheet: datasheetEl?.value || '',
       names: Object.keys(names).length > 0 ? names : null,
       related_products: relatedProducts.length > 0 ? relatedProducts : null,
       isActive: editingProduct?.isActive !== false,
@@ -454,6 +462,36 @@ const ProductEditor = () => {
                       </Badge>
                     </div>
                     <p className="text-muted-foreground mb-3">{product.description}</p>
+                    
+                    {/* Features */}
+                    {(() => {
+                      const safeFeatures = Array.isArray(product.features) 
+                        ? product.features 
+                        : typeof product.features === 'string' && product.features.length > 0
+                          ? [product.features]
+                          : [];
+                      
+                      if (safeFeatures.length > 0) {
+                        return (
+                          <div className="mb-3">
+                            <div className="flex flex-wrap gap-1">
+                              {safeFeatures.slice(0, 4).map((feature, index) => (
+                                <span key={index} className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
+                                  {feature}
+                                </span>
+                              ))}
+                              {safeFeatures.length > 4 && (
+                                <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">
+                                  +{safeFeatures.length - 4} more
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
+                    
                     <div className="space-y-2 text-sm">
                       <div><strong>Image:</strong> <span className="text-muted-foreground">{product.image}</span></div>
                       <div><strong>Datasheet:</strong> <span className="text-muted-foreground">{product.datasheet}</span></div>
