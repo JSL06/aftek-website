@@ -7,25 +7,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Edit, Trash2, Save, ArrowLeft, Package, Star } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, ArrowLeft, Package, Star, Database } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import ProductFilter, { ProductFilters } from '@/components/ProductFilter';
 import { useTranslation } from '@/hooks/useTranslation';
+import { productService, UnifiedProduct } from '@/services/productService';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  features?: string | string[] | null;
-  image?: string;
-  rating?: number;
-  in_stock?: boolean;
-  created_at?: string;
-  size?: string;
-  names?: { [key: string]: string };
-  isFeatured?: boolean;
+interface Product extends UnifiedProduct {
+  // Legacy compatibility - all properties now come from UnifiedProduct
 }
 
 const FEATURE_OPTIONS = [
@@ -73,16 +64,17 @@ const Products = () => {
     name: '',
     category: '',
     description: '',
-    features: [],
+    features: [] as string[],
     image: '',
     in_stock: true,
     size: '',
-    // isFeatured: false, // Temporarily disabled due to schema cache issue
+    showInFeatured: false,
+    displayOrder: 99
   });
 
   const [filters, setFilters] = useState<ProductFilters>({ 
     search: '', 
-    category: [], // Multiple categories
+    category: [] as string[], // Multiple categories
     features: [] as string[]
   });
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -152,17 +144,11 @@ const Products = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('id, name, category, description, features, image, in_stock, size, specifications, names, related_products, isActive');
-      
-      if (error) {
-        console.error('Error fetching products:', error);
-      } else {
-        setProducts(data || []);
-      }
+      const data = await productService.getAdminProducts(); // Use admin products to include inactive ones
+      setProducts(data || []);
     } catch (error) {
       console.error('Error fetching products:', error);
+      setProducts([]); // Ensure products is always an array
     }
     setLoading(false);
   };
@@ -177,7 +163,8 @@ const Products = () => {
       image: '',
       in_stock: true,
       size: '',
-      // isFeatured: false, // Temporarily disabled
+      showInFeatured: false,
+      displayOrder: 99
     });
     setShowForm(true);
   };
@@ -195,8 +182,9 @@ const Products = () => {
           : [],
       image: product.image || '',
       in_stock: product.in_stock !== false,
-      size: product.size || '',
-      // isFeatured: product.isFeatured || false, // Temporarily disabled
+      size: (product.sizes && product.sizes.length > 0) ? product.sizes[0] : '',
+      showInFeatured: product.showInFeatured || false,
+      displayOrder: product.displayOrder || 99
     });
     setShowForm(true);
   };
@@ -211,57 +199,45 @@ const Products = () => {
     }
     try {
       if (editingProduct && editingProduct.id) {
-        // Update existing product
-        const updateData: any = {
+        // Update existing product using productService
+        const updateData: Partial<UnifiedProduct> = {
           name: formData.name,
           category: formData.category,
           description: formData.description,
           features: formData.features,
           image: formData.image,
+          inStock: formData.in_stock,
           in_stock: formData.in_stock,
-          size: formData.size,
+          showInFeatured: formData.showInFeatured,
+          displayOrder: formData.displayOrder
         };
         
-        // Temporarily disable isFeatured until schema cache is refreshed
-        // updateData.isFeatured = formData.isFeatured;
-        
-        const { error } = await supabase
-          .from('products')
-          .update(updateData)
-          .eq('id', editingProduct.id);
-        
-        if (error) {
-          console.error('Error updating product:', error);
-          alert('Error updating product: ' + error.message);
+        const updated = await productService.updateProduct(editingProduct.id, updateData);
+        if (updated) {
+          toast.success('Product updated successfully!');
         } else {
-          alert('Product updated successfully!');
+          throw new Error('Product update failed');
         }
       } else {
-        // Add new product
-        const insertData: any = {
+        // Add new product using productService
+        const newProductData: Partial<UnifiedProduct> = {
           name: formData.name,
           category: formData.category,
           description: formData.description,
           features: formData.features,
           image: formData.image,
+          inStock: formData.in_stock,
           in_stock: formData.in_stock,
-          size: formData.size,
+          showInFeatured: formData.showInFeatured,
+          displayOrder: formData.displayOrder,
           isActive: true,
+          price: 0, // Default price
+          model: '', // Default model
+          sku: '' // Default SKU
         };
         
-        // Temporarily disable isFeatured until schema cache is refreshed
-        // insertData.isFeatured = formData.isFeatured;
-        
-        const { error } = await supabase
-          .from('products')
-          .insert([insertData]);
-        
-        if (error) {
-          console.error('Error adding product:', error);
-          alert('Error adding product: ' + error.message);
-        } else {
-          alert('Product added successfully!');
-        }
+        await productService.addProduct(newProductData);
+        toast.success('Product added successfully!');
       }
       
       await fetchProducts();
@@ -279,21 +255,17 @@ const Products = () => {
     
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id);
+      const success = await productService.deleteProduct(id);
       
-      if (error) {
-        console.error('Error deleting product:', error);
-        alert('Error deleting product');
-      } else {
-        alert('Product deleted successfully!');
+      if (success) {
+        toast.success('Product deleted successfully!');
         await fetchProducts();
+      } else {
+        toast.error('Product not found');
       }
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('Error deleting product');
+      toast.error('Error deleting product: ' + (error.message || error));
     }
     setLoading(false);
   };
@@ -417,16 +389,14 @@ const Products = () => {
                 <Label htmlFor="in_stock">In Stock</Label>
               </div>
 
-              {/* Temporarily disabled due to schema cache issue
               <div className="flex items-center space-x-2">
                 <Switch
-                  id="isFeatured"
-                  checked={formData.isFeatured}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isFeatured: checked }))}
+                  id="showInFeatured"
+                  checked={formData.showInFeatured}
+                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, showInFeatured: checked }))}
                 />
-                <Label htmlFor="isFeatured">Featured on Homepage</Label>
+                <Label htmlFor="showInFeatured">Show in Featured Products</Label>
               </div>
-              */}
 
               <div>
                 <Label htmlFor="size">Size</Label>
@@ -561,13 +531,6 @@ const Products = () => {
                         <Badge variant={product.in_stock ? "default" : "destructive"}>
                           {product.in_stock ? 'In Stock' : 'Out of Stock'}
                         </Badge>
-                        {/* Temporarily disabled: Featured badge
-                        {product.isFeatured && (
-                          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                            ⭐ Featured
-                          </Badge>
-                        )}
-                        */}
                       </div>
                       <div className="flex gap-2">
                         <Button size="sm" variant="outline" onClick={() => handleEdit(product)}>

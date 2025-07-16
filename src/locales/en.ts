@@ -73,7 +73,12 @@ const en = {
   'home.recommended.subtitle': 'Discover our most popular and trusted construction solutions',
   'home.recommended.viewAll': 'View All Products',
   
+  // Featured Products
+  'home.featured.title': 'Featured Products',
+  'home.featured.subtitle': 'Discover Our Best-Selling Solutions',
+  
   'home.reviews.title': 'Client Reviews',
+  'home.reviews.subtitle': 'What Our Clients Say About Us',
   'home.reviews.quote1': 'Aftek\'s waterproofing solutions have been exceptional for our high-rise projects. Their technical support team provided excellent guidance throughout the entire application process.',
   'home.reviews.author1': 'Chen Wei Ming',
   'home.reviews.position1': 'Project Manager',
@@ -153,6 +158,7 @@ const en = {
   'about.team.title': 'Leadership Team',
   'about.history.title': 'Our History',
   'about.history.content': 'Founded in 1990, Aftek has grown from a local supplier to a regional leader in construction chemicals, serving major projects across Taiwan, Southeast Asia, and beyond.',
+  'about.timeline.title': 'Our Journey',
 
   // About Page - Values
   'about.value.quality': 'Quality Excellence',
@@ -268,6 +274,7 @@ const en = {
   'loading.products': 'Loading products...',
   'loading.articles': 'Loading articles...',
   'loading.projects': 'Loading projects...',
+  'loading.featuredProducts': 'Loading featured products...',
 
   // Exploded View Tool
   'exploded.title': 'Interactive Building Guide',
@@ -315,6 +322,10 @@ const en = {
   'features.anti_slip': 'Anti-Slip',
   'features.uv_resistant': 'UV Resistant',
   'features.temperature_resistant': 'Temperature Resistant',
+
+  // Partners Section
+  'home.partners.title': 'Partners',
+  'home.partners.desc': 'Here will be a showcase of our partner companies and platforms.',
 };
 
 export default en; 

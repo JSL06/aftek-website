@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { CartProvider } from "./contexts/CartContext";
 import Home from "./pages/Home";
 import HomeTest from "./pages/Home-test";
 import About from "./pages/About";
@@ -26,10 +27,13 @@ import ProductEditor from "./pages/admin/ProductEditor";
 import AdminProducts from "./pages/admin/Products";
 import AdminArticles from "./pages/admin/Articles";
 import MediaManager from "./pages/admin/MediaManager";
+import FeaturedProductsManager from "./pages/admin/FeaturedProductsManager";
+import UnifiedProducts from "./pages/admin/UnifiedProducts";
 import Chatbot from "./components/Chatbot";
 import WebsiteTextEditor from './pages/admin/WebsiteTextEditor';
 import ProtectedPage from './components/ProtectedPage';
 import WebsiteTextManager from './pages/admin/WebsiteTextManager';
+import Cart from './pages/Cart';
 
 const queryClient = new QueryClient();
 
@@ -47,9 +51,10 @@ const basename = import.meta.env.PROD ? '/aftek-website' : '';
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter basename={basename}>
+      <CartProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter basename={basename}>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Layout />}>
@@ -68,13 +73,16 @@ const App = () => (
             <Route path="resources" element={<ProtectedPage pageName="articles"><Resources /></ProtectedPage>} />
             <Route path="industry-news" element={<ProtectedPage pageName="articles"><IndustryNews /></ProtectedPage>} />
             <Route path="media" element={<ProtectedPage pageName="articles"><Media /></ProtectedPage>} />
+            <Route path="cart" element={<Cart />} />
           </Route>
           
           {/* Admin Routes - Temporarily unprotected for testing */}
           <Route path="/admin" element={<Layout />}>
             <Route path="login" element={<AdminLogin />} />
             <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="products" element={<AdminProducts />} />
+            <Route path="products" element={<UnifiedProducts />} />
+            <Route path="unified-products" element={<UnifiedProducts />} />
+            <Route path="featured-products" element={<FeaturedProductsManager />} />
             <Route path="articles" element={<AdminArticles />} />
             <Route path="media" element={<MediaManager />} />
             <Route path="website-text" element={<WebsiteTextEditor />} />
@@ -85,6 +93,7 @@ const App = () => (
         </Routes>
         <ConditionalChatbot />
       </BrowserRouter>
+      </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

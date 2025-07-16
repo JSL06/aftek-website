@@ -10,11 +10,15 @@ import {
   Settings,
   Plus,
   Database,
-  Trash2
+  Trash2,
+  RefreshCw
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from '@/hooks/useTranslation';
+import { ProductMigrationTool } from '@/components/ProductMigrationTool';
+import { productService } from '@/services/productService';
+import ProductSyncTester from '@/components/ProductSyncTester';
 
 interface DashboardStats {
   totalProducts: number;
@@ -36,20 +40,32 @@ const AdminDashboard = () => {
       setLoading(true);
       
       try {
-        // Fetch counts from all tables
-        const [productsResult, articlesResult, mediaResult] = await Promise.all([
-          supabase.from('products').select('*', { count: 'exact', head: true }),
+        // Use productService for products count (same as other admin pages)
+        const products = await productService.getAllProducts();
+        
+        // Fetch counts from other tables
+        const [articlesResult, mediaResult] = await Promise.all([
           supabase.from('articles').select('*', { count: 'exact', head: true }),
           supabase.from('media').select('*', { count: 'exact', head: true })
         ]);
 
         setStats({
-          totalProducts: productsResult.count || 0,
+          totalProducts: products.length,
           totalArticles: articlesResult.count || 0,
           totalMedia: mediaResult.count || 0
         });
       } catch (error) {
         console.error('Error fetching stats:', error);
+        // Fallback to direct database call if productService fails
+        try {
+          const productsResult = await supabase.from('products').select('*', { count: 'exact', head: true });
+          setStats(prev => ({
+            ...prev,
+            totalProducts: productsResult.count || 0
+          }));
+        } catch (dbError) {
+          console.error('Database fallback also failed:', dbError);
+        }
       }
       
       setLoading(false);
@@ -115,8 +131,20 @@ const AdminDashboard = () => {
       {/* Header */}
       <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground p-6">
         <div className="container mx-auto">
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <p className="text-primary-foreground/80 mt-2">Manage your website content and settings</p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+              <p className="text-primary-foreground/80 mt-2">Manage your website content and settings</p>
+            </div>
+            <Button 
+              variant="secondary" 
+              onClick={() => window.location.reload()}
+              className="ml-4"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Stats
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -149,6 +177,12 @@ const AdminDashboard = () => {
             link="/admin/products"
           />
           <QuickActionCard
+            title="Featured Products"
+            description="Control homepage carousel products"
+            icon={Settings}
+            link="/admin/featured-products"
+          />
+          <QuickActionCard
             title="Manage Articles"
             description={`${stats.totalArticles} articles published`}
             icon={FileText}
@@ -166,6 +200,16 @@ const AdminDashboard = () => {
             icon={Database}
             link="/admin/website-text-manager"
           />
+        </div>
+
+        {/* Product Migration Tool */}
+        <div className="mb-8">
+          <ProductMigrationTool />
+        </div>
+
+        {/* Product Sync Status */}
+        <div className="mb-8">
+          <ProductSyncTester />
         </div>
 
         {/* Database Actions */}
@@ -187,9 +231,9 @@ const AdminDashboard = () => {
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" asChild>
-                    <Link to="/admin/products">
+                    <Link to="/admin/unified-products">
                       <Plus className="h-4 w-4 mr-1" />
-                      Add Product
+                      Manage Products
                     </Link>
                   </Button>
                 </div>

@@ -69,11 +69,16 @@ const vi = {
   'home.projects.project3.category': 'Công nghệ cao',
   
   // Recommended Products
-  'home.recommended.title': 'Sản phẩm đề xuất',
+  'home.recommended.title': 'Sản phẩm được đề xuất',
   'home.recommended.subtitle': 'Khám phá các giải pháp xây dựng phổ biến và đáng tin cậy nhất của chúng tôi',
   'home.recommended.viewAll': 'Xem tất cả sản phẩm',
   
+  // Featured Products
+  'home.featured.title': 'Sản phẩm nổi bật',
+  'home.featured.subtitle': 'Khám phá các giải pháp bán chạy nhất của chúng tôi',
+  
   'home.reviews.title': 'Đánh giá khách hàng',
+  'home.reviews.subtitle': 'Khách hàng nói gì về chúng tôi',
   'home.reviews.quote1': 'Giải pháp chống thấm của Aftek thật tuyệt vời cho các dự án nhà cao tầng của chúng tôi. Đội ngũ hỗ trợ kỹ thuật của họ đã cung cấp hướng dẫn xuất sắc trong suốt quá trình ứng dụng.',
   'home.reviews.author1': 'Trần Thành Công',
   'home.reviews.position1': 'Quản lý dự án',
@@ -139,7 +144,8 @@ const vi = {
   'about.values.sustainability': 'Trách nhiệm môi trường',
   'about.team.title': 'Đội ngũ lãnh đạo',
   'about.history.title': 'Lịch sử của chúng tôi',
-  'about.history.content': 'Thành lập năm 1990, Aftek đã phát triển từ một nhà cung cấp địa phương thành một nhà lãnh đạo khu vực trong lĩnh vực hóa chất xây dựng, phục vụ các dự án lớn trên khắp Đài Loan, Đông Nam Á và hơn thế nữa.',
+  'about.history.content': 'Thành lập năm 1990, Aftek đã phát triển từ nhà cung cấp địa phương thành công ty dẫn đầu khu vực về hóa chất xây dựng, phục vụ các dự án lớn trên khắp Đài Loan, Đông Nam Á và nhiều nơi khác.',
+  'about.timeline.title': 'Hành trình của chúng tôi',
 
   // About Page - Values
   'about.value.quality': 'Chất lượng xuất sắc',
@@ -255,6 +261,7 @@ const vi = {
   'loading.products': 'Đang tải sản phẩm...',
   'loading.articles': 'Đang tải bài viết...',
   'loading.projects': 'Đang tải dự án...',
+  'loading.featuredProducts': 'Đang tải sản phẩm nổi bật...',
 
   // Exploded View Tool
   'exploded.title': 'Hướng dẫn Xây dựng Tương tác',
@@ -315,6 +322,10 @@ const vi = {
   'features.anti_slip': 'Chống trượt',
   'features.uv_resistant': 'Chống tia UV',
   'features.temperature_resistant': 'Chống nhiệt độ',
+
+  // Partners Section
+  'home.partners.title': 'Đối tác',
+  'home.partners.desc': 'Đây sẽ là nơi giới thiệu các công ty đối tác và nền tảng của chúng tôi.',
 };
 
 export default vi; 

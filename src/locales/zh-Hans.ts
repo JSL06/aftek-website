@@ -70,10 +70,15 @@ const zhHans = {
 
   // Recommended Products
   'home.recommended.title': '推荐产品',
-  'home.recommended.subtitle': '探索我们最受欢迎和值得信赖的建筑解决方案',
+  'home.recommended.subtitle': '探索我们最受欢迎和最可信赖的建设解决方案',
   'home.recommended.viewAll': '查看所有产品',
   
+  // Featured Products
+  'home.featured.title': '精选产品',
+  'home.featured.subtitle': '探索我们的最佳销售解决方案',
+  
   'home.reviews.title': '客户评价',
+  'home.reviews.subtitle': '客户对我们的评价',
   'home.reviews.quote1': 'Aftek的防水解决方案在我们的高层项目中表现出色。他们的技术支持团队在整个应用过程中提供了优秀的指导。',
   'home.reviews.author1': '陈伟明',
   'home.reviews.position1': '项目经理',
@@ -152,7 +157,8 @@ const zhHans = {
   'about.values.sustainability': '环境责任',
   'about.team.title': '领导团队',
   'about.history.title': '我们的历史',
-  'about.history.content': '成立于1990年，Aftek已从地方供应商发展成为建筑化学品的区域领导者，为台湾、东南亚及其他地区的主要项目提供服务。',
+  'about.history.content': '成立于1990年，雅德科技从本地供应商发展成为建筑化学品的区域领导者，为台湾、东南亚及其他地区的重大项目提供服务。',
+  'about.timeline.title': '我们的历程',
 
   // About Page - Values
   'about.value.quality': '卓越品质',
@@ -268,6 +274,7 @@ const zhHans = {
   'loading.products': '加载产品中...',
   'loading.articles': '加载文章中...',
   'loading.projects': '加载项目中...',
+  'loading.featuredProducts': '加载精选产品中...',
 
   // Exploded View Tool
   'exploded.title': '交互式建筑指南',
@@ -315,6 +322,10 @@ const zhHans = {
   'features.anti_slip': '防滑',
   'features.uv_resistant': '抗紫外线',
   'features.temperature_resistant': '耐温',
+
+  // Partners Section
+  'home.partners.title': '合作伙伴',
+  'home.partners.desc': '这里将展示我们的合作伙伴公司和平台。',
 };
 
 export default zhHans; 

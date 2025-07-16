@@ -70,10 +70,15 @@ const zhHant = {
 
   // Recommended Products
   'home.recommended.title': '推薦產品',
-  'home.recommended.subtitle': '探索我們最受歡迎和值得信賴的建築解決方案',
+  'home.recommended.subtitle': '探索我們最受歡迎和最可信賴的建設解決方案',
   'home.recommended.viewAll': '查看所有產品',
   
+  // Featured Products
+  'home.featured.title': '精選產品',
+  'home.featured.subtitle': '探索我們的最佳銷售解決方案',
+  
   'home.reviews.title': '客戶評價',
+  'home.reviews.subtitle': '客戶對我們的評價',
   'home.reviews.quote1': 'Aftek的防水解決方案對我們的高層建築專案非常出色。他們的技術支援團隊在整個施工過程中提供了優秀的指導。',
   'home.reviews.author1': '陳偉明',
   'home.reviews.position1': '專案經理',
@@ -152,7 +157,8 @@ const zhHant = {
   'about.values.sustainability': '環境責任',
   'about.team.title': '領導團隊',
   'about.history.title': '我們的歷史',
-  'about.history.content': '成立於1990年，Aftek從本地供應商發展為區域建築化學品領導者，為台灣、東南亞及其他地區的重大專案提供服務。',
+  'about.history.content': '成立於1990年，雅德科技從本地供應商發展成為建築化學品的區域領導者，為台灣、東南亞及其他地區的重大項目提供服務。',
+  'about.timeline.title': '我們的歷程',
 
   // About Page - Values
   'about.value.quality': '卓越品質',
@@ -268,6 +274,7 @@ const zhHant = {
   'loading.products': '載入產品中...',
   'loading.articles': '載入文章中...',
   'loading.projects': '載入專案中...',
+  'loading.featuredProducts': '載入精選產品中...',
 
   // Exploded View Tool
   'exploded.title': '互動式建築指南',
@@ -315,6 +322,10 @@ const zhHant = {
   'features.anti_slip': '防滑',
   'features.uv_resistant': '抗紫外線',
   'features.temperature_resistant': '耐溫',
+
+  // Partners Section
+  'home.partners.title': '合作夥伴',
+  'home.partners.desc': '這裡將展示我們的合作夥伴公司和平台。',
 };
 
 export default zhHant; 

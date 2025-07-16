@@ -7,21 +7,22 @@ import { useTranslation } from '@/hooks/useTranslation';
 import heroImage from '@/assets/hero-aftek-construction.jpg';
 import companyProfilePdf from '@/assets/Aftek_Company_Profile_English.pdf';
 import { supabase } from '@/integrations/supabase/client';
+import FeaturedProductsCarousel from '@/components/FeaturedProductsCarousel';
+import { useProducts } from '@/hooks/useProducts';
 
 const Home = () => {
   const location = useLocation();
   const { t, currentLanguage } = useTranslation();
+  const { featuredProducts, loading: productsLoading } = useProducts();
   const isInitialMount = useRef(true);
   const [currentReview, setCurrentReview] = useState(0);
   const [currentProject, setCurrentProject] = useState(0);
-  const [currentRecommendedProduct, setCurrentRecommendedProduct] = useState(0);
   const [showTitle, setShowTitle] = useState(false);
   const [showDesc, setShowDesc] = useState(false);
   const [showButtons, setShowButtons] = useState(false);
   const [bgLighten, setBgLighten] = useState(false);
   const [parallaxOffset, setParallaxOffset] = useState(0);
   const [isCarouselHovered, setIsCarouselHovered] = useState(false);
-  const [featuredProducts, setFeaturedProducts] = useState([]);
 
   const carouselRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -68,29 +69,7 @@ const Home = () => {
   }, [location.pathname]);
 
   // Fetch featured products
-  useEffect(() => {
-    const fetchFeaturedProducts = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('id, name, category, description, image, features, names, isFeatured')
-          .eq('isFeatured', true)
-          .eq('isActive', true)
-          .limit(10);
-        
-        if (error) {
-          console.warn('Featured products not available:', error.message);
-          setFeaturedProducts([]);
-        } else {
-          setFeaturedProducts(data || []);
-        }
-      } catch (err) {
-        console.warn('Failed to fetch featured products:', err);
-        setFeaturedProducts([]);
-      }
-    };
-    fetchFeaturedProducts();
-  }, []);
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -162,6 +141,8 @@ const Home = () => {
       icon: Users
     }
   ];
+
+
 
   const getProjectData = (index: number) => {
     const projectKeys = [
@@ -380,138 +361,33 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Recommended Products Section */}
-      {featuredProducts.length > 0 && (
-        <section className="py-24 bg-background">
-          <div className="container mx-auto px-6">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-                {t('home.recommended.title')}
-              </h2>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                {t('home.recommended.subtitle')}
-              </p>
-            </div>
-
-            {/* Products Carousel */}
-            <div className="relative flex items-center justify-center max-w-6xl mx-auto mb-12" style={{ minHeight: '360px' }}>
-              {/* Left Arrow */}
-              <button
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/60 hover:bg-white/80 border border-border rounded-full shadow-lg p-2 transition-all backdrop-blur-md"
-                style={{ backdropFilter: 'blur(8px)' }}
-                onClick={() => setCurrentRecommendedProduct((prev) => (prev - 1 + featuredProducts.length) % featuredProducts.length)}
-                aria-label="Previous product"
-              >
-                <ChevronLeft className="h-8 w-8 text-primary" />
-              </button>
-
-              {/* Products Row */}
-              <div className="flex flex-row items-center justify-center gap-8 w-full px-20">
-                {featuredProducts.map((product, idx) => {
-                  const isSelected = idx === currentRecommendedProduct;
-                                     const productName = product.names?.[currentLanguage] || product.name;
-                  return (
-                    <div
-                      key={product.id}
-                      className={`transition-transform duration-500 ${isSelected ? 'scale-105' : 'scale-90 opacity-70'} cursor-pointer`}
-                      style={{ minWidth: '320px', maxWidth: '480px', width: '80vw', height: '360px' }}
-                      onClick={() => setCurrentRecommendedProduct(idx)}
-                    >
-                      <Card
-                        className={`bg-white/80 border-border shadow-card overflow-hidden w-full h-full flex-shrink-0 ${isSelected ? 'ring-2 ring-primary' : ''}`}
-                        style={{ height: '360px' }}
-                      >
-                        <CardContent className="p-0 h-full flex flex-col">
-                          {/* Product Image/Icon */}
-                          <div className="h-48 bg-gradient-accent flex items-center justify-center">
-                            {product.image ? (
-                              <img src={product.image} alt={productName} className="w-full h-full object-cover" />
-                            ) : (
-                              <Building2 className="h-16 w-16 text-primary" />
-                            )}
-                          </div>
-                          {/* Product Info */}
-                          <div className="flex-1 flex flex-col justify-center px-6 py-4">
-                            <h3 className="text-xl font-bold text-foreground mb-2">
-                              {productName}
-                            </h3>
-                            <span className="px-3 py-1 bg-primary/10 text-primary text-sm rounded-full inline-block mb-3 w-fit">
-                              {product.category}
-                            </span>
-                            
-                            {/* Features */}
-                            {(() => {
-                              const safeFeatures = Array.isArray(product.features) 
-                                ? product.features 
-                                : typeof product.features === 'string' && product.features.length > 0
-                                  ? [product.features]
-                                  : [];
-                              
-                              if (safeFeatures.length > 0) {
-                                return (
-                                  <div className="flex flex-wrap gap-1 mb-3">
-                                    {safeFeatures.slice(0, 2).map((feature, index) => (
-                                      <span key={index} className="px-2 py-1 bg-secondary/20 text-secondary-foreground text-xs rounded-full">
-                                        {feature}
-                                      </span>
-                                    ))}
-                                    {safeFeatures.length > 2 && (
-                                      <span className="px-2 py-1 bg-muted text-muted-foreground text-xs rounded-full">
-                                        +{safeFeatures.length - 2}
-                                      </span>
-                                    )}
-                                  </div>
-                                );
-                              }
-                              return null;
-                            })()}
-                            
-                            <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
-                              {product.description}
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Right Arrow */}
-              <button
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/60 hover:bg-white/80 border border-border rounded-full shadow-lg p-2 transition-all backdrop-blur-md"
-                style={{ backdropFilter: 'blur(8px)' }}
-                onClick={() => setCurrentRecommendedProduct((prev) => (prev + 1) % featuredProducts.length)}
-                aria-label="Next product"
-              >
-                <ChevronRight className="h-8 w-8 text-primary" />
-              </button>
-            </div>
-
-            {/* Navigation dots */}
-            <div className="flex justify-center gap-3 mt-4">
-              {featuredProducts.map((_, idx) => (
-                <button
-                  key={idx}
-                  className={`w-3 h-3 rounded-full border-2 ${currentRecommendedProduct === idx ? 'bg-primary border-primary' : 'bg-muted border-border'}`}
-                  onClick={() => setCurrentRecommendedProduct(idx)}
-                  aria-label={`Go to product ${idx + 1}`}
-                />
-              ))}
-            </div>
-
-            {/* View All Products Button */}
-            <div className="flex justify-center mt-12">
-              <Link to="/products">
-                <Button variant="outline">
-                  {t('home.recommended.viewAll')}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
+      {/* Featured Products Section */}
+      <section className="py-24 bg-background">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+              {t('home.featured.title')}
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              {t('home.featured.subtitle')}
+            </p>
           </div>
-        </section>
-      )}
+
+          {productsLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="text-muted-foreground">{t('loading.featuredProducts')}</div>
+            </div>
+          ) : (
+            <FeaturedProductsCarousel 
+              products={featuredProducts}
+              autoScroll={true}
+              autoScrollInterval={5000}
+            />
+          )}
+        </div>
+      </section>
+
+
 
       {/* Products & Articles Teaser */}
       <section className="py-24 bg-gradient-subtle">
@@ -665,11 +541,11 @@ const Home = () => {
       <section className="py-16 bg-primary">
         <div className="container mx-auto px-6">
           <div className="text-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
-              合作夥伴 / Partners
+            <h2 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4">
+              {t('home.partners.title')}
             </h2>
             <p className="text-lg text-primary-foreground/80">
-              Here will be a showcase of our partner companies and platforms.
+              {t('home.partners.desc')}
             </p>
           </div>
         </div>

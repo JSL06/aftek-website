@@ -68,7 +68,8 @@ const th = {
   'home.projects.project3.image': 'การติดตั้งห้องสะอาด',
   'home.projects.project3.category': 'เทคโนโลยีขั้นสูง',
   
-  'home.reviews.title': 'รีวิวจากลูกค้า',
+  'home.reviews.title': 'รีวิวลูกค้า',
+  'home.reviews.subtitle': 'สิ่งที่ลูกค้าของเราพูดถึงเรา',
   'home.reviews.quote1': 'โซลูชันกันน้ำของ Aftek ได้ผลยอดเยี่ยมสำหรับโครงการตึกสูงของเรา ทีมสนับสนุนด้านเทคนิคของพวกเขาให้คำแนะนำที่ยอดเยี่ยมตลอดกระบวนการใช้งาน',
   'home.reviews.author1': 'เฉิน เหว่ย หมิง',
   'home.reviews.position1': 'ผู้จัดการโครงการ',
@@ -134,7 +135,8 @@ const th = {
   'about.values.sustainability': 'ความรับผิดชอบต่อสิ่งแวดล้อม',
   'about.team.title': 'ทีมผู้นำ',
   'about.history.title': 'ประวัติของเรา',
-  'about.history.content': 'ก่อตั้งขึ้นในปี 1990 Aftek ได้เติบโตจากผู้จัดจำหน่ายในท้องถิ่นเป็นผู้นำระดับภูมิภาคในสารเคมีก่อสร้าง ให้บริการโครงการสำคัญทั่วไต้หวัน เอเชียตะวันออกเฉียงใต้ และอื่นๆ',
+  'about.history.content': 'ก่อตั้งขึ้นในปี 1990 แอฟเทคได้เติบโตจากผู้จัดหาในระดับท้องถิ่นสู่ผู้นำระดับภูมิภาคในด้านสารเคมีก่อสร้าง ให้บริการโครงการสำคัญทั่วไต้หวัน เอเชียตะวันออกเฉียงใต้ และอื่นๆ',
+  'about.timeline.title': 'เส้นทางของเรา',
 
   // About Page - Values
   'about.value.quality': 'ความเป็นเลิศด้านคุณภาพ',
@@ -250,6 +252,7 @@ const th = {
   'loading.products': 'กำลังโหลดผลิตภัณฑ์...',
   'loading.articles': 'กำลังโหลดบทความ...',
   'loading.projects': 'กำลังโหลดโครงการ...',
+  'loading.featuredProducts': 'กำลังโหลดผลิตภัณฑ์เด่น...',
 
   // Exploded View Tool
   'exploded.title': 'คู่มือการก่อสร้างแบบอินเทอร์แอกทีฟ',
@@ -313,8 +316,16 @@ const th = {
 
   // Recommended Products
   'home.recommended.title': 'ผลิตภัณฑ์แนะนำ',
-  'home.recommended.subtitle': 'ค้นพบโซลูชันการก่อสร้างที่ได้รับความนิยมและเชื่อถือได้มากที่สุดของเรา',
+  'home.recommended.subtitle': 'ค้นพบโซลูชันการก่อสร้างที่ได้รับความนิยมและไว้วางใจมากที่สุดของเรา',
   'home.recommended.viewAll': 'ดูผลิตภัณฑ์ทั้งหมด',
+  
+  // Featured Products
+  'home.featured.title': 'ผลิตภัณฑ์เด่น',
+  'home.featured.subtitle': 'ค้นพบโซลูชันขายดีของเรา',
+
+  // Partners Section
+  'home.partners.title': 'พันธมิตร',
+  'home.partners.desc': 'ที่นี่จะเป็นการแสดงบริษัทพันธมิตรและแพลตฟอร์มของเรา',
 };
 
 export default th; 

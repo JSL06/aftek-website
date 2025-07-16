@@ -5,6 +5,7 @@ import { useTranslation, Language } from '@/hooks/useTranslation';
 import { useEffect, useState } from 'react';
 import aftekLogo from '@/assets/aftek-logo.png';
 import { usePageVisibility } from '@/hooks/usePageVisibility';
+import { CartIcon } from './CartIcon';
 
 const Navigation = () => {
   const location = useLocation();
@@ -84,9 +85,9 @@ const Navigation = () => {
             ))}
           </div>
 
-          {/* Right Side: Language Selector */}
-          <div className="flex items-center space-x-6">
-            {/* Removed Professional Construction Solutions */}
+          {/* Right Side: Cart and Language Selector */}
+          <div className="flex items-center space-x-4">
+            <CartIcon />
             <select 
               className="bg-transparent border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               value={currentLanguage}

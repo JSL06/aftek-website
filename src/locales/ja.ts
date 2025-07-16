@@ -68,7 +68,13 @@ const ja = {
   'home.projects.project3.image': 'クリーンルーム設置',
   'home.projects.project3.category': '高度技術',
   
-  'home.reviews.title': 'お客様の声',
+  'home.reviews.title': 'お客様のレビュー',
+  'home.reviews.subtitle': 'お客様の声',
+  
+  // Partners Section
+  'home.partners.title': 'パートナー',
+  'home.partners.desc': 'ここにパートナー企業とプラットフォームのショーケースが表示されます。',
+  
   'home.reviews.quote1': 'Aftekの防水ソリューションは、私たちの高層プロジェクトにとって例外的でした。彼らの技術サポートチームは、アプリケーションプロセス全体を通じて優れたガイダンスを提供しました。',
   'home.reviews.author1': '陳 偉明',
   'home.reviews.position1': 'プロジェクトマネージャー',
@@ -134,7 +140,8 @@ const ja = {
   'about.values.sustainability': '環境責任',
   'about.team.title': 'リーダーシップチーム',
   'about.history.title': '私たちの歴史',
-  'about.history.content': '1990年に設立されたAftekは、地域のサプライヤーから台湾、東南アジア、その他の地域の主要プロジェクトにサービスを提供する建設化学品の地域リーダーに成長しました。',
+  'about.history.content': '1990年に設立されたアフテックは、地元のサプライヤーから建設化学品の地域リーダーへと成長し、台湾、東南アジア、その他の地域で主要プロジェクトにサービスを提供しています。',
+  'about.timeline.title': '私たちの歩み',
 
   // About Page - Values
   'about.value.quality': '品質の卓越性',
@@ -250,6 +257,7 @@ const ja = {
   'loading.products': '製品を読み込み中...',
   'loading.articles': '記事を読み込み中...',
   'loading.projects': 'プロジェクトを読み込み中...',
+  'loading.featuredProducts': '注目製品を読み込み中...',
 
   // Exploded View Tool
   'exploded.title': 'インタラクティブ建設ガイド',
@@ -442,9 +450,13 @@ const ja = {
   'features.temperature_resistant': '耐温度性',
 
   // Recommended Products
-  'home.recommended.title': 'おすすめ製品',
-  'home.recommended.subtitle': '最も人気で信頼性の高い建設ソリューションをご覧ください',
-  'home.recommended.viewAll': 'すべての製品を見る'
+  'home.recommended.title': '推奨製品',
+  'home.recommended.subtitle': '最も人気があり信頼できる建設ソリューションをご覧ください',
+  'home.recommended.viewAll': 'すべての製品を見る',
+  
+  // Featured Products
+  'home.featured.title': '注目製品',
+  'home.featured.subtitle': 'ベストセラーソリューションをご覧ください',
 
 };
 

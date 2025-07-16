@@ -126,20 +126,26 @@ const About = () => {
             </div>
           ))}
         </div>
-        {/* Our Achievements Timeline */}
-        <h2 className="text-2xl font-bold text-center mb-8" style={{ fontFamily }}>Our Achievements</h2>
-        <div className="mb-16">
-          {TIMELINE.map((item, idx) => (
-            <div key={item.year} className="flex mb-2">
-              <div className="w-20 text-right pr-4 text-red-700 font-bold text-lg" style={{ fontFamily }}>{item.year}</div>
-              <div className="flex-1 text-base" style={{ fontFamily }}>
-                {item.events.map((ev, i) => (
-                  <div key={i} className={i === 0 ? 'mb-1' : 'mb-1'} dangerouslySetInnerHTML={{ __html: ev }} />
-                ))}
+        {/* Timeline Section */}
+        <section className="max-w-6xl mx-auto py-16 px-4">
+          <h2 className="text-3xl font-bold text-center mb-12 text-red-600">
+            {t('about.timeline.title')}
+          </h2>
+          
+          {/* Simple centered timeline */}
+          <div className="max-w-4xl mx-auto">
+            {TIMELINE.map((item, idx) => (
+              <div key={item.year} className="flex justify-center mb-6">
+                <div className="w-24 text-right pr-6 text-red-700 font-bold text-lg flex-shrink-0" style={{ fontFamily }}>{item.year}</div>
+                <div className="flex-1 text-base max-w-3xl" style={{ fontFamily }}>
+                  {item.events.map((ev, i) => (
+                    <div key={i} className="mb-2" dangerouslySetInnerHTML={{ __html: ev }} />
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </section>
         {/* Leadership Team Section */}
         {leadership.length > 0 && (
           <div className="mb-16">
@@ -153,60 +159,60 @@ const About = () => {
                   <div className="text-xl font-bold mb-1 text-red-700" style={{ fontFamily }}>{leader.name}</div>
                   <div className="text-base font-semibold mb-2" style={{ fontFamily }}>{leader.title}</div>
                   <div className="text-base text-muted-foreground" style={{ fontFamily }}>{leader.bio}</div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
         )}
-      {/* Map and Contact Section */}
-      <div className="flex flex-col md:flex-row gap-8 mb-16 items-stretch container mx-auto max-w-4xl">
-        <div className="flex-1 min-w-[300px] rounded-lg overflow-hidden shadow-md border bg-white dark:bg-zinc-900">
-          <iframe
-            src="https://www.google.com/maps?q=台北市內湖區內湖路一段356號5樓&output=embed"
-            width="100%"
-            height="300"
-            style={{ border: 0 }}
-            allowFullScreen={true}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            title="Aftek Location Map"
-          ></iframe>
+        {/* Map and Contact Section */}
+        <div className="flex flex-col md:flex-row gap-8 mb-16 items-stretch container mx-auto max-w-4xl">
+          <div className="flex-1 min-w-[300px] rounded-lg overflow-hidden shadow-md border bg-white dark:bg-zinc-900">
+            <iframe
+              src="https://www.google.com/maps?q=台北市內湖區內湖路一段356號5樓&output=embed"
+              width="100%"
+              height="300"
+              style={{ border: 0 }}
+              allowFullScreen={true}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Aftek Location Map"
+            ></iframe>
+          </div>
+          <div className="flex-1 flex flex-col justify-center bg-white dark:bg-zinc-900 rounded-lg shadow-md border p-6" style={{ fontFamily }}>
+            <h3 className="text-xl font-semibold mb-4" style={{ fontFamily }}>{t('about.contactTitle')}</h3>
+            <div className="mb-2 text-lg" style={{ fontFamily }}>
+              <span className="font-medium">{t('about.address')}</span>
+              <div>{t('about.addressValue')}</div>
+            </div>
+            <div className="mb-2 text-lg" style={{ fontFamily }}>
+              <span className="font-medium">{t('about.email')}</span>
+              <a href="mailto:info@aftek.com.tw" className="text-primary underline">info@aftek.com.tw</a>
+            </div>
+            <div className="mb-2 text-lg" style={{ fontFamily }}>
+              <span className="font-medium">{t('about.phone')}</span>
+              <a href="tel:+886-2-8797-8990" className="text-primary underline">+886-2-8797-8990</a>
+            </div>
+          </div>
         </div>
-        <div className="flex-1 flex flex-col justify-center bg-white dark:bg-zinc-900 rounded-lg shadow-md border p-6" style={{ fontFamily }}>
-          <h3 className="text-xl font-semibold mb-4" style={{ fontFamily }}>{t('about.contactTitle')}</h3>
-          <div className="mb-2 text-lg" style={{ fontFamily }}>
-            <span className="font-medium">{t('about.address')}</span>
-            <div>{t('about.addressValue')}</div>
-          </div>
-          <div className="mb-2 text-lg" style={{ fontFamily }}>
-            <span className="font-medium">{t('about.email')}</span>
-            <a href="mailto:info@aftek.com.tw" className="text-primary underline">info@aftek.com.tw</a>
-          </div>
-          <div className="mb-2 text-lg" style={{ fontFamily }}>
-            <span className="font-medium">{t('about.phone')}</span>
-            <a href="tel:+886-2-8797-8990" className="text-primary underline">+886-2-8797-8990</a>
-          </div>
-        </div>
-      </div>
-      {/* Red Call-to-Action Section */}
-      <div className="w-full py-16" style={{ background: '#e53939', color: 'white', fontFamily }}>
-        <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-2xl font-bold mb-2" style={{ fontFamily }}>{RED_SECTION.title}</h2>
-          <div className="mb-6 text-lg" style={{ fontFamily }}>{RED_SECTION.desc}</div>
-          <div className="flex flex-col md:flex-row gap-4 justify-center">
-            {RED_SECTION.buttons.map((btn, i) => (
-              <a
-                key={i}
-                href={btn.href}
-                target={btn.target}
-                rel="noopener noreferrer"
-                className="inline-block px-6 py-3 rounded-lg font-semibold shadow hover:bg-primary/90 transition text-lg"
-                style={{ fontFamily, background: '#f8f5ec', color: '#b91c1c' }}
-              >
-                {i === 0 ? <PlayIcon /> : <FileIcon />}
-                {btn.label}
-              </a>
-            ))}
+        {/* Red Call-to-Action Section */}
+        <div className="w-full py-16" style={{ background: '#e53939', color: 'white', fontFamily }}>
+          <div className="container mx-auto max-w-4xl text-center">
+            <h2 className="text-2xl font-bold mb-2" style={{ fontFamily }}>{RED_SECTION.title}</h2>
+            <div className="mb-6 text-lg" style={{ fontFamily }}>{RED_SECTION.desc}</div>
+            <div className="flex flex-col md:flex-row gap-4 justify-center">
+              {RED_SECTION.buttons.map((btn, i) => (
+                <a
+                  key={i}
+                  href={btn.href}
+                  target={btn.target}
+                  rel="noopener noreferrer"
+                  className="inline-block px-6 py-3 rounded-lg font-semibold shadow hover:bg-primary/90 transition text-lg"
+                  style={{ fontFamily, background: '#f8f5ec', color: '#b91c1c' }}
+                >
+                  {i === 0 ? <PlayIcon /> : <FileIcon />}
+                  {btn.label}
+                </a>
+              ))}
             </div>
           </div>
         </div>

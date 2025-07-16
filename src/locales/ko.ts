@@ -69,6 +69,7 @@ const ko = {
   'home.projects.project3.category': '고기술',
   
   'home.reviews.title': '고객 리뷰',
+  'home.reviews.subtitle': '고객들이 우리에 대해 말하는 것',
   'home.reviews.quote1': 'Aftek의 방수 솔루션은 우리의 고층 프로젝트에 탁월했습니다. 그들의 기술 지원 팀은 전체 적용 과정에서 우수한 지침을 제공했습니다.',
   'home.reviews.author1': '陳 偉明',
   'home.reviews.position1': '프로젝트 매니저',
@@ -134,7 +135,8 @@ const ko = {
   'about.values.sustainability': '환경 책임',
   'about.team.title': '리더십 팀',
   'about.history.title': '우리의 역사',
-  'about.history.content': '1990년에 설립된 Aftek은 지역 공급업체에서 대만, 동남아시아 및 그 외 지역의 주요 프로젝트에 서비스를 제공하는 건설 화학제품의 지역 리더로 성장했습니다.',
+  'about.history.content': '1990년에 설립된 아프텍은 지역 공급업체에서 건설 화학품의 지역 리더로 성장하여 대만, 동남아시아 및 기타 지역의 주요 프로젝트에 서비스를 제공하고 있습니다.',
+  'about.timeline.title': '우리의 여정',
 
   // About Page - Values
   'about.value.quality': '품질의 우수성',
@@ -250,6 +252,7 @@ const ko = {
   'loading.products': '제품 로딩 중...',
   'loading.articles': '기사 로딩 중...',
   'loading.projects': '프로젝트 로딩 중...',
+  'loading.featuredProducts': '주요 제품 로딩 중...',
 
   // Exploded View Tool
   'exploded.title': '인터랙티브 건설 가이드',
@@ -313,8 +316,16 @@ const ko = {
 
   // Recommended Products
   'home.recommended.title': '추천 제품',
-  'home.recommended.subtitle': '가장 인기 있고 신뢰할 수 있는 건설 솔루션을 확인하세요',
+  'home.recommended.subtitle': '가장 인기 있고 신뢰할 수 있는 건설 솔루션을 발견하세요',
   'home.recommended.viewAll': '모든 제품 보기',
+  
+  // Featured Products
+  'home.featured.title': '주요 제품',
+  'home.featured.subtitle': '우리의 베스트셀러 솔루션을 발견하세요',
+
+  // Partners Section
+  'home.partners.title': '파트너',
+  'home.partners.desc': '여기에 우리의 파트너 회사와 플랫폼을 보여줄 예정입니다.',
 };
 
 export default ko; 

@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom';
 import { Switch } from '@/components/ui/switch';
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { productService } from '@/services/productService';
 
 interface UploadedFile {
   url: string;
@@ -43,15 +44,17 @@ const ProductEditor = () => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
 
-  // Fetch products from Supabase on mount
+  // Fetch products using productService
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (!error) setProducts(data || []);
+      try {
+        const data = await productService.getAdminProducts();
+        setProducts(data || []);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setProducts([]);
+      }
       setLoading(false);
     };
     fetchProducts();
@@ -130,17 +133,18 @@ const ProductEditor = () => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id);
-      if (error) throw error;
-      // Refresh products
-      const { data } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
-      setProducts(data || []);
+      const success = await productService.deleteProduct(id);
+      if (success) {
+        // Refresh products
+        const { data } = await supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: false });
+        setProducts(data || []);
+        alert('Product deleted successfully!');
+      } else {
+        alert('Product not found');
+      }
     } catch (err) {
       alert('Error deleting product: ' + (err.message || err));
     }
