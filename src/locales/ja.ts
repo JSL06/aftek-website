@@ -427,7 +427,6 @@ const ja = {
   'features.outdoor_use': '屋外用',
   'features.chemical_resistance': '耐薬品性',
   'features.key_performance_properties': '主要性能特性',
-  'features.waterproof': '防水',
   'features.fire_resistant': '耐火性',
   'features.weather_resistant': '耐候性',
   'features.fast_curing': '速硬化',
@@ -445,9 +444,7 @@ const ja = {
   // Recommended Products
   'home.recommended.title': 'おすすめ製品',
   'home.recommended.subtitle': '最も人気で信頼性の高い建設ソリューションをご覧ください',
-  'home.recommended.viewAll': 'すべての製品を見る',
-  
-  'home.reviews.title': 'お客様の声',
+  'home.recommended.viewAll': 'すべての製品を見る'
 
 };
 
