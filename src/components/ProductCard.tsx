@@ -1,31 +1,14 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ShoppingCart, Eye, Package, CheckCircle, XCircle, Check } from 'lucide-react';
-import React, { useState } from 'react';
-import { useCart } from '../contexts/CartContext';
+import { Eye, Package, CheckCircle, XCircle } from 'lucide-react';
+import React from 'react';
 import { cn } from '../lib/utils';
 
-export interface Product {
-  id: string;
-  name: string;
-  slug?: string;
-  description: string;
-  image: string;
-  price: string;
-  model: string;
-  inStock: boolean;
-  features: string[];
-  showInProducts: boolean;
-  showInFeatured: boolean;
-  displayOrder: number;
-  category?: string;
-  specifications?: Record<string, string>;
-}
+import { UnifiedProduct } from '@/services/productService';
 
 interface ProductCardProps {
-  product: Product;
-  onViewDetails?: (product: Product) => void;
-  onAddToCart?: (product: Product) => void;
+  product: UnifiedProduct;
+  onViewDetails?: (product: UnifiedProduct) => void;
   className?: string;
   variant?: 'default' | 'compact' | 'detailed';
 }
@@ -33,14 +16,9 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onViewDetails,
-  onAddToCart,
   className = '',
   variant = 'default'
 }) => {
-  const { addToCart, isInCart, getCartItemQuantity } = useCart();
-  const [isAdding, setIsAdding] = useState(false);
-  const [justAdded, setJustAdded] = useState(false);
-
   const handleViewDetails = () => {
     if (onViewDetails) {
       onViewDetails(product);
@@ -50,38 +28,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       window.location.href = productUrl;
     }
   };
-
-  const handleAddToCart = async () => {
-    if (onAddToCart) {
-      onAddToCart(product);
-    } else {
-      // Integrate with cart system
-      setIsAdding(true);
-      
-      // Convert Product to cart-compatible format
-      const cartProduct = {
-        id: product.id,
-        name: product.name,
-        price: parseFloat(product.price.replace(/[^0-9.-]+/g, '')), // Extract numeric value
-        image: product.image,
-        sku: product.model,
-        category: product.category,
-        maxQuantity: 99
-      };
-      
-      addToCart(cartProduct);
-      
-      // Show success animation
-      setJustAdded(true);
-      setTimeout(() => {
-        setIsAdding(false);
-        setJustAdded(false);
-      }, 1500);
-    }
-  };
-
-  const cartQuantity = getCartItemQuantity(product.id);
-  const productInCart = isInCart(product.id);
 
   const isCompact = variant === 'compact';
   const isDetailed = variant === 'detailed';
@@ -104,36 +50,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           
           {/* Quick action overlay */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="secondary"
-                className="bg-white/90 hover:bg-white text-gray-900"
-                onClick={handleViewDetails}
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-              {!isCompact && (
-                <Button
-                  size="sm"
-                  className={cn(
-                    "bg-primary/90 hover:bg-primary text-primary-foreground transition-all duration-200",
-                    justAdded && "bg-green-500 hover:bg-green-600",
-                    isAdding && "scale-95"
-                  )}
-                  onClick={handleAddToCart}
-                  disabled={!product.inStock || isAdding}
-                >
-                  {isAdding ? (
-                    <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                  ) : justAdded ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <ShoppingCart className="h-4 w-4" />
-                  )}
-                </Button>
-              )}
-            </div>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="bg-white/90 hover:bg-white text-gray-900"
+              onClick={handleViewDetails}
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
           </div>
         </div>
         
@@ -152,10 +76,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <div className="bg-muted/50 rounded-lg p-4 mb-6 border border-border/50">
             <div className="flex justify-between items-center mb-3">
               <span className={`font-bold text-foreground ${isCompact ? 'text-base' : 'text-lg'}`}>
-                {product.price}
+                ${typeof product.price === 'number' ? product.price.toFixed(2) : product.price}
               </span>
               <div className="flex items-center gap-2">
-                {product.inStock ? (
+                {product.inStock || product.in_stock ? (
                   <>
                     <CheckCircle className="h-4 w-4 text-green-600" />
                     <span className="text-sm text-green-600 font-medium">In Stock</span>
@@ -170,7 +94,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </div>
             
             <div className="text-sm text-muted-foreground mb-3">
-              <span className="font-medium">Model:</span> {product.model}
+              <span className="font-medium">Model:</span> {product.model || product.sku}
             </div>
             
             {/* Features List */}
@@ -206,45 +130,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             )}
           </div>
           
-          {/* Action Buttons */}
-          <div className="flex gap-3">
-            <Button 
-              variant="outline" 
-              size={isCompact ? "sm" : "sm"} 
-              className="flex-1 group-hover:border-primary group-hover:text-primary transition-colors"
-              onClick={handleViewDetails}
-            >
-              <Eye className="mr-2 h-4 w-4" />
-              View Details
-            </Button>
-            <Button 
-              size={isCompact ? "sm" : "sm"} 
-              className={cn(
-                "flex-1 bg-primary hover:bg-primary-hover text-primary-foreground transition-all duration-200",
-                justAdded && "bg-green-500 hover:bg-green-600",
-                isAdding && "scale-95"
-              )}
-              disabled={!product.inStock || isAdding}
-              onClick={handleAddToCart}
-            >
-              {isAdding ? (
-                <>
-                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
-                  Adding...
-                </>
-              ) : justAdded ? (
-                <>
-                  <Check className="mr-2 h-4 w-4" />
-                  Added {productInCart && cartQuantity > 1 && `(${cartQuantity})`}
-                </>
-              ) : (
-                <>
-                  <ShoppingCart className="mr-2 h-4 w-4" />
-                  {productInCart ? `Add to Cart (${cartQuantity})` : 'Add to Cart'}
-                </>
-              )}
-            </Button>
-          </div>
+          {/* Action Button */}
+          <Button 
+            variant="outline" 
+            size={isCompact ? "sm" : "sm"} 
+            className="w-full group-hover:border-primary group-hover:text-primary transition-colors"
+            onClick={handleViewDetails}
+          >
+            <Eye className="mr-2 h-4 w-4" />
+            View Details
+          </Button>
         </div>
       </CardContent>
     </Card>

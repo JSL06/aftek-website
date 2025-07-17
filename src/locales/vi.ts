@@ -308,6 +308,7 @@ const vi = {
   'features.outdoor_use': 'Sử dụng ngoài trời',
   'features.chemical_resistance': 'Chống hóa chất',
   'features.key_performance_properties': 'Tính năng hiệu suất chính',
+  'features.performance_properties': 'Đặc tính hiệu suất',
   'features.waterproof': 'Chống thấm',
   'features.fire_resistant': 'Chống cháy',
   'features.weather_resistant': 'Chống thời tiết',

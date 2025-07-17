@@ -308,6 +308,7 @@ const zhHans = {
   'features.outdoor_use': '室外使用',
   'features.chemical_resistance': '抗化学腐蚀',
   'features.key_performance_properties': '关键性能特性',
+  'features.performance_properties': '性能特性',
   'features.waterproof': '防水',
   'features.fire_resistant': '阻燃',
   'features.weather_resistant': '耐候',

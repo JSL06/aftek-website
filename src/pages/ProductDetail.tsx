@@ -5,9 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTranslation } from '@/hooks/useTranslation';
-import { FileText, Star, Tag, ArrowLeft, ExternalLink, Package, ShoppingCart, Check, ChevronRight, Home, Minus, Plus } from 'lucide-react';
+import { FileText, Star, Tag, ArrowLeft, ExternalLink, Package, ChevronRight, Home, Check } from 'lucide-react';
 import { productService, UnifiedProduct } from '@/services/productService';
-import { useCart } from '@/contexts/CartContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -15,13 +14,9 @@ const ProductDetail = () => {
   const { productId } = useParams();
   const { t, currentLanguage } = useTranslation();
   const navigate = useNavigate();
-  const { addToCart, isInCart, getCartItemQuantity, updateQuantity } = useCart();
   const [product, setProduct] = useState<UnifiedProduct | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<UnifiedProduct[]>([]);
   const [loading, setLoading] = useState(true);
-  const [quantity, setQuantity] = useState(1);
-  const [isAdding, setIsAdding] = useState(false);
-  const [justAdded, setJustAdded] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -45,11 +40,28 @@ const ProductDetail = () => {
 
         setProduct(productData);
         
-        // Get related products from the same category
+        // Get related products - prioritize manually selected ones, then fallback to category-based
         const allProducts = await productService.getAllProducts();
-        const related = allProducts
-          .filter(p => p.id !== productData!.id && p.category === productData!.category && p.isActive)
-          .slice(0, 3);
+        let related: UnifiedProduct[] = [];
+        
+        // First, try to get manually selected related products
+        if (productData.related_products && productData.related_products.length > 0) {
+          related = allProducts
+            .filter(p => productData.related_products!.includes(p.id) && p.isActive)
+            .slice(0, 6);
+        }
+        
+        // If not enough manually selected products, add category-based suggestions
+        if (related.length < 3) {
+          const categoryBased = allProducts
+            .filter(p => p.id !== productData!.id && 
+                        p.category === productData!.category && 
+                        p.isActive &&
+                        !related.some(r => r.id === p.id))
+            .slice(0, 3 - related.length);
+          related = [...related, ...categoryBased];
+        }
+        
         setRelatedProducts(related);
       } catch (error) {
         console.error('Error fetching product:', error);
@@ -60,45 +72,6 @@ const ProductDetail = () => {
 
     fetchProduct();
   }, [productId, navigate]);
-
-  const handleAddToCart = async () => {
-    if (!product) return;
-    
-    setIsAdding(true);
-    
-    try {
-      const cartProduct = {
-        id: product.id,
-        name: product.name,
-        price: typeof product.price === 'number' ? product.price : parseFloat(String(product.price).replace(/[^0-9.-]+/g, '') || '0'),
-        image: product.image,
-        sku: product.sku || product.model || product.id,
-        category: product.category,
-        maxQuantity: 99
-      };
-      
-      if (isInCart(product.id)) {
-        const currentQuantity = getCartItemQuantity(product.id);
-        updateQuantity(product.id, currentQuantity + quantity);
-      } else {
-        for (let i = 0; i < quantity; i++) {
-          addToCart(cartProduct);
-        }
-      }
-      
-      setJustAdded(true);
-      toast.success(`Added ${quantity} ${product.name}${quantity > 1 ? 's' : ''} to cart`);
-      
-      setTimeout(() => {
-        setIsAdding(false);
-        setJustAdded(false);
-      }, 2000);
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      toast.error('Failed to add product to cart');
-      setIsAdding(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -130,9 +103,6 @@ const ProductDetail = () => {
       </div>
     );
   }
-
-  const cartQuantity = getCartItemQuantity(product.id);
-  const productInCart = isInCart(product.id);
 
   return (
     <div className="min-h-screen pt-32 bg-gradient-subtle">
@@ -195,13 +165,8 @@ const ProductDetail = () => {
                 )}
               </div>
 
-              {/* SKU and Category */}
+              {/* Category */}
               <div className="flex flex-wrap items-center gap-4 mb-6">
-                {product.sku && (
-                  <span className="text-sm text-muted-foreground">
-                    SKU: <span className="font-mono">{product.sku}</span>
-                  </span>
-                )}
                 <Badge variant="secondary" className="text-primary">
                   {product.category}
                 </Badge>
@@ -249,59 +214,20 @@ const ProductDetail = () => {
                 </div>
               )}
 
-              {/* Quantity and Add to Cart */}
+              {/* Contact Information */}
               <div className="space-y-4 pt-6 border-t">
-                {/* Quantity Selector */}
-                <div className="flex items-center space-x-4">
-                  <label className="text-sm font-medium">Quantity:</label>
-                  <div className="flex items-center border rounded-lg">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      disabled={quantity <= 1}
-                    >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <span className="px-4 py-2 text-center min-w-[3rem]">{quantity}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setQuantity(quantity + 1)}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Add to Cart Button */}
-                <div className="flex gap-4">
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold mb-2">Interested in this product?</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Contact us for pricing, availability, and technical specifications.
+                  </p>
                   <Button 
                     size="lg" 
-                    className={cn(
-                      "flex-1 transition-all duration-200",
-                      justAdded && "bg-green-500 hover:bg-green-600",
-                      isAdding && "scale-95"
-                    )}
-                    onClick={handleAddToCart}
-                    disabled={!(product.inStock || product.in_stock) || isAdding}
+                    className="w-full"
+                    onClick={() => navigate('/contact')}
                   >
-                    {isAdding ? (
-                      <>
-                        <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
-                        Adding...
-                      </>
-                    ) : justAdded ? (
-                      <>
-                        <Check className="mr-2 h-4 w-4" />
-                        Added to Cart!
-                      </>
-                    ) : (
-                      <>
-                        <ShoppingCart className="mr-2 h-4 w-4" />
-                        {productInCart ? `Add More (${cartQuantity} in cart)` : 'Add to Cart'}
-                      </>
-                    )}
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Contact Us
                   </Button>
                 </div>
               </div>
@@ -380,14 +306,14 @@ const ProductDetail = () => {
                 <h2 className="text-2xl font-bold mb-6">Related Products</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {relatedProducts.map((relatedProduct) => (
-                                         <Card 
-                       key={relatedProduct.id} 
-                       className="cursor-pointer hover:shadow-lg transition-all duration-300 group"
-                       onClick={() => {
-                         const productUrl = relatedProduct.slug ? `/products/${relatedProduct.slug}` : `/products/${relatedProduct.id}`;
-                         navigate(productUrl);
-                       }}
-                     >
+                    <Card 
+                      key={relatedProduct.id} 
+                      className="cursor-pointer hover:shadow-lg transition-all duration-300 group"
+                      onClick={() => {
+                        const productUrl = relatedProduct.slug ? `/products/${relatedProduct.slug}` : `/products/${relatedProduct.id}`;
+                        navigate(productUrl);
+                      }}
+                    >
                       <CardContent className="p-6">
                         <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center rounded-lg mb-4 relative overflow-hidden">
                           {relatedProduct.image && relatedProduct.image !== '/placeholder.svg' ? (
@@ -399,35 +325,24 @@ const ProductDetail = () => {
                           ) : (
                             <Package className="h-8 w-8 text-gray-400" />
                           )}
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                         </div>
-                        
-                        <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
+                        <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
                           {relatedProduct.name}
                         </h3>
-                        
-                        <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                           {relatedProduct.description}
                         </p>
-                        
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold text-primary">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-foreground">
                             ${typeof relatedProduct.price === 'number' ? relatedProduct.price.toFixed(2) : relatedProduct.price}
                           </span>
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="secondary" className="text-xs">
                             {relatedProduct.category}
                           </Badge>
                         </div>
                       </CardContent>
                     </Card>
                   ))}
-                </div>
-                
-                <div className="text-center mt-6">
-                  <Button variant="outline" onClick={() => navigate('/products')}>
-                    View All Products
-                    <ArrowLeft className="ml-2 h-4 w-4 rotate-180" />
-                  </Button>
                 </div>
               </CardContent>
             </Card>

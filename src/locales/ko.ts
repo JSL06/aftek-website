@@ -299,6 +299,7 @@ const ko = {
   'features.outdoor_use': '실외 사용',
   'features.chemical_resistance': '내화학성',
   'features.key_performance_properties': '주요 성능 특성',
+  'features.performance_properties': '성능 특성',
   'features.waterproof': '방수',
   'features.fire_resistant': '내화성',
   'features.weather_resistant': '내후성',

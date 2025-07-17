@@ -103,7 +103,18 @@ const fallbackTranslations: { [key: string]: { [K in Language]: string } } = {
 };
 
 export const useTranslation = () => {
-  const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
+  // Initialize language from localStorage or default to 'en'
+  const getInitialLanguage = (): Language => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('aftek-language');
+      if (saved && Object.keys(localTranslations).includes(saved)) {
+        return saved as Language;
+      }
+    }
+    return 'en';
+  };
+
+  const [currentLanguage, setCurrentLanguage] = useState<Language>(getInitialLanguage);
   const [translations, setTranslations] = useState<Translations>({});
   const [loading, setLoading] = useState(true);
 
@@ -156,9 +167,34 @@ export const useTranslation = () => {
       }
     };
 
+    // Handle page visibility changes to ensure language sync
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        const savedLanguage = localStorage.getItem('aftek-language');
+        if (savedLanguage && savedLanguage !== currentLanguage && Object.keys(localTranslations).includes(savedLanguage)) {
+          setCurrentLanguage(savedLanguage as Language);
+        }
+      }
+    };
+
+    // Handle storage changes (when language is changed in another tab)
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'aftek-language' && event.newValue) {
+        const newLanguage = event.newValue as Language;
+        if (Object.keys(localTranslations).includes(newLanguage) && newLanguage !== currentLanguage) {
+          setCurrentLanguage(newLanguage);
+        }
+      }
+    };
+
     window.addEventListener('languageChange', handleLanguageChange as EventListener);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('storage', handleStorageChange);
+    
     return () => {
       window.removeEventListener('languageChange', handleLanguageChange as EventListener);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, [currentLanguage]);
 
@@ -189,10 +225,19 @@ export const useTranslation = () => {
 
   const changeLanguage = (language: Language) => {
     setCurrentLanguage(language);
+    // Persist language choice to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('aftek-language', language);
+    }
     // Set the lang attribute on the HTML element for CSS language selectors
     document.documentElement.lang = language;
     // Dispatch event for other components
     window.dispatchEvent(new CustomEvent('languageChange', { detail: language }));
+  };
+
+  // Force refresh translations for current language
+  const refreshTranslations = () => {
+    fetchTranslations(currentLanguage);
   };
 
   return {
@@ -200,6 +245,7 @@ export const useTranslation = () => {
     currentLanguage,
     changeLanguage,
     loading,
-    fetchTranslations
+    fetchTranslations,
+    refreshTranslations
   };
 };

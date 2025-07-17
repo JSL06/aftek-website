@@ -308,6 +308,7 @@ const en = {
   'features.outdoor_use': 'Outdoor Use',
   'features.chemical_resistance': 'Chemical Resistance',
   'features.key_performance_properties': 'Key Performance Properties',
+  'features.performance_properties': 'Performance Properties',
   'features.waterproof': 'Waterproof',
   'features.fire_resistant': 'Fire Resistant',
   'features.weather_resistant': 'Weather Resistant',

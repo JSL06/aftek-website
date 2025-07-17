@@ -4,8 +4,11 @@ import { Button } from '@/components/ui/button';
 import ProductFilter, { ProductFilters } from '@/components/ProductFilter';
 import { useTranslation } from '@/hooks/useTranslation';
 import { FileText } from 'lucide-react';
-import ProductCard, { Product } from '@/components/ProductCard';
+import ProductCard from '@/components/ProductCard';
 import { useProducts } from '@/hooks/useProducts';
+import { UnifiedProduct } from '@/services/productService';
+import aftekProductSummaryEnglish from '@/assets/Aftek_Product_Summary_English.pdf';
+import aftekProductSummaryTChinese from '@/assets/Aftek_Product_Summary_TChinese.pdf';
 import {
   Pagination,
   PaginationContent,
@@ -20,7 +23,7 @@ const Products = () => {
   const { t, currentLanguage } = useTranslation();
   const navigate = useNavigate();
   const { products, loading } = useProducts();
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<UnifiedProduct[]>([]);
   const [filters, setFilters] = useState<ProductFilters>({ search: '', category: [], features: [] });
   const [currentPage, setCurrentPage] = useState(1);
   const PRODUCTS_PER_PAGE = 12;
@@ -30,7 +33,7 @@ const Products = () => {
     if (!products) return;
     
     let filtered = [...products];
-
+    
     // Apply search filter
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
@@ -81,15 +84,22 @@ const Products = () => {
     setFilters(newFilters);
   };
 
-  const handleProductView = (product: Product) => {
+  const handleProductView = (product: UnifiedProduct) => {
     navigate(`/products/${product.id}`);
   };
 
-  const handleProductAddToCart = (product: Product) => {
-    // Handle add to cart functionality
-    console.log('Add to cart:', product.name);
-    // This could integrate with a cart system or show a toast notification
+  // Function to get the correct PDF URL based on current language
+  const getProductSummaryPdfUrl = () => {
+    switch (currentLanguage) {
+      case 'zh-Hant':
+        return aftekProductSummaryTChinese;
+      case 'en':
+      default:
+        return aftekProductSummaryEnglish;
+    }
   };
+
+
 
   if (loading) {
     return (
@@ -115,7 +125,7 @@ const Products = () => {
             {t('products.subtitle') || 'Discover our comprehensive range of construction and building materials'}
           </p>
         </div>
-
+        
         {/* Filters and Search */}
         <div className="mb-8">
           <ProductFilter
@@ -129,16 +139,22 @@ const Products = () => {
             Showing {startIndex + 1}-{Math.min(startIndex + PRODUCTS_PER_PAGE, filteredProducts.length)} of {filteredProducts.length} products
           </p>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/resources')}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              asChild
             >
-              <FileText className="mr-2 h-4 w-4" />
-              View Resources
+              <a 
+                href={getProductSummaryPdfUrl()} 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                View Product PDF
+              </a>
             </Button>
           </div>
-        </div>
+                </div>
 
         {/* Products Grid */}
         {paginatedProducts.length > 0 ? (
@@ -149,37 +165,36 @@ const Products = () => {
                   key={product.id}
                   product={product}
                   onViewDetails={handleProductView}
-                  onAddToCart={handleProductAddToCart}
                   variant="default"
                 />
-              ))}
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
+          ))}
+        </div>
+        
+        {/* Pagination */}
+        {totalPages > 1 && (
               <div className="flex justify-center mb-12">
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
                         onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                         className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                      />
-                    </PaginationItem>
-                    
+                  />
+                </PaginationItem>
+                
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       const page = i + Math.max(1, currentPage - 2);
                       if (page > totalPages) return null;
                       
                       return (
                         <PaginationItem key={page}>
-                          <PaginationLink
+                      <PaginationLink
                             onClick={() => setCurrentPage(page)}
                             isActive={currentPage === page}
-                            className="cursor-pointer"
-                          >
+                        className="cursor-pointer"
+                      >
                             {page}
-                          </PaginationLink>
+                      </PaginationLink>
                         </PaginationItem>
                       );
                     })}
@@ -187,19 +202,19 @@ const Products = () => {
                     {totalPages > 5 && currentPage < totalPages - 2 && (
                       <PaginationItem>
                         <PaginationEllipsis />
-                      </PaginationItem>
+                  </PaginationItem>
                     )}
-                    
-                    <PaginationItem>
-                      <PaginationNext
+                
+                <PaginationItem>
+                  <PaginationNext 
                         onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                         className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              </div>
-            )}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+        </div>
+        )}
           </>
         ) : (
           <div className="text-center py-20">

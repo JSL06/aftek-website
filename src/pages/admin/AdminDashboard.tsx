@@ -11,7 +11,9 @@ import {
   Plus,
   Database,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  Building2,
+  Filter
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,6 +24,7 @@ import ProductSyncTester from '@/components/ProductSyncTester';
 
 interface DashboardStats {
   totalProducts: number;
+  totalProjects: number;
   totalArticles: number;
   totalMedia: number;
 }
@@ -30,6 +33,7 @@ const AdminDashboard = () => {
   const { t } = useTranslation();
   const [stats, setStats] = useState<DashboardStats>({
     totalProducts: 0,
+    totalProjects: 0,
     totalArticles: 0,
     totalMedia: 0
   });
@@ -44,13 +48,15 @@ const AdminDashboard = () => {
         const products = await productService.getAllProducts();
         
         // Fetch counts from other tables
-        const [articlesResult, mediaResult] = await Promise.all([
+        const [articlesResult, mediaResult, projectsResult] = await Promise.all([
           supabase.from('articles').select('*', { count: 'exact', head: true }),
-          supabase.from('media').select('*', { count: 'exact', head: true })
+          supabase.from('media').select('*', { count: 'exact', head: true }),
+          supabase.from('projects').select('*', { count: 'exact', head: true })
         ]);
 
         setStats({
           totalProducts: products.length,
+          totalProjects: projectsResult.count || 0,
           totalArticles: articlesResult.count || 0,
           totalMedia: mediaResult.count || 0
         });
@@ -133,8 +139,8 @@ const AdminDashboard = () => {
         <div className="container mx-auto">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-              <p className="text-primary-foreground/80 mt-2">Manage your website content and settings</p>
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <p className="text-primary-foreground/80 mt-2">Manage your website content and settings</p>
             </div>
             <Button 
               variant="secondary" 
@@ -157,6 +163,11 @@ const AdminDashboard = () => {
             icon={Package}
           />
           <StatCard
+            title="Total Projects"
+            value={stats.totalProjects}
+            icon={Building2}
+          />
+          <StatCard
             title="Total Articles"
             value={stats.totalArticles}
             icon={FileText}
@@ -175,6 +186,12 @@ const AdminDashboard = () => {
             description={`${stats.totalProducts} products in database`}
             icon={Package}
             link="/admin/products"
+          />
+          <QuickActionCard
+            title="Manage Projects"
+            description={`${stats.totalProjects} projects in database`}
+            icon={Building2}
+            link="/admin/projects"
           />
           <QuickActionCard
             title="Featured Products"
@@ -241,6 +258,23 @@ const AdminDashboard = () => {
               
               <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
                 <div>
+                  <h4 className="font-semibold">Projects Database</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {stats.totalProjects} projects currently stored
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" asChild>
+                    <Link to="/admin/projects">
+                      <Plus className="h-4 w-4 mr-1" />
+                      Manage Projects
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                <div>
                   <h4 className="font-semibold">Articles Database</h4>
                   <p className="text-sm text-muted-foreground">
                     {stats.totalArticles} articles currently stored
@@ -274,6 +308,13 @@ const AdminDashboard = () => {
               </Button>
               
               <Button variant="outline" className="h-auto p-4 flex-col" asChild>
+                <Link to="/admin/projects">
+                  <Building2 className="h-6 w-6 mb-2" />
+                  <span>View Projects</span>
+                </Link>
+              </Button>
+              
+              <Button variant="outline" className="h-auto p-4 flex-col" asChild>
                 <Link to="/admin/articles">
                   <FileText className="h-6 w-6 mb-2" />
                   <span>View Articles</span>
@@ -284,6 +325,13 @@ const AdminDashboard = () => {
                 <Link to="/admin/media">
                   <Image className="h-6 w-6 mb-2" />
                   <span>Media Library</span>
+                </Link>
+              </Button>
+              
+              <Button variant="outline" className="h-auto p-4 flex-col" asChild>
+                <Link to="/admin/filter-manager">
+                  <Filter className="h-6 w-6 mb-2" />
+                  <span>Filter Manager</span>
                 </Link>
               </Button>
               

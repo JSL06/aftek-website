@@ -2,14 +2,15 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTranslation, Language } from '@/hooks/useTranslation';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useEffect, useState } from 'react';
 import aftekLogo from '@/assets/aftek-logo.png';
 import { usePageVisibility } from '@/hooks/usePageVisibility';
-import { CartIcon } from './CartIcon';
 
 const Navigation = () => {
   const location = useLocation();
   const { currentLanguage, changeLanguage, t } = useTranslation();
+  const { refreshTranslations } = useLanguage();
   const { isPageVisible } = usePageVisibility();
 
   // State to control header visibility
@@ -85,13 +86,16 @@ const Navigation = () => {
             ))}
           </div>
 
-          {/* Right Side: Cart and Language Selector */}
+                      {/* Right Side: Language Selector */}
           <div className="flex items-center space-x-4">
-            <CartIcon />
             <select 
               className="bg-transparent border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               value={currentLanguage}
-              onChange={(e) => changeLanguage(e.target.value as Language)}
+              onChange={(e) => {
+                changeLanguage(e.target.value as Language);
+                // Force refresh translations after language change
+                setTimeout(() => refreshTranslations(), 100);
+              }}
             >
               {languageOptions.map((lang) => (
                 <option key={lang.code} value={lang.code}>

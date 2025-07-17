@@ -299,6 +299,7 @@ const th = {
   'features.outdoor_use': 'ใช้ภายนอก',
   'features.chemical_resistance': 'ทนต่อสารเคมี',
   'features.key_performance_properties': 'คุณสมบัติหลัก',
+  'features.performance_properties': 'คุณสมบัติประสิทธิภาพ',
   'features.waterproof': 'กันน้ำ',
   'features.fire_resistant': 'ทนไฟ',
   'features.weather_resistant': 'ทนต่อสภาพอากาศ',

@@ -362,16 +362,16 @@ const Home = () => {
       </section>
 
       {/* Featured Products Section */}
-      <section className="py-24 bg-background">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+        <section className="py-24 bg-background">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
               {t('home.featured.title')}
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               {t('home.featured.subtitle')}
-            </p>
-          </div>
+              </p>
+            </div>
 
           {productsLoading ? (
             <div className="flex justify-center items-center py-12">
@@ -384,8 +384,8 @@ const Home = () => {
               autoScrollInterval={5000}
             />
           )}
-        </div>
-      </section>
+          </div>
+        </section>
 
 
 

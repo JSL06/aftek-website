@@ -386,6 +386,106 @@ const UnifiedProducts = () => {
                 </p>
               </div>
 
+              <div>
+                <Label>Related Products</Label>
+                <div className="space-y-4">
+                  <div className="flex gap-2 mb-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        // Auto-suggest products with similar tags
+                        const currentTags = formData.features || [];
+                        const suggestions = products
+                          .filter(p => p.id !== formData.id && p.isActive)
+                          .filter(p => {
+                            const productTags = p.features || [];
+                            return productTags.some(tag => currentTags.includes(tag));
+                          })
+                          .slice(0, 5)
+                          .map(p => p.id);
+                        
+                        setFormData(prev => ({
+                          ...prev,
+                          related_products: [...new Set([...(prev.related_products || []), ...suggestions])]
+                        }));
+                      }}
+                    >
+                      <Package className="h-4 w-4 mr-2" />
+                      Auto-Suggest by Tags
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        // Auto-suggest products from same category
+                        const suggestions = products
+                          .filter(p => p.id !== formData.id && p.isActive && p.category === formData.category)
+                          .slice(0, 5)
+                          .map(p => p.id);
+                        
+                        setFormData(prev => ({
+                          ...prev,
+                          related_products: [...new Set([...(prev.related_products || []), ...suggestions])]
+                        }));
+                      }}
+                    >
+                      <Package className="h-4 w-4 mr-2" />
+                      Auto-Suggest by Category
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFormData(prev => ({ ...prev, related_products: [] }))}
+                    >
+                      Clear All
+                    </Button>
+                  </div>
+                  
+                  <div className="border rounded-lg p-4 max-h-48 overflow-y-auto">
+                    <div className="space-y-2">
+                      {products
+                        .filter(p => p.id !== formData.id && p.isActive)
+                        .map(product => (
+                          <label key={product.id} className="flex items-center space-x-2 text-sm p-2 hover:bg-muted rounded">
+                            <input
+                              type="checkbox"
+                              checked={formData.related_products?.includes(product.id) || false}
+                              onChange={(e) => {
+                                const relatedProducts = formData.related_products || [];
+                                if (e.target.checked) {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    related_products: [...relatedProducts, product.id]
+                                  }));
+                                } else {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    related_products: relatedProducts.filter(id => id !== product.id)
+                                  }));
+                                }
+                              }}
+                            />
+                            <div className="flex-1">
+                              <span className="font-medium">{product.name}</span>
+                              <span className="text-muted-foreground ml-2">({product.category})</span>
+                            </div>
+                            <Badge variant="secondary" className="text-xs">
+                              {product.features?.slice(0, 2).join(', ')}
+                            </Badge>
+                          </label>
+                        ))}
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Selected: {formData.related_products?.length || 0} related products
+                  </p>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="flex items-center space-x-2">
                   <Switch
@@ -577,6 +677,14 @@ const UnifiedProducts = () => {
                         {product.inStock ? 'In Stock' : 'Out of Stock'}
                       </Badge>
                     </div>
+                    {product.related_products && product.related_products.length > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Related:</span>
+                        <span className="font-medium text-xs">
+                          {product.related_products.length} products
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex gap-6">

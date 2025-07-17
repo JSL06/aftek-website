@@ -1,86 +1,134 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { FilterSection, FilterCategory, FilterButton } from '@/components/ui/filter-section';
+import ProjectCard from '@/components/ProjectCard';
+import ProjectFilter, { ProjectFilters } from '@/components/ProjectFilter';
+import { useProjects } from '@/hooks/useProjects';
+import { Project } from '@/services/projectService';
+import { 
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 const Projects = () => {
-  const [activeFilter, setActiveFilter] = useState('all');
+  const { projects, loading } = useProjects();
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
+  const [filters, setFilters] = useState<ProjectFilters>({ 
+    search: '', 
+    category: [], 
+    features: [], 
+    completionYear: []
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [showGallery, setShowGallery] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const PROJECTS_PER_PAGE = 6;
 
-  const filters = [
-    { id: 'all', label: 'All Projects' },
-    { id: 'construction', label: 'Construction' },
-    { id: 'manufacturing', label: 'Manufacturing' },
-    { id: 'industrial', label: 'Industrial' },
-    { id: 'infrastructure', label: 'Infrastructure' }
-  ];
+  // Update filtered projects when projects or filters change
+  useEffect(() => {
+    if (!projects) return;
 
-  const projects = [
-    {
-      title: '[PROJECT_1_TITLE_PLACEHOLDER] Taipei Metro Extension',
-      location: 'Taipei, Taiwan',
-      year: '2023',
-      category: 'infrastructure',
-      description: '[PROJECT_1_DESC_PLACEHOLDER] Waterproofing and sealant solutions for subway tunnel construction.',
-      gallery: '[PROJECT_1_GALLERY_PLACEHOLDER]',
-      caseStudy: '[PROJECT_1_CASE_STUDY_PDF_PLACEHOLDER]'
-    },
-    {
-      title: '[PROJECT_2_TITLE_PLACEHOLDER] Industrial Complex Renovation',
-      location: 'Kaohsiung, Taiwan',
-      year: '2023',
-      category: 'industrial',
-      description: '[PROJECT_2_DESC_PLACEHOLDER] Structural repair and protective coating applications.',
-      gallery: '[PROJECT_2_GALLERY_PLACEHOLDER]',
-      caseStudy: '[PROJECT_2_CASE_STUDY_PDF_PLACEHOLDER]'
-    },
-    {
-      title: '[PROJECT_3_TITLE_PLACEHOLDER] Shopping Mall Construction',
-      location: 'Taichung, Taiwan',
-      year: '2022',
-      category: 'construction',
-      description: '[PROJECT_3_DESC_PLACEHOLDER] Flooring systems and architectural sealants installation.',
-      gallery: '[PROJECT_3_GALLERY_PLACEHOLDER]',
-      caseStudy: '[PROJECT_3_CASE_STUDY_PDF_PLACEHOLDER]'
-    },
-    {
-      title: '[PROJECT_4_TITLE_PLACEHOLDER] Semiconductor Facility',
-      location: 'Hsinchu, Taiwan',
-      year: '2022',
-      category: 'manufacturing',
-      description: '[PROJECT_4_DESC_PLACEHOLDER] Cleanroom flooring and specialized sealant solutions.',
-      gallery: '[PROJECT_4_GALLERY_PLACEHOLDER]',
-      caseStudy: '[PROJECT_4_CASE_STUDY_PDF_PLACEHOLDER]'
-    },
-    {
-      title: '[PROJECT_5_TITLE_PLACEHOLDER] Hospital Renovation',
-      location: 'Tainan, Taiwan',
-      year: '2021',
-      category: 'construction',
-      description: '[PROJECT_5_DESC_PLACEHOLDER] Medical-grade flooring and antimicrobial coatings.',
-      gallery: '[PROJECT_5_GALLERY_PLACEHOLDER]',
-      caseStudy: '[PROJECT_5_CASE_STUDY_PDF_PLACEHOLDER]'
-    },
-    {
-      title: '[PROJECT_6_TITLE_PLACEHOLDER] Power Plant Maintenance',
-      location: 'New Taipei, Taiwan',
-      year: '2021',
-      category: 'industrial',
-      description: '[PROJECT_6_DESC_PLACEHOLDER] High-temperature resistant coatings and structural repair.',
-      gallery: '[PROJECT_6_GALLERY_PLACEHOLDER]',
-      caseStudy: '[PROJECT_6_CASE_STUDY_PDF_PLACEHOLDER]'
+    let filtered = [...projects];
+
+    // Apply search filter
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(project =>
+        project.title.toLowerCase().includes(searchLower) ||
+        project.description.toLowerCase().includes(searchLower) ||
+        project.location.toLowerCase().includes(searchLower) ||
+        project.client.toLowerCase().includes(searchLower) ||
+        project.features.some(feature => feature.toLowerCase().includes(searchLower))
+      );
     }
-  ];
 
-  const filteredProjects = activeFilter === 'all' 
-    ? projects 
-    : projects.filter(project => project.category === activeFilter);
+    // Apply category filter
+    if (filters.category.length > 0) {
+      filtered = filtered.filter(project =>
+        filters.category.includes(project.category)
+      );
+    }
 
-  const clearFilters = () => {
-    setActiveFilter('all');
+
+
+    // Apply completion year filter
+    if (filters.completionYear.length > 0) {
+      filtered = filtered.filter(project =>
+        filters.completionYear.includes(project.completion_date)
+      );
+    }
+
+    // Apply features filter
+    if (filters.features.length > 0) {
+      filtered = filtered.filter(project =>
+        filters.features.some(filterFeature =>
+          project.features.some(projectFeature =>
+            projectFeature.toLowerCase().includes(filterFeature.toLowerCase())
+          )
+        )
+      );
+    }
+
+    setFilteredProjects(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [projects, filters]);
+
+  // Handle pagination
+  const totalPages = Math.ceil(filteredProjects.length / PROJECTS_PER_PAGE);
+  const startIndex = (currentPage - 1) * PROJECTS_PER_PAGE;
+  const endIndex = startIndex + PROJECTS_PER_PAGE;
+  const currentProjects = filteredProjects.slice(startIndex, endIndex);
+
+  const handleViewGallery = (project: Project) => {
+    setSelectedProject(project);
+    setCurrentImageIndex(0);
+    setShowGallery(true);
   };
 
-  const hasActiveFilters = activeFilter !== 'all';
+  const closeGallery = () => {
+    setShowGallery(false);
+    setSelectedProject(null);
+    setCurrentImageIndex(0);
+  };
+
+  const nextImage = () => {
+    if (selectedProject?.gallery && currentImageIndex < selectedProject.gallery.length - 1) {
+      setCurrentImageIndex(prev => prev + 1);
+    }
+  };
+
+  const prevImage = () => {
+    if (currentImageIndex > 0) {
+      setCurrentImageIndex(prev => prev - 1);
+    }
+  };
+
+  // Get all project images (main image + gallery)
+  const getProjectImages = (project: Project): string[] => {
+    const images: string[] = [];
+    if (project.image) images.push(project.image);
+    if (project.gallery && project.gallery.length > 0) {
+      images.push(...project.gallery);
+    }
+    return images;
+  };
+
+  const handleViewCaseStudy = (project: Project) => {
+    // Handle case study view - could open PDF or navigate to case study page
+    if (project.case_study_pdf) {
+      window.open(project.case_study_pdf, '_blank');
+    }
+  };
 
   return (
     <div className="min-h-screen pt-16">
@@ -106,78 +154,106 @@ const Projects = () => {
           </div>
 
           {/* Filter Section */}
-          <FilterSection
-            title="Filter Projects"
-            onClear={clearFilters}
-            hasActiveFilters={hasActiveFilters}
-          >
-            <FilterCategory title="Project Categories">
-              {filters.map((filter) => (
-                <FilterButton
-                  key={filter.id}
-                  label={filter.label}
-                  isSelected={activeFilter === filter.id}
-                  onClick={() => setActiveFilter(filter.id)}
-                />
-              ))}
-            </FilterCategory>
-          </FilterSection>
+          {projects && projects.length > 0 && (
+            <ProjectFilter
+              projects={projects}
+              filters={filters}
+              onFiltersChange={setFilters}
+            />
+          )}
+
+          {/* Loading State */}
+          {loading && (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="text-muted-foreground mt-4">Loading projects...</p>
+            </div>
+          )}
+
+          {/* No Projects State */}
+          {!loading && filteredProjects.length === 0 && projects && projects.length > 0 && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No projects match your current filters.</p>
+              <Button 
+                variant="outline" 
+                onClick={() => setFilters({ search: '', category: [], features: [], completionYear: [] })}
+                className="mt-4"
+              >
+                Clear Filters
+              </Button>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && projects && projects.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No projects available at the moment.</p>
+            </div>
+          )}
 
           {/* Projects Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {filteredProjects.map((project, index) => (
-              <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 group">
-                <CardContent className="p-0">
-                  {/* Project Image Placeholder */}
-                  <div className="h-64 bg-muted rounded-t-lg flex items-center justify-center group-hover:bg-muted/80 transition-colors">
-                    <span className="text-muted-foreground text-sm font-medium">
-                      {project.gallery}
-                    </span>
-                  </div>
-                  
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full capitalize">
-                        {project.category}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        {project.year}
-                      </span>
-                    </div>
-                    
-                    <h3 className="text-xl font-semibold text-foreground mb-2">
-                      {project.title}
-                    </h3>
-                    
-                    <p className="text-sm text-muted-foreground mb-3">
-                      📍 {project.location}
-                    </p>
-                    
-                    <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
-                      {project.description}
-                    </p>
-                    
-                    <div className="flex space-x-3">
-                      <Button variant="outline" size="sm" className="flex-1">
-                        View Gallery
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-primary hover:text-primary hover:bg-primary/10">
-                        Case Study PDF
-                        <span className="ml-1 text-xs">📄</span>
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {!loading && currentProjects.length > 0 && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {currentProjects.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    onViewGallery={handleViewGallery}
+                    onViewCaseStudy={handleViewCaseStudy}
+                  />
+                ))}
+              </div>
 
-          {/* Load More */}
-          <div className="text-center mt-12">
-            <Button variant="outline" size="lg">
-              Load More Projects
-            </Button>
-          </div>
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center mt-12">
+                  <Pagination>
+                    <PaginationContent>
+                      {currentPage > 1 && (
+                        <PaginationItem>
+                          <PaginationPrevious 
+                            href="#" 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setCurrentPage(currentPage - 1);
+                            }}
+                          />
+                        </PaginationItem>
+                      )}
+                      
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            href="#"
+                            isActive={currentPage === page}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setCurrentPage(page);
+                            }}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                      
+                      {currentPage < totalPages && (
+                        <PaginationItem>
+                          <PaginationNext 
+                            href="#" 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setCurrentPage(currentPage + 1);
+                            }}
+                          />
+                        </PaginationItem>
+                      )}
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </section>
 
@@ -208,6 +284,117 @@ const Projects = () => {
           </div>
         </div>
       </section>
+
+      {/* Gallery Modal */}
+      <Dialog open={showGallery} onOpenChange={closeGallery}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          {selectedProject && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center justify-between">
+                  <span>{selectedProject.title} - Gallery</span>
+                  <Button variant="ghost" size="sm" onClick={closeGallery}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </DialogTitle>
+              </DialogHeader>
+              
+              {(() => {
+                const images = getProjectImages(selectedProject);
+                return (
+                  <div className="space-y-4">
+                    {/* Main Image Display */}
+                    {images.length > 0 && (
+                      <div className="relative">
+                        <img
+                          src={images[currentImageIndex]}
+                          alt={`${selectedProject.title} - Image ${currentImageIndex + 1}`}
+                          className="w-full h-96 object-cover rounded-lg"
+                        />
+                        
+                        {/* Navigation Arrows */}
+                        {images.length > 1 && (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white"
+                              onClick={prevImage}
+                              disabled={currentImageIndex === 0}
+                            >
+                              <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white"
+                              onClick={nextImage}
+                              disabled={currentImageIndex === images.length - 1}
+                            >
+                              <ChevronRight className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+                        
+                        {/* Image Counter */}
+                        {images.length > 1 && (
+                          <div className="absolute bottom-2 right-2 bg-black/60 text-white px-2 py-1 rounded text-sm">
+                            {currentImageIndex + 1} / {images.length}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Project Details */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="font-medium mb-1">Description:</p>
+                        <p className="text-muted-foreground">{selectedProject.description}</p>
+                      </div>
+                      
+                      {selectedProject.products_used && selectedProject.products_used.length > 0 && (
+                        <div>
+                          <p className="font-medium mb-2">Products Used:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {selectedProject.products_used.map((product, index) => (
+                              <Badge key={index} variant="secondary" className="text-xs">
+                                {product}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Thumbnail Gallery */}
+                    {images.length > 1 && (
+                      <div className="flex gap-2 overflow-x-auto pb-2">
+                        {images.map((image, index) => (
+                          <button
+                            key={index}
+                            className={cn(
+                              "flex-shrink-0 w-20 h-16 rounded border-2 overflow-hidden",
+                              currentImageIndex === index ? "border-primary" : "border-muted"
+                            )}
+                            onClick={() => setCurrentImageIndex(index)}
+                          >
+                            <img
+                              src={image}
+                              alt={`Thumbnail ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

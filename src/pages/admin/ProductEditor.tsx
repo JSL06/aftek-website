@@ -135,12 +135,12 @@ const ProductEditor = () => {
     try {
       const success = await productService.deleteProduct(id);
       if (success) {
-        // Refresh products
-        const { data } = await supabase
-          .from('products')
-          .select('*')
-          .order('created_at', { ascending: false });
-        setProducts(data || []);
+      // Refresh products
+      const { data } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+      setProducts(data || []);
         alert('Product deleted successfully!');
       } else {
         alert('Product not found');

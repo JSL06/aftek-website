@@ -435,6 +435,7 @@ const ja = {
   'features.outdoor_use': '屋外用',
   'features.chemical_resistance': '耐薬品性',
   'features.key_performance_properties': '主要性能特性',
+  'features.performance_properties': '性能特性',
   'features.fire_resistant': '耐火性',
   'features.weather_resistant': '耐候性',
   'features.fast_curing': '速硬化',

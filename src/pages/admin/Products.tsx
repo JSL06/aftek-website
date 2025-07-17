@@ -145,7 +145,7 @@ const Products = () => {
     setLoading(true);
     try {
       const data = await productService.getAdminProducts(); // Use admin products to include inactive ones
-      setProducts(data || []);
+        setProducts(data || []);
     } catch (error) {
       console.error('Error fetching products:', error);
       setProducts([]); // Ensure products is always an array
