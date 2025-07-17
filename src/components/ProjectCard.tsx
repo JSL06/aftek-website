@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Calendar, Building2, ExternalLink, FileText } from 'lucide-react';
 import { Project } from '@/services/projectService';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ProjectCardProps {
   project: Project;
@@ -13,6 +14,7 @@ interface ProjectCardProps {
 }
 
 const ProjectCard = ({ project, onViewGallery, onViewCaseStudy, className = '' }: ProjectCardProps) => {
+  const { t } = useTranslation();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -35,6 +37,22 @@ const ProjectCard = ({ project, onViewGallery, onViewCaseStudy, className = '' }
     if (onViewCaseStudy) {
       onViewCaseStudy(project);
     }
+  };
+
+  // Mapping of category values to translation keys
+  const categoryTranslationMap: Record<string, string> = {
+    'Infrastructure': 'projectCategory.infrastructure',
+    'Industrial': 'projectCategory.industrial',
+    'High-Tech': 'projectCategory.highTech',
+    'Commercial': 'projectCategory.commercial',
+    'Residential': 'projectCategory.residential',
+    'Healthcare': 'projectCategory.healthcare',
+    'Education': 'projectCategory.education',
+    'Transportation': 'projectCategory.transportation',
+    'Energy': 'projectCategory.energy',
+    'Water Treatment': 'projectCategory.waterTreatment',
+    'Manufacturing': 'projectCategory.manufacturing',
+    'General': 'projectCategory.general',
   };
 
   return (
@@ -74,7 +92,10 @@ const ProjectCard = ({ project, onViewGallery, onViewCaseStudy, className = '' }
           {/* Category Badge */}
           <div className="absolute top-4 left-4">
             <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm">
-              {project.category}
+              {(() => {
+                const translated = t(categoryTranslationMap[project.category]);
+                return translated === categoryTranslationMap[project.category] ? project.category : translated;
+              })()}
             </Badge>
           </div>
           
@@ -90,9 +111,9 @@ const ProjectCard = ({ project, onViewGallery, onViewCaseStudy, className = '' }
         
         <div className="p-6">
           {/* Project Meta Information */}
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center text-sm text-muted-foreground">
-              <Calendar className="h-4 w-4 mr-1" />
+              <Calendar className="h-4 w-4 mr-2" />
               {project.completion_date}
             </div>
             {project.project_value && (
@@ -103,34 +124,38 @@ const ProjectCard = ({ project, onViewGallery, onViewCaseStudy, className = '' }
           </div>
           
           {/* Project Title */}
-          <h3 className="text-xl font-semibold text-foreground mb-2 line-clamp-2">
+          <h3 className="text-xl font-semibold text-foreground mb-3">
             {project.title}
           </h3>
           
           {/* Location and Client */}
-          <div className="flex flex-col gap-1 mb-3">
-            <div className="flex items-center text-sm text-muted-foreground">
-              <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
-              <span className="truncate">{project.location}</span>
-            </div>
+          <div className="flex flex-col gap-2 mb-4">
+            {project.location && (
+              <div className="flex items-center text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span className="truncate">{project.location}</span>
+              </div>
+            )}
             {project.client && (
               <div className="flex items-center text-sm text-muted-foreground">
-                <Building2 className="h-4 w-4 mr-1 flex-shrink-0" />
+                <Building2 className="h-4 w-4 mr-2 flex-shrink-0" />
                 <span className="truncate">{project.client}</span>
               </div>
             )}
           </div>
           
           {/* Project Description */}
-          <p className="text-muted-foreground mb-4 text-sm leading-relaxed line-clamp-3">
-            {project.description}
-          </p>
+          {project.description && (
+            <p className="text-muted-foreground mb-5 text-sm leading-relaxed line-clamp-3">
+              {project.description}
+            </p>
+          )}
           
           {/* Features/Technologies */}
           {project.features && project.features.length > 0 && (
-            <div className="mb-3">
-              <p className="text-xs font-medium text-muted-foreground mb-1">Features:</p>
-              <div className="flex flex-wrap gap-1">
+            <div className="mb-5">
+              <p className="text-xs font-medium text-muted-foreground mb-2">Features:</p>
+              <div className="flex flex-wrap gap-2">
                 {project.features.slice(0, 3).map((feature, index) => (
                   <Badge key={index} variant="outline" className="text-xs">
                     {feature}
@@ -147,9 +172,9 @@ const ProjectCard = ({ project, onViewGallery, onViewCaseStudy, className = '' }
 
           {/* Products Used */}
           {project.products_used && project.products_used.length > 0 && (
-            <div className="mb-3">
-              <p className="text-xs font-medium text-muted-foreground mb-1">Products Used:</p>
-              <div className="flex flex-wrap gap-1">
+            <div className="mb-5">
+              <p className="text-xs font-medium text-muted-foreground mb-2">Products Used:</p>
+              <div className="flex flex-wrap gap-2">
                 {project.products_used.slice(0, 2).map((product, index) => (
                   <Badge key={index} variant="secondary" className="text-xs">
                     {product}
@@ -166,7 +191,7 @@ const ProjectCard = ({ project, onViewGallery, onViewCaseStudy, className = '' }
           
           {/* Duration */}
           {project.duration && (
-            <div className="text-xs text-muted-foreground mb-4">
+            <div className="text-xs text-muted-foreground mb-5">
               Duration: {project.duration}
             </div>
           )}
@@ -179,7 +204,7 @@ const ProjectCard = ({ project, onViewGallery, onViewCaseStudy, className = '' }
               className="flex-1"
               onClick={handleViewGallery}
             >
-              <ExternalLink className="h-4 w-4 mr-1" />
+              <ExternalLink className="h-4 w-4 mr-2" />
               View Gallery
             </Button>
             {project.case_study_pdf && (
@@ -189,7 +214,7 @@ const ProjectCard = ({ project, onViewGallery, onViewCaseStudy, className = '' }
                 className="text-primary hover:text-primary hover:bg-primary/10"
                 onClick={handleViewCaseStudy}
               >
-                <FileText className="h-4 w-4 mr-1" />
+                <FileText className="h-4 w-4 mr-2" />
                 Case Study
               </Button>
             )}

@@ -159,9 +159,9 @@ const TEXT_FIELDS: Record<string, TextField[]> = {
     },
     {
       key: 'nav.guide',
-      label: 'User Guide Menu Item',
-      description: 'The text that appears in the navigation menu for the User Guide page',
-      placeholder: 'Enter the user guide menu text...',
+      label: 'Guide Menu Item',
+      description: 'The text that appears in the navigation menu for the Guide page',
+      placeholder: 'Enter the guide menu text...',
       type: 'text',
       required: true
     },

@@ -5,7 +5,7 @@ const th = {
   'nav.products': 'ผลิตภัณฑ์',
   'nav.projects': 'โครงการ',
   'nav.articles': 'บทความ',
-  'nav.guide': 'คู่มือผู้ใช้',
+  'nav.guide': 'คู่มือ',
   'nav.contact': 'ติดต่อ',
 
   // Home Page
@@ -122,7 +122,7 @@ const th = {
   'chatbot.typing': 'กำลังพิมพ์...',
 
   // About Page
-  'about.title': 'เกี่ยวกับเรา',
+  'about.title': 'เกี่ยวกับ',
   'about.hero.title': 'เกี่ยวกับ Aftek',
   'about.hero.subtitle': 'ความเป็นเลิศในการก่อสร้างผ่านโซลูชันการก่อสร้างที่นวัตกรรม',
   'about.mission.title': 'ภารกิจของเรา',
@@ -173,7 +173,7 @@ const th = {
   'about.phone': 'โทรศัพท์:',
 
   // Contact Page
-  'contact.title': 'ติดต่อเรา',
+  'contact.title': 'ติดต่อ',
   'contact.subtitle': 'ติดต่อทีมของเราเพื่อหารือเกี่ยวกับความต้องการวัสดุก่อสร้างและข้อกำหนดของโครงการ',
   'contact.info.title': 'ข้อมูลการติดต่อ',
   'contact.info.address': 'ที่อยู่',
@@ -200,7 +200,7 @@ const th = {
   'contact.form.submit': 'ส่งข้อความ',
 
   // Products Page
-  'products.title': 'ผลิตภัณฑ์ของเรา',
+  'products.title': 'ผลิตภัณฑ์',
   'products.subtitle': 'สารเคมีก่อสร้างและวัสดุก่อสร้างระดับมืออาชีพ',
   'products.filters.all': 'ทุกหมวดหมู่',
   'products.filters.waterproofing': 'กันน้ำ',
@@ -221,7 +221,7 @@ const th = {
   'products.of': 'จาก',
 
   // Projects Page
-  'projects.title': 'โครงการของเรา',
+  'projects.title': 'โครงการ',
   'projects.subtitle': 'โครงการก่อสร้างที่ประสบความสำเร็จทั่วภูมิภาคเอเชีย-แปซิฟิก',
   'projects.viewDetails': 'ดูรายละเอียดโครงการ',
   'projects.category': 'หมวดหมู่',
@@ -230,7 +230,7 @@ const th = {
   'projects.client': 'ลูกค้า',
 
   // Articles Page
-  'articles.title': 'บทความและข่าวสาร',
+  'articles.title': 'บทความ',
   'articles.subtitle': 'ข้อมูลเชิงลึกล่าสุด คู่มือเทคนิค และข่าวสารอุตสาหกรรม',
   'articles.filters.all': 'บทความทั้งหมด',
   'articles.filters.search_placeholder': 'ค้นหาบทความ...',
@@ -292,6 +292,20 @@ const th = {
   'category.redimix': 'Redi-Mix G&M',
   'category.flooring': 'ระบบพื้น',
   'category.others': 'อื่นๆ (ฉนวน, เคลือบผิว)',
+
+  // Project Categories
+  'projectCategory.infrastructure': 'โครงสร้างพื้นฐาน',
+  'projectCategory.industrial': 'อุตสาหกรรม',
+  'projectCategory.highTech': 'เทคโนโลยีขั้นสูง',
+  'projectCategory.commercial': 'เชิงพาณิชย์',
+  'projectCategory.residential': 'ที่อยู่อาศัย',
+  'projectCategory.healthcare': 'สุขภาพ',
+  'projectCategory.education': 'การศึกษา',
+  'projectCategory.transportation': 'ขนส่ง',
+  'projectCategory.energy': 'พลังงาน',
+  'projectCategory.waterTreatment': 'บำบัดน้ำ',
+  'projectCategory.manufacturing': 'การผลิต',
+  'projectCategory.general': 'ทั่วไป',
 
   // Product Features
   'features.application_environment': 'สภาพแวดล้อมการใช้งาน',

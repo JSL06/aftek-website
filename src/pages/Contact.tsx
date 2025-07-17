@@ -9,26 +9,12 @@ const Contact = () => {
   const { t } = useTranslation();
   
   return (
-    <div className="min-h-screen pt-16">
-      {/* Breadcrumbs */}
-      <div className="bg-muted/30 py-4">
-        <div className="container mx-auto px-6">
-          <nav className="text-sm text-muted-foreground">
-            <span>{t('breadcrumb.home')}</span> <span className="mx-2">/</span> <span className="text-foreground">{t('breadcrumb.contact')}</span>
-          </nav>
-        </div>
-      </div>
-
-      {/* Header */}
-      <section className="py-20">
-        <div className="container mx-auto px-6 mb-24">
-          <div className="text-center mb-16">
-            <div className="title-container">
-              <h1 className="uniform-page-title">{t('contact.title')}</h1>
-            </div>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              {t('contact.subtitle')}
-            </p>
+    <div className="min-h-screen bg-background">
+      {/* Spacer to prevent header overlap */}
+      <div style={{ height: '80px' }}></div>
+      <div className="container mx-auto p-8">
+          <div className="flex flex-col items-center mb-12">
+            <h1 className="uniform-page-title">{t('contact.title')}</h1>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
@@ -168,74 +154,6 @@ const Contact = () => {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* Additional Contact Options */}
-      <section className="py-20 bg-muted/30">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
-              {t('contact.other.title')}
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              {t('contact.other.subtitle')}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <Card className="border-0 shadow-md text-center">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-primary text-2xl">💬</span>
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  {t('contact.other.chat.title')}
-                </h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  {t('contact.other.chat.desc')}
-                </p>
-                <Button variant="outline" size="sm">
-                  {t('contact.other.chat.btn')}
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-md text-center">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-primary text-2xl">📱</span>
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  {t('contact.other.whatsapp.title')}
-                </h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  {t('contact.other.whatsapp.desc')}
-                </p>
-                <Button variant="outline" size="sm">
-                  {t('contact.other.whatsapp.btn')}
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-md text-center">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-primary text-2xl">🏢</span>
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  {t('contact.other.visit.title')}
-                </h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  {t('contact.other.visit.desc')}
-                </p>
-                <Button variant="outline" size="sm">
-                  {t('contact.other.visit.btn')}
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
     </div>
   );
 };

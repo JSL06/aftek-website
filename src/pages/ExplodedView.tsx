@@ -117,111 +117,78 @@ const ExplodedView = () => {
   if (!selectedFacility) {
     // Facility selector
     return (
-      <div className="min-h-screen pt-32 bg-background">
-        {/* Breadcrumbs */}
-        <div className="bg-muted/30 py-4">
-          <div className="container mx-auto px-6">
-            <nav className="text-sm text-muted-foreground">
-              <Link to="/">Home</Link> <span className="mx-2">/</span> <span className="text-foreground">Exploded View Tool</span>
-            </nav>
+      <div className="min-h-screen bg-background">
+        {/* Spacer to prevent header overlap */}
+        <div style={{ height: '80px' }}></div>
+        <div className="container mx-auto p-8">
+          <div className="flex flex-col items-center mb-12">
+            <h1 className="uniform-page-title">Guide</h1>
+          </div>
+
+          {/* Facility Type Selector */}
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
+              Select Facility Type
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              Choose the type of facility to explore Aftek solutions
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {facilityTypes.map((facility) => (
+              <Button
+                key={facility.id}
+                variant="ghost"
+                onClick={() => setSelectedFacility(facility.id)}
+                className="h-auto p-0 bg-transparent hover:bg-transparent"
+              >
+                <Card className="w-full bg-card border-border shadow-card hover:shadow-elegant transition-all duration-300 group">
+                  <CardContent className="p-8 text-center">
+                    <div className="text-5xl mb-4">{facility.icon}</div>
+                    <h3 className="text-xl font-semibold text-foreground mb-3 group-hover:text-primary transition-colors">
+                      {facility.name}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {facility.description}
+                    </p>
+                    <ArrowRight className="h-5 w-5 text-primary mx-auto opacity-0 group-hover:opacity-100 transition-all duration-300" />
+                  </CardContent>
+                </Card>
+              </Button>
+            ))}
           </div>
         </div>
-
-        {/* Header */}
-        <section className="py-0 bg-background">
-          <div className="container mx-auto px-6">
-            <div className="text-center mb-8">
-              <div className="title-container">
-                <h1 className="uniform-page-title">User Guide</h1>
-              </div>
-              <p className="text-xl text-muted-foreground max-w-4xl mx-auto">
-                EXPLODED_VIEW_TOOL_DESCRIPTION_PLACEHOLDER
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Facility Type Selector */}
-        <section className="py-20">
-          <div className="container mx-auto px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-foreground mb-4">
-                Select Facility Type
-              </h2>
-              <p className="text-lg text-muted-foreground">
-                Choose the type of facility to explore Aftek solutions
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
-              {facilityTypes.map((facility) => (
-                <Button
-                  key={facility.id}
-                  variant="ghost"
-                  onClick={() => setSelectedFacility(facility.id)}
-                  className="h-auto p-0 bg-transparent hover:bg-transparent"
-                >
-                  <Card className="w-full bg-card border-border shadow-card hover:shadow-elegant transition-all duration-300 group">
-                    <CardContent className="p-8 text-center">
-                      <div className="text-5xl mb-4">{facility.icon}</div>
-                      <h3 className="text-xl font-semibold text-foreground mb-3 group-hover:text-primary transition-colors">
-                        {facility.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        {facility.description}
-                      </p>
-                      <ArrowRight className="h-5 w-5 text-primary mx-auto opacity-0 group-hover:opacity-100 transition-all duration-300" />
-                    </CardContent>
-                  </Card>
-                </Button>
-              ))}
-            </div>
-          </div>
-        </section>
       </div>
     );
   }
 
   // Exploded view diagram
   return (
-    <div className="min-h-screen pt-16 bg-background">
-      {/* Breadcrumbs */}
-      <div className="bg-muted/30 py-4">
-        <div className="container mx-auto px-6">
-          <nav className="text-sm text-muted-foreground">
-            <Link to="/">Home</Link> <span className="mx-2">/</span> 
-            <Link to="/exploded-view">Exploded View Tool</Link> <span className="mx-2">/</span> 
-            <span className="text-foreground">{selectedFacilityData?.name}</span>
-          </nav>
-        </div>
-      </div>
-
-      {/* Header */}
-      <section className="py-12 bg-gradient-subtle">
-        <div className="container mx-auto px-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-                {selectedFacilityData?.name} - Exploded View
-              </h1>
-              <p className="text-lg text-muted-foreground">
-                Click on hotspots to discover recommended Aftek products
-              </p>
-            </div>
-            <Button 
-              variant="outline" 
-              onClick={() => setSelectedFacility(null)}
-              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-            >
-              Change Facility
-            </Button>
+    <div className="min-h-screen bg-background">
+      {/* Spacer to prevent header overlap */}
+      <div style={{ height: '80px' }}></div>
+      <div className="container mx-auto p-8 max-w-4xl">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+              {selectedFacilityData?.name} - Exploded View
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              Click on hotspots to discover recommended Aftek products
+            </p>
           </div>
+          <Button 
+            variant="outline" 
+            onClick={() => setSelectedFacility(null)}
+            className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+          >
+            Change Facility
+          </Button>
         </div>
-      </section>
 
-      {/* Interactive Diagram */}
-      <section className="py-12">
-        <div className="container mx-auto px-6 mb-24">
+        {/* Interactive Diagram */}
+        <div className="mb-24">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Diagram */}
             <div className="lg:col-span-2">
@@ -344,7 +311,7 @@ const ExplodedView = () => {
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 };

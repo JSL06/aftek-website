@@ -5,7 +5,7 @@ const ko = {
   'nav.products': '제품',
   'nav.projects': '프로젝트',
   'nav.articles': '기사',
-  'nav.guide': '사용자 가이드',
+  'nav.guide': '가이드',
   'nav.contact': '연락처',
 
   // Home Page
@@ -200,7 +200,7 @@ const ko = {
   'contact.form.submit': '메시지 보내기',
 
   // Products Page
-  'products.title': '우리의 제품',
+  'products.title': '제품',
   'products.subtitle': '전문 건설 화학제품 및 건축 자재',
   'products.filters.all': '모든 카테고리',
   'products.filters.waterproofing': '방수',
@@ -221,7 +221,7 @@ const ko = {
   'products.of': '/',
 
   // Projects Page
-  'projects.title': '우리의 프로젝트',
+  'projects.title': '프로젝트',
   'projects.subtitle': '아시아태평양 지역의 성공적인 건설 프로젝트',
   'projects.viewDetails': '프로젝트 세부정보 보기',
   'projects.category': '카테고리',
@@ -230,7 +230,7 @@ const ko = {
   'projects.client': '클라이언트',
 
   // Articles Page
-  'articles.title': '기사 및 뉴스',
+  'articles.title': '기사',
   'articles.subtitle': '최신 통찰력, 기술 가이드, 업계 뉴스',
   'articles.filters.all': '모든 기사',
   'articles.filters.search_placeholder': '기사 검색...',
@@ -292,6 +292,20 @@ const ko = {
   'category.redimix': 'Redi-Mix G&M',
   'category.flooring': '바닥재 시스템',
   'category.others': '기타 (단열, 코팅)',
+
+  // Project Categories
+  'projectCategory.infrastructure': '인프라',
+  'projectCategory.industrial': '산업',
+  'projectCategory.highTech': '고기술',
+  'projectCategory.commercial': '상업',
+  'projectCategory.residential': '주거',
+  'projectCategory.healthcare': '의료',
+  'projectCategory.education': '교육',
+  'projectCategory.transportation': '운송',
+  'projectCategory.energy': '에너지',
+  'projectCategory.waterTreatment': '수처리',
+  'projectCategory.manufacturing': '제조업',
+  'projectCategory.general': '일반',
 
   // Product Features
   'features.application_environment': '적용 환경',

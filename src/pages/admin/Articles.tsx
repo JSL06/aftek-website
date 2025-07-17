@@ -11,6 +11,7 @@ import { Plus, Edit, Trash2, Save, ArrowLeft, FileText, Calendar } from 'lucide-
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
 import ArticleFilter, { ArticleFilters } from '@/components/ArticleFilter';
+import RichTextEditor from '@/components/RichTextEditor';
 
 interface Article {
   id: string;
@@ -139,12 +140,26 @@ const Articles = () => {
         setLoading(false);
         return;
       }
+
+      // Generate slug from title
+      const generateSlug = (title: string) => {
+        return title
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+          .replace(/\s+/g, '-') // Replace spaces with hyphens
+          .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+          .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+      };
+
+      const slug = generateSlug(formData.title);
+
       if (editingArticle && editingArticle.id) {
         // Update existing article
         const { error } = await supabase
           .from('articles')
           .update({
             title: formData.title,
+            slug: slug,
             content: formData.content,
             excerpt: formData.excerpt,
             author: formData.author,
@@ -154,7 +169,8 @@ const Articles = () => {
           })
           .eq('id', editingArticle.id);
         if (error) {
-          alert('Error updating article');
+          console.error('Supabase update error:', error);
+          alert('Error updating article: ' + error.message);
         } else {
           alert('Article updated successfully!');
         }
@@ -164,6 +180,7 @@ const Articles = () => {
           .from('articles')
           .insert([{
             title: formData.title,
+            slug: slug,
             content: formData.content,
             excerpt: formData.excerpt,
             author: formData.author,
@@ -172,7 +189,8 @@ const Articles = () => {
             published_at: formData.is_published ? new Date().toISOString() : null
           }]);
         if (error) {
-          alert('Error adding article');
+          console.error('Supabase insert error:', error);
+          alert('Error adding article: ' + error.message);
         } else {
           alert('Article added successfully!');
         }
@@ -268,12 +286,10 @@ const Articles = () => {
               </div>
               <div>
                 <Label htmlFor="content">Content</Label>
-                <Textarea
-                  id="content"
+                <RichTextEditor
                   value={formData.content}
-                  onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                  placeholder="Enter article content"
-                  rows={10}
+                  onChange={(value) => setFormData(prev => ({ ...prev, content: value }))}
+                  placeholder="Write your article content here..."
                 />
               </div>
               <div className="flex items-center space-x-2">

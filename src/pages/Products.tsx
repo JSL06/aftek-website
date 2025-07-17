@@ -115,15 +115,12 @@ const Products = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-6 pt-24">
+      {/* Spacer to prevent header overlap */}
+      <div style={{ height: '80px' }}></div>
+      <div className="container mx-auto p-8">
         {/* Page Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            {t('products.title') || 'Our Products'}
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            {t('products.subtitle') || 'Discover our comprehensive range of construction and building materials'}
-          </p>
+        <div className="flex flex-col items-center mb-12">
+          <h1 className="uniform-page-title">{t('products.title') || 'Products'}</h1>
         </div>
         
         {/* Filters and Search */}

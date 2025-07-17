@@ -12,6 +12,7 @@ import About from "./pages/About";
 import Products from "./pages/Products";
 import Projects from "./pages/Projects";
 import Articles from "./pages/Articles";
+import ArticleDetail from "./pages/ArticleDetail";
 import ExplodedView from "./pages/ExplodedView";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
@@ -65,8 +66,9 @@ const App = () => (
               <Route path="products" element={<ProtectedPage pageName="products"><Products /></ProtectedPage>} />
               <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
               <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
+              <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
               <Route path="articles/:category" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
-              <Route path="exploded-view" element={<ProtectedPage pageName="home"><ExplodedView /></ProtectedPage>} />
+              <Route path="guide" element={<ProtectedPage pageName="home"><ExplodedView /></ProtectedPage>} />
               <Route path="contact" element={<ProtectedPage pageName="contact"><Contact /></ProtectedPage>} />
               <Route path="products/flex-pro-pu" element={<ProtectedPage pageName="products"><FlexProPU /></ProtectedPage>} />
               <Route path="products/:productId" element={<ProtectedPage pageName="products"><ProductDetail /></ProtectedPage>} />

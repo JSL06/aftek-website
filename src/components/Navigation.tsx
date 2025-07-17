@@ -33,7 +33,7 @@ const Navigation = () => {
     { label: t('nav.products'), path: '/products', page: 'products' },
     { label: t('nav.projects'), path: '/projects', page: 'projects' },
     { label: t('nav.articles'), path: '/articles', page: 'articles' },
-    { label: t('nav.guide'), path: '/exploded-view', page: 'home' }, // Guide is part of home
+    { label: t('nav.guide'), path: '/guide', page: 'home' }, // Guide is part of home
     { label: t('nav.contact'), path: '/contact', page: 'contact' },
   ];
 

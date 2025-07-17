@@ -5,7 +5,7 @@ const vi = {
   'nav.products': 'Sản phẩm',
   'nav.projects': 'Dự án',
   'nav.articles': 'Bài viết',
-  'nav.guide': 'Hướng dẫn người dùng',
+  'nav.guide': 'Hướng dẫn',
   'nav.contact': 'Liên hệ',
 
   // Home Page
@@ -131,7 +131,7 @@ const vi = {
   'chatbot.typing': 'Đang gõ...',
 
   // About Page
-  'about.title': 'Về chúng tôi',
+  'about.title': 'Giới thiệu',
   'about.hero.title': 'Về Aftek',
   'about.hero.subtitle': 'Sự xuất sắc trong xây dựng thông qua các giải pháp xây dựng sáng tạo',
   'about.mission.title': 'Sứ mệnh của chúng tôi',
@@ -182,7 +182,7 @@ const vi = {
   'about.phone': 'Điện thoại:',
 
   // Contact Page
-  'contact.title': 'Liên hệ chúng tôi',
+  'contact.title': 'Liên hệ',
   'contact.subtitle': 'Liên hệ với đội ngũ của chúng tôi để thảo luận về nhu cầu vật liệu xây dựng và yêu cầu dự án của bạn.',
   'contact.info.title': 'Thông tin liên hệ',
   'contact.info.address': 'Địa chỉ',
@@ -209,7 +209,7 @@ const vi = {
   'contact.form.submit': 'Gửi tin nhắn',
 
   // Products Page
-  'products.title': 'Sản phẩm của chúng tôi',
+  'products.title': 'Sản phẩm',
   'products.subtitle': 'Hóa chất xây dựng và vật liệu xây dựng chuyên nghiệp',
   'products.filters.all': 'Tất cả danh mục',
   'products.filters.waterproofing': 'Chống thấm',
@@ -230,7 +230,7 @@ const vi = {
   'products.of': 'trên',
 
   // Projects Page
-  'projects.title': 'Dự án của chúng tôi',
+  'projects.title': 'Dự án',
   'projects.subtitle': 'Các dự án xây dựng thành công trên khắp khu vực Châu Á-Thái Bình Dương',
   'projects.viewDetails': 'Xem chi tiết dự án',
   'projects.category': 'Danh mục',
@@ -239,7 +239,7 @@ const vi = {
   'projects.client': 'Khách hàng',
 
   // Articles Page
-  'articles.title': 'Bài viết & Tin tức',
+  'articles.title': 'Bài viết',
   'articles.subtitle': 'Thông tin mới nhất, hướng dẫn kỹ thuật và tin tức ngành',
   'articles.filters.all': 'Tất cả bài viết',
   'articles.filters.search_placeholder': 'Tìm kiếm bài viết...',
@@ -301,6 +301,20 @@ const vi = {
   'category.redimix': 'Redi-Mix G&M',
   'category.flooring': 'Hệ thống sàn',
   'category.others': 'Khác (Cách nhiệt, Lớp phủ)',
+
+  // Project Categories
+  'projectCategory.infrastructure': 'Cơ sở hạ tầng',
+  'projectCategory.industrial': 'Công nghiệp',
+  'projectCategory.highTech': 'Công nghệ cao',
+  'projectCategory.commercial': 'Thương mại',
+  'projectCategory.residential': 'Nhà ở',
+  'projectCategory.healthcare': 'Y tế',
+  'projectCategory.education': 'Giáo dục',
+  'projectCategory.transportation': 'Giao thông vận tải',
+  'projectCategory.energy': 'Năng lượng',
+  'projectCategory.waterTreatment': 'Xử lý nước',
+  'projectCategory.manufacturing': 'Sản xuất',
+  'projectCategory.general': 'Chung',
 
   // Product Features
   'features.application_environment': 'Môi trường ứng dụng',

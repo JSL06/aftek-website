@@ -6,6 +6,7 @@ import { FilterSection, FilterCategory, FilterButton } from '@/components/ui/fil
 import { Search, X } from 'lucide-react';
 import { Project } from '@/services/projectService';
 import { filterService } from '@/services/filterService';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export interface ProjectFilters {
   search: string;
@@ -22,6 +23,7 @@ interface ProjectFilterProps {
 }
 
 const ProjectFilter = ({ projects, filters, onFiltersChange, className = '' }: ProjectFilterProps) => {
+  const { t } = useTranslation();
   const [localSearch, setLocalSearch] = useState(filters.search);
   const [categories, setCategories] = useState<string[]>([]);
   const [features, setFeatures] = useState<string[]>([]);
@@ -105,6 +107,22 @@ const ProjectFilter = ({ projects, filters, onFiltersChange, className = '' }: P
     filters.features.length > 0 ||
     filters.completionYear.length > 0;
 
+  // Mapping of category values to translation keys
+  const categoryTranslationMap: Record<string, string> = {
+    'Infrastructure': 'projectCategory.infrastructure',
+    'Industrial': 'projectCategory.industrial',
+    'High-Tech': 'projectCategory.highTech',
+    'Commercial': 'projectCategory.commercial',
+    'Residential': 'projectCategory.residential',
+    'Healthcare': 'projectCategory.healthcare',
+    'Education': 'projectCategory.education',
+    'Transportation': 'projectCategory.transportation',
+    'Energy': 'projectCategory.energy',
+    'Water Treatment': 'projectCategory.waterTreatment',
+    'Manufacturing': 'projectCategory.manufacturing',
+    'General': 'projectCategory.general',
+  };
+
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Search Bar */}
@@ -134,19 +152,22 @@ const ProjectFilter = ({ projects, filters, onFiltersChange, className = '' }: P
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm font-medium text-muted-foreground">Active filters:</span>
           
-          {filters.category.map(category => (
-            <Badge key={category} variant="secondary" className="gap-1">
-              {category}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleCategoryToggle(category)}
-                className="h-4 w-4 p-0 hover:bg-transparent"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </Badge>
-          ))}
+          {filters.category.map(category => {
+            const translated = t(categoryTranslationMap[category]);
+            return (
+              <Badge key={category} variant="secondary" className="gap-1">
+                {translated === categoryTranslationMap[category] ? category : translated}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleCategoryToggle(category)}
+                  className="h-4 w-4 p-0 hover:bg-transparent"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            );
+          })}
           
           {filters.features.map(feature => (
             <Badge key={feature} variant="secondary" className="gap-1">
@@ -188,19 +209,22 @@ const ProjectFilter = ({ projects, filters, onFiltersChange, className = '' }: P
       )}
 
       {/* Filter Sections - Each on Separate Row */}
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Category Filter */}
         <div>
-          <h4 className="text-sm font-medium text-foreground mb-3">Categories</h4>
+          <h4 className="text-sm font-medium text-foreground mb-3">{t('filter.category')}</h4>
           <div className="flex flex-wrap gap-2">
-            {categories.map(category => (
-              <FilterButton
-                key={category}
-                label={category}
-                isSelected={filters.category.includes(category)}
-                onClick={() => handleCategoryToggle(category)}
-              />
-            ))}
+            {categories.map(category => {
+              const translated = t(categoryTranslationMap[category]);
+              return (
+                <FilterButton
+                  key={category}
+                  label={translated === categoryTranslationMap[category] ? category : translated}
+                  isSelected={filters.category.includes(category)}
+                  onClick={() => handleCategoryToggle(category)}
+                />
+              );
+            })}
           </div>
         </div>
 
@@ -218,21 +242,9 @@ const ProjectFilter = ({ projects, filters, onFiltersChange, className = '' }: P
             ))}
           </div>
         </div>
-
-        {/* Features Filter */}
-        <div>
-          <h4 className="text-sm font-medium text-foreground mb-3">Features</h4>
-          <div className="flex flex-wrap gap-2">
-            {features.map(feature => (
-              <FilterButton
-                key={feature}
-                label={feature}
-                isSelected={filters.features.includes(feature)}
-                onClick={() => handleFeatureToggle(feature)}
-              />
-            ))}
-          </div>
-        </div>
+        
+        {/* Spacing Block */}
+        <div className="h-4"></div>
       </div>
     </div>
   );

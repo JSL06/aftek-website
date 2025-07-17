@@ -18,8 +18,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const Projects = () => {
+  const { t } = useTranslation();
   const { projects, loading } = useProjects();
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [filters, setFilters] = useState<ProjectFilters>({ 
@@ -58,8 +60,6 @@ const Projects = () => {
         filters.category.includes(project.category)
       );
     }
-
-
 
     // Apply completion year filter
     if (filters.completionYear.length > 0) {
@@ -131,26 +131,12 @@ const Projects = () => {
   };
 
   return (
-    <div className="min-h-screen pt-16">
-      {/* Breadcrumbs */}
-      <div className="bg-muted/30 py-4">
-        <div className="container mx-auto px-6">
-          <nav className="text-sm text-muted-foreground">
-            <span>Home</span> <span className="mx-2">/</span> <span className="text-foreground">Projects</span>
-          </nav>
-        </div>
-      </div>
-
-      {/* Header */}
-      <section className="py-20">
-        <div className="container mx-auto px-6 mb-24">
-          <div className="text-center mb-16">
-            <div className="title-container">
-              <h1 className="uniform-page-title">Projects</h1>
-            </div>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              [PROJECTS_INTRO_PLACEHOLDER] Explore our portfolio of successful projects across various industries, showcasing our expertise in construction materials and engineering solutions.
-            </p>
+    <div className="min-h-screen bg-background">
+      {/* Spacer to prevent header overlap */}
+      <div style={{ height: '80px' }}></div>
+      <div className="container mx-auto p-8">
+          <div className="flex flex-col items-center mb-12">
+            <h1 className="uniform-page-title">{t('projects.title') || 'Projects'}</h1>
           </div>
 
           {/* Filter Section */}
@@ -255,35 +241,6 @@ const Projects = () => {
             </>
           )}
         </div>
-      </section>
-
-      {/* Project Statistics */}
-      <section className="py-20 bg-primary text-primary-foreground">
-        <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            Project Statistics
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-            <div className="text-center">
-              <div className="text-3xl font-bold mb-2">200+</div>
-              <div className="text-primary-foreground/80">Projects Completed</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold mb-2">39</div>
-              <div className="text-primary-foreground/80">Years Experience</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold mb-2">50+</div>
-              <div className="text-primary-foreground/80">Industry Partners</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold mb-2">99%</div>
-              <div className="text-primary-foreground/80">Client Satisfaction</div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Gallery Modal */}
       <Dialog open={showGallery} onOpenChange={closeGallery}>

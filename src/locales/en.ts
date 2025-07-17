@@ -5,7 +5,7 @@ const en = {
   'nav.products': 'Products',
   'nav.projects': 'Projects',
   'nav.articles': 'Articles',
-  'nav.guide': 'User Guide',
+  'nav.guide': 'Guide',
   'nav.contact': 'Contact',
 
   // Home Page
@@ -144,7 +144,7 @@ const en = {
   'chatbot.typing': 'Typing...',
 
   // About Page
-  'about.title': 'About Us',
+  'about.title': 'About',
   'about.hero.title': 'About Aftek',
   'about.hero.subtitle': 'Building excellence through innovative construction solutions',
   'about.mission.title': 'Our Mission',
@@ -195,7 +195,7 @@ const en = {
   'about.phone': 'Phone:',
 
   // Contact Page
-  'contact.title': 'Contact Us',
+  'contact.title': 'Contact',
   'contact.subtitle': 'Get in touch with our team to discuss your construction material needs and project requirements.',
   'contact.info.title': 'Contact Information',
   'contact.info.address': 'Address',
@@ -222,7 +222,7 @@ const en = {
   'contact.form.submit': 'Send Message',
 
   // Products Page
-  'products.title': 'Our Products',
+  'products.title': 'Products',
   'products.subtitle': 'Professional construction chemicals and building materials',
   'products.filters.all': 'All Categories',
   'products.filters.waterproofing': 'Waterproofing',
@@ -243,7 +243,7 @@ const en = {
   'products.of': 'of',
 
   // Projects Page
-  'projects.title': 'Our Projects',
+  'projects.title': 'Projects',
   'projects.subtitle': 'Successful construction projects across Asia-Pacific region',
   'projects.viewDetails': 'View Project Details',
   'projects.category': 'Category',
@@ -252,7 +252,7 @@ const en = {
   'projects.client': 'Client',
 
   // Articles Page
-  'articles.title': 'Articles & News',
+  'articles.title': 'Articles',
   'articles.subtitle': 'Latest insights, technical guides, and industry news',
   'articles.filters.all': 'All Articles',
   'articles.filters.search_placeholder': 'Search articles...',
@@ -301,6 +301,20 @@ const en = {
   'category.redimix': 'Redi-Mix G&M',
   'category.flooring': 'Flooring Systems',
   'category.others': 'Others (Insulation, Coatings)',
+
+  // Project Categories
+  'projectCategory.infrastructure': 'Infrastructure',
+  'projectCategory.industrial': 'Industrial',
+  'projectCategory.highTech': 'High-Tech',
+  'projectCategory.commercial': 'Commercial',
+  'projectCategory.residential': 'Residential',
+  'projectCategory.healthcare': 'Healthcare',
+  'projectCategory.education': 'Education',
+  'projectCategory.transportation': 'Transportation',
+  'projectCategory.energy': 'Energy',
+  'projectCategory.waterTreatment': 'Water Treatment',
+  'projectCategory.manufacturing': 'Manufacturing',
+  'projectCategory.general': 'General',
 
   // Product Features
   'features.application_environment': 'Application Environment',

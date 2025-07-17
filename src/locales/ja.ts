@@ -5,7 +5,7 @@ const ja = {
   'nav.products': '製品',
   'nav.projects': 'プロジェクト',
   'nav.articles': '記事',
-  'nav.guide': 'ユーザーガイド',
+  'nav.guide': 'ガイド',
   'nav.contact': 'お問い合わせ',
 
   // Home Page
@@ -127,7 +127,7 @@ const ja = {
   'chatbot.typing': '入力中...',
 
   // About Page
-  'about.title': '私たちについて',
+  'about.title': '会社概要',
   'about.hero.title': 'Aftekについて',
   'about.hero.subtitle': '革新的な建設ソリューションを通じた建設の卓越性',
   'about.mission.title': '私たちのミッション',
@@ -178,7 +178,7 @@ const ja = {
   'about.phone': '電話：',
 
   // Contact Page
-  'contact.title': 'お問い合わせ',
+  'contact.title': '連絡先',
   'contact.subtitle': '建設材料のニーズとプロジェクト要件について話し合うため、私たちのチームにお気軽にお問い合わせください。',
   'contact.info.title': '連絡先情報',
   'contact.info.address': '住所',
@@ -205,7 +205,7 @@ const ja = {
   'contact.form.submit': 'メッセージを送信',
 
   // Products Page
-  'products.title': '私たちの製品',
+  'products.title': '製品',
   'products.subtitle': '専門的な建設化学品と建築材料',
   'products.filters.all': 'すべてのカテゴリ',
   'products.filters.waterproofing': '防水',
@@ -226,7 +226,7 @@ const ja = {
   'products.of': '/',
 
   // Projects Page
-  'projects.title': '私たちのプロジェクト',
+  'projects.title': 'プロジェクト',
   'projects.subtitle': 'アジア太平洋地域での成功した建設プロジェクト',
   'projects.viewDetails': 'プロジェクト詳細を見る',
   'projects.category': 'カテゴリ',
@@ -235,7 +235,7 @@ const ja = {
   'projects.client': 'クライアント',
 
   // Articles Page
-  'articles.title': '記事・ニュース',
+  'articles.title': '記事',
   'articles.subtitle': '最新の洞察、技術ガイド、業界ニュース',
   'articles.filters.all': 'すべての記事',
   'articles.filters.search_placeholder': '記事を検索...',
@@ -406,6 +406,20 @@ const ja = {
   'categories.joints': '目地シーラー',
   'categories.sealantAdhesive': 'シーラント/接着剤',
   'categories.rediMixGM': '即用型モルタル',
+
+  // Project Categories
+  'projectCategory.infrastructure': 'インフラ',
+  'projectCategory.industrial': '工業',
+  'projectCategory.highTech': '高度技術',
+  'projectCategory.commercial': '商業',
+  'projectCategory.residential': '住宅',
+  'projectCategory.healthcare': '医療',
+  'projectCategory.education': '教育',
+  'projectCategory.transportation': '交通',
+  'projectCategory.energy': 'エネルギー',
+  'projectCategory.waterTreatment': '水処理',
+  'projectCategory.manufacturing': '製造業',
+  'projectCategory.general': '一般',
 
   // Footer - Additional Keys  
   'footer.relatedPlatforms': '関連プラットフォーム',
