@@ -285,76 +285,6 @@ const zhHant = {
   // Home Page - Additional Content
   'home.partners.title': '我們的合作夥伴',
   'home.partners.desc': '我們與亞太地區的領先建築公司和材料供應商建立長期合作關係，確保為客戶提供最佳的解決方案和服務。',
-
-  // Products Page
-  'products.title': '產品',
-  'products.subtitle': '專業建築化學品和建築材料',
-  'products.filters.all': '所有類別',
-  'products.filters.waterproofing': '防水',
-  'products.filters.sealants': '密封劑與黏合劑',
-  'products.filters.flooring': '地板系統',
-  'products.filters.grout': 'Redi-Mix G&M',
-  'products.filters.insulation': '隔熱與塗料',
-  'products.search.placeholder': '搜尋產品...',
-  'products.viewDetails': '查看詳情',
-  'products.specifications': '規格',
-  'products.features': '主要特性',
-  'products.applications': '應用',
-  'products.downloads': '下載',
-  'products.showing': '顯示 {count} 個產品，共 {total} 個',
-  'products.filtered': '已過濾自',
-  'products.total': '總計',
-  'products.page': '第',
-  'products.of': '頁，共',
-
-  // Projects Page
-  'projects.title': '專案',
-  'projects.intro': '探索我們在各行各業的成功專案組合，展現我們在建築材料和工程解決方案方面的專業知識。',
-  'projects.categories.Waterproofing': '防水',
-  'projects.categories.Structural Repair': '結構修復',
-  'projects.categories.Flooring Systems': '地坪系統',
-  'projects.categories.Protective Coatings': '保護塗層',
-  'projects.categories.Sealants & Adhesives': '密封膠與黏著劑',
-  'projects.categories.Insulation': '隔熱材料',
-  'projects.categories.Underground Construction': '地下工程',
-  'projects.categories.Cleanroom Technology': '無塵室技術',
-  'projects.categories.Chemical Resistance': '耐化學性',
-  'projects.categories.High Temperature': '高溫',
-  'projects.categories.ESD Protection': '靜電防護',
-  'projects.categories.Fire Resistant': '防火',
-  'projects.categories.Heavy Duty': '重型',
-  'projects.categories.High Traffic Areas': '高人流區域',
-  'projects.categories.Public Transportation': '公共運輸',
-  'projects.categories.Industrial Equipment': '工業設備',
-  'projects.categories.Architectural Finishes': '建築飾面',
-  'projects.categories.Environmental Protection': '環境保護',
-  'projects.categories.Infrastructure': '基礎建設',
-  'projects.categories.Industrial': '工業',
-  'projects.categories.Commercial': '商業',
-  'projects.categories.Residential': '住宅',
-  'projects.categories.High-Tech': '高科技',
-  'projects.categories.Healthcare': '醫療保健',
-  'projects.categories.Transportation': '運輸',
-  'projects.categories.Energy': '能源',
-  'projects.categories.Manufacturing': '製造業',
-  'projects.viewDetails': '查看專案詳情',
-  'projects.category': '類別',
-  'projects.location': '位置',
-  'projects.completion': '完成日期',
-  'projects.client': '客戶',
-
-  // Articles Page
-  'articles.title': '文章與新聞',
-  'articles.subtitle': '最新洞察、技術指南和行業新聞',
-  'articles.filters.all': '所有文章',
-  'articles.filters.search_placeholder': '搜尋文章...',
-  'articles.readMore': '閱讀更多',
-  'articles.publishedOn': '發布於',
-  'articles.categories.technical_guides': '技術指南',
-  'articles.categories.industry_news': '行業新聞',
-  'articles.categories.case_studies': '案例研究',
-  'articles.categories.product_updates': '產品更新',
-  'articles.categories.company_news': '公司新聞',
   
   // Error Pages
   'error.notFound.title': '頁面未找到',
@@ -455,11 +385,6 @@ const zhHant = {
   'articles.categories.technology': '技術',
   'articles.categories.sustainability': '永續發展',
 
-  // 404 Page
-  'notFound.title': '頁面未找到',
-  'notFound.subtitle': '抱歉，您要尋找的頁面不存在。',
-  'notFound.home': '返回首頁',
-
   // Contact Page - Additional Keys
   'contact.info.address': '地址',
   'contact.info.phone': '電話',
@@ -488,19 +413,7 @@ const zhHant = {
   // Projects Page - Additional Keys
   'projects.subtitle': '探索我們在亞太地區成功完成的建築專案作品集。',
 
-  // Chatbot - Additional Keys
-  'chatbot.welcome': '您好！我是Aftek的AI助手。我可以協助您了解我們的產品、技術支援或任何其他問題。請告訴我您需要什麼幫助？',
-  'chatbot.subtitle': 'AI智能助手',
-  'chatbot.responses.waterproofing': '我們的防水解決方案包括液體塗布系統、片狀薄膜和注入技術。這些產品專為屋頂、地下室和外牆設計，提供長期防水保護。您想了解哪個特定應用？',
-  'chatbot.responses.sealants': '我們提供各種密封劑和黏合劑，適用於建築接縫、縫隙和黏接應用。我們的產品具有優異的柔韌性和耐久性。您需要什麼特定類型的密封劑？',
-  'chatbot.responses.flooring': '我們的地板解決方案包括環氧樹脂塗料、自流平化合物和裝飾地板飾面。這些產品適用於工業和商業環境。您想了解哪個特定應用？',
-  'chatbot.responses.insulation': '我們的隔熱和塗料產品提供優異的熱性能和保護。我們提供各種配方以滿足不同的建築需求。您需要什麼特定類型的隔熱材料？',
-  'chatbot.responses.projects': '我們在亞太地區完成了許多成功的專案，包括基礎設施、工業和商業建築。我可以為您提供案例研究或推薦適合您專案的解決方案。',
-  'chatbot.responses.contact': '您可以透過以下方式聯繫我們：電話：02-2799-6558，電子郵件：info@aftek.com.tw，或填寫我們網站上的聯絡表單。我們的團隊很樂意協助您。',
-  'chatbot.responses.technical': '我們提供全面的技術支援，包括產品選擇建議、應用指南和現場技術協助。我們的技術團隊可以協助您找到最適合您專案的解決方案。',
-  'chatbot.responses.consultation': '我們提供免費的技術諮詢服務。我們的專家可以評估您的專案需求並推薦最適合的產品和解決方案。請聯繫我們安排諮詢。',
-  'chatbot.responses.default': '感謝您的問題。我可以協助您了解我們的產品、技術支援或安排諮詢。請告訴我您具體需要什麼幫助？',
-  'chatbot.responses.recommendations': '基於您的需求，我推薦以下產品：',
+
 
   // UI - Additional Keys
   'ui.viewPdf': '查看PDF',

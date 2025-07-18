@@ -121,6 +121,7 @@ export const useTranslation = () => {
 
   // Fetch translations from Supabase with local fallback
   const fetchTranslations = async (language: Language) => {
+    console.log('Fetching translations for language:', language);
     try {
       const { data, error } = await supabase
         .from('website_texts')
@@ -130,6 +131,7 @@ export const useTranslation = () => {
       if (error) {
         console.error('Error fetching translations:', error);
         // Use local translations as primary fallback
+        console.log('Using local translations as fallback for:', language);
         setTranslations(localTranslations[language] || localTranslations['zh-Hant']);
       } else {
         // Start with local translations as base
@@ -137,6 +139,7 @@ export const useTranslation = () => {
         
         // Add local translations as base (fallback)
         const localTrans = localTranslations[language] || localTranslations['zh-Hant'];
+        console.log('Local translations for', language, ':', Object.keys(localTrans).filter(k => k.startsWith('admin.')));
         Object.keys(localTrans).forEach(key => {
           mergedTranslations[key] = localTrans[key];
         });
@@ -146,11 +149,13 @@ export const useTranslation = () => {
           mergedTranslations[item.key] = item.value;
         });
         
+        console.log('Final merged translations for', language, ':', Object.keys(mergedTranslations).filter(k => k.startsWith('admin.')));
         setTranslations(mergedTranslations);
       }
     } catch (error) {
       console.error('Error fetching translations:', error);
       // Use local translations as fallback
+      console.log('Using local translations as fallback due to error for:', language);
       setTranslations(localTranslations[language] || localTranslations['zh-Hant']);
     } finally {
       setLoading(false);
@@ -217,6 +222,13 @@ export const useTranslation = () => {
       }
       return value || key;
     };
+
+    // Debug logging for admin keys
+    if (key.startsWith('admin.')) {
+      console.log('Translation request for:', key, 'Current language:', currentLanguage);
+      console.log('Local translations available:', Object.keys(localTranslations[currentLanguage] || {}).filter(k => k.startsWith('admin.')));
+      console.log('Database translations available:', Object.keys(translations).filter(k => k.startsWith('admin.')));
+    }
 
     // First check database translations (highest priority)
     if (!loading) {
