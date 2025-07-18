@@ -721,6 +721,16 @@ const zhHant = {
   'admin.featuredProducts.productFeaturedStatus': '產品精選狀態',
   'admin.featuredProducts.toggleDescription': '切換產品以在首頁精選區域中顯示/隱藏',
 
+  // Admin Login
+  'admin.login.title': 'Aftek 管理員登入',
+  'admin.login.username': '使用者名稱',
+  'admin.login.usernamePlaceholder': 'admin',
+  'admin.login.password': '密碼',
+  'admin.login.passwordPlaceholder': 'aftek2024',
+  'admin.login.loginButton': '登入管理面板',
+  'admin.login.demoCredentials': '示範憑證：admin / aftek2024',
+  'admin.login.invalidCredentials': '無效的憑證。請使用 admin/aftek2024',
+
 };
 
 export default zhHant; 
