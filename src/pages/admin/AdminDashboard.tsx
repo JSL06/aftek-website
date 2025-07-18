@@ -53,6 +53,13 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedLanguage, setSelectedLanguage] = useState('zh-Hant');
 
+  // Simple test to verify translation function
+  console.log('AdminDashboard - Translation test:', {
+    testKey: t('admin.dashboard.title'),
+    testNav: t('nav.home'),
+    currentLanguage: selectedLanguage
+  });
+
   useEffect(() => {
     const fetchStats = async () => {
       setLoading(true);
@@ -141,6 +148,12 @@ const AdminDashboard = () => {
     </Card>
   );
 
+  // Test language selection
+  const handleLanguageSelect = (languageCode: string) => {
+    console.log('Language selected:', languageCode);
+    setSelectedLanguage(languageCode);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -187,7 +200,7 @@ const AdminDashboard = () => {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
             {LANGUAGES.map(language => (
-              <div key={language.code} onClick={() => setSelectedLanguage(language.code)}>
+              <div key={language.code} onClick={() => handleLanguageSelect(language.code)}>
                 <LanguageCard language={language} />
               </div>
             ))}
