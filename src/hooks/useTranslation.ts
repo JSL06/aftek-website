@@ -34,6 +34,20 @@ const localTranslations: { [K in Language]: Translations } = {
   'zh-Hant': zhHantTranslations,
 };
 
+// Debug: Check if translations are loaded
+console.log('Local translations loaded:', {
+  en: Object.keys(enTranslations).length,
+  ja: Object.keys(jaTranslations).length,
+  ko: Object.keys(koTranslations).length,
+  th: Object.keys(thTranslations).length,
+  vi: Object.keys(viTranslations).length,
+  zhHans: Object.keys(zhHansTranslations).length,
+  zhHant: Object.keys(zhHantTranslations).length,
+});
+
+// Debug: Check admin keys in Traditional Chinese
+console.log('Admin keys in Traditional Chinese:', Object.keys(zhHantTranslations).filter(k => k.startsWith('admin.')));
+
 // Basic fallback translations for critical navigation items
 const fallbackTranslations: { [key: string]: { [K in Language]: string } } = {
   // Navigation
@@ -118,6 +132,11 @@ export const useTranslation = () => {
   const [translations, setTranslations] = useState<Translations>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Debug: Test translation function immediately
+  console.log('Current language:', currentLanguage);
+  console.log('Local translations for current language:', Object.keys(localTranslations[currentLanguage] || {}).length);
+  console.log('Test admin key:', localTranslations[currentLanguage]?.['admin.dashboard.title']);
 
   // Fetch translations from Supabase with local fallback
   const fetchTranslations = async (language: Language) => {
