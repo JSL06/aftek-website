@@ -87,6 +87,10 @@ const Articles = () => {
       <div className="container mx-auto p-8">
         <div className="flex flex-col items-center mb-12">
           <h1 className="uniform-page-title">{t('articles.title') || 'Articles'}</h1>
+          {/* Debug info */}
+          <div style={{fontSize: '12px', color: 'gray', marginTop: '10px'}}>
+            Debug: articles.title = "{t('articles.title')}" | Language: {currentLanguage}
+          </div>
         </div>
         
         {/* Article Filter */}
