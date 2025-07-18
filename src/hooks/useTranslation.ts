@@ -261,6 +261,15 @@ export const useTranslation = () => {
       console.log('Database translations available:', Object.keys(translations).filter(k => k.startsWith('admin.')));
     }
 
+    // Special handling for articles.title in Traditional Chinese
+    if (key === 'articles.title' && currentLanguage === 'zh-Hant') {
+      console.log('🔧 Force using local translation for articles.title in Traditional Chinese');
+      const localValue = localTranslations['zh-Hant']?.[key];
+      if (localValue) {
+        return getValue(localValue);
+      }
+    }
+
     // First check database translations (highest priority)
     if (!loading) {
       const translation = translations[key];
