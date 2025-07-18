@@ -264,6 +264,15 @@ export const useTranslation = () => {
       return getValue(localValue);
     }
 
+    // Force check Traditional Chinese for admin keys
+    if (key.startsWith('admin.') && currentLanguage !== 'zh-Hant') {
+      const zhHantValue = localTranslations['zh-Hant']?.[key];
+      if (zhHantValue) {
+        console.log('Using Traditional Chinese fallback for:', key, zhHantValue);
+        return getValue(zhHantValue);
+      }
+    }
+
     // Then check fallback translations - prioritize Traditional Chinese
     const fallbackValue = fallbackTranslations[key]?.[currentLanguage] || 
                          fallbackTranslations[key]?.['zh-Hant'] || 
