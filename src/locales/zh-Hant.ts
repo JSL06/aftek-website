@@ -385,33 +385,7 @@ const zhHant = {
   'articles.categories.technology': '技術',
   'articles.categories.sustainability': '永續發展',
 
-  // Contact Page - Additional Keys
-  'contact.info.address': '地址',
-  'contact.info.phone': '電話',
-  'contact.info.email': '電子郵件',
-  'contact.info.hours': '營業時間',
-  'contact.location.title': '我們的位置',
-  'contact.location.placeholder': '在地圖上查看我們的位置',
-  'contact.form.firstName': '名字',
-  'contact.form.firstName.placeholder': '請輸入您的名字',
-  'contact.form.lastName': '姓氏',
-  'contact.form.lastName.placeholder': '請輸入您的姓氏',
-  'contact.form.company': '公司',
-  'contact.form.company.placeholder': '請輸入您的公司名稱',
-  'contact.form.email.placeholder': '請輸入您的電子郵件地址',
-  'contact.form.phone': '電話',
-  'contact.form.phone.placeholder': '請輸入您的電話號碼',
-  'contact.form.subject': '主題',
-  'contact.form.subject.placeholder': '請輸入訊息主題',
-  'contact.form.message.placeholder': '請輸入您的訊息...',
-  'contact.form.submit': '發送訊息',
 
-  // Products Page - Additional Keys
-  'products.filter.title': '篩選產品',
-  'products.filter.search': '搜尋產品...',
-
-  // Projects Page - Additional Keys
-  'projects.subtitle': '探索我們在亞太地區成功完成的建築專案作品集。',
 
 
 
