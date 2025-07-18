@@ -21,7 +21,7 @@ import { productService } from '@/services/productService';
 import { toast } from '@/hooks/use-toast';
 
 interface ContentStatus {
-  type: 'texts' | 'products' | 'projects' | 'articles' | 'media';
+  type: 'texts' | 'products' | 'projects' | 'articles';
   total: number;
   translated: number;
   missing: string[];
@@ -133,25 +133,7 @@ const ContentSyncManager = () => {
         });
       }
 
-      // Check media
-      const { data: media } = await supabase
-        .from('media')
-        .select('*');
 
-      if (media) {
-        const mediaLanguages = [...new Set(media.flatMap(m => 
-          m.translations ? Object.keys(m.translations) : []
-        ))];
-        const missingMedia = LANGUAGES.filter(lang => !mediaLanguages.includes(lang.code));
-        
-        statuses.push({
-          type: 'media',
-          total: media.length,
-          translated: mediaLanguages.length,
-          missing: missingMedia.map(l => l.name),
-          languages: mediaLanguages
-        });
-      }
 
       setContentStatus(statuses);
     } catch (error) {
@@ -170,7 +152,7 @@ const ContentSyncManager = () => {
     setProgress(0);
     
     try {
-      const totalSteps = 5;
+      const totalSteps = 4;
       let currentStep = 0;
 
       // Step 1: Sync website texts
@@ -193,10 +175,7 @@ const ContentSyncManager = () => {
       setProgress((currentStep / totalSteps) * 100);
       await syncArticles();
 
-      // Step 5: Sync media
-      currentStep++;
-      setProgress((currentStep / totalSteps) * 100);
-      await syncMedia();
+
 
       toast({
         title: "同步完成",
@@ -367,45 +346,7 @@ const ContentSyncManager = () => {
     }
   };
 
-  const syncMedia = async (): Promise<SyncResult> => {
-    try {
-      const { data: media } = await supabase
-        .from('media')
-        .select('*');
 
-      if (!media) return { success: false, message: 'No media found' };
-
-      for (const item of media) {
-        if (!item.translations) {
-          item.translations = {};
-        }
-
-        // Ensure all languages have translations
-        for (const lang of LANGUAGES) {
-          if (!item.translations[lang.code]) {
-            item.translations[lang.code] = {
-              title: item.title || '',
-              description: item.description || ''
-            };
-          }
-        }
-
-        // Update media with translations
-        const { error } = await supabase
-          .from('media')
-          .update({ translations: item.translations })
-          .eq('id', item.id);
-
-        if (error) {
-          console.error(`Error updating media ${item.id}:`, error);
-        }
-      }
-
-      return { success: true, message: `Synced ${media.length} media items` };
-    } catch (error) {
-      return { success: false, message: 'Failed to sync media' };
-    }
-  };
 
   const getStatusIcon = (status: ContentStatus) => {
     const coverage = (status.translated / LANGUAGES.length) * 100;
@@ -425,7 +366,6 @@ const ContentSyncManager = () => {
       case 'products': return <Package className="h-5 w-5" />;
       case 'projects': return <Building className="h-5 w-5" />;
       case 'articles': return <FileText className="h-5 w-5" />;
-      case 'media': return <Image className="h-5 w-5" />;
       default: return <Database className="h-5 w-5" />;
     }
   };
@@ -489,7 +429,6 @@ const ContentSyncManager = () => {
                           {status.type === 'products' && '产品'}
                           {status.type === 'projects' && '项目'}
                           {status.type === 'articles' && '文章'}
-                          {status.type === 'media' && '媒体'}
                         </h3>
                         <p className="text-sm text-muted-foreground">
                           {status.total} 个项目，{status.translated}/{LANGUAGES.length} 种语言
