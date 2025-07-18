@@ -19,15 +19,15 @@ const PageDisabled = ({ pageName }: PageDisabledProps) => {
             <AlertTriangle className="h-8 w-8 text-yellow-600" />
           </div>
           <h1 className="text-2xl font-bold text-foreground mb-4">
-            Page Temporarily Unavailable
+            {t('ui.pageUnavailable')}
           </h1>
           <p className="text-muted-foreground mb-6">
-            The {pageName} page is currently disabled. Please check back later or contact the administrator.
+            {t('ui.pageUnavailableDesc').replace('{pageName}', pageName)}
           </p>
           <Link to="/">
             <Button className="w-full">
               <Home className="mr-2 h-4 w-4" />
-              Go to Homepage
+              {t('ui.goToHomepage')}
             </Button>
           </Link>
         </CardContent>

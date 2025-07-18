@@ -103,7 +103,7 @@ const fallbackTranslations: { [key: string]: { [K in Language]: string } } = {
 };
 
 export const useTranslation = () => {
-  // Initialize language from localStorage or default to 'en'
+  // Initialize language from localStorage or default to 'zh-Hant' (Traditional Chinese)
   const getInitialLanguage = (): Language => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('aftek-language');
@@ -111,12 +111,13 @@ export const useTranslation = () => {
         return saved as Language;
       }
     }
-    return 'en';
+    return 'zh-Hant';
   };
 
   const [currentLanguage, setCurrentLanguage] = useState<Language>(getInitialLanguage);
   const [translations, setTranslations] = useState<Translations>({});
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Fetch translations from Supabase with local fallback
   const fetchTranslations = async (language: Language) => {
@@ -129,24 +130,28 @@ export const useTranslation = () => {
       if (error) {
         console.error('Error fetching translations:', error);
         // Use local translations as primary fallback
-        setTranslations(localTranslations[language] || localTranslations['en']);
+        setTranslations(localTranslations[language] || localTranslations['zh-Hant']);
       } else {
-        const trans: Translations = {};
-        data?.forEach(item => {
-          trans[item.key] = item.value;
+        // Start with local translations as base
+        const mergedTranslations: Translations = {};
+        
+        // Add local translations as base (fallback)
+        const localTrans = localTranslations[language] || localTranslations['zh-Hant'];
+        Object.keys(localTrans).forEach(key => {
+          mergedTranslations[key] = localTrans[key];
         });
         
-        // If database has translations, use them; otherwise use local
-        if (Object.keys(trans).length > 0) {
-        setTranslations(trans);
-        } else {
-          setTranslations(localTranslations[language] || localTranslations['en']);
-        }
+        // Add database translations with higher priority (overwrite local translations)
+        data?.forEach(item => {
+          mergedTranslations[item.key] = item.value;
+        });
+        
+        setTranslations(mergedTranslations);
       }
     } catch (error) {
       console.error('Error fetching translations:', error);
       // Use local translations as fallback
-      setTranslations(localTranslations[language] || localTranslations['en']);
+      setTranslations(localTranslations[language] || localTranslations['zh-Hant']);
     } finally {
       setLoading(false);
     }
@@ -187,14 +192,21 @@ export const useTranslation = () => {
       }
     };
 
+    // Handle translation updates from admin panel
+    const handleTranslationUpdate = () => {
+      fetchTranslations(currentLanguage);
+    };
+
     window.addEventListener('languageChange', handleLanguageChange as EventListener);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('translationUpdate', handleTranslationUpdate);
     
     return () => {
       window.removeEventListener('languageChange', handleLanguageChange as EventListener);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('translationUpdate', handleTranslationUpdate);
     };
   }, [currentLanguage]);
 
@@ -206,21 +218,31 @@ export const useTranslation = () => {
       return value || key;
     };
 
-    if (loading) {
-      // Return local translations while loading
-      const localTrans = localTranslations[currentLanguage] || localTranslations['en'];
-      return getValue(localTrans[key]) || fallbackTranslations[key]?.[currentLanguage] || fallbackTranslations[key]?.['en'] || key;
+    // First check database translations (highest priority)
+    if (!loading) {
+      const translation = translations[key];
+      if (translation) {
+        return getValue(translation);
+      }
+    }
+
+    // Then check local translations as fallback
+    const localTrans = localTranslations[currentLanguage] || localTranslations['zh-Hant'];
+    const localValue = localTrans[key];
+    if (localValue) {
+      return getValue(localValue);
+    }
+
+    // Then check fallback translations - prioritize Traditional Chinese
+    const fallbackValue = fallbackTranslations[key]?.[currentLanguage] || 
+                         fallbackTranslations[key]?.['zh-Hant'] || 
+                         fallbackTranslations[key]?.['en'];
+    if (fallbackValue) {
+      return getValue(fallbackValue);
     }
     
-    // Return from current translations (database or local)
-    const translation = translations[key];
-    if (translation) {
-      return getValue(translation);
-    }
-    
-    // Final fallback to local translations
-    const localTrans = localTranslations[currentLanguage] || localTranslations['en'];
-    return getValue(localTrans[key]) || fallbackTranslations[key]?.[currentLanguage] || fallbackTranslations[key]?.['en'] || key;
+    // Last resort: return the key itself
+    return key;
   };
 
   const changeLanguage = (language: Language) => {
@@ -236,8 +258,13 @@ export const useTranslation = () => {
   };
 
   // Force refresh translations for current language
-  const refreshTranslations = () => {
-    fetchTranslations(currentLanguage);
+  const refreshTranslations = async () => {
+    setRefreshing(true);
+    try {
+      await fetchTranslations(currentLanguage);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   return {
@@ -245,6 +272,7 @@ export const useTranslation = () => {
     currentLanguage,
     changeLanguage,
     loading,
+    refreshing,
     fetchTranslations,
     refreshTranslations
   };

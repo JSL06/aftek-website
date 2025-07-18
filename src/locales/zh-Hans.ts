@@ -15,8 +15,7 @@ const zhHans = {
   'home.hero.companyProfileBtn': '公司简介PDF',
   
   'home.mission.title': '使命宣言',
-  'home.mission.paragraph1': 'Aftek致力于提供高品质的建筑材料和创新解决方案，以满足建筑业的多样化需求。我们专注于开发和供应先进的建筑材料，提升建筑项目的耐久性、安全性和效率。',
-  'home.mission.paragraph2': '我们的初衷且唯一的目标，就是协助客户及广垠市场进一步认识建材化学，了解如何藉由使用具高效能、与时并进之创新产品，将自身产业价值最大化，以期共创无限商机。',
+  'home.mission.content': 'Aftek致力于提供高品质的建筑材料和创新解决方案，以满足建筑业的多样化需求。我们专注于开发和供应先进的建筑材料，提升建筑项目的耐久性、安全性和效率。\n\n我们的初衷且唯一的目标，就是协助客户及广垠市场进一步认识建材化学，了解如何藉由使用具高效能、与时并进之创新产品，将自身产业价值最大化，以期共创无限商机。',
   
   'home.services.title': '我们的服务',
   'home.services.subtitle': '横跨亚太市场的综合建筑材料和建筑解决方案',
@@ -368,6 +367,93 @@ const zhHans = {
   // Partners Section
   'home.partners.title': '合作伙伴',
   'home.partners.desc': '这里将展示我们的合作伙伴公司和平台。',
+
+  // Chatbot - Additional Keys
+  'chatbot.welcome': '您好！我在这里协助您了解我们的建筑材料和解决方案。今天我能为您提供什么帮助？',
+  'chatbot.subtitle': '询问我关于产品、服务或技术信息',
+  'chatbot.responses.waterproofing': '我们的防水解决方案包括液体涂布薄膜、片状薄膜和注入系统。我们为屋顶、地下室和外墙提供产品。您想了解更多关于特定应用的信息吗？',
+  'chatbot.responses.sealants': '我们为建筑接缝、缝隙和粘接应用提供高性能密封剂和胶黏剂。我们的产品包括硅胶、聚氨酯和混合配方。您在寻找什么类型的应用？',
+  'chatbot.responses.flooring': '我们的地板解决方案包括环氧树脂涂料、自流平化合物和工业商业应用的装饰饰面。我们为高人流区域、抗化学腐蚀和防滑表面提供产品。',
+  'chatbot.responses.insulation': '我们提供隔热和隔音解决方案以及保护涂层。我们的产品有助于改善建筑物的能源效率和声音控制。',
+  'chatbot.responses.projects': '我们在亚太地区完成了许多成功的项目。您可以在项目页面查看我们的项目作品集，了解案例研究和应用。',
+  'chatbot.responses.contact': '您可以拨打02-2799-6558或发送电子邮件至info@aftek.com.tw联系我们。我们的办公室位于台湾新北市中和区健康路37号10楼。',
+  'chatbot.responses.technical': '我们提供全面的技术支持，包括应用指南、规格和咨询服务。我们的技术团队可以协助产品选择和安装指导。',
+  'chatbot.responses.consultation': '我们为您的建筑项目提供免费咨询服务。我们的专家可以协助您选择合适的产品并提供应用指导。请联系我们安排咨询。',
+  'chatbot.responses.default': '感谢您的问题。我在这里协助您了解我们的建筑材料和解决方案。您可以询问防水、密封剂、地板、隔热或我们提供的任何其他产品。',
+  'chatbot.responses.recommendations': '根据您的需求，我们推荐：{products}',
+
+  // UI - Additional Keys
+  'ui.viewPdf': '查看PDF',
+  'ui.downloadPdf': '下载PDF',
+  'ui.openInNewTab': '在新标签页中打开',
+  'ui.pageUnavailable': '页面暂时无法使用',
+  'ui.pageUnavailableDesc': '{pageName}页面目前停用。请稍后再试或联系管理员。',
+  'ui.goToHomepage': '前往首页',
+  'ui.refreshTranslations': '刷新翻译',
+
+  // Guide Page
+  'guide.title': '使用指南',
+  'guide.subtitle': '选择设施类型以探索Aftek解决方案',
+  'guide.selectFacility': '选择设施类型',
+  'guide.facilityType1.name': '住宅建筑',
+  'guide.facilityType1.description': '适用于住宅建筑的防水和地板解决方案',
+  'guide.facilityType2.name': '商业建筑',
+  'guide.facilityType2.description': '适用于商业建筑的专业解决方案',
+  'guide.facilityType3.name': '教育设施',
+  'guide.facilityType3.description': '适用于学校和大学的耐用解决方案',
+  'guide.facilityType4.name': '娱乐设施',
+  'guide.facilityType4.description': '适用于体育馆和娱乐场所的解决方案',
+  'guide.facilityType5.name': '住宅别墅',
+  'guide.facilityType5.description': '适用于高端住宅的豪华解决方案',
+  'guide.facilityType6.name': '医疗设施',
+  'guide.facilityType6.description': '适用于医院和诊所的卫生解决方案',
+  'guide.facilityType7.name': '工业设施',
+  'guide.facilityType7.description': '适用于工厂和工业建筑的坚固解决方案',
+
+  // Articles - Additional Keys
+  'articles.filters.title': '筛选文章',
+  'articles.filters.categories': '类别',
+  'articles.categories.technology': '技术',
+  'articles.categories.sustainability': '可持续发展',
+
+  // Projects - Additional Keys
+  'projects.intro': '探索我们在各行各业的成功项目组合，展现我们在建筑材料和工程解决方案方面的专业知识。',
+
+  // Product Catalog Categories
+  'catalog.waterproofing.title': '防水型录',
+  'catalog.waterproofing.english': 'Waterproofing',
+  'catalog.sealant_adhesive.title': '填缝/接着剂型录',
+  'catalog.sealant_adhesive.english': 'Sealant/Adhesive',
+  'catalog.flooring.title': '地坪型录',
+  'catalog.flooring.english': 'Flooring',
+  'catalog.redimix_gm.title': '砂浆/修护剂型录',
+  'catalog.redimix_gm.english': 'Redi-Mix G&M',
+  'catalog.industrial_flooring.title': '工业地坪型录',
+  'catalog.industrial_flooring.english': 'Industrial Flooring',
+  'catalog.color_card.title': '产品色卡',
+  'catalog.color_card.english': 'Color Card',
+  'catalog.seeMore': '看更多',
+  'catalog.download': '按我下载',
+
+  // Product Detail Page
+  'productDetail.description': '产品描述',
+  'productDetail.specifications': '规格',
+  'productDetail.examples': '过往案例',
+  'productDetail.productDescription': '产品描述',
+  'productDetail.descriptionText': '{productName} 专为满足最高品质和性能标准而设计。此产品结合创新技术与可靠功能，为您的建筑和建设需求提供卓越成果。',
+  'productDetail.technicalSpecifications': '技术规格',
+  'productDetail.specificationsText': '{productName} 的详细规格正在更新中。请联系我们获取更多信息。',
+  'productDetail.pastExamples': '过往案例与项目',
+  'productDetail.examplesDescription': '探索 {productName} 的实际应用和成功项目。了解我们的产品如何在各种建筑场景中使用。',
+  'productDetail.viewProjects': '查看项目',
+  'productDetail.inStock': '有库存',
+  'productDetail.outOfStock': '缺货',
+  'productDetail.keyFeatures': '主要特点',
+  'productDetail.interestedInProduct': '对这个产品感兴趣？',
+  'productDetail.contactForInfo': '联系我们了解价格、库存和技术规格。',
+  'productDetail.contactUs': '联系我们',
+  'productDetail.relatedProducts': '相关产品',
+
 };
 
 export default zhHans; 

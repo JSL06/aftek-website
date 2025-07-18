@@ -7,8 +7,10 @@ import { ArrowLeft, Star, Package, GripVertical, Save, Eye } from 'lucide-react'
 import { Link } from 'react-router-dom';
 import { useProducts } from '@/hooks/useProducts';
 import ProductCard from '@/components/ProductCard';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const FeaturedProductsManager = () => {
+  const { t } = useTranslation();
   const { products, featuredProducts, loading, updateProductFeaturedStatus, reorderFeaturedProducts } = useProducts();
   const [localChanges, setLocalChanges] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
@@ -44,7 +46,7 @@ const FeaturedProductsManager = () => {
       <div className="min-h-screen bg-background p-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-center items-center py-20">
-            <div className="text-xl text-muted-foreground">Loading products...</div>
+            <div className="text-xl text-muted-foreground">{t('admin.featuredProducts.loading')}</div>
           </div>
         </div>
       </div>
@@ -63,8 +65,8 @@ const FeaturedProductsManager = () => {
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Featured Products Manager</h1>
-              <p className="text-muted-foreground">Control which products appear in the homepage carousel</p>
+              <h1 className="text-3xl font-bold text-foreground">{t('admin.featuredProducts.title')}</h1>
+              <p className="text-muted-foreground">{t('admin.featuredProducts.description')}</p>
             </div>
           </div>
           

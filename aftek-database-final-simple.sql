@@ -42,7 +42,7 @@ CREATE TABLE featured_products (
 CREATE TABLE website_text (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     key TEXT NOT NULL,
-    language_code TEXT NOT NULL DEFAULT 'en',
+    language_code TEXT NOT NULL DEFAULT 'zh-Hant',
     value TEXT NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),

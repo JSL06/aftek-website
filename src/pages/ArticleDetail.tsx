@@ -133,20 +133,7 @@ const ArticleDetail = () => {
   return (
     <div className="min-h-screen pt-32 bg-gradient-subtle">
       <div className="container mx-auto px-6 mb-24">
-        {/* Breadcrumbs */}
-        <div className="mb-8">
-          <nav className="text-sm text-muted-foreground">
-            <Link to="/" className="hover:text-foreground transition-colors">
-              {t('nav.home') || 'Home'}
-            </Link>
-            <span className="mx-2">/</span>
-            <Link to="/articles" className="hover:text-foreground transition-colors">
-              {t('nav.articles') || 'Articles'}
-            </Link>
-            <span className="mx-2">/</span>
-            <span className="text-foreground">{article.title}</span>
-          </nav>
-        </div>
+
 
         {/* Article Header */}
         <div className="max-w-4xl mx-auto">

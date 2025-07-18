@@ -7,13 +7,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Edit, Trash2, Save, ArrowLeft, Package, Star, Database } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, ArrowLeft, Package, Star, Database, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ProductFilter, { ProductFilters } from '@/components/ProductFilter';
 import { useTranslation } from '@/hooks/useTranslation';
 import { productService, UnifiedProduct } from '@/services/productService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import LanguageSelector, { Language, LANGUAGES } from '@/components/LanguageSelector';
+import MultilingualFormField from '@/components/MultilingualFormField';
+import TranslationStatus from '@/components/TranslationStatus';
+import QuickTranslationCopy from '@/components/QuickTranslationCopy';
 
 interface Product extends UnifiedProduct {
   // Legacy compatibility - all properties now come from UnifiedProduct
@@ -27,7 +31,7 @@ const FEATURE_OPTIONS = [
   'High Traffic Areas',
   'Chemical Exposure',
   
-  // Performance Properties
+  // Properties
   'Waterproof',
   'UV Resistant',
   'Flexible',
@@ -56,6 +60,7 @@ const FEATURE_OPTIONS = [
 
 const Products = () => {
   const { currentLanguage } = useTranslation();
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>('zh-Hant');
   const [products, setProducts] = useState<Product[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -69,13 +74,15 @@ const Products = () => {
     in_stock: true,
     size: '',
     showInFeatured: false,
-    displayOrder: 99
+    displayOrder: 99,
+    // Multilingual content
+    translations: {} as Record<string, any>
   });
 
   const [filters, setFilters] = useState<ProductFilters>({ 
     search: '', 
-    category: [] as string[], // Multiple categories
-    features: [] as string[]
+    category: [],
+    features: []
   });
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
@@ -87,55 +94,38 @@ const Products = () => {
     'Others (Insulation, Coatings)'
   ];
 
-  // Fetch products from Supabase
+  // Filter products based on current filters
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    let filtered = products;
 
-  useEffect(() => {
-    // Filter products whenever products or filters change
-    let filtered = [...products];
-    
-    // Search filter
     if (filters.search) {
-      filtered = filtered.filter(product =>
-        (product.name?.toLowerCase() || '').includes(filters.search.toLowerCase()) ||
-        (product.names?.[currentLanguage]?.toLowerCase() || '').includes(filters.search.toLowerCase())
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(product => 
+        product.name.toLowerCase().includes(searchLower) ||
+        product.description.toLowerCase().includes(searchLower) ||
+        product.category.toLowerCase().includes(searchLower)
       );
     }
-    
-    // Category filter - show products if they match ANY of the selected categories
-    // If no categories selected, show all products
+
     if (filters.category.length > 0) {
       filtered = filtered.filter(product => 
-        product.category && filters.category.includes(product.category)
+        filters.category.includes(product.category)
       );
     }
-    
-    // Features filter - show products if they have ANY of the selected features
+
     if (filters.features.length > 0) {
       filtered = filtered.filter(product => {
-        // Handle different types of features data
-        let productFeatures: string[] = [];
-        
-        if (Array.isArray(product.features)) {
-          productFeatures = product.features;
-        } else if (typeof product.features === 'string' && product.features.length > 0) {
-          productFeatures = [product.features];
-        }
-        
-        // Check if product has ANY of the selected features
-        return filters.features.some(selectedFeature => 
-          productFeatures.some(productFeature => 
-            productFeature.toLowerCase().includes(selectedFeature.toLowerCase()) ||
-            selectedFeature.toLowerCase().includes(productFeature.toLowerCase())
-          )
+        const productFeatures = Array.isArray(product.features) 
+          ? product.features 
+          : [product.features].filter(Boolean);
+        return filters.features.some(feature => 
+          productFeatures.includes(feature)
         );
       });
     }
-    
+
     setFilteredProducts(filtered);
-  }, [products, filters, currentLanguage]);
+  }, [products, filters]);
 
   const handleFilterChange = (newFilters: ProductFilters) => {
     setFilters(newFilters);
@@ -144,11 +134,11 @@ const Products = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const data = await productService.getAdminProducts(); // Use admin products to include inactive ones
-        setProducts(data || []);
+      const data = await productService.getAdminProducts();
+      setProducts(data || []);
     } catch (error) {
       console.error('Error fetching products:', error);
-      setProducts([]); // Ensure products is always an array
+      setProducts([]);
     }
     setLoading(false);
   };
@@ -164,79 +154,121 @@ const Products = () => {
       in_stock: true,
       size: '',
       showInFeatured: false,
-      displayOrder: 99
+      displayOrder: 99,
+      translations: {}
     });
     setShowForm(true);
   };
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
+    
+    // Prepare translations data
+    const translations: Record<string, any> = {};
+    LANGUAGES.forEach(lang => {
+      translations[lang.code] = {
+        name: lang.code === 'en' ? product.name : (product.names?.[lang.code] || ''),
+        description: lang.code === 'en' ? product.description : (product.names?.[`${lang.code}_description`] || ''),
+        category: product.category || ''
+      };
+    });
+
     setFormData({
       name: product.name,
       category: product.category,
       description: product.description,
-      features: Array.isArray(product.features)
-        ? product.features
-        : (typeof product.features === 'string' && product.features.length > 0)
-          ? [product.features]
-          : [],
+      features: (() => {
+        const features = product.features as any;
+        if (Array.isArray(features)) {
+          return features;
+        }
+        if (typeof features === 'string' && features && features.length > 0) {
+          return [features];
+        }
+        return [];
+      })(),
       image: product.image || '',
       in_stock: product.in_stock !== false,
       size: (product.sizes && product.sizes.length > 0) ? product.sizes[0] : '',
       showInFeatured: product.showInFeatured || false,
-      displayOrder: product.displayOrder || 99
+      displayOrder: product.displayOrder || 99,
+      translations
     });
     setShowForm(true);
   };
 
+  const handleTranslationChange = (language: Language, fieldName: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      translations: {
+        ...prev.translations,
+        [language]: {
+          ...prev.translations[language],
+          [fieldName]: value
+        }
+      }
+    }));
+  };
+
+  const handleTranslationUpdate = (language: Language, updates: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      translations: {
+        ...prev.translations,
+        [language]: {
+          ...prev.translations[language],
+          ...updates
+        }
+      }
+    }));
+  };
+
   const handleSave = async () => {
     setLoading(true);
-    // Only require product name
-    if (!formData.name) {
-      alert('Please enter a product name.');
+    
+    // Validate required fields for current language
+    const currentLangData = formData.translations[selectedLanguage] || {};
+    if (!currentLangData.name && !formData.name) {
+      toast.error('Please enter a product name.');
       setLoading(false);
       return;
     }
+
     try {
+      // Prepare product data with multilingual content
+      const productData: Partial<UnifiedProduct> = {
+        name: formData.name || currentLangData.name,
+        category: formData.category,
+        description: formData.description || currentLangData.description,
+        features: formData.features,
+        image: formData.image,
+        inStock: formData.in_stock,
+        in_stock: formData.in_stock,
+        showInFeatured: formData.showInFeatured,
+        displayOrder: formData.displayOrder,
+        names: {}
+      };
+
+      // Add multilingual names and descriptions
+      LANGUAGES.forEach(lang => {
+        const langData = formData.translations[lang.code];
+        if (langData?.name) {
+          productData.names![lang.code] = langData.name;
+        }
+        if (langData?.description) {
+          productData.names![`${lang.code}_description`] = langData.description;
+        }
+      });
+
       if (editingProduct && editingProduct.id) {
-        // Update existing product using productService
-        const updateData: Partial<UnifiedProduct> = {
-          name: formData.name,
-          category: formData.category,
-          description: formData.description,
-          features: formData.features,
-          image: formData.image,
-          inStock: formData.in_stock,
-          in_stock: formData.in_stock,
-          showInFeatured: formData.showInFeatured,
-          displayOrder: formData.displayOrder
-        };
-        
-        const updated = await productService.updateProduct(editingProduct.id, updateData);
+        const updated = await productService.updateProduct(editingProduct.id, productData);
         if (updated) {
           toast.success('Product updated successfully!');
         } else {
           throw new Error('Product update failed');
         }
       } else {
-        // Add new product using productService
-        const newProductData: Partial<UnifiedProduct> = {
-          name: formData.name,
-          category: formData.category,
-          description: formData.description,
-          features: formData.features,
-          image: formData.image,
-          inStock: formData.in_stock,
-          in_stock: formData.in_stock,
-          showInFeatured: formData.showInFeatured,
-          displayOrder: formData.displayOrder,
-          isActive: true,
-          price: 0, // Default price
-          model: '', // Default model
-          sku: '' // Default SKU
-        };
-        
-        await productService.addProduct(newProductData);
+        await productService.addProduct(productData);
         toast.success('Product added successfully!');
       }
       
@@ -245,7 +277,7 @@ const Products = () => {
       setEditingProduct(null);
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('Error saving product: ' + (error.message || error));
+      toast.error('Error saving product: ' + (error.message || error));
     }
     setLoading(false);
   };
@@ -270,26 +302,9 @@ const Products = () => {
     setLoading(false);
   };
 
-  const addFeature = () => {
-    setFormData(prev => ({
-      ...prev,
-      features: [...prev.features, '']
-    }));
-  };
-
-  const updateFeature = (index: number, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      features: prev.features.map((f, i) => i === index ? value : f)
-    }));
-  };
-
-  const removeFeature = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      features: prev.features.filter((_, i) => i !== index)
-    }));
-  };
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   if (showForm) {
     return (
@@ -305,49 +320,80 @@ const Products = () => {
           <Card>
             <CardHeader>
               <CardTitle>
-                {editingProduct ? 'Edit Product' : 'Add New Product'}
+                {editingProduct ? '编辑产品' : '添加新产品'}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="name">Product Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Enter product name"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map(category => (
-                        <SelectItem key={category} value={category}>
-                          {category.charAt(0).toUpperCase() + category.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Enter product description"
-                  rows={4}
+              {/* Language Selector */}
+              <div className="bg-background border-b border-border pb-4 mb-6">
+                <LanguageSelector
+                  selectedLanguage={selectedLanguage}
+                  onLanguageChange={setSelectedLanguage}
                 />
               </div>
 
+              {/* Translation Status */}
+              <div className="bg-muted p-4 rounded-lg">
+                <TranslationStatus
+                  translations={formData.translations}
+                  requiredFields={['name', 'description']}
+                />
+              </div>
+
+              {/* Quick Translation Copy */}
+              <QuickTranslationCopy
+                translations={formData.translations}
+                onTranslationUpdate={handleTranslationUpdate}
+              />
+
+              {/* Language-specific editing */}
+              <div className="bg-muted p-4 rounded-lg">
+                <h3 className="font-semibold mb-3">
+                  当前编辑语言: {LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName}
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <MultilingualFormField
+                    label="产品名称"
+                    fieldName="name"
+                    type="text"
+                    translations={formData.translations}
+                    onTranslationChange={handleTranslationChange}
+                    currentLanguage={selectedLanguage}
+                    required={true}
+                  />
+
+                  <div>
+                    <Label htmlFor="category">Category</Label>
+                    <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map(category => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <MultilingualFormField
+                    label="产品描述"
+                    fieldName="description"
+                    type="textarea"
+                    translations={formData.translations}
+                    onTranslationChange={handleTranslationChange}
+                    currentLanguage={selectedLanguage}
+                    required={true}
+                  />
+                </div>
+              </div>
+
+              {/* Common fields */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <Label htmlFor="image">Product Image</Label>
@@ -358,7 +404,6 @@ const Products = () => {
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      // Sanitize file name
                       const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
                       const filePath = `products/${Date.now()}_${sanitizedFileName}`;
                       const { data, error } = await supabase.storage.from('product-images').upload(filePath, file, {
@@ -366,10 +411,9 @@ const Products = () => {
                         upsert: false
                       });
                       if (error) {
-                        alert('Error uploading image: ' + error.message);
+                        toast.error('Error uploading image: ' + error.message);
                         return;
                       }
-                      // Get public URL
                       const { data: publicUrlData } = supabase.storage.from('product-images').getPublicUrl(filePath);
                       setFormData(prev => ({ ...prev, image: publicUrlData.publicUrl }));
                     }}
@@ -378,57 +422,59 @@ const Products = () => {
                     <img src={formData.image} alt="Product" style={{ maxWidth: 200, marginTop: 8 }} />
                   )}
                 </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="in_stock"
+                    checked={formData.in_stock}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, in_stock: checked }))}
+                  />
+                  <Label htmlFor="in_stock">In Stock</Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="showInFeatured"
+                    checked={formData.showInFeatured}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, showInFeatured: checked }))}
+                  />
+                  <Label htmlFor="showInFeatured">Show in Featured Products</Label>
+                </div>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="in_stock"
-                  checked={formData.in_stock}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, in_stock: checked }))}
-                />
-                <Label htmlFor="in_stock">In Stock</Label>
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="size">Size</Label>
+                  <select
+                    id="size"
+                    className="border rounded p-2 w-full"
+                    value={formData.size}
+                    onChange={e => setFormData(prev => ({ ...prev, size: e.target.value }))}
+                  >
+                    <option value="">Select size (optional)</option>
+                    <option value="Small">Small</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Large">Large</option>
+                  </select>
+                </div>
 
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="showInFeatured"
-                  checked={formData.showInFeatured}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, showInFeatured: checked }))}
-                />
-                <Label htmlFor="showInFeatured">Show in Featured Products</Label>
-              </div>
-
-              <div>
-                <Label htmlFor="size">Size</Label>
-                <select
-                  id="size"
-                  className="border rounded p-2 w-full"
-                  value={formData.size}
-                  onChange={e => setFormData(prev => ({ ...prev, size: e.target.value }))}
-                >
-                  <option value="">Select size (optional)</option>
-                  <option value="Small">Small</option>
-                  <option value="Medium">Medium</option>
-                  <option value="Large">Large</option>
-                </select>
-              </div>
-
-              <div>
-                <Label>Features</Label>
-                <select
-                  multiple
-                  className="border rounded p-2 w-full"
-                  value={formData.features}
-                  onChange={e => {
-                    const selected = Array.from(e.target.selectedOptions, option => option.value);
-                    setFormData(prev => ({ ...prev, features: selected }));
-                  }}
-                >
-                  {FEATURE_OPTIONS.map(option => (
-                    <option key={option} value={option}>{option}</option>
-                  ))}
-                </select>
-                <p className="text-xs text-muted-foreground mt-1">Hold Ctrl (Windows) or Cmd (Mac) to select multiple features.</p>
+                <div>
+                  <Label>Features</Label>
+                  <select
+                    multiple
+                    className="border rounded p-2 w-full"
+                    value={formData.features}
+                    onChange={e => {
+                      const selected = Array.from(e.target.selectedOptions, option => option.value);
+                      setFormData(prev => ({ ...prev, features: selected }));
+                    }}
+                  >
+                    {FEATURE_OPTIONS.map(option => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-muted-foreground mt-1">Hold Ctrl (Windows) or Cmd (Mac) to select multiple features.</p>
+                </div>
               </div>
 
               <div className="flex gap-4">
@@ -454,24 +500,24 @@ const Products = () => {
           <Link to="/admin/dashboard">
             <Button variant="secondary" className="mb-4 bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Dashboard
+              返回仪表板
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold">Manage Products</h1>
+          <h1 className="text-2xl font-bold">产品管理</h1>
         </div>
       </div>
+
       <div className="container mx-auto p-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold">Products Management</h1>
-            <p className="text-muted-foreground">Manage your product catalog</p>
+            <h1 className="text-3xl font-bold">产品管理</h1>
+            <p className="text-muted-foreground">管理您的产品目录</p>
           </div>
           <Button onClick={handleAddNew}>
             <Plus className="h-4 w-4 mr-2" />
-            Add Product
+            添加产品
           </Button>
         </div>
-
 
         <ProductFilter onFilterChange={handleFilterChange} />
 
@@ -485,10 +531,11 @@ const Products = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product) => {
-              const safeFeatures: string[] = Array.isArray(product.features)
-                ? product.features as string[]
-                : (typeof product.features === 'string' && product.features.length > 0)
-                  ? [product.features]
+              const features = product.features as any;
+              const safeFeatures: string[] = Array.isArray(features)
+                ? features
+                : (typeof features === 'string' && features && features.length > 0)
+                  ? [features]
                   : [];
               const displayName = product.names && product.names[currentLanguage] ? product.names[currentLanguage] : product.name;
 
@@ -501,6 +548,22 @@ const Products = () => {
                         <Badge variant="secondary" className="mt-1">
                           {product.category}
                         </Badge>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(product)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(product.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
 
@@ -528,17 +591,15 @@ const Products = () => {
 
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
-                        <Badge variant={product.in_stock ? "default" : "destructive"}>
-                          {product.in_stock ? 'In Stock' : 'Out of Stock'}
+                        <Badge variant={product.in_stock ? "default" : "secondary"}>
+                          {product.in_stock ? "In Stock" : "Out of Stock"}
                         </Badge>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline" onClick={() => handleEdit(product)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleDelete(product.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {product.showInFeatured && (
+                          <Badge variant="outline">
+                            <Star className="h-3 w-3 mr-1" />
+                            Featured
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -546,22 +607,6 @@ const Products = () => {
               );
             })}
           </div>
-        )}
-
-        {products.length === 0 && !loading && (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No products found</h3>
-              <p className="text-muted-foreground mb-4">
-                Get started by adding your first product to the catalog.
-              </p>
-              <Button onClick={handleAddNew}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Your First Product
-              </Button>
-            </CardContent>
-          </Card>
         )}
       </div>
     </div>

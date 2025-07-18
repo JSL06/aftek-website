@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const AdminLogin = () => {
+  const { t } = useTranslation();
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -19,7 +21,7 @@ const AdminLogin = () => {
       localStorage.setItem('adminAuth', 'true');
       navigate('/admin/dashboard');
     } else {
-      setError('Invalid credentials. Use admin/aftek2024');
+      setError(t('admin.login.invalidCredentials'));
     }
   };
 
@@ -28,28 +30,28 @@ const AdminLogin = () => {
       <Card className="w-96 shadow-elegant">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-primary text-center">
-            Aftek Admin Login
+            {t('admin.login.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">{t('admin.login.username')}</Label>
               <Input
                 id="username"
                 type="text"
-                placeholder="admin"
+                placeholder={t('admin.login.usernamePlaceholder')}
                 value={credentials.username}
                 onChange={(e) => setCredentials({...credentials, username: e.target.value})}
                 className="mt-1"
               />
             </div>
             <div>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('admin.login.password')}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="aftek2024"
+                placeholder={t('admin.login.passwordPlaceholder')}
                 value={credentials.password}
                 onChange={(e) => setCredentials({...credentials, password: e.target.value})}
                 className="mt-1"
@@ -64,11 +66,11 @@ const AdminLogin = () => {
               type="submit" 
               className="w-full bg-primary hover:bg-primary-hover text-primary-foreground"
             >
-              Login to Admin Panel
+              {t('admin.login.loginButton')}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm text-muted-foreground">
-            Demo credentials: admin / aftek2024
+            {t('admin.login.demoCredentials')}
           </div>
         </CardContent>
       </Card>

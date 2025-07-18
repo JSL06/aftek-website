@@ -6,6 +6,7 @@ interface LanguageContextType {
   changeLanguage: (language: Language) => void;
   refreshTranslations: () => void;
   loading: boolean;
+  refreshing: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -23,7 +24,7 @@ interface LanguageProviderProps {
 }
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
-  const { currentLanguage, changeLanguage, refreshTranslations, loading } = useTranslation();
+  const { currentLanguage, changeLanguage, refreshTranslations, loading, refreshing } = useTranslation();
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize language on mount
@@ -65,7 +66,8 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     currentLanguage,
     changeLanguage,
     refreshTranslations,
-    loading: loading || !isInitialized
+    loading: loading || !isInitialized,
+    refreshing
   };
 
   return (

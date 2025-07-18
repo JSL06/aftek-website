@@ -6,10 +6,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useEffect, useState } from 'react';
 import aftekLogo from '@/assets/aftek-logo.png';
 import { usePageVisibility } from '@/hooks/usePageVisibility';
+import { RefreshCw } from 'lucide-react';
 
 const Navigation = () => {
   const location = useLocation();
-  const { currentLanguage, changeLanguage, t } = useTranslation();
+  const { currentLanguage, changeLanguage, t, refreshing } = useTranslation();
   const { refreshTranslations } = useLanguage();
   const { isPageVisible } = usePageVisibility();
 
@@ -88,6 +89,16 @@ const Navigation = () => {
 
                       {/* Right Side: Language Selector */}
           <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => refreshTranslations()}
+              className="p-2"
+              title={t('ui.refreshTranslations')}
+              disabled={refreshing}
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            </Button>
             <select 
               className="bg-transparent border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               value={currentLanguage}

@@ -22,6 +22,10 @@ import {
   AlertDialogCancel,
   AlertDialogAction
 } from '@/components/ui/alert-dialog';
+import LanguageSelector, { Language, LANGUAGES } from '@/components/LanguageSelector';
+import MultilingualFormField from '@/components/MultilingualFormField';
+import TranslationStatus from '@/components/TranslationStatus';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const FEATURE_OPTIONS = [
   // Application Environment
@@ -47,6 +51,8 @@ const CATEGORIES = [
 ];
 
 const UnifiedProducts = () => {
+  const { t } = useTranslation();
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>('zh-Hant');
   const [products, setProducts] = useState<UnifiedProduct[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<UnifiedProduct[]>([]);
   const [editingProduct, setEditingProduct] = useState<UnifiedProduct | null>(null);
@@ -56,19 +62,19 @@ const UnifiedProducts = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showInactiveProducts, setShowInactiveProducts] = useState(false);
 
-  const [formData, setFormData] = useState<Partial<UnifiedProduct>>({
+  const [formData, setFormData] = useState<Partial<UnifiedProduct> & { translations: Record<string, any> }>({
     name: '',
     description: '',
     category: '',
     price: 0,
     model: '',
-    sku: '',
     features: [],
     inStock: true,
     showInFeatured: false,
     isActive: true,
     image: '/placeholder.svg',
-    tags: []
+    tags: [],
+    translations: {}
   });
 
   // Load products on component mount
@@ -90,7 +96,7 @@ const UnifiedProducts = () => {
       setProducts(allProducts);
     } catch (error) {
       console.error('Error loading products:', error);
-      toast.error('Failed to load products');
+      toast.error(t('admin.products.loadError'));
     }
     setLoading(false);
   };
@@ -105,7 +111,7 @@ const UnifiedProducts = () => {
         product.name.toLowerCase().includes(term) ||
         product.description.toLowerCase().includes(term) ||
         product.category.toLowerCase().includes(term) ||
-        product.sku.toLowerCase().includes(term) ||
+        product.model.toLowerCase().includes(term) ||
         product.features.some(feature => feature.toLowerCase().includes(term))
       );
     }
@@ -131,39 +137,67 @@ const UnifiedProducts = () => {
       category: '',
       price: 0,
       model: '',
-      sku: '',
       features: [],
       inStock: true,
       showInFeatured: false,
       isActive: true,
       image: '/placeholder.svg',
-      tags: []
+      tags: [],
+      translations: {}
     });
     setShowForm(true);
   };
 
   const handleEdit = (product: UnifiedProduct) => {
     setEditingProduct(product);
+    
+    // Prepare translations data
+    const translations: Record<string, any> = {};
+    LANGUAGES.forEach(lang => {
+      translations[lang.code] = {
+        name: lang.code === 'en' ? product.name : (product.names?.[lang.code] || ''),
+        description: lang.code === 'en' ? product.description : (product.names?.[`${lang.code}_description`] || ''),
+        category: product.category || ''
+      };
+    });
+
     setFormData({
       name: product.name,
       description: product.description,
       category: product.category,
       price: product.price,
       model: product.model,
-      sku: product.sku,
       features: [...product.features],
       inStock: product.inStock,
       showInFeatured: product.showInFeatured,
       isActive: product.isActive,
       image: product.image || '/placeholder.svg',
-      tags: product.tags ? [...product.tags] : []
+      tags: product.tags ? [...product.tags] : [],
+      translations
     });
     setShowForm(true);
   };
 
+  const handleTranslationChange = (language: Language, fieldName: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      translations: {
+        ...prev.translations,
+        [language]: {
+          ...prev.translations[language],
+          [fieldName]: value
+        }
+      }
+    }));
+  };
+
+
+
   const handleSave = async () => {
-    if (!formData.name?.trim()) {
-      toast.error('Product name is required');
+    // Validate required fields for current language
+    const currentLangData = formData.translations[selectedLanguage] || {};
+    if (!currentLangData.name && !formData.name?.trim()) {
+      toast.error(t('admin.products.name') + ' ' + t('admin.products.required'));
       return;
     }
 
@@ -174,20 +208,47 @@ const UnifiedProducts = () => {
 
     setLoading(true);
     try {
-      console.log('Saving product with data:', formData);
+      // Prepare product data with multilingual content
+      const productData: Partial<UnifiedProduct> = {
+        name: formData.name || currentLangData.name,
+        description: formData.description || currentLangData.description,
+        category: formData.category,
+        price: formData.price,
+        model: formData.model,
+        features: formData.features,
+        inStock: formData.inStock,
+        showInFeatured: formData.showInFeatured,
+        isActive: formData.isActive,
+        image: formData.image,
+        tags: formData.tags,
+        names: {}
+      };
+
+      // Add multilingual names and descriptions
+      LANGUAGES.forEach(lang => {
+        const langData = formData.translations[lang.code];
+        if (langData?.name) {
+          productData.names![lang.code] = langData.name;
+        }
+        if (langData?.description) {
+          productData.names![`${lang.code}_description`] = langData.description;
+        }
+      });
+
+      console.log('Saving product with data:', productData);
       
       if (editingProduct) {
         // Update existing product
-        const updated = await productService.updateProduct(editingProduct.id, formData);
+        const updated = await productService.updateProduct(editingProduct.id, productData);
         if (updated) {
-          toast.success('Product updated successfully');
+          toast.success(t('admin.products.saveSuccess'));
         } else {
           throw new Error('Product update returned null');
         }
       } else {
         // Add new product
-        await productService.addProduct(formData);
-        toast.success('Product added successfully');
+        await productService.addProduct(productData);
+        toast.success(t('admin.products.saveSuccess'));
       }
 
       await loadProducts();
@@ -196,7 +257,7 @@ const UnifiedProducts = () => {
     } catch (error) {
       console.error('Save error details:', error);
       const errorMessage = error?.message || 'Unknown error occurred';
-      toast.error(`${editingProduct ? 'Failed to update' : 'Failed to add'} product: ${errorMessage}`);
+      toast.error(t('admin.products.saveError') + ': ' + errorMessage);
     }
     setLoading(false);
   };
@@ -214,10 +275,10 @@ const UnifiedProducts = () => {
       // Reload the admin interface
       await loadProducts();
       
-      toast.success(`${name} deleted successfully`);
+      toast.success(t('admin.products.deleteSuccess'));
       console.log(`✅ Admin: Product "${name}" deletion complete`);
     } catch (error) {
-      toast.error('Failed to delete product');
+      toast.error(t('admin.products.deleteError'));
       console.error('❌ Admin: Error deleting product:', error);
     }
     setLoading(false);
@@ -260,11 +321,11 @@ const UnifiedProducts = () => {
             <Link to="/admin/unified-products">
               <Button variant="secondary" className="mb-4 bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Products
+                {t('admin.products.backToProducts')}
               </Button>
             </Link>
             <h1 className="text-2xl font-bold">
-              {editingProduct ? 'Edit Product' : 'Add New Product'}
+              {editingProduct ? t('admin.products.edit') : t('admin.products.addNew')}
             </h1>
           </div>
         </div>
@@ -272,51 +333,79 @@ const UnifiedProducts = () => {
         <div className="container mx-auto p-8">
           <Card>
             <CardHeader>
-              <CardTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</CardTitle>
+              <CardTitle>{editingProduct ? t('admin.products.edit') : t('admin.products.addNew')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="name">Product Name *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Enter product name"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="category">Category *</Label>
-                  <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CATEGORIES.map(category => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Enter product description"
-                  rows={4}
+              {/* Language Selector */}
+              <div className="bg-background border-b border-border pb-4 mb-6">
+                <LanguageSelector
+                  selectedLanguage={selectedLanguage}
+                  onLanguageChange={setSelectedLanguage}
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Translation Status */}
+              <div className="bg-muted p-4 rounded-lg">
+                <TranslationStatus
+                  translations={formData.translations}
+                  requiredFields={['name', 'description']}
+                />
+              </div>
+
+
+
+              {/* Language-specific editing */}
+              <div className="bg-muted p-4 rounded-lg">
+                <h3 className="font-semibold mb-3">
+                  {t('admin.dashboard.currentSelection')}: {LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName}
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <MultilingualFormField
+                    label={t('admin.products.name')}
+                    fieldName="name"
+                    type="text"
+                    translations={formData.translations}
+                    onTranslationChange={handleTranslationChange}
+                    currentLanguage={selectedLanguage}
+                    required={true}
+                  />
+
+                  <div>
+                    <Label htmlFor="category">{t('admin.products.category')}</Label>
+                    <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('admin.products.allCategories')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CATEGORIES.map(category => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <MultilingualFormField
+                    label={t('admin.products.description')}
+                    fieldName="description"
+                    type="textarea"
+                    translations={formData.translations}
+                    onTranslationChange={handleTranslationChange}
+                    currentLanguage={selectedLanguage}
+                    required={true}
+                  />
+                </div>
+              </div>
+
+              {/* Common fields */}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label htmlFor="price">Price</Label>
+                  <Label htmlFor="price">{t('admin.products.price')}</Label>
                   <Input
                     id="price"
                     type="number"
@@ -328,7 +417,7 @@ const UnifiedProducts = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="model">Model</Label>
+                  <Label htmlFor="model">{t('admin.products.model')}</Label>
                   <Input
                     id="model"
                     value={formData.model || ''}
@@ -336,20 +425,10 @@ const UnifiedProducts = () => {
                     placeholder="Enter model number"
                   />
                 </div>
-
-                <div>
-                  <Label htmlFor="sku">SKU</Label>
-                  <Input
-                    id="sku"
-                    value={formData.sku || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value }))}
-                    placeholder="Enter SKU"
-                  />
-                </div>
               </div>
 
               <div>
-                <Label htmlFor="image">Image URL</Label>
+                <Label htmlFor="image">{t('admin.products.image')}</Label>
                 <Input
                   id="image"
                   value={formData.image || ''}
@@ -359,7 +438,7 @@ const UnifiedProducts = () => {
               </div>
 
               <div>
-                <Label>Features</Label>
+                <Label>{t('admin.products.features')}</Label>
                 <div className="border rounded-lg p-4 max-h-32 overflow-y-auto">
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                     {FEATURE_OPTIONS.map(feature => (
@@ -382,7 +461,7 @@ const UnifiedProducts = () => {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Selected: {formData.features?.length || 0} features
+                  Selected: {formData.features?.length || 0} {t('admin.products.features').toLowerCase()}
                 </p>
               </div>
 
@@ -493,7 +572,7 @@ const UnifiedProducts = () => {
                     checked={formData.inStock || false}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, inStock: checked }))}
                   />
-                  <Label htmlFor="inStock">In Stock</Label>
+                  <Label htmlFor="inStock">{t('admin.products.inStock')}</Label>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -502,7 +581,7 @@ const UnifiedProducts = () => {
                     checked={formData.showInFeatured || false}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, showInFeatured: checked }))}
                   />
-                  <Label htmlFor="showInFeatured">Featured</Label>
+                  <Label htmlFor="showInFeatured">{t('admin.products.featured')}</Label>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -511,17 +590,17 @@ const UnifiedProducts = () => {
                     checked={formData.isActive || false}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
                   />
-                  <Label htmlFor="isActive">Active</Label>
+                  <Label htmlFor="isActive">{t('admin.products.active')}</Label>
                 </div>
               </div>
 
               <div className="flex gap-4">
                 <Button onClick={handleSave} disabled={loading}>
                   <Save className="h-4 w-4 mr-2" />
-                  {loading ? 'Saving...' : 'Save Product'}
+                  {loading ? 'Saving...' : t('admin.products.save')}
                 </Button>
                 <Button variant="outline" onClick={() => setShowForm(false)}>
-                  Cancel
+                  {t('admin.products.cancel')}
                 </Button>
               </div>
             </CardContent>
@@ -541,7 +620,7 @@ const UnifiedProducts = () => {
               Back to Dashboard
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold">Unified Products Management</h1>
+          <h1 className="text-2xl font-bold">{t('admin.products.title')}</h1>
           <p className="text-primary-foreground/80">
             Manage all products from a single source - changes reflect immediately on website
           </p>
@@ -552,7 +631,7 @@ const UnifiedProducts = () => {
         {/* Header with Actions */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold">Products Management</h1>
+            <h1 className="text-3xl font-bold">{t('admin.products.title')}</h1>
             <p className="text-muted-foreground">
               {filteredProducts.length} of {products.length} products
             </p>
@@ -586,7 +665,7 @@ const UnifiedProducts = () => {
             </Button>
             <Button onClick={handleAddNew}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Product
+              {t('admin.products.addNew')}
             </Button>
           </div>
         </div>
@@ -596,23 +675,23 @@ const UnifiedProducts = () => {
           <CardContent className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <Label htmlFor="search">Search Products</Label>
+                <Label htmlFor="search">{t('admin.products.search')}</Label>
                 <Input
                   id="search"
-                  placeholder="Search by name, description, SKU..."
+                  placeholder="Search by name, description, model..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
 
               <div>
-                <Label htmlFor="category">Category Filter</Label>
+                <Label htmlFor="category">{t('admin.products.filterByCategory')}</Label>
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
+                    <SelectItem value="all">{t('admin.products.allCategories')}</SelectItem>
                     {CATEGORIES.map(category => (
                       <SelectItem key={category} value={category}>
                         {category}
@@ -628,7 +707,7 @@ const UnifiedProducts = () => {
                   checked={showInactiveProducts}
                   onCheckedChange={setShowInactiveProducts}
                 />
-                <Label htmlFor="showInactive">Show Inactive</Label>
+                <Label htmlFor="showInactive">{t('admin.products.showInactive')}</Label>
               </div>
             </div>
           </CardContent>
@@ -639,7 +718,7 @@ const UnifiedProducts = () => {
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading products...</p>
+              <p className="text-muted-foreground">{t('admin.products.loading')}</p>
             </div>
           </div>
         ) : (
@@ -653,7 +732,7 @@ const UnifiedProducts = () => {
                       <div className="flex gap-2 mt-1">
                         <Badge variant="secondary">{product.category}</Badge>
                         {product.showInFeatured && <Badge className="bg-yellow-500"><Star className="h-3 w-3" /></Badge>}
-                        {!product.isActive && <Badge variant="destructive">Inactive</Badge>}
+                        {!product.isActive && <Badge variant="destructive">{t('admin.common.disabled')}</Badge>}
                       </div>
                     </div>
                   </div>
@@ -664,17 +743,13 @@ const UnifiedProducts = () => {
 
                   <div className="space-y-2 text-sm mb-4">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Price:</span>
+                      <span className="text-muted-foreground">{t('admin.products.price')}:</span>
                       <span className="font-medium">{formatPrice(product.price)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">SKU:</span>
-                      <span className="font-medium">{product.sku}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Stock:</span>
+                      <span className="text-muted-foreground">{t('admin.products.inStock')}:</span>
                       <Badge variant={product.inStock ? "default" : "destructive"}>
-                        {product.inStock ? 'In Stock' : 'Out of Stock'}
+                        {product.inStock ? t('admin.products.inStock') : 'Out of Stock'}
                       </Badge>
                     </div>
                     {product.related_products && product.related_products.length > 0 && (
@@ -693,21 +768,21 @@ const UnifiedProducts = () => {
                         checked={product.isActive}
                         onCheckedChange={() => productService.updateProduct(product.id, { isActive: !product.isActive }).then(loadProducts)}
                       />
-                      <span className="text-sm font-medium">Active</span>
+                      <span className="text-sm font-medium">{t('admin.products.active')}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Switch
                         checked={product.showInFeatured}
                         onCheckedChange={() => toggleFeaturedStatus(product.id, product.showInFeatured)}
                       />
-                      <span className="text-sm font-medium">Featured</span>
+                      <span className="text-sm font-medium">{t('admin.products.featured')}</span>
                     </div>
                   </div>
 
                   <div className="flex gap-2">
                     <Button size="sm" variant="outline" onClick={() => handleEdit(product)} className="flex-1">
                       <Edit className="h-4 w-4 mr-1" />
-                      Edit
+                      {t('admin.products.edit')}
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
@@ -717,18 +792,18 @@ const UnifiedProducts = () => {
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Product</AlertDialogTitle>
+                          <AlertDialogTitle>{t('admin.products.delete')}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to delete "{product.name}"? This action cannot be undone.
+                            {t('admin.products.deleteConfirm')} "{product.name}"? {t('admin.products.deleteWarning')}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogCancel>{t('admin.products.cancel')}</AlertDialogCancel>
                           <AlertDialogAction 
                             onClick={() => handleDelete(product.id, product.name)}
                             className="bg-red-600 hover:bg-red-700"
                           >
-                            Delete
+                            {t('admin.products.delete')}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>

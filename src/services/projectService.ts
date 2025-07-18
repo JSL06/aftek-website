@@ -5,8 +5,10 @@ export interface Project {
   id: string;
   name: string;
   title: string;
+  titles?: Record<string, string>; // Multilingual titles
   slug?: string;
   description: string;
+  descriptions?: Record<string, string>; // Multilingual descriptions
   location: string;
   category: string;
   client: string;
@@ -21,8 +23,11 @@ export interface Project {
   project_value?: string;
   duration?: string;
   challenges?: string;
+  challenges_multilingual?: Record<string, string>; // Multilingual challenges
   solutions?: string;
+  solutions_multilingual?: Record<string, string>; // Multilingual solutions
   results?: string;
+  results_multilingual?: Record<string, string>; // Multilingual results
   testimonial?: string;
   isActive: boolean;
   showInFeatured: boolean;

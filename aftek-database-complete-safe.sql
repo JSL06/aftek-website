@@ -539,9 +539,6 @@ CREATE POLICY "Public read access for featured_products" ON featured_products
 CREATE POLICY "Authenticated users can manage products" ON products
     FOR ALL USING (auth.role() = 'authenticated');
 
-CREATE POLICY "Authenticated users can manage website_texts" ON website_texts
-    FOR ALL USING (auth.role() = 'authenticated');
-
 CREATE POLICY "Authenticated users can manage articles" ON articles
     FOR ALL USING (auth.role() = 'authenticated');
 
@@ -550,6 +547,9 @@ CREATE POLICY "Authenticated users can manage media" ON media
 
 CREATE POLICY "Authenticated users can manage featured_products" ON featured_products
     FOR ALL USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Public access for website_texts" ON website_texts
+    FOR ALL USING (true);
 
 -- =====================================================
 -- 10. CREATE UPDATE TRIGGERS

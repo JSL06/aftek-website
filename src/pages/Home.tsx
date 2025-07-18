@@ -321,9 +321,11 @@ const Home = () => {
             </div>
             
             <div className="prose prose-lg max-w-none text-center">
-              <p className="text-lg md:text-xl text-foreground leading-relaxed font-medium">
-                {t('home.mission.paragraph2')}
-              </p>
+              {t('home.mission.content').split('\n\n').map((paragraph, index) => (
+                <p key={index} className="text-lg md:text-xl text-foreground leading-relaxed font-medium mb-6 last:mb-0">
+                  {paragraph}
+                </p>
+              ))}
             </div>
           </div>
         </div>

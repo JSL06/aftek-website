@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTranslation } from '@/hooks/useTranslation';
-import { FileText, Star, Tag, ArrowLeft, ExternalLink, Package, ChevronRight, Home, Check } from 'lucide-react';
+import { FileText, Star, Tag, ArrowLeft, ExternalLink, Package, Check } from 'lucide-react';
 import { productService, UnifiedProduct } from '@/services/productService';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -106,19 +106,8 @@ const ProductDetail = () => {
 
   return (
     <div className="min-h-screen pt-32 bg-gradient-subtle">
-      <div className="container mx-auto px-6 mb-24">
-        {/* Breadcrumb Navigation */}
-        <nav className="flex items-center space-x-2 text-sm text-muted-foreground mb-8">
-          <Link to="/" className="hover:text-foreground transition-colors">
-            <Home className="h-4 w-4" />
-          </Link>
-          <ChevronRight className="h-4 w-4" />
-          <Link to="/products" className="hover:text-foreground transition-colors">
-            Products
-          </Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium">{product.name}</span>
-        </nav>
+      <div className="container mx-auto px-6 mb-8">
+
 
         {/* Back Button */}
         <div className="mb-8">
@@ -183,11 +172,11 @@ const ProductDetail = () => {
               <div className="mb-6">
                 {product.inStock || product.in_stock ? (
                   <Badge variant="default" className="bg-green-100 text-green-800">
-                    ✓ In Stock
+                    ✓ {t('productDetail.inStock')}
                   </Badge>
                 ) : (
                   <Badge variant="destructive">
-                    ✗ Out of Stock
+                    ✗ {t('productDetail.outOfStock')}
                   </Badge>
                 )}
               </div>
@@ -202,7 +191,7 @@ const ProductDetail = () => {
               {/* Features */}
               {product.features && product.features.length > 0 && (
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-3">Key Features</h3>
+                  <h3 className="text-lg font-semibold mb-3">{t('productDetail.keyFeatures')}</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {product.features.map((feature: string, idx: number) => (
                       <div key={idx} className="flex items-center">
@@ -217,9 +206,9 @@ const ProductDetail = () => {
               {/* Contact Information */}
               <div className="space-y-4 pt-6 border-t">
                 <div className="bg-muted/50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold mb-2">Interested in this product?</h3>
+                  <h3 className="text-lg font-semibold mb-2">{t('productDetail.interestedInProduct')}</h3>
                   <p className="text-muted-foreground mb-4">
-                    Contact us for pricing, availability, and technical specifications.
+                    {t('productDetail.contactForInfo')}
                   </p>
                   <Button 
                     size="lg" 
@@ -227,7 +216,7 @@ const ProductDetail = () => {
                     onClick={() => navigate('/contact')}
                   >
                     <ExternalLink className="mr-2 h-4 w-4" />
-                    Contact Us
+                    {t('productDetail.contactUs')}
                   </Button>
                 </div>
               </div>
@@ -241,28 +230,26 @@ const ProductDetail = () => {
             <CardContent className="p-8">
               <Tabs defaultValue="description" className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="description">Description</TabsTrigger>
-                  <TabsTrigger value="specifications">Specifications</TabsTrigger>
-                  <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                  <TabsTrigger value="description">{t('productDetail.description')}</TabsTrigger>
+                  <TabsTrigger value="specifications">{t('productDetail.specifications')}</TabsTrigger>
+                  <TabsTrigger value="examples">{t('productDetail.examples')}</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="description" className="mt-6">
                   <div className="prose max-w-none">
-                    <h3 className="text-xl font-semibold mb-4">Product Description</h3>
+                    <h3 className="text-xl font-semibold mb-4">{t('productDetail.productDescription')}</h3>
                     <p className="text-muted-foreground leading-relaxed mb-4">
                       {product.description}
                     </p>
                     <p className="text-muted-foreground leading-relaxed">
-                      {product.name} is designed to meet the highest standards of quality and performance. 
-                      This product combines innovative technology with reliable functionality to deliver 
-                      exceptional results for your construction and building needs.
+                      {t('productDetail.descriptionText').replace('{productName}', product.name)}
                     </p>
                   </div>
                 </TabsContent>
                 
                 <TabsContent value="specifications" className="mt-6">
                   <div>
-                    <h3 className="text-xl font-semibold mb-4">Technical Specifications</h3>
+                    <h3 className="text-xl font-semibold mb-4">{t('productDetail.technicalSpecifications')}</h3>
                     {product.specifications && Object.keys(product.specifications).length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {Object.entries(product.specifications).map(([key, value]) => (
@@ -276,21 +263,27 @@ const ProductDetail = () => {
                       <div className="bg-muted/50 rounded-lg p-6 text-center">
                         <Package className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
                         <p className="text-muted-foreground">
-                          Detailed specifications for {product.name} are being updated. 
-                          Please contact us for more information.
+                          {t('productDetail.specificationsText').replace('{productName}', product.name)}
                         </p>
                       </div>
                     )}
                   </div>
                 </TabsContent>
                 
-                <TabsContent value="reviews" className="mt-6">
+                <TabsContent value="examples" className="mt-6">
                   <div className="text-center py-8">
-                    <Star className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                    <h3 className="text-lg font-semibold mb-2">Customer Reviews</h3>
-                    <p className="text-muted-foreground">
-                      Customer reviews are coming soon. Be the first to share your experience with {product.name}.
+                    <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                    <h3 className="text-lg font-semibold mb-2">{t('productDetail.pastExamples')}</h3>
+                    <p className="text-muted-foreground mb-6">
+                      {t('productDetail.examplesDescription').replace('{productName}', product.name)}
                     </p>
+                    <Button 
+                      onClick={() => navigate('/projects')}
+                      className="bg-primary hover:bg-primary/90"
+                    >
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      {t('productDetail.viewProjects')}
+                    </Button>
                   </div>
                 </TabsContent>
               </Tabs>
@@ -300,10 +293,10 @@ const ProductDetail = () => {
 
         {/* Related Products Section */}
         {relatedProducts.length > 0 && (
-          <div className="mt-16">
+          <div className="mt-16 mb-8">
             <Card>
               <CardContent className="p-8">
-                <h2 className="text-2xl font-bold mb-6">Related Products</h2>
+                <h2 className="text-2xl font-bold mb-6">{t('productDetail.relatedProducts')}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {relatedProducts.map((relatedProduct) => (
                     <Card 

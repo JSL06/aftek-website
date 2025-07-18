@@ -15,8 +15,7 @@ const ja = {
   'home.hero.companyProfileBtn': '会社プロファイルPDF',
   
   'home.mission.title': 'ミッションステートメント',
-  'home.mission.paragraph1': 'Aftekは、建設業界の多様なニーズを満たす高品質な建設材料と革新的なソリューションを提供することにコミットしています。私たちは、建設プロジェクトの耐久性、安全性、効率性を向上させる先進的な建築材料の開発と供給に焦点を当てています。',
-  'home.mission.paragraph2': '私たちの本来の意図と唯一の目標は、お客様と広大な市場が建築用化学材料をより深く理解し、時代とともに進歩する高性能で革新的な製品の使用を通じて、自らの産業価値を最大化し、無限のビジネス機会を共に創造する方法を学ぶことです。',
+  'home.mission.content': 'Aftekは、建設業界の多様なニーズを満たす高品質な建設材料と革新的なソリューションを提供することにコミットしています。私たちは、建設プロジェクトの耐久性、安全性、効率性を向上させる先進的な建築材料の開発と供給に焦点を当てています。\n\n私たちの本来の意図と唯一の目標は、お客様と広大な市場が建築用化学材料をより深く理解し、時代とともに進歩する高性能で革新的な製品の使用を通じて、自らの産業価値を最大化し、無限のビジネス機会を共に創造する方法を学ぶことです。',
   
   'home.services.title': '私たちのサービス',
   'home.services.subtitle': 'アジア太平洋市場全体の包括的な建築材料と建設ソリューション',
@@ -472,6 +471,92 @@ const ja = {
   // Featured Products
   'home.featured.title': '注目製品',
   'home.featured.subtitle': 'ベストセラーソリューションをご覧ください',
+
+  // Chatbot - Additional Keys
+  'chatbot.welcome': 'こんにちは！建築材料とソリューションに関する情報をお手伝いします。今日はどのようにお手伝いできますか？',
+  'chatbot.subtitle': '製品、サービス、技術情報についてお尋ねください',
+  'chatbot.responses.waterproofing': '私たちの防水ソリューションには、液体塗布膜、シート膜、注入システムが含まれます。屋根、地下室、外壁用の製品を提供しています。特定の用途について詳しく知りたいですか？',
+  'chatbot.responses.sealants': '建築用継ぎ目、隙間、接着用途のための高性能シーラントと接着剤を提供しています。シリコーン、ポリウレタン、ハイブリッド配合の製品があります。どのような用途をお探しですか？',
+  'chatbot.responses.flooring': '私たちの床材ソリューションには、エポキシコーティング、セルフレベリング化合物、工業・商業用途の装飾仕上げが含まれます。高交通量エリア、耐薬品性、滑り止め表面用の製品を提供しています。',
+  'chatbot.responses.insulation': '断熱・防音ソリューションと保護コーティングを提供しています。私たちの製品は建物のエネルギー効率と音響制御の改善に役立ちます。',
+  'chatbot.responses.projects': 'アジア太平洋地域で多くの成功したプロジェクトを完了しています。プロジェクトページでプロジェクトポートフォリオを閲覧し、ケーススタディとアプリケーションをご覧いただけます。',
+  'chatbot.responses.contact': '02-2799-6558までお電話いただくか、info@aftek.com.twまでメールでお問い合わせください。オフィスは台湾新北市中和区建康路37号10階にあります。',
+  'chatbot.responses.technical': 'アプリケーションガイド、仕様、コンサルティングサービスを含む包括的な技術サポートを提供しています。技術チームが製品選択と設置ガイダンスをお手伝いします。',
+  'chatbot.responses.consultation': '建設プロジェクトのための無料コンサルティングサービスを提供しています。専門家が適切な製品の選択とアプリケーションガイダンスをお手伝いします。コンサルティングの予約はお問い合わせください。',
+  'chatbot.responses.default': 'ご質問ありがとうございます。建築材料とソリューションに関する情報をお手伝いします。防水、シーラント、床材、断熱、または提供している他の製品についてお尋ねください。',
+  'chatbot.responses.recommendations': 'あなたのニーズに基づいて、以下をお勧めします：{products}',
+
+  // UI - Additional Keys
+  'ui.viewPdf': 'PDFを表示',
+  'ui.downloadPdf': 'PDFをダウンロード',
+  'ui.openInNewTab': '新しいタブで開く',
+  'ui.pageUnavailable': 'ページは一時的に利用できません',
+  'ui.pageUnavailableDesc': '{pageName}ページは現在無効になっています。後で確認するか、管理者にお問い合わせください。',
+  'ui.goToHomepage': 'ホームページへ',
+  'ui.refreshTranslations': '翻訳を更新',
+
+  // Guide Page
+  'guide.title': 'ユーザーガイド',
+  'guide.subtitle': 'Aftekソリューションを探索する施設タイプを選択してください',
+  'guide.selectFacility': '施設タイプを選択',
+  'guide.facilityType1.name': '住宅建築',
+  'guide.facilityType1.description': '住宅建築のための防水・床材ソリューション',
+  'guide.facilityType2.name': '商業建築',
+  'guide.facilityType2.description': '商業建築のための専門ソリューション',
+  'guide.facilityType3.name': '教育施設',
+  'guide.facilityType3.description': '学校や大学のための耐久性ソリューション',
+  'guide.facilityType4.name': 'エンターテイメント施設',
+  'guide.facilityType4.description': 'スタジアムやエンターテイメント会場のためのソリューション',
+  'guide.facilityType5.name': '住宅用ヴィラ',
+  'guide.facilityType5.description': '高級住宅用不動産のためのラグジュアリーソリューション',
+  'guide.facilityType6.name': '医療施設',
+  'guide.facilityType6.description': '病院やクリニックのための衛生ソリューション',
+  'guide.facilityType7.name': '産業施設',
+  'guide.facilityType7.description': '工場や産業建築のための堅牢なソリューション',
+
+  // Articles - Additional Keys
+  'articles.filters.title': '記事をフィルター',
+  'articles.filters.categories': 'カテゴリー',
+  'articles.categories.technology': 'テクノロジー',
+  'articles.categories.sustainability': 'サステナビリティ',
+
+  // Projects - Additional Keys
+  'projects.intro': '様々な業界での成功したプロジェクトのポートフォリオを探索し、建築材料とエンジニアリングソリューションにおける私たちの専門知識を紹介します。',
+
+  // Product Catalog Categories
+  'catalog.waterproofing.title': '防水カタログ',
+  'catalog.waterproofing.english': 'Waterproofing',
+  'catalog.sealant_adhesive.title': 'シーラント/接着剤カタログ',
+  'catalog.sealant_adhesive.english': 'Sealant/Adhesive',
+  'catalog.flooring.title': '床材カタログ',
+  'catalog.flooring.english': 'Flooring',
+  'catalog.redimix_gm.title': 'Redi-Mix G&Mカタログ',
+  'catalog.redimix_gm.english': 'Redi-Mix G&M',
+  'catalog.industrial_flooring.title': '工業床材カタログ',
+  'catalog.industrial_flooring.english': 'Industrial Flooring',
+  'catalog.color_card.title': 'カラーチャート',
+  'catalog.color_card.english': 'Color Card',
+  'catalog.seeMore': 'もっと見る',
+  'catalog.download': 'ダウンロード',
+
+  // Product Detail Page
+  'productDetail.description': '製品説明',
+  'productDetail.specifications': '仕様',
+  'productDetail.examples': '過去の事例',
+  'productDetail.productDescription': '製品説明',
+  'productDetail.descriptionText': '{productName}は最高品質と性能基準を満たすように設計されています。この製品は革新的な技術と信頼性の高い機能を組み合わせ、建設・建築ニーズに卓越した結果を提供します。',
+  'productDetail.technicalSpecifications': '技術仕様',
+  'productDetail.specificationsText': '{productName}の詳細仕様は更新中です。詳細についてはお問い合わせください。',
+  'productDetail.pastExamples': '過去の事例とプロジェクト',
+  'productDetail.examplesDescription': '{productName}の実際のアプリケーションと成功したプロジェクトを探索してください。様々な建設シナリオで製品がどのように使用されているかをご覧ください。',
+  'productDetail.viewProjects': 'プロジェクトを見る',
+  'productDetail.inStock': '在庫あり',
+  'productDetail.outOfStock': '在庫切れ',
+  'productDetail.keyFeatures': '主要機能',
+  'productDetail.interestedInProduct': 'この製品に興味がありますか？',
+  'productDetail.contactForInfo': '価格、在庫状況、技術仕様についてお問い合わせください。',
+  'productDetail.contactUs': 'お問い合わせ',
+  'productDetail.relatedProducts': '関連製品',
 
 };
 

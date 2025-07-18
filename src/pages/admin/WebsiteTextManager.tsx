@@ -29,7 +29,7 @@ const WebsiteTextManager = () => {
   const [texts, setTexts] = useState<WebsiteText[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
-  const [language, setLanguage] = useState('en');
+  const [language, setLanguage] = useState('zh-Hant');
   const [edited, setEdited] = useState<{ [id: string]: string }>({});
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState<{ [section: string]: boolean }>({});

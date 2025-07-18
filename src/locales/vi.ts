@@ -15,8 +15,7 @@ const vi = {
   'home.hero.companyProfileBtn': 'Hồ sơ công ty PDF',
   
   'home.mission.title': 'Tuyên bố sứ mệnh',
-  'home.mission.paragraph1': 'Aftek cam kết cung cấp vật liệu xây dựng chất lượng cao và các giải pháp sáng tạo để đáp ứng nhu cầu đa dạng của ngành xây dựng. Chúng tôi tập trung vào việc phát triển và cung cấp vật liệu xây dựng tiên tiến nhằm nâng cao độ bền, an toàn và hiệu quả của các dự án xây dựng.',
-  'home.mission.paragraph2': 'Ý định ban đầu và mục tiêu duy nhất của chúng tôi là giúp khách hàng và thị trường rộng lớn hiểu rõ hơn về hóa chất xây dựng, học cách tối đa hóa giá trị ngành của họ thông qua việc sử dụng các sản phẩm sáng tạo hiệu suất cao theo kịp thời đại, và cùng nhau tạo ra cơ hội kinh doanh vô hạn.',
+  'home.mission.content': 'Aftek cam kết cung cấp vật liệu xây dựng chất lượng cao và các giải pháp sáng tạo để đáp ứng nhu cầu đa dạng của ngành xây dựng. Chúng tôi tập trung vào việc phát triển và cung cấp vật liệu xây dựng tiên tiến nhằm nâng cao độ bền, an toàn và hiệu quả của các dự án xây dựng.\n\nÝ định ban đầu và mục tiêu duy nhất của chúng tôi là giúp khách hàng và thị trường rộng lớn hiểu rõ hơn về hóa chất xây dựng, học cách tối đa hóa giá trị ngành của họ thông qua việc sử dụng các sản phẩm sáng tạo hiệu suất cao theo kịp thời đại, và cùng nhau tạo ra cơ hội kinh doanh vô hạn.',
   
   'home.services.title': 'Dịch vụ của chúng tôi',
   'home.services.subtitle': 'Vật liệu xây dựng và giải pháp xây dựng toàn diện trên khắp thị trường Châu Á-Thái Bình Dương',
@@ -340,7 +339,93 @@ const vi = {
 
   // Partners Section
   'home.partners.title': 'Đối tác',
-  'home.partners.desc': 'Đây sẽ là nơi giới thiệu các công ty đối tác và nền tảng của chúng tôi.',
+  'home.partners.desc': 'Đây sẽ là nơi trưng bày các công ty đối tác và nền tảng của chúng tôi.',
+
+  // Chatbot - Additional Keys
+  'chatbot.welcome': 'Xin chào! Tôi ở đây để giúp bạn với thông tin về vật liệu xây dựng và giải pháp của chúng tôi. Hôm nay tôi có thể giúp gì cho bạn?',
+  'chatbot.subtitle': 'Hỏi tôi về sản phẩm, dịch vụ hoặc thông tin kỹ thuật',
+  'chatbot.responses.waterproofing': 'Giải pháp chống thấm của chúng tôi bao gồm màng ứng dụng lỏng, màng tấm và hệ thống tiêm. Chúng tôi cung cấp sản phẩm cho mái nhà, tầng hầm và tường ngoài. Bạn có muốn biết thêm về các ứng dụng cụ thể không?',
+  'chatbot.responses.sealants': 'Chúng tôi cung cấp chất bịt kín và keo dán hiệu suất cao cho các mối nối, khe hở và ứng dụng liên kết trong xây dựng. Sản phẩm của chúng tôi bao gồm công thức silicone, polyurethane và hybrid. Bạn đang tìm kiếm loại ứng dụng nào?',
+  'chatbot.responses.flooring': 'Giải pháp sàn của chúng tôi bao gồm lớp phủ epoxy, hợp chất tự cân bằng và hoàn thiện trang trí cho các ứng dụng công nghiệp và thương mại. Chúng tôi cung cấp sản phẩm cho khu vực lưu lượng cao, chống hóa chất và bề mặt chống trượt.',
+  'chatbot.responses.insulation': 'Chúng tôi cung cấp giải pháp cách nhiệt và cách âm cùng với lớp phủ bảo vệ. Sản phẩm của chúng tôi giúp cải thiện hiệu quả năng lượng và kiểm soát âm thanh trong các tòa nhà.',
+  'chatbot.responses.projects': 'Chúng tôi đã hoàn thành nhiều dự án thành công trên khắp Châu Á-Thái Bình Dương. Bạn có thể xem danh mục dự án của chúng tôi trên trang Dự án để xem các nghiên cứu trường hợp và ứng dụng.',
+  'chatbot.responses.contact': 'Bạn có thể liên hệ với chúng tôi tại 02-2799-6558 hoặc gửi email cho chúng tôi tại info@aftek.com.tw. Văn phòng của chúng tôi nằm tại Tầng 10, Số 37, Đường Jiankang, Quận Zhonghe, Tân Bắc, Đài Loan.',
+  'chatbot.responses.technical': 'Chúng tôi cung cấp hỗ trợ kỹ thuật toàn diện bao gồm hướng dẫn ứng dụng, thông số kỹ thuật và dịch vụ tư vấn. Đội ngũ kỹ thuật của chúng tôi có thể giúp lựa chọn sản phẩm và hướng dẫn lắp đặt.',
+  'chatbot.responses.consultation': 'Chúng tôi cung cấp dịch vụ tư vấn miễn phí cho các dự án xây dựng của bạn. Các chuyên gia của chúng tôi có thể giúp bạn chọn sản phẩm phù hợp và cung cấp hướng dẫn ứng dụng. Vui lòng liên hệ với chúng tôi để lên lịch tư vấn.',
+  'chatbot.responses.default': 'Cảm ơn câu hỏi của bạn. Tôi ở đây để giúp với thông tin về vật liệu xây dựng và giải pháp của chúng tôi. Bạn có thể hỏi về chống thấm, chất bịt kín, sàn, cách nhiệt hoặc bất kỳ sản phẩm nào khác mà chúng tôi cung cấp.',
+
+  // UI - Additional Keys
+  'ui.viewPdf': 'Xem PDF',
+  'ui.downloadPdf': 'Tải xuống PDF',
+  'ui.openInNewTab': 'Mở trong tab mới',
+  'ui.pageUnavailable': 'Trang tạm thời không khả dụng',
+  'ui.pageUnavailableDesc': 'Trang {pageName} hiện đang bị vô hiệu hóa. Vui lòng kiểm tra lại sau hoặc liên hệ quản trị viên.',
+  'ui.goToHomepage': 'Đi đến trang chủ',
+  'ui.refreshTranslations': 'Làm mới bản dịch',
+
+  // Guide Page
+  'guide.title': 'Hướng dẫn sử dụng',
+  'guide.subtitle': 'Chọn loại cơ sở để khám phá giải pháp Aftek',
+  'guide.selectFacility': 'Chọn loại cơ sở',
+  'guide.facilityType1.name': 'Tòa nhà dân cư',
+  'guide.facilityType1.description': 'Giải pháp chống thấm và sàn cho tòa nhà dân cư',
+  'guide.facilityType2.name': 'Tòa nhà thương mại',
+  'guide.facilityType2.description': 'Giải pháp chuyên nghiệp cho tòa nhà thương mại',
+  'guide.facilityType3.name': 'Cơ sở giáo dục',
+  'guide.facilityType3.description': 'Giải pháp bền bỉ cho trường học và đại học',
+  'guide.facilityType4.name': 'Cơ sở giải trí',
+  'guide.facilityType4.description': 'Giải pháp cho sân vận động và địa điểm giải trí',
+  'guide.facilityType5.name': 'Biệt thự dân cư',
+  'guide.facilityType5.description': 'Giải pháp sang trọng cho bất động sản dân cư cao cấp',
+  'guide.facilityType6.name': 'Cơ sở y tế',
+  'guide.facilityType6.description': 'Giải pháp vệ sinh cho bệnh viện và phòng khám',
+  'guide.facilityType7.name': 'Cơ sở công nghiệp',
+  'guide.facilityType7.description': 'Giải pháp mạnh mẽ cho nhà máy và tòa nhà công nghiệp',
+
+  // Articles - Additional Keys
+  'articles.filters.title': 'Lọc bài viết',
+  'articles.filters.categories': 'Danh mục',
+  'articles.categories.technology': 'Công nghệ',
+  'articles.categories.sustainability': 'Bền vững',
+
+  // Projects - Additional Keys
+  'projects.intro': 'Khám phá danh mục các dự án thành công trong các ngành công nghiệp khác nhau, thể hiện chuyên môn của chúng tôi trong vật liệu xây dựng và giải pháp kỹ thuật.',
+
+  // Product Catalog Categories
+  'catalog.waterproofing.title': 'Danh mục chống thấm',
+  'catalog.waterproofing.english': 'Waterproofing',
+  'catalog.sealant_adhesive.title': 'Danh mục chất bịt kín/keo dán',
+  'catalog.sealant_adhesive.english': 'Sealant/Adhesive',
+  'catalog.flooring.title': 'Danh mục sàn',
+  'catalog.flooring.english': 'Flooring',
+  'catalog.redimix_gm.title': 'Danh mục Redi-Mix G&M',
+  'catalog.redimix_gm.english': 'Redi-Mix G&M',
+  'catalog.industrial_flooring.title': 'Danh mục sàn công nghiệp',
+  'catalog.industrial_flooring.english': 'Industrial Flooring',
+  'catalog.color_card.title': 'Bảng màu',
+  'catalog.color_card.english': 'Color Card',
+  'catalog.seeMore': 'Xem thêm',
+  'catalog.download': 'Tải xuống',
+
+  // Product Detail Page
+  'productDetail.description': 'Mô tả sản phẩm',
+  'productDetail.specifications': 'Thông số kỹ thuật',
+  'productDetail.examples': 'Ví dụ trong quá khứ',
+  'productDetail.productDescription': 'Mô tả sản phẩm',
+  'productDetail.descriptionText': '{productName} được thiết kế để đáp ứng các tiêu chuẩn chất lượng và hiệu suất cao nhất. Sản phẩm này kết hợp công nghệ tiên tiến với chức năng đáng tin cậy để mang lại kết quả xuất sắc cho nhu cầu xây dựng và xây dựng của bạn.',
+  'productDetail.technicalSpecifications': 'Thông số kỹ thuật',
+  'productDetail.specificationsText': 'Thông số kỹ thuật chi tiết cho {productName} đang được cập nhật. Vui lòng liên hệ với chúng tôi để biết thêm thông tin.',
+  'productDetail.pastExamples': 'Ví dụ và dự án trong quá khứ',
+  'productDetail.examplesDescription': 'Khám phá các ứng dụng thực tế và dự án thành công có {productName}. Xem cách chúng tôi sử dụng sản phẩm trong các tình huống xây dựng khác nhau.',
+  'productDetail.viewProjects': 'Xem dự án',
+  'productDetail.inStock': 'Có hàng',
+  'productDetail.outOfStock': 'Hết hàng',
+  'productDetail.keyFeatures': 'Tính năng chính',
+  'productDetail.interestedInProduct': 'Quan tâm đến sản phẩm này?',
+  'productDetail.contactForInfo': 'Liên hệ với chúng tôi để biết giá, tình trạng hàng và thông số kỹ thuật.',
+  'productDetail.contactUs': 'Liên hệ chúng tôi',
+  'productDetail.relatedProducts': 'Sản phẩm liên quan',
+
 };
 
 export default vi; 

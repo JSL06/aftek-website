@@ -15,8 +15,7 @@ const en = {
   'home.hero.companyProfileBtn': 'Company Profile PDF',
   
   'home.mission.title': 'Mission Statement',
-  'home.mission.paragraph1': 'Taiwan Aftek Co., Ltd. and its affiliated companies are distributed across the entire Asia-Pacific region, covering professional manufacturers in the fields of construction sealants, adhesives, flooring materials, and waterproofing materials, providing customers with usage recommendations and consulting services for construction chemical materials. Combining the chemical expertise team of our parent company, NanPao Resins Chemical Group, Taiwan Aftek not only connects technical support from various professionals across Asia but also establishes long-term partnerships with key strategic teams in Europe, Australia, and the United States. In recent years, through continuous technical cooperation and R&D with Germany, France, Italy, Australia, and other countries, our product line development has become increasingly comprehensive.',
-  'home.mission.paragraph2': 'Our original intention and sole goal is to help customers and the vast market better understand construction chemicals, learn how to maximize their industry value through the use of high-performance, innovative products that keep pace with the times, and create unlimited business opportunities together.',
+  'home.mission.content': 'Taiwan Aftek Co., Ltd. and its affiliated companies are distributed across the entire Asia-Pacific region, covering professional manufacturers in the fields of construction sealants, adhesives, flooring materials, and waterproofing materials, providing customers with usage recommendations and consulting services for construction chemical materials. Combining the chemical expertise team of our parent company, NanPao Resins Chemical Group, Taiwan Aftek not only connects technical support from various professionals across Asia but also establishes long-term partnerships with key strategic teams in Europe, Australia, and the United States. In recent years, through continuous technical cooperation and R&D with Germany, France, Italy, Australia, and other countries, our product line development has become increasingly comprehensive.\n\nOur original intention and sole goal is to help customers and the vast market better understand construction chemicals, learn how to maximize their industry value through the use of high-performance, innovative products that keep pace with the times, and create unlimited business opportunities together.',
   
   'home.services.title': 'Our Services',
   'home.services.subtitle': 'Comprehensive building materials and construction solutions across Asia-Pacific markets',
@@ -341,6 +340,93 @@ const en = {
   // Partners Section
   'home.partners.title': 'Partners',
   'home.partners.desc': 'Here will be a showcase of our partner companies and platforms.',
+
+  // Chatbot - Additional Keys
+  'chatbot.welcome': 'Hello! I\'m here to help you with information about our construction materials and solutions. How can I assist you today?',
+  'chatbot.subtitle': 'Ask me about our products, services, or technical information',
+  'chatbot.responses.waterproofing': 'Our waterproofing solutions include liquid-applied membranes, sheet membranes, and injection systems. We offer products for roofs, basements, and exterior walls. Would you like to know more about specific applications?',
+  'chatbot.responses.sealants': 'We provide high-performance sealants and adhesives for construction joints, gaps, and bonding applications. Our products include silicone, polyurethane, and hybrid formulations. What type of application are you looking for?',
+  'chatbot.responses.flooring': 'Our flooring solutions include epoxy coatings, self-leveling compounds, and decorative finishes for industrial and commercial applications. We offer products for high-traffic areas, chemical resistance, and anti-slip surfaces.',
+  'chatbot.responses.insulation': 'We offer thermal and acoustic insulation solutions along with protective coatings. Our products help improve energy efficiency and sound control in buildings.',
+  'chatbot.responses.projects': 'We have completed numerous successful projects across Asia-Pacific. You can view our project portfolio on the Projects page to see case studies and applications.',
+  'chatbot.responses.contact': 'You can reach us at 02-2799-6558 or email us at info@aftek.com.tw. Our office is located at 10F., No. 37, Jiankang Rd., Zhonghe Dist., New Taipei City 235, Taiwan.',
+  'chatbot.responses.technical': 'We provide comprehensive technical support including application guides, specifications, and consultation services. Our technical team can help with product selection and installation guidance.',
+  'chatbot.responses.consultation': 'We offer free consultation services for your construction projects. Our experts can help you choose the right products and provide application guidance. Please contact us to schedule a consultation.',
+  'chatbot.responses.default': 'Thank you for your question. I\'m here to help with information about our construction materials and solutions. You can ask about waterproofing, sealants, flooring, insulation, or any other products we offer.',
+  'chatbot.responses.recommendations': 'Based on your needs, we recommend: {products}',
+
+  // UI - Additional Keys
+  'ui.viewPdf': 'View PDF',
+  'ui.downloadPdf': 'Download PDF',
+  'ui.openInNewTab': 'Open in New Tab',
+  'ui.pageUnavailable': 'Page Temporarily Unavailable',
+  'ui.pageUnavailableDesc': 'The {pageName} page is currently disabled. Please check back later or contact the administrator.',
+  'ui.goToHomepage': 'Go to Homepage',
+  'ui.refreshTranslations': 'Refresh translations',
+
+  // Guide Page
+  'guide.title': 'User Guide',
+  'guide.subtitle': 'Choose the type of facility to explore Aftek solutions',
+  'guide.selectFacility': 'Select Facility Type',
+  'guide.facilityType1.name': 'Residential Building',
+  'guide.facilityType1.description': 'Waterproofing and flooring solutions for residential buildings',
+  'guide.facilityType2.name': 'Commercial Building',
+  'guide.facilityType2.description': 'Professional solutions for commercial buildings',
+  'guide.facilityType3.name': 'Educational Facility',
+  'guide.facilityType3.description': 'Durable solutions for schools and universities',
+  'guide.facilityType4.name': 'Entertainment Facility',
+  'guide.facilityType4.description': 'Solutions for stadiums and entertainment venues',
+  'guide.facilityType5.name': 'Residential Villa',
+  'guide.facilityType5.description': 'Luxury solutions for high-end residential properties',
+  'guide.facilityType6.name': 'Healthcare Facility',
+  'guide.facilityType6.description': 'Hygienic solutions for hospitals and clinics',
+  'guide.facilityType7.name': 'Industrial Facility',
+  'guide.facilityType7.description': 'Robust solutions for factories and industrial buildings',
+
+  // Articles - Additional Keys
+  'articles.filters.title': 'Filter Articles',
+  'articles.filters.categories': 'Categories',
+  'articles.categories.technology': 'Technology',
+  'articles.categories.sustainability': 'Sustainability',
+
+  // Projects - Additional Keys
+  'projects.intro': 'Explore our portfolio of successful projects across various industries, showcasing our expertise in construction materials and engineering solutions.',
+
+  // Product Catalog Categories
+  'catalog.waterproofing.title': 'Waterproofing Catalog',
+  'catalog.waterproofing.english': 'Waterproofing',
+  'catalog.sealant_adhesive.title': 'Sealant/Adhesive Catalog',
+  'catalog.sealant_adhesive.english': 'Sealant/Adhesive',
+  'catalog.flooring.title': 'Flooring Catalog',
+  'catalog.flooring.english': 'Flooring',
+  'catalog.redimix_gm.title': 'Redi-Mix G&M Catalog',
+  'catalog.redimix_gm.english': 'Redi-Mix G&M',
+  'catalog.industrial_flooring.title': 'Industrial Flooring Catalog',
+  'catalog.industrial_flooring.english': 'Industrial Flooring',
+  'catalog.color_card.title': 'Color Card',
+  'catalog.color_card.english': 'Color Card',
+  'catalog.seeMore': 'See More',
+  'catalog.download': 'Download',
+
+  // Product Detail Page
+  'productDetail.description': 'Description',
+  'productDetail.specifications': 'Specifications',
+  'productDetail.examples': 'Past Examples',
+  'productDetail.productDescription': 'Product Description',
+  'productDetail.descriptionText': '{productName} is designed to meet the highest standards of quality and performance. This product combines innovative technology with reliable functionality to deliver exceptional results for your construction and building needs.',
+  'productDetail.technicalSpecifications': 'Technical Specifications',
+  'productDetail.specificationsText': 'Detailed specifications for {productName} are being updated. Please contact us for more information.',
+  'productDetail.pastExamples': 'Past Examples & Projects',
+  'productDetail.examplesDescription': 'Explore real-world applications and successful projects featuring {productName}. See how our products have been used in various construction scenarios.',
+  'productDetail.viewProjects': 'View Projects',
+  'productDetail.inStock': 'In Stock',
+  'productDetail.outOfStock': 'Out of Stock',
+  'productDetail.keyFeatures': 'Key Features',
+  'productDetail.interestedInProduct': 'Interested in this product?',
+  'productDetail.contactForInfo': 'Contact us for pricing, availability, and technical specifications.',
+  'productDetail.contactUs': 'Contact Us',
+  'productDetail.relatedProducts': 'Related Products',
+
 };
 
 export default en; 

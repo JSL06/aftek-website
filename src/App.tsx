@@ -36,6 +36,7 @@ import Chatbot from "./components/Chatbot";
 import WebsiteTextEditor from './pages/admin/WebsiteTextEditor';
 import ProtectedPage from './components/ProtectedPage';
 import WebsiteTextManager from './pages/admin/WebsiteTextManager';
+import TranslationDashboard from './pages/admin/TranslationDashboard';
 
 const queryClient = new QueryClient();
 
@@ -90,7 +91,9 @@ const App = () => (
               <Route path="articles" element={<AdminArticles />} />
               <Route path="media" element={<MediaManager />} />
               <Route path="website-text" element={<WebsiteTextEditor />} />
+              <Route path="website-text-editor" element={<WebsiteTextEditor />} />
               <Route path="website-text-manager" element={<WebsiteTextManager />} />
+              <Route path="translation-dashboard" element={<TranslationDashboard />} />
             </Route>
             
             <Route path="*" element={<NotFound />} />

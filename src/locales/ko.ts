@@ -15,8 +15,7 @@ const ko = {
   'home.hero.companyProfileBtn': '회사 프로필 PDF',
   
   'home.mission.title': '미션 스테이트먼트',
-  'home.mission.paragraph1': 'Aftek은 건설업계의 다양한 요구를 충족하는 고품질 건설 자재와 혁신적인 솔루션을 제공하는 데 전념합니다. 우리는 건설 프로젝트의 내구성, 안전성, 효율성을 향상시키는 첨단 건축 자재의 개발과 공급에 중점을 둡니다.',
-  'home.mission.paragraph2': '우리의 원래 의도이자 유일한 목표는 고객과 광활한 시장이 건축용 화학재료를 더 잘 이해하고, 시대와 함께 발전하는 고성능의 혁신적인 제품을 사용하여 자신의 산업 가치를 극대화하고 무한한 비즈니스 기회를 함께 창조하는 방법을 배우는 것입니다.',
+  'home.mission.content': 'Aftek은 건설업계의 다양한 요구를 충족하는 고품질 건설 자재와 혁신적인 솔루션을 제공하는 데 전념합니다. 우리는 건설 프로젝트의 내구성, 안전성, 효율성을 향상시키는 첨단 건축 자재의 개발과 공급에 중점을 둡니다.\n\n우리의 원래 의도이자 유일한 목표는 고객과 광활한 시장이 건축용 화학재료를 더 잘 이해하고, 시대와 함께 발전하는 고성능의 혁신적인 제품을 사용하여 자신의 산업 가치를 극대화하고 무한한 비즈니스 기회를 함께 창조하는 방법을 배우는 것입니다.',
   
   'home.services.title': '우리의 서비스',
   'home.services.subtitle': '아시아태평양 시장 전역의 포괄적인 건축 자재 및 건설 솔루션',
@@ -340,7 +339,94 @@ const ko = {
 
   // Partners Section
   'home.partners.title': '파트너',
-  'home.partners.desc': '여기에 우리의 파트너 회사와 플랫폼을 보여줄 예정입니다.',
+  'home.partners.desc': '여기에 파트너 기업과 플랫폼의 쇼케이스가 표시됩니다.',
+
+  // Chatbot - Additional Keys
+  'chatbot.welcome': '안녕하세요! 건설 자재와 솔루션에 대한 정보를 도와드리겠습니다. 오늘 어떻게 도와드릴까요?',
+  'chatbot.subtitle': '제품, 서비스 또는 기술 정보에 대해 문의하세요',
+  'chatbot.responses.waterproofing': '우리의 방수 솔루션에는 액체 도포 막, 시트 막, 주입 시스템이 포함됩니다. 지붕, 지하실, 외벽용 제품을 제공합니다. 특정 응용에 대해 더 자세히 알고 싶으신가요?',
+  'chatbot.responses.sealants': '건축용 이음새, 틈새, 접착 응용을 위한 고성능 실런트와 접착제를 제공합니다. 실리콘, 폴리우레탄, 하이브리드 배합의 제품이 있습니다. 어떤 종류의 응용을 찾고 계신가요?',
+  'chatbot.responses.flooring': '우리의 바닥재 솔루션에는 에폭시 코팅, 셀프 레벨링 화합물, 산업 및 상업용 장식 마감재가 포함됩니다. 고교통량 지역, 내화학성, 미끄럼 방지 표면용 제품을 제공합니다.',
+  'chatbot.responses.insulation': '단열 및 방음 솔루션과 보호 코팅을 제공합니다. 우리의 제품은 건물의 에너지 효율성과 음향 제어 개선에 도움이 됩니다.',
+  'chatbot.responses.projects': '아시아태평양 지역에서 많은 성공적인 프로젝트를 완료했습니다. 프로젝트 페이지에서 프로젝트 포트폴리오를 확인하고 사례 연구와 응용을 볼 수 있습니다.',
+  'chatbot.responses.contact': '02-2799-6558로 전화하거나 info@aftek.com.tw로 이메일을 보내주세요. 사무실은 대만 신베이시 중허구 지엔캉로 37호 10층에 있습니다.',
+  'chatbot.responses.technical': '응용 가이드, 사양, 컨설팅 서비스를 포함한 포괄적인 기술 지원을 제공합니다. 기술 팀이 제품 선택과 설치 가이드를 도와드립니다.',
+  'chatbot.responses.consultation': '건설 프로젝트를 위한 무료 컨설팅 서비스를 제공합니다. 전문가가 적절한 제품 선택과 응용 가이드를 도와드립니다. 컨설팅 예약을 위해 연락해 주세요.',
+  'chatbot.responses.default': '질문해 주셔서 감사합니다. 건설 자재와 솔루션에 대한 정보를 도와드리겠습니다. 방수, 실런트, 바닥재, 단열 또는 제공하는 다른 제품에 대해 문의하실 수 있습니다.',
+  'chatbot.responses.recommendations': '귀하의 요구사항에 따라 다음을 추천합니다: {products}',
+
+  // UI - Additional Keys
+  'ui.viewPdf': 'PDF 보기',
+  'ui.downloadPdf': 'PDF 다운로드',
+  'ui.openInNewTab': '새 탭에서 열기',
+  'ui.pageUnavailable': '페이지를 일시적으로 사용할 수 없습니다',
+  'ui.pageUnavailableDesc': '{pageName} 페이지가 현재 비활성화되어 있습니다. 나중에 다시 확인하거나 관리자에게 문의하세요.',
+  'ui.goToHomepage': '홈페이지로',
+  'ui.refreshTranslations': '번역 새로고침',
+
+  // Guide Page
+  'guide.title': '사용자 가이드',
+  'guide.subtitle': 'Aftek 솔루션을 탐색할 시설 유형을 선택하세요',
+  'guide.selectFacility': '시설 유형 선택',
+  'guide.facilityType1.name': '주거용 건물',
+  'guide.facilityType1.description': '주거용 건물을 위한 방수 및 바닥재 솔루션',
+  'guide.facilityType2.name': '상업용 건물',
+  'guide.facilityType2.description': '상업용 건물을 위한 전문 솔루션',
+  'guide.facilityType3.name': '교육 시설',
+  'guide.facilityType3.description': '학교와 대학을 위한 내구성 솔루션',
+  'guide.facilityType4.name': '엔터테인먼트 시설',
+  'guide.facilityType4.description': '경기장과 엔터테인먼트 장소를 위한 솔루션',
+  'guide.facilityType5.name': '주거용 빌라',
+  'guide.facilityType5.description': '고급 주거용 부동산을 위한 럭셔리 솔루션',
+  'guide.facilityType6.name': '의료 시설',
+  'guide.facilityType6.description': '병원과 클리닉을 위한 위생 솔루션',
+  'guide.facilityType7.name': '산업 시설',
+  'guide.facilityType7.description': '공장과 산업 건물을 위한 견고한 솔루션',
+
+  // Articles - Additional Keys
+  'articles.filters.title': '기사 필터',
+  'articles.filters.categories': '카테고리',
+  'articles.categories.technology': '기술',
+  'articles.categories.sustainability': '지속가능성',
+
+  // Projects - Additional Keys
+  'projects.intro': '다양한 산업에서의 성공적인 프로젝트 포트폴리오를 탐색하고 건설 자재와 엔지니어링 솔루션에서의 우리의 전문성을 보여줍니다.',
+
+  // Product Catalog Categories
+  'catalog.waterproofing.title': '방수 카탈로그',
+  'catalog.waterproofing.english': 'Waterproofing',
+  'catalog.sealant_adhesive.title': '실런트/접착제 카탈로그',
+  'catalog.sealant_adhesive.english': 'Sealant/Adhesive',
+  'catalog.flooring.title': '바닥재 카탈로그',
+  'catalog.flooring.english': 'Flooring',
+  'catalog.redimix_gm.title': 'Redi-Mix G&M 카탈로그',
+  'catalog.redimix_gm.english': 'Redi-Mix G&M',
+  'catalog.industrial_flooring.title': '산업용 바닥재 카탈로그',
+  'catalog.industrial_flooring.english': 'Industrial Flooring',
+  'catalog.color_card.title': '컬러 카드',
+  'catalog.color_card.english': 'Color Card',
+  'catalog.seeMore': '더 보기',
+  'catalog.download': '다운로드',
+
+  // Product Detail Page
+  'productDetail.description': '제품 설명',
+  'productDetail.specifications': '사양',
+  'productDetail.examples': '과거 사례',
+  'productDetail.productDescription': '제품 설명',
+  'productDetail.descriptionText': '{productName}는 최고 품질과 성능 기준을 충족하도록 설계되었습니다. 이 제품은 혁신적인 기술과 신뢰할 수 있는 기능을 결합하여 건설 및 건축 요구사항에 탁월한 결과를 제공합니다.',
+  'productDetail.technicalSpecifications': '기술 사양',
+  'productDetail.specificationsText': '{productName}의 상세 사양이 업데이트 중입니다. 자세한 내용은 문의해 주세요.',
+  'productDetail.pastExamples': '과거 사례 및 프로젝트',
+  'productDetail.examplesDescription': '{productName}의 실제 응용 및 성공한 프로젝트를 탐색하세요. 다양한 건설 시나리오에서 제품이 어떻게 사용되는지 확인하세요.',
+  'productDetail.viewProjects': '프로젝트 보기',
+  'productDetail.inStock': '재고 있음',
+  'productDetail.outOfStock': '재고 없음',
+  'productDetail.keyFeatures': '주요 기능',
+  'productDetail.interestedInProduct': '이 제품에 관심이 있으신가요?',
+  'productDetail.contactForInfo': '가격, 재고 상황, 기술 사양에 대해 문의해 주세요.',
+  'productDetail.contactUs': '문의하기',
+  'productDetail.relatedProducts': '관련 제품',
+
 };
 
 export default ko; 

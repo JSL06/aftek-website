@@ -4,52 +4,54 @@ import { Badge } from '@/components/ui/badge';
 import { X, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const ExplodedView = () => {
+  const { t } = useTranslation();
   const [selectedFacility, setSelectedFacility] = useState<string | null>(null);
   const [selectedHotspot, setSelectedHotspot] = useState<string | null>(null);
 
   const facilityTypes = [
     {
       id: 'FACILITY_TYPE_1_ID',
-      name: 'FACILITY_TYPE_1_NAME',
-      description: 'FACILITY_TYPE_1_DESCRIPTION',
+      name: t('guide.facilityType1.name'),
+      description: t('guide.facilityType1.description'),
       icon: '🏠'
     },
     {
       id: 'FACILITY_TYPE_2_ID',
-      name: 'FACILITY_TYPE_2_NAME',
-      description: 'FACILITY_TYPE_2_DESCRIPTION',
+      name: t('guide.facilityType2.name'),
+      description: t('guide.facilityType2.description'),
       icon: '🏢'
     },
     {
       id: 'FACILITY_TYPE_3_ID',
-      name: 'FACILITY_TYPE_3_NAME',
-      description: 'FACILITY_TYPE_3_DESCRIPTION',
+      name: t('guide.facilityType3.name'),
+      description: t('guide.facilityType3.description'),
       icon: '🏫'
     },
     {
       id: 'FACILITY_TYPE_4_ID',
-      name: 'FACILITY_TYPE_4_NAME',
-      description: 'FACILITY_TYPE_4_DESCRIPTION',
+      name: t('guide.facilityType4.name'),
+      description: t('guide.facilityType4.description'),
       icon: '🏟️'
     },
     {
       id: 'FACILITY_TYPE_5_ID',
-      name: 'FACILITY_TYPE_5_NAME',
-      description: 'FACILITY_TYPE_5_DESCRIPTION',
+      name: t('guide.facilityType5.name'),
+      description: t('guide.facilityType5.description'),
       icon: '🏡'
     },
     {
       id: 'FACILITY_TYPE_6_ID',
-      name: 'FACILITY_TYPE_6_NAME',
-      description: 'FACILITY_TYPE_6_DESCRIPTION',
+      name: t('guide.facilityType6.name'),
+      description: t('guide.facilityType6.description'),
       icon: '🏥'
     },
     {
       id: 'FACILITY_TYPE_7_ID',
-      name: 'FACILITY_TYPE_7_NAME',
-      description: 'FACILITY_TYPE_7_DESCRIPTION',
+      name: t('guide.facilityType7.name'),
+      description: t('guide.facilityType7.description'),
       icon: '🏭'
     }
   ];
@@ -122,16 +124,16 @@ const ExplodedView = () => {
         <div style={{ height: '80px' }}></div>
         <div className="container mx-auto p-8">
           <div className="flex flex-col items-center mb-12">
-            <h1 className="uniform-page-title">Guide</h1>
+            <h1 className="uniform-page-title">{t('guide.title')}</h1>
           </div>
 
           {/* Facility Type Selector */}
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-foreground mb-4">
-              Select Facility Type
+              {t('guide.selectFacility')}
             </h2>
             <p className="text-lg text-muted-foreground">
-              Choose the type of facility to explore Aftek solutions
+              {t('guide.subtitle')}
             </p>
           </div>
 

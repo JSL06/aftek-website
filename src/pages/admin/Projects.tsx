@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Building2, Edit, Trash2, Plus, MapPin, Calendar, Save, Upload, Star } from 'lucide-react';
+import { ArrowLeft, Building2, Edit, Trash2, Plus, MapPin, Calendar, Save, Upload, Star, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAdminProjects } from '@/hooks/useProjects';
 import { Project } from '@/services/projectService';
@@ -14,8 +14,14 @@ import { productService } from '@/services/productService';
 import { filterService } from '@/services/filterService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import LanguageSelector, { Language, LANGUAGES } from '@/components/LanguageSelector';
+import MultilingualFormField from '@/components/MultilingualFormField';
+import TranslationStatus from '@/components/TranslationStatus';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const AdminProjects = () => {
+  const { t } = useTranslation();
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>('zh-Hant');
   const { projects, loading, addProject, updateProject, deleteProject, refetch } = useAdminProjects();
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -23,34 +29,49 @@ const AdminProjects = () => {
   const [availableProducts, setAvailableProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [features, setFeatures] = useState<string[]>([]);
-  const [formData, setFormData] = useState<Partial<Project>>({
+  const [formData, setFormData] = useState({
     title: '',
-    name: '',
-    description: '',
     location: '',
     category: '',
     client: '',
     completion_date: '',
     project_type: '',
     image: '',
-    features: [],
-    products_used: [],
+    features: [] as string[],
+    products_used: [] as string[],
     project_value: '',
     duration: '',
+    description: '',
     challenges: '',
     solutions: '',
     results: '',
     isActive: true,
     showInFeatured: false,
-    displayOrder: 99
+    displayOrder: 99,
+    // Multilingual content
+    translations: {} as Record<string, any>
   });
 
   const handleEdit = (project: Project) => {
     setEditingProject(project);
+    
+    // Prepare translations data
+    const translations: Record<string, any> = {};
+    LANGUAGES.forEach(lang => {
+      translations[lang.code] = {
+        title: lang.code === 'en' ? project.title : (project.titles?.[lang.code] || ''),
+        description: lang.code === 'en' ? project.description : (project.descriptions?.[lang.code] || ''),
+        challenges: lang.code === 'en' ? project.challenges : (project.challenges_multilingual?.[lang.code] || ''),
+        solutions: lang.code === 'en' ? project.solutions : (project.solutions_multilingual?.[lang.code] || ''),
+        results: lang.code === 'en' ? project.results : (project.results_multilingual?.[lang.code] || ''),
+        location: project.location || '',
+        category: project.category || '',
+        client: project.client || ''
+      };
+    });
+
     setFormData({
       title: project.title,
-      name: project.name,
-      description: project.description,
       location: project.location,
       category: project.category,
       client: project.client,
@@ -61,12 +82,14 @@ const AdminProjects = () => {
       products_used: project.products_used || [],
       project_value: project.project_value,
       duration: project.duration,
+      description: project.description || '',
       challenges: project.challenges,
       solutions: project.solutions,
       results: project.results,
       isActive: project.isActive,
       showInFeatured: project.showInFeatured,
-      displayOrder: project.displayOrder
+      displayOrder: project.displayOrder,
+      translations
     });
     setShowForm(true);
   };
@@ -75,8 +98,6 @@ const AdminProjects = () => {
     setEditingProject(null);
     setFormData({
       title: '',
-      name: '',
-      description: '',
       location: '',
       category: '',
       client: '',
@@ -87,29 +108,94 @@ const AdminProjects = () => {
       products_used: [],
       project_value: '',
       duration: '',
+      description: '',
       challenges: '',
       solutions: '',
       results: '',
       isActive: true,
       showInFeatured: false,
-      displayOrder: projects.length + 1
+      displayOrder: projects.length + 1,
+      translations: {}
     });
     setShowForm(true);
   };
 
+  const handleTranslationChange = (language: Language, fieldName: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      translations: {
+        ...prev.translations,
+        [language]: {
+          ...prev.translations[language],
+          [fieldName]: value
+        }
+      }
+    }));
+  };
+
+
+
   const handleSave = async () => {
-    if (!formData.title) {
+    // Validate required fields for current language
+    const currentLangData = formData.translations[selectedLanguage] || {};
+    if (!currentLangData.title && !formData.title) {
       toast.error('Please enter a project title.');
       return;
     }
 
     setSaving(true);
     try {
+      // Prepare project data with multilingual content
+      const projectData: Partial<Project> = {
+        title: formData.title || currentLangData.title,
+        location: formData.location,
+        category: formData.category,
+        client: formData.client,
+        completion_date: formData.completion_date,
+        project_type: formData.project_type,
+        image: formData.image,
+        features: formData.features,
+        products_used: formData.products_used,
+        project_value: formData.project_value,
+        duration: formData.duration,
+        challenges: formData.challenges || currentLangData.challenges,
+        solutions: formData.solutions || currentLangData.solutions,
+        results: formData.results || currentLangData.results,
+        isActive: formData.isActive,
+        showInFeatured: formData.showInFeatured,
+        displayOrder: formData.displayOrder,
+        titles: {},
+        descriptions: {},
+        challenges_multilingual: {},
+        solutions_multilingual: {},
+        results_multilingual: {}
+      };
+
+      // Add multilingual content
+      LANGUAGES.forEach(lang => {
+        const langData = formData.translations[lang.code];
+        if (langData?.title) {
+          projectData.titles![lang.code] = langData.title;
+        }
+        if (langData?.description) {
+          projectData.descriptions![lang.code] = langData.description;
+        }
+        if (langData?.challenges) {
+          projectData.challenges_multilingual![lang.code] = langData.challenges;
+        }
+        if (langData?.solutions) {
+          projectData.solutions_multilingual![lang.code] = langData.solutions;
+        }
+        if (langData?.results) {
+          projectData.results_multilingual![lang.code] = langData.results;
+        }
+      });
+
       if (editingProject) {
-        await updateProject(editingProject.id, formData);
+        await updateProject(editingProject.id, projectData);
         toast.success('Project updated successfully!');
       } else {
-        await addProject(formData);
+        await addProject(projectData);
         toast.success('Project added successfully!');
       }
       
@@ -252,23 +338,90 @@ const AdminProjects = () => {
         <div className="container mx-auto p-8">
           <Card className="max-w-6xl mx-auto">
             <CardHeader>
-              <CardTitle>Project Details</CardTitle>
+              <CardTitle>项目详情</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Basic Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="title">Project Title *</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    className="mt-1"
-                    placeholder="Enter project title"
+              {/* Language Selector */}
+              <div className="bg-background border-b border-border pb-4 mb-6">
+                <LanguageSelector
+                  selectedLanguage={selectedLanguage}
+                  onLanguageChange={setSelectedLanguage}
+                />
+              </div>
+
+              {/* Translation Status */}
+              <div className="bg-muted p-4 rounded-lg">
+                <TranslationStatus
+                  translations={formData.translations}
+                  requiredFields={['title', 'description']}
+                />
+              </div>
+
+
+
+              {/* Language-specific editing */}
+              <div className="bg-muted p-4 rounded-lg">
+                <h3 className="font-semibold mb-3">
+                  {t('admin.dashboard.currentSelection')}: {LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName}
+                </h3>
+                
+                <div className="space-y-6">
+                  <MultilingualFormField
+                    label={t('admin.projects.projectTitle')}
+                    fieldName="title"
+                    type="text"
+                    translations={formData.translations}
+                    onTranslationChange={handleTranslationChange}
+                    currentLanguage={selectedLanguage}
+                    required={true}
+                  />
+
+                  <MultilingualFormField
+                    label={t('admin.projects.description')}
+                    fieldName="description"
+                    type="textarea"
+                    translations={formData.translations}
+                    onTranslationChange={handleTranslationChange}
+                    currentLanguage={selectedLanguage}
+                    required={true}
+                  />
+
+                  <MultilingualFormField
+                    label="项目挑战"
+                    fieldName="challenges"
+                    type="textarea"
+                    translations={formData.translations}
+                    onTranslationChange={handleTranslationChange}
+                    currentLanguage={selectedLanguage}
+                    required={false}
+                  />
+
+                  <MultilingualFormField
+                    label="解决方案"
+                    fieldName="solutions"
+                    type="textarea"
+                    translations={formData.translations}
+                    onTranslationChange={handleTranslationChange}
+                    currentLanguage={selectedLanguage}
+                    required={false}
+                  />
+
+                  <MultilingualFormField
+                    label="项目成果"
+                    fieldName="results"
+                    type="textarea"
+                    translations={formData.translations}
+                    onTranslationChange={handleTranslationChange}
+                    currentLanguage={selectedLanguage}
+                    required={false}
                   />
                 </div>
+              </div>
+
+              {/* Common fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="category">Category *</Label>
+                  <Label htmlFor="category">{t('admin.projects.category')} *</Label>
                   <select
                     id="category"
                     value={formData.category}
@@ -276,16 +429,16 @@ const AdminProjects = () => {
                     className="mt-1 w-full px-3 py-2 border border-input rounded-md bg-background"
                   >
                     <option value="">Select category</option>
-                                            {categories.map(category => (
-                          <option key={category} value={category}>{category}</option>
-                        ))}
+                    {categories.map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="location">Location</Label>
+                  <Label htmlFor="location">{t('admin.projects.location')}</Label>
                   <Input
                     id="location"
                     value={formData.location}
@@ -295,7 +448,7 @@ const AdminProjects = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="client">Client</Label>
+                  <Label htmlFor="client">{t('admin.projects.client')}</Label>
                   <Input
                     id="client"
                     value={formData.client}
@@ -306,22 +459,12 @@ const AdminProjects = () => {
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  className="mt-1"
-                  rows={4}
-                  placeholder="Project description"
-                />
-              </div>
+
 
               {/* Project Details */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="completion_date">Completion Year</Label>
+                  <Label htmlFor="completion_date">{t('admin.projects.completionDate')}</Label>
                   <Input
                     id="completion_date"
                     value={formData.completion_date}
@@ -450,44 +593,7 @@ const AdminProjects = () => {
                 )}
               </div>
 
-              {/* Detailed Information */}
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="challenges">Challenges</Label>
-                  <Textarea
-                    id="challenges"
-                    value={formData.challenges}
-                    onChange={(e) => setFormData(prev => ({ ...prev, challenges: e.target.value }))}
-                    className="mt-1"
-                    rows={3}
-                    placeholder="What challenges were faced in this project?"
-                  />
-                </div>
 
-                <div>
-                  <Label htmlFor="solutions">Solutions</Label>
-                  <Textarea
-                    id="solutions"
-                    value={formData.solutions}
-                    onChange={(e) => setFormData(prev => ({ ...prev, solutions: e.target.value }))}
-                    className="mt-1"
-                    rows={3}
-                    placeholder="How were the challenges solved?"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="results">Results</Label>
-                  <Textarea
-                    id="results"
-                    value={formData.results}
-                    onChange={(e) => setFormData(prev => ({ ...prev, results: e.target.value }))}
-                    className="mt-1"
-                    rows={3}
-                    placeholder="What were the project outcomes and achievements?"
-                  />
-                </div>
-              </div>
 
               {/* Settings */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -497,7 +603,7 @@ const AdminProjects = () => {
                     checked={formData.isActive}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
                   />
-                  <Label htmlFor="isActive">Active (Show on website)</Label>
+                  <Label htmlFor="isActive">{t('admin.projects.active')} (Show on website)</Label>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -506,7 +612,7 @@ const AdminProjects = () => {
                     checked={formData.showInFeatured}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, showInFeatured: checked }))}
                   />
-                  <Label htmlFor="showInFeatured">Featured Project</Label>
+                  <Label htmlFor="showInFeatured">{t('admin.projects.featured')}</Label>
                 </div>
 
                 <div>
@@ -533,7 +639,7 @@ const AdminProjects = () => {
                   ) : (
                     <>
                       <Save className="mr-2 h-4 w-4" />
-                      Save Project
+                      {t('admin.projects.save')}
                     </>
                   )}
                 </Button>
@@ -543,7 +649,7 @@ const AdminProjects = () => {
                   disabled={saving}
                   className="flex-1"
                 >
-                  Cancel
+                  {t('admin.products.cancel')}
                 </Button>
               </div>
             </CardContent>
@@ -554,29 +660,56 @@ const AdminProjects = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-24">
       <div className="bg-gradient-hero text-primary-foreground p-6">
         <div className="container mx-auto">
           <Link to="/admin/dashboard">
             <Button variant="secondary" className="mb-4 bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Admin
+              Back to Dashboard
             </Button>
           </Link>
+          <h1 className="text-2xl font-bold">{t('admin.projects.title')}</h1>
+        </div>
+      </div>
+
+      {/* Language Selection */}
+      <div className="bg-background border-b border-border">
+        <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Projects Management</h1>
-              <p className="text-primary-foreground/80">Manage construction projects and case studies</p>
+            <div className="flex items-center gap-2">
+              <Globe className="h-5 w-5 text-muted-foreground" />
+              <span className="text-sm font-medium text-muted-foreground">选择编辑语言:</span>
             </div>
-            <Button onClick={handleAddNew} className="bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground">
-              <Plus className="mr-2 h-4 w-4" />
-              Add New Project
-            </Button>
+            <div className="flex gap-2">
+              {LANGUAGES.map(lang => (
+                <Button
+                  key={lang.code}
+                  variant={selectedLanguage === lang.code ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedLanguage(lang.code as Language)}
+                  className="flex items-center gap-2"
+                >
+                  <span>{lang.flag}</span>
+                  <span>{lang.nativeName}</span>
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       <div className="container mx-auto p-8">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold">项目管理</h1>
+            <p className="text-muted-foreground">管理建筑项目和案例研究</p>
+          </div>
+          <Button onClick={handleAddNew}>
+            <Plus className="mr-2 h-4 w-4" />
+            添加新项目
+          </Button>
+        </div>
         {loading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>

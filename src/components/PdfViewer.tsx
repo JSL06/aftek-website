@@ -1,4 +1,4 @@
-import { useState } from 'react';
+image.pngimport { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { FileText, Download, ExternalLink } from 'lucide-react';
@@ -26,7 +26,7 @@ const PdfViewer = ({ title, pdfUrl, downloadUrl }: PdfViewerProps) => {
       <DialogTrigger asChild>
         <Button variant="outline" className="group hover:bg-primary hover:text-primary-foreground transition-smooth">
           <FileText className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
-          View PDF
+          {t('ui.viewPdf')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl w-full h-[80vh] flex flex-col">
@@ -50,7 +50,7 @@ const PdfViewer = ({ title, pdfUrl, downloadUrl }: PdfViewerProps) => {
                 className="hover:bg-blue hover:text-blue-foreground transition-smooth"
               >
                 <ExternalLink className="h-4 w-4 mr-2" />
-                Open in New Tab
+                {t('ui.openInNewTab')}
               </Button>
             </div>
           </div>
