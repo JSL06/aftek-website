@@ -242,6 +242,18 @@ export const useTranslation = () => {
       return value || key;
     };
 
+    // Debug logging for articles.title specifically
+    if (key === 'articles.title') {
+      console.log('🔍 Translation request for articles.title');
+      console.log('   Current language:', currentLanguage);
+      console.log('   Loading state:', loading);
+      console.log('   Database translations count:', Object.keys(translations).length);
+      console.log('   Local translation available:', !!localTranslations[currentLanguage]?.[key]);
+      console.log('   Local translation value:', localTranslations[currentLanguage]?.[key]);
+      console.log('   Database translation available:', !!translations[key]);
+      console.log('   Database translation value:', translations[key]);
+    }
+
     // Debug logging for admin keys
     if (key.startsWith('admin.')) {
       console.log('Translation request for:', key, 'Current language:', currentLanguage);
