@@ -14,6 +14,7 @@ import Projects from "./pages/Projects";
 import Articles from "./pages/Articles";
 import ArticleDetail from "./pages/ArticleDetail";
 import ExplodedView from "./pages/ExplodedView";
+import ProductGuide from "./pages/ProductGuide";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import FlexProPU from "./pages/products/FlexProPU";
@@ -70,6 +71,7 @@ const App = () => (
               <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
               <Route path="articles/:category" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
               <Route path="guide" element={<ProtectedPage pageName="home"><ExplodedView /></ProtectedPage>} />
+              <Route path="product-guide" element={<ProtectedPage pageName="product-guide"><ProductGuide /></ProtectedPage>} />
               <Route path="contact" element={<ProtectedPage pageName="contact"><Contact /></ProtectedPage>} />
               <Route path="products/flex-pro-pu" element={<ProtectedPage pageName="products"><FlexProPU /></ProtectedPage>} />
               <Route path="products/:productId" element={<ProtectedPage pageName="products"><ProductDetail /></ProtectedPage>} />

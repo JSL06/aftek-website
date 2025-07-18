@@ -275,7 +275,91 @@ const en = {
   'loading.projects': 'Loading projects...',
   'loading.featuredProducts': 'Loading featured products...',
 
-  // Exploded View Tool
+  // Product Guide - Entry
+  'guide.entry.title': 'Build Your Perfect Space',
+  'guide.entry.subtitle': 'Click anywhere to explore solutions',
+  'guide.entry.startButton': 'Start Exploration',
+  'guide.entry.instruction': 'Choose your facility type to begin your journey',
+
+  // Product Guide - Facility Selection
+  'guide.facilitySelect.title': 'Choose Your Facility Type',
+  'guide.facilitySelect.subtitle': 'Select the type of building or structure you want to explore',
+  'guide.facilitySelect.explore': 'Explore',
+
+  // Product Guide - Facilities
+  'guide.facilities.residential': 'Residential',
+  'guide.facilities.residentialDesc': 'Homes, apartments, and residential complexes',
+  'guide.facilities.commercial': 'Commercial',
+  'guide.facilities.commercialDesc': 'Office buildings, retail spaces, and commercial structures',
+  'guide.facilities.industrial': 'Industrial',
+  'guide.facilities.industrialDesc': 'Factories, warehouses, and industrial facilities',
+  'guide.facilities.infrastructure': 'Infrastructure',
+  'guide.facilities.infrastructureDesc': 'Bridges, roads, and public infrastructure projects',
+
+  // Product Guide - Explorer
+  'guide.explorer.title': 'Interactive Explorer',
+  'guide.explorer.subtitle': 'Click on hotspots to discover recommended Aftek products',
+  'guide.explorer.changeFacility': 'Change Facility',
+  'guide.explorer.download': 'Download Plan',
+  'guide.explorer.share': 'Share',
+  'guide.explorer.consult': 'Get Consultation',
+
+  // Product Guide - Hotspots
+  'guide.hotspots.foundation.label': 'Foundation',
+  'guide.hotspots.foundation.description': 'Waterproofing and structural protection',
+  'guide.hotspots.walls.label': 'Walls',
+  'guide.hotspots.walls.description': 'Protective coatings and finishes',
+  'guide.hotspots.roof.label': 'Roof',
+  'guide.hotspots.roof.description': 'Waterproofing and insulation systems',
+
+  // Product Guide - Products
+  'guide.products.flexProPU.description': 'High-performance polyurethane sealant for expansion joints',
+  'guide.products.protectiveCoating.description': 'Advanced protective coating system for concrete',
+  'guide.products.liquidMembrane.description': 'Liquid-applied waterproofing membrane',
+
+  // Product Guide - Panel
+  'guide.panel.selectHotspot': 'Select a Hotspot',
+  'guide.panel.selectHotspotDesc': 'Click on the red dots in the 3D model to explore products',
+  'guide.panel.recommendedProducts': 'Recommended Products',
+  'guide.panel.clickToExplore': 'Click cards to flip and see details',
+  'guide.panel.details': 'Details',
+  'guide.panel.specifications': 'Specifications',
+  'guide.panel.applications': 'Applications',
+  'guide.panel.download': 'Download',
+  'guide.panel.learnMore': 'Learn More',
+  'guide.panel.aiRecommendation': 'AI Recommendation',
+  'guide.panel.aiRecommendationText': 'Based on your selection, we recommend considering these additional products for optimal performance.',
+  'guide.panel.viewSolution': 'View Complete Solution',
+
+  // Product Guide - AI
+  'guide.ai.analyzing': 'AI is analyzing your selections...',
+  'guide.ai.complete': 'complete',
+  'guide.ai.analyzingProducts': 'Analyzing product compatibility',
+  'guide.ai.checkingCompatibility': 'Checking system compatibility',
+  'guide.ai.generatingSolutions': 'Generating optimal solutions',
+  'guide.ai.selectProducts': 'Select Products First',
+  'guide.ai.selectProductsDesc': 'Choose products from the hotspots to get AI recommendations',
+  'guide.ai.recommendations': 'AI-Powered Recommendations',
+  'guide.ai.recommendationsDesc': 'Our AI has analyzed your selections and generated optimal solutions',
+  'guide.ai.compatibility': 'Compatibility',
+  'guide.ai.cost': 'Cost',
+  'guide.ai.complexity': 'Complexity',
+  'guide.ai.time': 'Time',
+  'guide.ai.products': 'products',
+  'guide.ai.select': 'Select',
+  'guide.ai.downloadPlan': 'Download Plan',
+  'guide.ai.share': 'Share Solution',
+  'guide.ai.consult': 'Get Consultation',
+
+  // Product Guide - Solutions
+  'guide.solutions.comprehensive.name': 'Comprehensive Solution',
+  'guide.solutions.comprehensive.description': 'Complete system with all recommended products for maximum performance',
+  'guide.solutions.budget.name': 'Budget-Friendly Solution',
+  'guide.solutions.budget.description': 'Essential products for cost-effective implementation',
+  'guide.solutions.premium.name': 'Premium Solution',
+  'guide.solutions.premium.description': 'High-end products with advanced features and extended warranties',
+
+  // Exploded View Tool (Legacy)
   'exploded.title': 'Interactive Building Guide',
   'exploded.description': 'Explore our interactive building diagrams to discover the right Aftek products for each construction application. Click on hotspots to see recommended solutions.',
   'exploded.selectFacility': 'Select Building Type',
