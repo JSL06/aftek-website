@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Eye, Package, CheckCircle, XCircle } from 'lucide-react';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 
 import { UnifiedProduct } from '@/services/productService';
@@ -27,13 +28,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   className = '',
   variant = 'default'
 }) => {
+  const navigate = useNavigate();
+  
   const handleViewDetails = () => {
     if (onViewDetails) {
       onViewDetails(product);
     } else {
       // Default behavior - navigate to product detail page using slug if available
       const productUrl = product.slug ? `/products/${product.slug}` : `/products/${product.id}`;
-      window.location.href = productUrl;
+      navigate(productUrl);
     }
   };
 

@@ -397,10 +397,7 @@ const UnifiedProducts = () => {
                     onTranslationChange={handleTranslationChange}
                     currentLanguage={selectedLanguage}
                     required={true}
-                  />
-                  <p className="text-xs text-muted-foreground mt-2">
-                    所見即所得編輯器，支持富文本格式、圖片插入、調整大小和方向。圖片將自動上傳到服務器並優化顯示。
-                  </p>
+                                        />
                 </div>
               </div>
 

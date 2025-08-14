@@ -112,13 +112,15 @@ const About = () => {
           <h1 className="uniform-page-title">{t('about.title')}</h1>
         </div>
         {/* Mission Statement */}
-        <h2 className="text-2xl font-bold text-center mb-4" style={{ fontFamily }}>{t('home.mission.title')}</h2>
-        <div className="text-center text-lg mb-8" style={{ fontFamily }}>
-          {t('home.mission.content').split('\n\n').map((paragraph, index) => (
-            <p key={index} className={index > 0 ? 'mt-6' : 'mb-6'}>
-              {paragraph}
-            </p>
-          ))}
+        <div className="max-w-4xl mx-auto text-center mb-12">
+          <h2 className="text-3xl font-bold mb-6" style={{ fontFamily }}>{t('home.mission.title')}</h2>
+          <div className="text-lg leading-relaxed" style={{ fontFamily }}>
+            {t('home.mission.content').split('\n\n').map((paragraph, index) => (
+              <p key={index} className={index > 0 ? 'mt-6' : ''}>
+                {paragraph}
+              </p>
+            ))}
+          </div>
         </div>
         {/* Value Boxes */}
         <div className="flex flex-col md:flex-row gap-6 justify-center mb-16">
