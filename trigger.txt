@@ -1,2 +1,0 @@
-This file is used to trigger GitHub Actions deployment.
-Last updated: 2025-08-14

@@ -1,0 +1,38 @@
+[1mdiff --git a/package.json b/package.json[m
+[1mindex c23694e..13e80e5 100644[m
+[1m--- a/package.json[m
+[1m+++ b/package.json[m
+[36m@@ -9,33 +9,22 @@[m
+     "preview": "vite preview"[m
+   },[m
+   "dependencies": {[m
+[31m-    "@radix-ui/react-accordion": "^1.1.2",[m
+     "@radix-ui/react-alert-dialog": "^1.0.5",[m
+[31m-    "@radix-ui/react-aspect-ratio": "^1.0.3",[m
+[31m-    "@radix-ui/react-avatar": "^1.0.4",[m
+     "@radix-ui/react-checkbox": "^1.0.4",[m
+[31m-    "@radix-ui/react-collapsible": "^1.0.3",[m
+     "@radix-ui/react-context-menu": "^2.1.5",[m
+     "@radix-ui/react-dialog": "^1.0.5",[m
+     "@radix-ui/react-dropdown-menu": "^2.0.6",[m
+     "@radix-ui/react-hover-card": "^1.0.7",[m
+     "@radix-ui/react-label": "^2.0.2",[m
+[31m-    "@radix-ui/react-menubar": "^1.0.4",[m
+[31m-    "@radix-ui/react-navigation-menu": "^1.1.4",[m
+     "@radix-ui/react-popover": "^1.0.7",[m
+[31m-    "@radix-ui/react-progress": "^1.0.3",[m
+[31m-    "@radix-ui/react-radio-group": "^1.1.3",[m
+     "@radix-ui/react-scroll-area": "^1.0.5",[m
+     "@radix-ui/react-select": "^2.0.0",[m
+     "@radix-ui/react-separator": "^1.0.3",[m
+[31m-    "@radix-ui/react-sheet": "^1.0.4",[m
+     "@radix-ui/react-slider": "^1.1.2",[m
+     "@radix-ui/react-slot": "^1.0.2",[m
+     "@radix-ui/react-switch": "^1.0.3",[m
+     "@radix-ui/react-tabs": "^1.0.4",[m
+     "@radix-ui/react-toast": "^1.1.5",[m
+[31m-    "@radix-ui/react-toggle": "^1.0.3",[m
+[31m-    "@radix-ui/react-toggle-group": "^1.0.4",[m
+     "@radix-ui/react-tooltip": "^1.0.7",[m
+     "@supabase/supabase-js": "^2.39.0",[m
+     "@tanstack/react-query": "^5.17.9",[m
