@@ -241,6 +241,16 @@ export const useTranslation = () => {
       return value || key;
     };
 
+    // For specific keys that should always use local translations, prioritize local files
+    const alwaysLocalKeys = ['home.about.desc', 'home.mission.content'];
+    if (alwaysLocalKeys.includes(key)) {
+      const localTrans = localTranslations[currentLanguage];
+      const localValue = localTrans?.[key];
+      if (localValue) {
+        return getValue(localValue);
+      }
+    }
+
     // For all languages, use the same priority order
     // First check database translations (highest priority)
     if (!loading) {
