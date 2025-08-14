@@ -117,20 +117,15 @@ const fallbackTranslations: { [key: string]: { [K in Language]: string } } = {
 };
 
 export const useTranslation = () => {
-  // Initialize language from localStorage or default to 'zh-Hant' (Traditional Chinese)
+  // Initialize language from localStorage or default to 'en' (English)
   const getInitialLanguage = (): Language => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('aftek-language');
-      // Force Traditional Chinese if Simplified Chinese is saved
-      if (saved === 'zh-Hans') {
-        localStorage.removeItem('aftek-language');
-        return 'zh-Hant';
-      }
       if (saved && Object.keys(localTranslations).includes(saved)) {
         return saved as Language;
       }
     }
-    return 'zh-Hant';
+    return 'en';
   };
 
   const [currentLanguage, setCurrentLanguage] = useState<Language>(getInitialLanguage);
@@ -192,21 +187,27 @@ export const useTranslation = () => {
     document.documentElement.lang = currentLanguage;
   }, [currentLanguage]);
 
-  // Listen for language changes from other components
-  useEffect(() => {
-    const handleLanguageChange = (event: CustomEvent) => {
-      const newLanguage = event.detail as Language;
-      if (newLanguage && newLanguage !== currentLanguage) {
-        setCurrentLanguage(newLanguage);
-      }
-    };
+      // Listen for language changes from other components
+    useEffect(() => {
+      const handleLanguageChange = (event: CustomEvent) => {
+        const newLanguage = event.detail as Language;
+        if (newLanguage && newLanguage !== currentLanguage) {
+          // Only change if the new language is valid
+          if (['en', 'ja', 'ko', 'th', 'vi', 'zh-Hans', 'zh-Hant'].includes(newLanguage)) {
+            setCurrentLanguage(newLanguage);
+          }
+        }
+      };
 
     // Handle page visibility changes to ensure language sync
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         const savedLanguage = localStorage.getItem('aftek-language');
         if (savedLanguage && savedLanguage !== currentLanguage && Object.keys(localTranslations).includes(savedLanguage)) {
-          setCurrentLanguage(savedLanguage as Language);
+          // Only change if the saved language is valid
+          if (['en', 'ja', 'ko', 'th', 'vi', 'zh-Hans', 'zh-Hant'].includes(savedLanguage)) {
+            setCurrentLanguage(savedLanguage as Language);
+          }
         }
       }
     };
@@ -216,7 +217,10 @@ export const useTranslation = () => {
       if (event.key === 'aftek-language' && event.newValue) {
         const newLanguage = event.newValue as Language;
         if (Object.keys(localTranslations).includes(newLanguage) && newLanguage !== currentLanguage) {
-          setCurrentLanguage(newLanguage);
+          // Only change if the new language is valid
+          if (['en', 'ja', 'ko', 'th', 'vi', 'zh-Hans', 'zh-Hant'].includes(newLanguage)) {
+            setCurrentLanguage(newLanguage);
+          }
         }
       }
     };
@@ -247,27 +251,7 @@ export const useTranslation = () => {
       return value || key;
     };
 
-    // For Traditional Chinese, prioritize local translations over database translations
-    if (currentLanguage === 'zh-Hant') {
-      // First check local Traditional Chinese translations
-      const localValue = localTranslations['zh-Hant']?.[key];
-      if (localValue) {
-        return getValue(localValue);
-      }
-      
-      // Then check database translations as fallback
-      if (!loading) {
-        const translation = translations[key];
-        if (translation) {
-          return getValue(translation);
-        }
-      }
-      
-      // Show the key instead of falling back to English
-      return key;
-    }
-
-    // For other languages, use the original priority order
+    // For all languages, use the same priority order
     // First check database translations (highest priority)
     if (!loading) {
       const translation = translations[key];

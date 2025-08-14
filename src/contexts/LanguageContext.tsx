@@ -32,7 +32,10 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     if (typeof window !== 'undefined') {
       const savedLanguage = localStorage.getItem('aftek-language');
       if (savedLanguage && savedLanguage !== currentLanguage) {
-        changeLanguage(savedLanguage as Language);
+        // Only change if the saved language is valid
+        if (['en', 'ja', 'ko', 'th', 'vi', 'zh-Hans', 'zh-Hant'].includes(savedLanguage)) {
+          changeLanguage(savedLanguage as Language);
+        }
       }
       setIsInitialized(true);
     }
@@ -45,7 +48,10 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
       setTimeout(() => {
         const savedLanguage = localStorage.getItem('aftek-language');
         if (savedLanguage && savedLanguage !== currentLanguage) {
-          changeLanguage(savedLanguage as Language);
+          // Only change if the saved language is valid
+          if (['en', 'ja', 'ko', 'th', 'vi', 'zh-Hans', 'zh-Hant'].includes(savedLanguage)) {
+            changeLanguage(savedLanguage as Language);
+          }
         }
       }, 100);
     };
