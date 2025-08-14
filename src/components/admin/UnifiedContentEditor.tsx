@@ -40,6 +40,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { ContentType, Language, ContentStatus, MediaItem } from '@/types/admin';
+import UnsavedChangesWarning from './UnsavedChangesWarning';
 
 const LANGUAGES: { code: Language; name: string; flag: string; nativeName: string }[] = [
   { code: 'en', name: 'English', flag: '🇺🇸', nativeName: 'English' },
@@ -128,16 +129,13 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
     en: 0, 'zh-Hans': 0, 'zh-Hant': 0, ja: 0, ko: 0, th: 0, vi: 0
   });
 
-  // Auto-save functionality
+  // Track unsaved changes
   useEffect(() => {
-    const autoSaveInterval = setInterval(() => {
-      if (useAdminStore.getState().autoSave.enabled) {
-        handleAutoSave();
-      }
-    }, useAdminStore.getState().autoSave.interval);
-
-    return () => clearInterval(autoSaveInterval);
+    useAdminStore.getState().setHasUnsavedChanges(true);
   }, [formData]);
+
+  // Import UnsavedChangesWarning component
+  const { saveTracking } = useAdminStore();
 
   // Calculate translation progress
   useEffect(() => {
@@ -156,16 +154,6 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
     setTranslationProgress(progress);
   }, [formData.multilingual]);
 
-  const handleAutoSave = useCallback(async () => {
-    try {
-      // Simulate auto-save
-      useAdminStore.getState().setLastSaved(new Date().toISOString());
-      useAdminStore.getState().setHasUnsavedChanges(false);
-    } catch (error) {
-      console.error('Auto-save failed:', error);
-    }
-  }, []);
-
   const handleSave = async (publish: boolean = false) => {
     setIsSaving(true);
     try {
@@ -178,6 +166,7 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
         basic: { ...prev.basic, status: newStatus }
       }));
 
+      // Update save tracking
       useAdminStore.getState().setLastSaved(new Date().toISOString());
       useAdminStore.getState().setHasUnsavedChanges(false);
 
@@ -205,6 +194,8 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
       setIsSaving(false);
     }
   };
+
+
 
   const handleLanguageChange = (lang: Language) => {
     setSelectedLanguage(lang);
@@ -259,7 +250,12 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
   const config = getContentTypeConfig();
 
   return (
-    <div className="space-y-6">
+    <>
+      <UnsavedChangesWarning 
+        hasUnsavedChanges={saveTracking.hasUnsavedChanges}
+        onSave={() => handleSave(false)}
+      />
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
@@ -283,12 +279,12 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
         </div>
 
         <div className="flex items-center space-x-2">
-          {/* Auto-save indicator */}
+          {/* Save status indicator */}
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
             <Clock className="h-4 w-4" />
             <span>
-              {useAdminStore.getState().autoSave.lastSaved 
-                ? `上次保存: ${new Date(useAdminStore.getState().autoSave.lastSaved).toLocaleTimeString()}`
+              {saveTracking.lastSaved 
+                ? `上次保存: ${new Date(saveTracking.lastSaved).toLocaleTimeString()}`
                 : '未保存'
               }
             </span>
@@ -690,7 +686,8 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </>
   );
 };
 

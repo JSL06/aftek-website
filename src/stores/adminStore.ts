@@ -116,9 +116,7 @@ interface AdminActions {
   removeRecentItem: (id: string) => void;
   clearRecentItems: () => void;
   
-  // Auto-save Actions
-  setAutoSaveEnabled: (enabled: boolean) => void;
-  setAutoSaveInterval: (interval: number) => void;
+  // Save tracking Actions
   setLastSaved: (timestamp: string) => void;
   setHasUnsavedChanges: (hasChanges: boolean) => void;
   
@@ -184,11 +182,9 @@ const initialState: AdminState = {
     isSearching: false
   },
   
-  // Auto-save
-  autoSave: {
-    enabled: false, // Disabled by default to prevent frequent reloads
-    interval: 300000, // 5 minutes (300 seconds)
-    lastSaved: null,
+  // Save tracking
+  saveTracking: {
+    lastSaved: string | null,
     hasUnsavedChanges: false
   }
 };
@@ -402,21 +398,13 @@ export const useAdminStore = create<AdminState & AdminActions>()(
       
       clearRecentItems: () => set({ recentItems: [] }),
       
-      // Auto-save Actions
-      setAutoSaveEnabled: (enabled: boolean) => set(state => ({
-        autoSave: { ...state.autoSave, enabled }
-      })),
-      
-      setAutoSaveInterval: (interval: number) => set(state => ({
-        autoSave: { ...state.autoSave, interval }
-      })),
-      
+      // Save tracking Actions
       setLastSaved: (timestamp: string) => set(state => ({
-        autoSave: { ...state.autoSave, lastSaved: timestamp }
+        saveTracking: { ...state.saveTracking, lastSaved: timestamp }
       })),
       
       setHasUnsavedChanges: (hasChanges: boolean) => set(state => ({
-        autoSave: { ...state.autoSave, hasUnsavedChanges: hasChanges }
+        saveTracking: { ...state.saveTracking, hasUnsavedChanges: hasChanges }
       })),
       
       // Utility Actions
@@ -428,7 +416,7 @@ export const useAdminStore = create<AdminState & AdminActions>()(
         sidebar: state.sidebar,
         theme: state.theme,
         language: state.language,
-        autoSave: state.autoSave,
+        saveTracking: state.saveTracking,
         recentItems: state.recentItems
       })
     }
