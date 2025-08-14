@@ -95,7 +95,7 @@ const WebsiteTextManager = () => {
               Back to Dashboard
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold">Website Text Manager</h1>
+          <h1 className="text-2xl font-bold">{t('page.title.admin.websiteText')}</h1>
           <p className="text-primary-foreground/80 mb-2">Edit all text on the website, including titles, captions, filter labels, and body content. Changes are live.</p>
         </div>
       </div>

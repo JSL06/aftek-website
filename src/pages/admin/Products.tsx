@@ -59,7 +59,7 @@ const FEATURE_OPTIONS = [
 ];
 
 const Products = () => {
-  const { currentLanguage } = useTranslation();
+  const { currentLanguage, t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
   const [products, setProducts] = useState<Product[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -500,22 +500,22 @@ const Products = () => {
           <Link to="/admin/dashboard">
             <Button variant="secondary" className="mb-4 bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              返回仪表板
+              {t('admin.common.backToDashboard')}
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold">产品管理</h1>
+          <h1 className="text-2xl font-bold">{t('page.title.admin.products')}</h1>
         </div>
       </div>
 
       <div className="container mx-auto p-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold">产品管理</h1>
-            <p className="text-muted-foreground">管理您的产品目录</p>
+            <h1 className="text-3xl font-bold">{t('page.title.admin.products')}</h1>
+            <p className="text-muted-foreground">{t('admin.products.pageDescription')}</p>
           </div>
           <Button onClick={handleAddNew}>
             <Plus className="h-4 w-4 mr-2" />
-            添加产品
+            {t('admin.products.addProduct')}
           </Button>
         </div>
 
