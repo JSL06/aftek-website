@@ -98,7 +98,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </div>
             
             {/* Features List */}
-            {!isCompact && (
+            {!isCompact && product.features && Array.isArray(product.features) && product.features.length > 0 && (
               <ul className="space-y-1">
                 {product.features.slice(0, 4).map((feature, index) => (
                   <li key={index} className="text-sm text-muted-foreground flex items-start">
@@ -110,7 +110,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             )}
 
             {/* Compact view - show first 2 features */}
-            {isCompact && product.features.length > 0 && (
+            {isCompact && product.features && Array.isArray(product.features) && product.features.length > 0 && (
               <div className="text-sm text-muted-foreground">
                 <span className="font-medium">Key Features:</span>
                 <div className="mt-1">

@@ -112,7 +112,7 @@ const UnifiedProducts = () => {
         product.description.toLowerCase().includes(term) ||
         product.category.toLowerCase().includes(term) ||
         product.model.toLowerCase().includes(term) ||
-        product.features.some(feature => feature.toLowerCase().includes(term))
+        (Array.isArray(product.features) && product.features.some(feature => feature.toLowerCase().includes(term)))
       );
     }
 
@@ -167,7 +167,7 @@ const UnifiedProducts = () => {
       category: product.category,
       price: product.price,
       model: product.model,
-      features: [...product.features],
+      features: Array.isArray(product.features) ? [...product.features] : [],
       inStock: product.inStock,
       showInFeatured: product.showInFeatured,
       isActive: product.isActive,
@@ -553,7 +553,7 @@ const UnifiedProducts = () => {
                               <span className="text-muted-foreground ml-2">({product.category})</span>
                             </div>
                             <Badge variant="secondary" className="text-xs">
-                              {product.features?.slice(0, 2).join(', ')}
+                              {Array.isArray(product.features) ? product.features.slice(0, 2).join(', ') : ''}
                             </Badge>
                           </label>
                         ))}

@@ -121,6 +121,11 @@ export const useTranslation = () => {
   const getInitialLanguage = (): Language => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('aftek-language');
+      // Force Traditional Chinese if Simplified Chinese is saved
+      if (saved === 'zh-Hans') {
+        localStorage.removeItem('aftek-language');
+        return 'zh-Hant';
+      }
       if (saved && Object.keys(localTranslations).includes(saved)) {
         return saved as Language;
       }
@@ -242,34 +247,27 @@ export const useTranslation = () => {
       return value || key;
     };
 
-    // Debug logging for articles.title specifically
-    if (key === 'articles.title') {
-      console.log('🔍 Translation request for articles.title');
-      console.log('   Current language:', currentLanguage);
-      console.log('   Loading state:', loading);
-      console.log('   Database translations count:', Object.keys(translations).length);
-      console.log('   Local translation available:', !!localTranslations[currentLanguage]?.[key]);
-      console.log('   Local translation value:', localTranslations[currentLanguage]?.[key]);
-      console.log('   Database translation available:', !!translations[key]);
-      console.log('   Database translation value:', translations[key]);
-    }
-
-    // Debug logging for admin keys
-    if (key.startsWith('admin.')) {
-      console.log('Translation request for:', key, 'Current language:', currentLanguage);
-      console.log('Local translations available:', Object.keys(localTranslations[currentLanguage] || {}).filter(k => k.startsWith('admin.')));
-      console.log('Database translations available:', Object.keys(translations).filter(k => k.startsWith('admin.')));
-    }
-
-    // Special handling for articles.title in Traditional Chinese
-    if (key === 'articles.title' && currentLanguage === 'zh-Hant') {
-      console.log('🔧 Force using local translation for articles.title in Traditional Chinese');
+    // For Traditional Chinese, prioritize local translations over database translations
+    if (currentLanguage === 'zh-Hant') {
+      // First check local Traditional Chinese translations
       const localValue = localTranslations['zh-Hant']?.[key];
       if (localValue) {
         return getValue(localValue);
       }
+      
+      // Then check database translations as fallback
+      if (!loading) {
+        const translation = translations[key];
+        if (translation) {
+          return getValue(translation);
+        }
+      }
+      
+      // Show the key instead of falling back to English
+      return key;
     }
 
+    // For other languages, use the original priority order
     // First check database translations (highest priority)
     if (!loading) {
       const translation = translations[key];
@@ -279,30 +277,21 @@ export const useTranslation = () => {
     }
 
     // Then check local translations as fallback
-    const localTrans = localTranslations[currentLanguage] || localTranslations['zh-Hant'];
-    const localValue = localTrans[key];
+    const localTrans = localTranslations[currentLanguage];
+    const localValue = localTrans?.[key];
     if (localValue) {
       return getValue(localValue);
     }
 
     // Force check Traditional Chinese for admin keys
-    if (key.startsWith('admin.') && currentLanguage !== 'zh-Hant') {
+    if (key.startsWith('admin.')) {
       const zhHantValue = localTranslations['zh-Hant']?.[key];
       if (zhHantValue) {
-        console.log('Using Traditional Chinese fallback for:', key, zhHantValue);
         return getValue(zhHantValue);
       }
     }
 
-    // Then check fallback translations - prioritize Traditional Chinese
-    const fallbackValue = fallbackTranslations[key]?.[currentLanguage] || 
-                         fallbackTranslations[key]?.['zh-Hant'] || 
-                         fallbackTranslations[key]?.['en'];
-    if (fallbackValue) {
-      return getValue(fallbackValue);
-    }
-    
-    // Last resort: return the key itself
+    // Show the key instead of falling back to English
     return key;
   };
 

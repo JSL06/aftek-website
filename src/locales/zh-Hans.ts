@@ -15,7 +15,7 @@ const zhHans = {
   'home.hero.companyProfileBtn': '公司简介PDF',
   
   'home.mission.title': '使命宣言',
-  'home.mission.content': 'Aftek致力于提供高品质的建筑材料和创新解决方案，以满足建筑业的多样化需求。我们专注于开发和供应先进的建筑材料，提升建筑项目的耐久性、安全性和效率。\n\n我们的初衷且唯一的目标，就是协助客户及广垠市场进一步认识建材化学，了解如何藉由使用具高效能、与时并进之创新产品，将自身产业价值最大化，以期共创无限商机。',
+  'home.mission.content': '台湾艾富克股份有限公司及其关系企业分布横跨整个亚太区，涵盖建材填缝胶、接着剂、地坪材料及防水材料等领域之专业厂商，提供客户建材化学材料的使用建议及咨询服务。结合了母公司南寳树脂之化学专业团队，台湾艾富克除了串联亚洲区各专业人士的技术支援外，同建立与欧洲、澳洲及美国等关键策略团队之长期伙伴关系，近年来，藉由不断与德、法、义、澳等国的技术合作与研发，使产品线的发展愈趋完整。\n\n我们的初衷且唯一的目标，就是协助客户及广垠市场进一步认识建材化学，了解如何藉由使用具高效能、与时并进之创新产品，将自身产业价值最大化，以期共创无限商机。',
   
   'home.services.title': '我们的服务',
   'home.services.subtitle': '横跨亚太市场的综合建筑材料和建筑解决方案',
@@ -136,11 +136,7 @@ const zhHans = {
   'ui.getQuote': '获取报价',
   'ui.backToProducts': '返回产品',
 
-  // Chatbot
-  'chatbot.title': '我们能为您做什么？',
-  'chatbot.placeholder': '询问我们的产品...',
-  'chatbot.send': '发送',
-  'chatbot.typing': '正在输入...',
+
 
   // About Page
   'about.title': '关于我们',
@@ -368,19 +364,7 @@ const zhHans = {
   'home.partners.title': '合作伙伴',
   'home.partners.desc': '这里将展示我们的合作伙伴公司和平台。',
 
-  // Chatbot - Additional Keys
-  'chatbot.welcome': '您好！我在这里协助您了解我们的建筑材料和解决方案。今天我能为您提供什么帮助？',
-  'chatbot.subtitle': '询问我关于产品、服务或技术信息',
-  'chatbot.responses.waterproofing': '我们的防水解决方案包括液体涂布薄膜、片状薄膜和注入系统。我们为屋顶、地下室和外墙提供产品。您想了解更多关于特定应用的信息吗？',
-  'chatbot.responses.sealants': '我们为建筑接缝、缝隙和粘接应用提供高性能密封剂和胶黏剂。我们的产品包括硅胶、聚氨酯和混合配方。您在寻找什么类型的应用？',
-  'chatbot.responses.flooring': '我们的地板解决方案包括环氧树脂涂料、自流平化合物和工业商业应用的装饰饰面。我们为高人流区域、抗化学腐蚀和防滑表面提供产品。',
-  'chatbot.responses.insulation': '我们提供隔热和隔音解决方案以及保护涂层。我们的产品有助于改善建筑物的能源效率和声音控制。',
-  'chatbot.responses.projects': '我们在亚太地区完成了许多成功的项目。您可以在项目页面查看我们的项目作品集，了解案例研究和应用。',
-  'chatbot.responses.contact': '您可以拨打02-2799-6558或发送电子邮件至info@aftek.com.tw联系我们。我们的办公室位于台湾新北市中和区健康路37号10楼。',
-  'chatbot.responses.technical': '我们提供全面的技术支持，包括应用指南、规格和咨询服务。我们的技术团队可以协助产品选择和安装指导。',
-  'chatbot.responses.consultation': '我们为您的建筑项目提供免费咨询服务。我们的专家可以协助您选择合适的产品并提供应用指导。请联系我们安排咨询。',
-  'chatbot.responses.default': '感谢您的问题。我在这里协助您了解我们的建筑材料和解决方案。您可以询问防水、密封剂、地板、隔热或我们提供的任何其他产品。',
-  'chatbot.responses.recommendations': '根据您的需求，我们推荐：{products}',
+
 
   // UI - Additional Keys
   'ui.viewPdf': '查看PDF',
@@ -409,6 +393,17 @@ const zhHans = {
   'guide.facilityType6.description': '适用于医院和诊所的卫生解决方案',
   'guide.facilityType7.name': '工业设施',
   'guide.facilityType7.description': '适用于工厂和工业建筑的坚固解决方案',
+  'guide.explorer.changeFacility': '更换设施',
+
+  // Guide Facilities
+  'guide.facilities.residential': '住宅',
+  'guide.facilities.residentialDesc': '住宅、公寓和住宅综合体',
+  'guide.facilities.commercial': '商业',
+  'guide.facilities.commercialDesc': '办公楼、零售空间和商业建筑',
+  'guide.facilities.industrial': '工业',
+  'guide.facilities.industrialDesc': '工厂、仓库和工业设施',
+  'guide.facilities.infrastructure': '基础设施',
+  'guide.facilities.infrastructureDesc': '桥梁、道路和公共基础设施项目',
 
   // Articles - Additional Keys
   'articles.filters.title': '筛选文章',
@@ -602,8 +597,7 @@ const zhHans = {
   'admin.websiteText.contactDesc': '编辑联系表单标签、办公室信息和联系详情',
   'admin.websiteText.footer': '页脚',
   'admin.websiteText.footerDesc': '编辑页脚链接、公司信息和联系详情',
-  'admin.websiteText.chatbot': 'AI聊天机器人',
-  'admin.websiteText.chatbotDesc': '编辑聊天机器人欢迎消息和响应模板',
+
   'admin.websiteText.common': '通用UI元素',
   'admin.websiteText.commonDesc': '编辑整个网站使用的按钮、标签和通用界面元素',
   'admin.websiteText.media': '媒体和资源',

@@ -15,7 +15,7 @@ const en = {
   'home.hero.companyProfileBtn': 'Company Profile PDF',
   
   'home.mission.title': 'Mission Statement',
-  'home.mission.content': 'Taiwan Aftek Co., Ltd. and its affiliated companies are distributed across the entire Asia-Pacific region, covering professional manufacturers in the fields of construction sealants, adhesives, flooring materials, and waterproofing materials, providing customers with usage recommendations and consulting services for construction chemical materials. Combining the chemical expertise team of our parent company, NanPao Resins Chemical Group, Taiwan Aftek not only connects technical support from various professionals across Asia but also establishes long-term partnerships with key strategic teams in Europe, Australia, and the United States. In recent years, through continuous technical cooperation and R&D with Germany, France, Italy, Australia, and other countries, our product line development has become increasingly comprehensive.\n\nOur original intention and sole goal is to help customers and the vast market better understand construction chemicals, learn how to maximize their industry value through the use of high-performance, innovative products that keep pace with the times, and create unlimited business opportunities together.',
+  'home.mission.content': 'Taiwan Aftek Co., Ltd. and its affiliated companies are distributed across the entire Asia-Pacific region, covering professional manufacturers in the fields of construction sealants, adhesives, flooring materials, and waterproofing materials, providing customers with construction chemical material usage recommendations and consulting services. Combining the chemical expertise team of parent company Nan Pao Resins, Taiwan Aftek not only connects technical support from various professionals across Asia, but also establishes long-term partnerships with key strategic teams in Europe, Australia, and the United States. In recent years, through continuous technical cooperation and research and development with Germany, France, Italy, Australia, and other countries, the development of product lines has become increasingly complete.\n\nOur original intention and only goal is to help customers and the vast market further understand construction chemicals, understand how to maximize their industry value by using high-performance, innovative products that keep pace with the times, in order to create unlimited business opportunities together.',
   
   'home.services.title': 'Our Services',
   'home.services.subtitle': 'Comprehensive building materials and construction solutions across Asia-Pacific markets',
@@ -136,11 +136,7 @@ const en = {
   'ui.getQuote': 'Get Quote',
   'ui.backToProducts': 'Back to Products',
 
-  // Chatbot
-  'chatbot.title': 'How can we help?',
-  'chatbot.placeholder': 'Ask about our products...',
-  'chatbot.send': 'Send',
-  'chatbot.typing': 'Typing...',
+
 
   // About Page
   'about.title': 'About',
@@ -425,19 +421,7 @@ const en = {
   'home.partners.title': 'Partners',
   'home.partners.desc': 'Here will be a showcase of our partner companies and platforms.',
 
-  // Chatbot - Additional Keys
-  'chatbot.welcome': 'Hello! I\'m here to help you with information about our construction materials and solutions. How can I assist you today?',
-  'chatbot.subtitle': 'Ask me about our products, services, or technical information',
-  'chatbot.responses.waterproofing': 'Our waterproofing solutions include liquid-applied membranes, sheet membranes, and injection systems. We offer products for roofs, basements, and exterior walls. Would you like to know more about specific applications?',
-  'chatbot.responses.sealants': 'We provide high-performance sealants and adhesives for construction joints, gaps, and bonding applications. Our products include silicone, polyurethane, and hybrid formulations. What type of application are you looking for?',
-  'chatbot.responses.flooring': 'Our flooring solutions include epoxy coatings, self-leveling compounds, and decorative finishes for industrial and commercial applications. We offer products for high-traffic areas, chemical resistance, and anti-slip surfaces.',
-  'chatbot.responses.insulation': 'We offer thermal and acoustic insulation solutions along with protective coatings. Our products help improve energy efficiency and sound control in buildings.',
-  'chatbot.responses.projects': 'We have completed numerous successful projects across Asia-Pacific. You can view our project portfolio on the Projects page to see case studies and applications.',
-  'chatbot.responses.contact': 'You can reach us at 02-2799-6558 or email us at info@aftek.com.tw. Our office is located at 10F., No. 37, Jiankang Rd., Zhonghe Dist., New Taipei City 235, Taiwan.',
-  'chatbot.responses.technical': 'We provide comprehensive technical support including application guides, specifications, and consultation services. Our technical team can help with product selection and installation guidance.',
-  'chatbot.responses.consultation': 'We offer free consultation services for your construction projects. Our experts can help you choose the right products and provide application guidance. Please contact us to schedule a consultation.',
-  'chatbot.responses.default': 'Thank you for your question. I\'m here to help with information about our construction materials and solutions. You can ask about waterproofing, sealants, flooring, insulation, or any other products we offer.',
-  'chatbot.responses.recommendations': 'Based on your needs, we recommend: {products}',
+
 
   // UI - Additional Keys
   'ui.viewPdf': 'View PDF',
@@ -659,8 +643,7 @@ const en = {
   'admin.websiteText.contactDesc': 'Edit contact form labels, office information, and contact details',
   'admin.websiteText.footer': 'Footer',
   'admin.websiteText.footerDesc': 'Edit footer links, company information, and contact details',
-  'admin.websiteText.chatbot': 'AI Chatbot',
-  'admin.websiteText.chatbotDesc': 'Edit chatbot welcome messages and response templates',
+
   'admin.websiteText.common': 'Common UI Elements',
   'admin.websiteText.commonDesc': 'Edit buttons, labels, and common interface elements used throughout the website',
   'admin.websiteText.media': 'Media & Resources',

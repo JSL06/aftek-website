@@ -15,7 +15,7 @@ const vi = {
   'home.hero.companyProfileBtn': 'Hồ sơ công ty PDF',
   
   'home.mission.title': 'Tuyên bố sứ mệnh',
-  'home.mission.content': 'Aftek cam kết cung cấp vật liệu xây dựng chất lượng cao và các giải pháp sáng tạo để đáp ứng nhu cầu đa dạng của ngành xây dựng. Chúng tôi tập trung vào việc phát triển và cung cấp vật liệu xây dựng tiên tiến nhằm nâng cao độ bền, an toàn và hiệu quả của các dự án xây dựng.\n\nÝ định ban đầu và mục tiêu duy nhất của chúng tôi là giúp khách hàng và thị trường rộng lớn hiểu rõ hơn về hóa chất xây dựng, học cách tối đa hóa giá trị ngành của họ thông qua việc sử dụng các sản phẩm sáng tạo hiệu suất cao theo kịp thời đại, và cùng nhau tạo ra cơ hội kinh doanh vô hạn.',
+  'home.mission.content': 'Công ty TNHH Aftek Đài Loan và các công ty liên kết phân bố khắp khu vực Châu Á-Thái Bình Dương, bao gồm các nhà sản xuất chuyên nghiệp trong các lĩnh vực keo trám khe xây dựng, chất kết dính, vật liệu sàn và vật liệu chống thấm, cung cấp cho khách hàng các khuyến nghị sử dụng và dịch vụ tư vấn về vật liệu hóa chất xây dựng. Kết hợp với đội ngũ chuyên môn hóa học của công ty mẹ Nam Bảo Resin, Aftek Đài Loan không chỉ kết nối hỗ trợ kỹ thuật từ các chuyên gia khác nhau ở Châu Á, mà còn thiết lập quan hệ đối tác dài hạn với các nhóm chiến lược chính ở Châu Âu, Úc và Hoa Kỳ. Trong những năm gần đây, thông qua hợp tác kỹ thuật và nghiên cứu phát triển liên tục với Đức, Pháp, Ý, Úc và các quốc gia khác, sự phát triển của các dòng sản phẩm ngày càng hoàn thiện.\n\nMục đích ban đầu và mục tiêu duy nhất của chúng tôi là giúp khách hàng và thị trường rộng lớn hiểu rõ hơn về hóa chất xây dựng, hiểu cách tối đa hóa giá trị ngành của mình bằng cách sử dụng các sản phẩm sáng tạo hiệu suất cao và theo kịp thời đại, để cùng tạo ra cơ hội kinh doanh vô hạn.',
   
   'home.services.title': 'Dịch vụ của chúng tôi',
   'home.services.subtitle': 'Vật liệu xây dựng và giải pháp xây dựng toàn diện trên khắp thị trường Châu Á-Thái Bình Dương',
@@ -123,11 +123,7 @@ const vi = {
   'ui.getQuote': 'Yêu cầu báo giá',
   'ui.backToProducts': 'Quay lại sản phẩm',
 
-  // Chatbot
-  'chatbot.title': 'Chúng tôi có thể giúp gì?',
-  'chatbot.placeholder': 'Hỏi về sản phẩm của chúng tôi...',
-  'chatbot.send': 'Gửi',
-  'chatbot.typing': 'Đang gõ...',
+
 
   // About Page
   'about.title': 'Giới thiệu',
@@ -341,18 +337,7 @@ const vi = {
   'home.partners.title': 'Đối tác',
   'home.partners.desc': 'Đây sẽ là nơi trưng bày các công ty đối tác và nền tảng của chúng tôi.',
 
-  // Chatbot - Additional Keys
-  'chatbot.welcome': 'Xin chào! Tôi ở đây để giúp bạn với thông tin về vật liệu xây dựng và giải pháp của chúng tôi. Hôm nay tôi có thể giúp gì cho bạn?',
-  'chatbot.subtitle': 'Hỏi tôi về sản phẩm, dịch vụ hoặc thông tin kỹ thuật',
-  'chatbot.responses.waterproofing': 'Giải pháp chống thấm của chúng tôi bao gồm màng ứng dụng lỏng, màng tấm và hệ thống tiêm. Chúng tôi cung cấp sản phẩm cho mái nhà, tầng hầm và tường ngoài. Bạn có muốn biết thêm về các ứng dụng cụ thể không?',
-  'chatbot.responses.sealants': 'Chúng tôi cung cấp chất bịt kín và keo dán hiệu suất cao cho các mối nối, khe hở và ứng dụng liên kết trong xây dựng. Sản phẩm của chúng tôi bao gồm công thức silicone, polyurethane và hybrid. Bạn đang tìm kiếm loại ứng dụng nào?',
-  'chatbot.responses.flooring': 'Giải pháp sàn của chúng tôi bao gồm lớp phủ epoxy, hợp chất tự cân bằng và hoàn thiện trang trí cho các ứng dụng công nghiệp và thương mại. Chúng tôi cung cấp sản phẩm cho khu vực lưu lượng cao, chống hóa chất và bề mặt chống trượt.',
-  'chatbot.responses.insulation': 'Chúng tôi cung cấp giải pháp cách nhiệt và cách âm cùng với lớp phủ bảo vệ. Sản phẩm của chúng tôi giúp cải thiện hiệu quả năng lượng và kiểm soát âm thanh trong các tòa nhà.',
-  'chatbot.responses.projects': 'Chúng tôi đã hoàn thành nhiều dự án thành công trên khắp Châu Á-Thái Bình Dương. Bạn có thể xem danh mục dự án của chúng tôi trên trang Dự án để xem các nghiên cứu trường hợp và ứng dụng.',
-  'chatbot.responses.contact': 'Bạn có thể liên hệ với chúng tôi tại 02-2799-6558 hoặc gửi email cho chúng tôi tại info@aftek.com.tw. Văn phòng của chúng tôi nằm tại Tầng 10, Số 37, Đường Jiankang, Quận Zhonghe, Tân Bắc, Đài Loan.',
-  'chatbot.responses.technical': 'Chúng tôi cung cấp hỗ trợ kỹ thuật toàn diện bao gồm hướng dẫn ứng dụng, thông số kỹ thuật và dịch vụ tư vấn. Đội ngũ kỹ thuật của chúng tôi có thể giúp lựa chọn sản phẩm và hướng dẫn lắp đặt.',
-  'chatbot.responses.consultation': 'Chúng tôi cung cấp dịch vụ tư vấn miễn phí cho các dự án xây dựng của bạn. Các chuyên gia của chúng tôi có thể giúp bạn chọn sản phẩm phù hợp và cung cấp hướng dẫn ứng dụng. Vui lòng liên hệ với chúng tôi để lên lịch tư vấn.',
-  'chatbot.responses.default': 'Cảm ơn câu hỏi của bạn. Tôi ở đây để giúp với thông tin về vật liệu xây dựng và giải pháp của chúng tôi. Bạn có thể hỏi về chống thấm, chất bịt kín, sàn, cách nhiệt hoặc bất kỳ sản phẩm nào khác mà chúng tôi cung cấp.',
+
 
   // UI - Additional Keys
   'ui.viewPdf': 'Xem PDF',
@@ -381,6 +366,17 @@ const vi = {
   'guide.facilityType6.description': 'Giải pháp vệ sinh cho bệnh viện và phòng khám',
   'guide.facilityType7.name': 'Cơ sở công nghiệp',
   'guide.facilityType7.description': 'Giải pháp mạnh mẽ cho nhà máy và tòa nhà công nghiệp',
+  'guide.explorer.changeFacility': 'Thay đổi cơ sở',
+
+  // Guide Facilities
+  'guide.facilities.residential': 'Dân cư',
+  'guide.facilities.residentialDesc': 'Nhà ở, căn hộ và khu phức hợp dân cư',
+  'guide.facilities.commercial': 'Thương mại',
+  'guide.facilities.commercialDesc': 'Tòa nhà văn phòng, không gian bán lẻ và cấu trúc thương mại',
+  'guide.facilities.industrial': 'Công nghiệp',
+  'guide.facilities.industrialDesc': 'Nhà máy, kho hàng và cơ sở công nghiệp',
+  'guide.facilities.infrastructure': 'Cơ sở hạ tầng',
+  'guide.facilities.infrastructureDesc': 'Cầu, đường và dự án cơ sở hạ tầng công cộng',
 
   // Articles - Additional Keys
   'articles.filters.title': 'Lọc bài viết',
@@ -574,8 +570,7 @@ const vi = {
   'admin.websiteText.contactDesc': 'Chỉnh sửa nhãn biểu mẫu liên hệ, thông tin văn phòng và chi tiết liên hệ',
   'admin.websiteText.footer': 'Chân trang',
   'admin.websiteText.footerDesc': 'Chỉnh sửa liên kết chân trang, thông tin công ty và chi tiết liên hệ',
-  'admin.websiteText.chatbot': 'AI Chatbot',
-  'admin.websiteText.chatbotDesc': 'Chỉnh sửa tin nhắn chào mừng chatbot và mẫu phản hồi',
+
   'admin.websiteText.common': 'Phần tử UI chung',
   'admin.websiteText.commonDesc': 'Chỉnh sửa nút, nhãn và phần tử giao diện chung được sử dụng trên toàn trang web',
   'admin.websiteText.media': 'Phương tiện và tài nguyên',

@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '../integrations/supabase/client';
 
 export interface FilterOption {
   id: string;
@@ -10,161 +10,127 @@ export interface FilterOption {
   updated_at?: string;
 }
 
-class FilterService {
-  private filterOptions: FilterOption[] = [];
-  private initialized = false;
+export const filterService = {
+  async getFilterOptions(type?: string): Promise<FilterOption[]> {
+    let query = supabase
+      .from('filter_options')
+      .select('*')
+      .order('type', { ascending: true })
+      .order('display_order', { ascending: true });
 
-  constructor() {
-    this.initializeFilterOptions();
-  }
-
-  private async initializeFilterOptions(): Promise<void> {
-    if (this.initialized) return;
-    
-    try {
-      await this.loadFromDatabase();
-      this.initialized = true;
-    } catch (error) {
-      console.error('Error initializing filter options:', error);
+    if (type) {
+      query = query.eq('type', type);
     }
-  }
 
-  private async loadFromDatabase(): Promise<void> {
-    try {
-      const { data, error } = await supabase
-        .from('filter_options')
-        .select('*')
-        .eq('is_active', true)
-        .order('type', { ascending: true })
-        .order('display_order', { ascending: true });
+    const { data, error } = await query;
 
-      if (error) throw error;
-      this.filterOptions = data || [];
-    } catch (error) {
-      console.error('Error loading filter options from database:', error);
-      this.filterOptions = [];
-    }
-  }
-
-  async getFilterOptionsByType(type: string): Promise<string[]> {
-    await this.initializeFilterOptions();
-    return this.filterOptions
-      .filter(option => option.type === type && option.is_active)
-      .sort((a, b) => a.display_order - b.display_order)
-      .map(option => option.value);
-  }
-
-  async getAllFilterOptions(): Promise<FilterOption[]> {
-    await this.initializeFilterOptions();
-    return [...this.filterOptions];
-  }
-
-  async getCategories(): Promise<string[]> {
-    return this.getFilterOptionsByType('category');
-  }
-
-  async getFeatures(): Promise<string[]> {
-    return this.getFilterOptionsByType('feature');
-  }
-
-  async getLocations(): Promise<string[]> {
-    return this.getFilterOptionsByType('location');
-  }
-
-  async getProjectTypes(): Promise<string[]> {
-    return this.getFilterOptionsByType('project_type');
-  }
-
-  async forceRefresh(): Promise<void> {
-    this.initialized = false;
-    await this.initializeFilterOptions();
-  }
-
-  // Admin functions for managing filter options
-  async addFilterOption(type: string, value: string): Promise<FilterOption> {
-    try {
-      const { data, error } = await supabase
-        .from('filter_options')
-        .insert({
-          type,
-          value: value.trim(),
-          display_order: this.filterOptions.filter(opt => opt.type === type).length + 1,
-          is_active: true
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      this.filterOptions.push(data);
-      return data;
-    } catch (error) {
-      console.error('Error adding filter option:', error);
+    if (error) {
+      console.error('Error fetching filter options:', error);
       throw error;
     }
-  }
 
-  async updateFilterOption(id: string, updates: Partial<FilterOption>): Promise<FilterOption | null> {
-    try {
-      const { data, error } = await supabase
-        .from('filter_options')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
+    return data || [];
+  },
 
-      if (error) throw error;
+  async getFilterOption(id: string): Promise<FilterOption | null> {
+    const { data, error } = await supabase
+      .from('filter_options')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-      this.filterOptions = this.filterOptions.map(opt => 
-        opt.id === id ? data : opt
-      );
+    if (error) {
+      console.error('Error fetching filter option:', error);
+      throw error;
+    }
 
-      return data;
-    } catch (error) {
+    return data;
+  },
+
+  async createFilterOption(filterOption: Omit<FilterOption, 'id' | 'created_at' | 'updated_at'>): Promise<FilterOption> {
+    const { data, error } = await supabase
+      .from('filter_options')
+      .insert([filterOption])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating filter option:', error);
+      throw error;
+    }
+
+    return data;
+  },
+
+  async updateFilterOption(id: string, updates: Partial<FilterOption>): Promise<FilterOption> {
+    const { data, error } = await supabase
+      .from('filter_options')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
       console.error('Error updating filter option:', error);
       throw error;
     }
-  }
 
-  async deleteFilterOption(id: string): Promise<boolean> {
-    try {
-      const { error } = await supabase
-        .from('filter_options')
-        .delete()
-        .eq('id', id);
+    return data;
+  },
 
-      if (error) throw error;
+  async deleteFilterOption(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('filter_options')
+      .delete()
+      .eq('id', id);
 
-      this.filterOptions = this.filterOptions.filter(opt => opt.id !== id);
-      return true;
-    } catch (error) {
+    if (error) {
       console.error('Error deleting filter option:', error);
       throw error;
     }
-  }
+  },
 
-  async toggleFilterOptionActive(id: string): Promise<boolean> {
-    try {
-      const option = this.filterOptions.find(opt => opt.id === id);
-      if (!option) throw new Error('Filter option not found');
+  async getFilterOptionsByType(type: string): Promise<FilterOption[]> {
+    const { data, error } = await supabase
+      .from('filter_options')
+      .select('*')
+      .eq('type', type)
+      .eq('is_active', true)
+      .order('display_order', { ascending: true });
 
-      const { error } = await supabase
-        .from('filter_options')
-        .update({ is_active: !option.is_active })
-        .eq('id', id);
-
-      if (error) throw error;
-
-      this.filterOptions = this.filterOptions.map(opt => 
-        opt.id === id ? { ...opt, is_active: !opt.is_active } : opt
-      );
-
-      return !option.is_active;
-    } catch (error) {
-      console.error('Error toggling filter option:', error);
+    if (error) {
+      console.error('Error fetching filter options by type:', error);
       throw error;
     }
-  }
-}
 
-export const filterService = new FilterService(); 
+    return data || [];
+  },
+
+  async getFeatures(): Promise<string[]> {
+    // Get features from the filter_options table
+    try {
+      const features = await this.getFilterOptionsByType('feature');
+      return features.map(f => f.value);
+    } catch (error) {
+      console.error('Error fetching features from database:', error);
+      // Fallback to default features if database query fails
+      return [
+        'Energy Efficient',
+        'Sustainable Design',
+        'Smart Technology',
+        'Modular Construction',
+        'Green Building',
+        'LEED Certified',
+        'BIM Implementation',
+        'Prefabricated Components',
+        'Renewable Energy',
+        'Water Conservation',
+        'Waste Management',
+        'Accessibility',
+        'Security Systems',
+        'HVAC Systems',
+        'Lighting Design'
+      ];
+    }
+  }
+}; 

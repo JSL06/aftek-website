@@ -15,7 +15,7 @@ const ko = {
   'home.hero.companyProfileBtn': '회사 프로필 PDF',
   
   'home.mission.title': '미션 스테이트먼트',
-  'home.mission.content': 'Aftek은 건설업계의 다양한 요구를 충족하는 고품질 건설 자재와 혁신적인 솔루션을 제공하는 데 전념합니다. 우리는 건설 프로젝트의 내구성, 안전성, 효율성을 향상시키는 첨단 건축 자재의 개발과 공급에 중점을 둡니다.\n\n우리의 원래 의도이자 유일한 목표는 고객과 광활한 시장이 건축용 화학재료를 더 잘 이해하고, 시대와 함께 발전하는 고성능의 혁신적인 제품을 사용하여 자신의 산업 가치를 극대화하고 무한한 비즈니스 기회를 함께 창조하는 방법을 배우는 것입니다.',
+  'home.mission.content': '대만 아프텍 주식회사와 그 계열사들은 아시아태평양 지역 전역에 분포하여 건축용 실런트, 접착제, 바닥재, 방수재 등의 분야의 전문 제조업체를 포괄하며, 고객에게 건축용 화학재료의 사용 권장사항과 컨설팅 서비스를 제공합니다. 모회사 남보수지의 화학 전문팀과 결합하여, 대만 아프텍은 아시아 지역의 각 전문가들의 기술 지원을 연결할 뿐만 아니라, 유럽, 호주, 미국 등의 핵심 전략팀과의 장기적인 파트너십도 구축하고 있습니다. 최근 몇 년간, 독일, 프랑스, 이탈리아, 호주 등의 국가들과의 지속적인 기술 협력과 연구개발을 통해, 제품 라인의 개발이 점점 더 완전해지고 있습니다.\n\n우리의 본래 의도이자 유일한 목표는 고객과 광활한 시장이 건축용 화학재료를 더 깊이 이해하고, 시대와 함께 발전하는 고성능의 혁신적인 제품을 사용하여 자신의 산업 가치를 극대화하는 방법을 이해하여, 무한한 비즈니스 기회를 함께 창조하는 것입니다.',
   
   'home.services.title': '우리의 서비스',
   'home.services.subtitle': '아시아태평양 시장 전역의 포괄적인 건축 자재 및 건설 솔루션',
@@ -114,11 +114,7 @@ const ko = {
   'ui.getQuote': '견적 받기',
   'ui.backToProducts': '제품으로 돌아가기',
 
-  // Chatbot
-  'chatbot.title': '어떻게 도와드릴까요?',
-  'chatbot.placeholder': '제품에 대해 문의하세요...',
-  'chatbot.send': '전송',
-  'chatbot.typing': '입력 중...',
+
 
   // About Page
   'about.title': '회사소개',
@@ -341,19 +337,7 @@ const ko = {
   'home.partners.title': '파트너',
   'home.partners.desc': '여기에 파트너 기업과 플랫폼의 쇼케이스가 표시됩니다.',
 
-  // Chatbot - Additional Keys
-  'chatbot.welcome': '안녕하세요! 건설 자재와 솔루션에 대한 정보를 도와드리겠습니다. 오늘 어떻게 도와드릴까요?',
-  'chatbot.subtitle': '제품, 서비스 또는 기술 정보에 대해 문의하세요',
-  'chatbot.responses.waterproofing': '우리의 방수 솔루션에는 액체 도포 막, 시트 막, 주입 시스템이 포함됩니다. 지붕, 지하실, 외벽용 제품을 제공합니다. 특정 응용에 대해 더 자세히 알고 싶으신가요?',
-  'chatbot.responses.sealants': '건축용 이음새, 틈새, 접착 응용을 위한 고성능 실런트와 접착제를 제공합니다. 실리콘, 폴리우레탄, 하이브리드 배합의 제품이 있습니다. 어떤 종류의 응용을 찾고 계신가요?',
-  'chatbot.responses.flooring': '우리의 바닥재 솔루션에는 에폭시 코팅, 셀프 레벨링 화합물, 산업 및 상업용 장식 마감재가 포함됩니다. 고교통량 지역, 내화학성, 미끄럼 방지 표면용 제품을 제공합니다.',
-  'chatbot.responses.insulation': '단열 및 방음 솔루션과 보호 코팅을 제공합니다. 우리의 제품은 건물의 에너지 효율성과 음향 제어 개선에 도움이 됩니다.',
-  'chatbot.responses.projects': '아시아태평양 지역에서 많은 성공적인 프로젝트를 완료했습니다. 프로젝트 페이지에서 프로젝트 포트폴리오를 확인하고 사례 연구와 응용을 볼 수 있습니다.',
-  'chatbot.responses.contact': '02-2799-6558로 전화하거나 info@aftek.com.tw로 이메일을 보내주세요. 사무실은 대만 신베이시 중허구 지엔캉로 37호 10층에 있습니다.',
-  'chatbot.responses.technical': '응용 가이드, 사양, 컨설팅 서비스를 포함한 포괄적인 기술 지원을 제공합니다. 기술 팀이 제품 선택과 설치 가이드를 도와드립니다.',
-  'chatbot.responses.consultation': '건설 프로젝트를 위한 무료 컨설팅 서비스를 제공합니다. 전문가가 적절한 제품 선택과 응용 가이드를 도와드립니다. 컨설팅 예약을 위해 연락해 주세요.',
-  'chatbot.responses.default': '질문해 주셔서 감사합니다. 건설 자재와 솔루션에 대한 정보를 도와드리겠습니다. 방수, 실런트, 바닥재, 단열 또는 제공하는 다른 제품에 대해 문의하실 수 있습니다.',
-  'chatbot.responses.recommendations': '귀하의 요구사항에 따라 다음을 추천합니다: {products}',
+
 
   // UI - Additional Keys
   'ui.viewPdf': 'PDF 보기',
@@ -382,6 +366,17 @@ const ko = {
   'guide.facilityType6.description': '병원과 클리닉을 위한 위생 솔루션',
   'guide.facilityType7.name': '산업 시설',
   'guide.facilityType7.description': '공장과 산업 건물을 위한 견고한 솔루션',
+  'guide.explorer.changeFacility': '시설 변경',
+
+  // Guide Facilities
+  'guide.facilities.residential': '주거',
+  'guide.facilities.residentialDesc': '주택, 아파트, 주거 단지',
+  'guide.facilities.commercial': '상업',
+  'guide.facilities.commercialDesc': '사무실 건물, 소매 공간, 상업 구조물',
+  'guide.facilities.industrial': '산업',
+  'guide.facilities.industrialDesc': '공장, 창고, 산업 시설',
+  'guide.facilities.infrastructure': '인프라',
+  'guide.facilities.infrastructureDesc': '다리, 도로, 공공 인프라 프로젝트',
 
   // Articles - Additional Keys
   'articles.filters.title': '기사 필터',
@@ -575,8 +570,7 @@ const ko = {
   'admin.websiteText.contactDesc': '연락처 양식 라벨, 사무실 정보, 연락처 세부사항 편집',
   'admin.websiteText.footer': '푸터',
   'admin.websiteText.footerDesc': '푸터 링크, 회사 정보, 연락처 세부사항 편집',
-  'admin.websiteText.chatbot': 'AI 챗봇',
-  'admin.websiteText.chatbotDesc': '챗봇 환영 메시지 및 응답 템플릿 편집',
+
   'admin.websiteText.common': '공통 UI 요소',
   'admin.websiteText.commonDesc': '웹사이트 전체에서 사용되는 버튼, 라벨, 공통 인터페이스 요소 편집',
   'admin.websiteText.media': '미디어 및 리소스',

@@ -228,12 +228,17 @@ html, body {
 }
 
 /* Use Times New Roman for Japanese and Simplified Chinese text */
-:lang(ja), :lang(zh-Hans) {
+:lang(ja), :lang(zh-Hans), :lang(zh-Hant) {
   font-family: 'Times New Roman', Times, serif !important;
 }
 
 /* Ensure all text elements use Times New Roman for Japanese and Simplified Chinese */
-:lang(ja) *, :lang(zh-Hans) * {
+:lang(ja) *, :lang(zh-Hans) *, :lang(zh-Hant) * {
+  font-family: 'Times New Roman', Times, serif !important;
+}
+
+/* Additional specific styling for Traditional Chinese */
+html[lang="zh-Hant"], html[lang="zh-Hant"] * {
   font-family: 'Times New Roman', Times, serif !important;
 }
 

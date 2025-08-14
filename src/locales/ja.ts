@@ -15,7 +15,7 @@ const ja = {
   'home.hero.companyProfileBtn': '会社プロファイルPDF',
   
   'home.mission.title': 'ミッションステートメント',
-  'home.mission.content': 'Aftekは、建設業界の多様なニーズを満たす高品質な建設材料と革新的なソリューションを提供することにコミットしています。私たちは、建設プロジェクトの耐久性、安全性、効率性を向上させる先進的な建築材料の開発と供給に焦点を当てています。\n\n私たちの本来の意図と唯一の目標は、お客様と広大な市場が建築用化学材料をより深く理解し、時代とともに進歩する高性能で革新的な製品の使用を通じて、自らの産業価値を最大化し、無限のビジネス機会を共に創造する方法を学ぶことです。',
+  'home.mission.content': '台湾アフテック株式会社とその関連企業は、アジア太平洋地域全体に分布し、建設用シーラント、接着剤、床材、防水材などの分野の専門メーカーをカバーし、お客様に建設用化学材料の使用提案とコンサルティングサービスを提供しています。親会社の南寳樹脂の化学専門チームと連携し、台湾アフテックは、アジア地域の各専門家からの技術支援を結びつけるだけでなく、ヨーロッパ、オーストラリア、アメリカなどの主要戦略チームとの長期的なパートナーシップも確立しています。近年、ドイツ、フランス、イタリア、オーストラリアなどの国々との継続的な技術協力と研究開発により、製品ラインの開発がますます完全になっています。\n\n私たちの本来の意図と唯一の目標は、お客様と広大な市場が建設用化学材料をより深く理解し、時代とともに進歩する高性能で革新的な製品を使用して自らの産業価値を最大化する方法を理解し、無限のビジネスチャンスを共に創造することです。',
   
   'home.services.title': '私たちのサービス',
   'home.services.subtitle': 'アジア太平洋市場全体の包括的な建築材料と建設ソリューション',
@@ -119,11 +119,7 @@ const ja = {
   'ui.getQuote': '見積もりを取得',
   'ui.backToProducts': '製品に戻る',
 
-  // Chatbot
-  'chatbot.title': 'どのようにお手伝いできますか？',
-  'chatbot.placeholder': '製品についてお尋ねください...',
-  'chatbot.send': '送信',
-  'chatbot.typing': '入力中...',
+
 
   // About Page
   'about.title': '会社概要',
@@ -472,19 +468,7 @@ const ja = {
   'home.featured.title': '注目製品',
   'home.featured.subtitle': 'ベストセラーソリューションをご覧ください',
 
-  // Chatbot - Additional Keys
-  'chatbot.welcome': 'こんにちは！建築材料とソリューションに関する情報をお手伝いします。今日はどのようにお手伝いできますか？',
-  'chatbot.subtitle': '製品、サービス、技術情報についてお尋ねください',
-  'chatbot.responses.waterproofing': '私たちの防水ソリューションには、液体塗布膜、シート膜、注入システムが含まれます。屋根、地下室、外壁用の製品を提供しています。特定の用途について詳しく知りたいですか？',
-  'chatbot.responses.sealants': '建築用継ぎ目、隙間、接着用途のための高性能シーラントと接着剤を提供しています。シリコーン、ポリウレタン、ハイブリッド配合の製品があります。どのような用途をお探しですか？',
-  'chatbot.responses.flooring': '私たちの床材ソリューションには、エポキシコーティング、セルフレベリング化合物、工業・商業用途の装飾仕上げが含まれます。高交通量エリア、耐薬品性、滑り止め表面用の製品を提供しています。',
-  'chatbot.responses.insulation': '断熱・防音ソリューションと保護コーティングを提供しています。私たちの製品は建物のエネルギー効率と音響制御の改善に役立ちます。',
-  'chatbot.responses.projects': 'アジア太平洋地域で多くの成功したプロジェクトを完了しています。プロジェクトページでプロジェクトポートフォリオを閲覧し、ケーススタディとアプリケーションをご覧いただけます。',
-  'chatbot.responses.contact': '02-2799-6558までお電話いただくか、info@aftek.com.twまでメールでお問い合わせください。オフィスは台湾新北市中和区建康路37号10階にあります。',
-  'chatbot.responses.technical': 'アプリケーションガイド、仕様、コンサルティングサービスを含む包括的な技術サポートを提供しています。技術チームが製品選択と設置ガイダンスをお手伝いします。',
-  'chatbot.responses.consultation': '建設プロジェクトのための無料コンサルティングサービスを提供しています。専門家が適切な製品の選択とアプリケーションガイダンスをお手伝いします。コンサルティングの予約はお問い合わせください。',
-  'chatbot.responses.default': 'ご質問ありがとうございます。建築材料とソリューションに関する情報をお手伝いします。防水、シーラント、床材、断熱、または提供している他の製品についてお尋ねください。',
-  'chatbot.responses.recommendations': 'あなたのニーズに基づいて、以下をお勧めします：{products}',
+
 
   // UI - Additional Keys
   'ui.viewPdf': 'PDFを表示',
@@ -513,6 +497,17 @@ const ja = {
   'guide.facilityType6.description': '病院やクリニックのための衛生ソリューション',
   'guide.facilityType7.name': '産業施設',
   'guide.facilityType7.description': '工場や産業建築のための堅牢なソリューション',
+  'guide.explorer.changeFacility': '施設を変更',
+
+  // Guide Facilities
+  'guide.facilities.residential': '住宅',
+  'guide.facilities.residentialDesc': '住宅、アパート、住宅複合施設',
+  'guide.facilities.commercial': '商業',
+  'guide.facilities.commercialDesc': 'オフィスビル、小売スペース、商業構造物',
+  'guide.facilities.industrial': '産業',
+  'guide.facilities.industrialDesc': '工場、倉庫、産業施設',
+  'guide.facilities.infrastructure': 'インフラ',
+  'guide.facilities.infrastructureDesc': '橋、道路、公共インフラプロジェクト',
 
   // Articles - Additional Keys
   'articles.filters.title': '記事をフィルター',
@@ -706,8 +701,7 @@ const ja = {
   'admin.websiteText.contactDesc': 'お問い合わせフォームのラベル、オフィス情報、連絡先詳細を編集',
   'admin.websiteText.footer': 'フッター',
   'admin.websiteText.footerDesc': 'フッターリンク、会社情報、連絡先詳細を編集',
-  'admin.websiteText.chatbot': 'AIチャットボット',
-  'admin.websiteText.chatbotDesc': 'チャットボットの歓迎メッセージとレスポンステンプレートを編集',
+
   'admin.websiteText.common': '共通UI要素',
   'admin.websiteText.commonDesc': 'ウェブサイト全体で使用されるボタン、ラベル、共通インターフェース要素を編集',
   'admin.websiteText.media': 'メディアとリソース',

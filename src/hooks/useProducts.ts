@@ -77,11 +77,11 @@ export const useProducts = (): UseProductsReturn => {
   }, [products]);
 
   const getProductsByCategory = useCallback((category: string): UnifiedProduct[] => {
-    return products.filter(product => product.category === category && product.isActive);
+    return products.filter(product => product.category === category);
   }, [products]);
 
   return {
-    products: products.filter(p => p.isActive), // Only return active products for website
+    products: products, // Return all products
     featuredProducts,
     loading,
     error,

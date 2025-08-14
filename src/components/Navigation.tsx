@@ -36,6 +36,7 @@ const Navigation = () => {
     { label: t('nav.articles'), path: '/articles', page: 'articles' },
     { label: t('nav.guide'), path: '/guide', page: 'home' }, // Guide is part of home
     { label: t('nav.contact'), path: '/contact', page: 'contact' },
+
   ];
 
   const languageOptions = [
