@@ -1643,7 +1643,7 @@ function WebsiteTextEditor() {
   const [texts, setTexts] = useState<WebsiteText[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>('zh-Hant');
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
   const [activeTab, setActiveTab] = useState('navigation');
   const [highlightedKey, setHighlightedKey] = useState<string | null>(null);
   const [shouldScrollToSection, setShouldScrollToSection] = useState(false);
@@ -2019,9 +2019,9 @@ function WebsiteTextEditor() {
     }
     
     // If not found and not Traditional Chinese, try Traditional Chinese as fallback
-    if (!text && selectedLanguage !== 'zh-Hant') {
-      text = texts.find(t => t.key === key && t.language === 'zh-Hant');
-    }
+            if (!text && selectedLanguage !== 'en') {
+          text = texts.find(t => t.key === key && t.language === 'en');
+        }
     
     // If still not found, try English as final fallback
     if (!text) {

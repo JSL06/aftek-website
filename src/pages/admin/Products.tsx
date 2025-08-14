@@ -60,7 +60,7 @@ const FEATURE_OPTIONS = [
 
 const Products = () => {
   const { currentLanguage } = useTranslation();
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>('zh-Hant');
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
   const [products, setProducts] = useState<Product[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);

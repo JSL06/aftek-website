@@ -21,7 +21,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 
 const AdminProjects = () => {
   const { t } = useTranslation();
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>('zh-Hant');
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
   const { projects, loading, addProject, updateProject, deleteProject, refetch } = useAdminProjects();
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [showForm, setShowForm] = useState(false);

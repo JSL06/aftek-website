@@ -18,7 +18,7 @@ export const QuickTranslationCopy: React.FC<QuickTranslationCopyProps> = ({
   onTranslationUpdate,
   className = ''
 }) => {
-  const [fromLanguage, setFromLanguage] = useState<Language>('zh-Hant');
+  const [fromLanguage, setFromLanguage] = useState<Language>('en');
   const [toLanguage, setToLanguage] = useState<Language>('zh-Hans');
   const [isCopying, setIsCopying] = useState(false);
 

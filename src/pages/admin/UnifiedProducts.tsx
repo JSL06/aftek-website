@@ -52,7 +52,7 @@ const CATEGORIES = [
 
 const UnifiedProducts = () => {
   const { t } = useTranslation();
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>('zh-Hant');
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
   const [products, setProducts] = useState<UnifiedProduct[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<UnifiedProduct[]>([]);
   const [editingProduct, setEditingProduct] = useState<UnifiedProduct | null>(null);

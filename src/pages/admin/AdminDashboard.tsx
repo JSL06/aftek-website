@@ -51,15 +51,12 @@ const AdminDashboard = () => {
     totalTranslations: 0
   });
   const [loading, setLoading] = useState(true);
-  const [selectedLanguage, setSelectedLanguage] = useState('zh-Hant');
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
 
-  // Force Traditional Chinese for admin pages
+  // Use current language from context, don't force any specific language
   useEffect(() => {
-    if (currentLanguage !== 'zh-Hant') {
-      console.log('Forcing Traditional Chinese for admin dashboard');
-      changeLanguage('zh-Hant');
-    }
-  }, [currentLanguage, changeLanguage]);
+    setSelectedLanguage(currentLanguage);
+  }, [currentLanguage]);
 
   // Simple test to verify translation function
   console.log('AdminDashboard - Translation test:', {

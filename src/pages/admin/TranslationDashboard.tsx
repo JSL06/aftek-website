@@ -73,7 +73,7 @@ const TranslationDashboard = () => {
   const [auditResult, setAuditResult] = useState<TranslationAuditResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>('zh-Hant');
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
   const [searchTerm, setSearchTerm] = useState('');
   const [validationResult, setValidationResult] = useState<{
     isValid: boolean;

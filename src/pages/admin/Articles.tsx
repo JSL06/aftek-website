@@ -35,7 +35,7 @@ interface Article {
 
 const Articles = () => {
   const { t } = useTranslation();
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>('zh-Hant' as Language);
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>('en' as Language);
   const [articles, setArticles] = useState<Article[]>([]);
   const [filteredArticles, setFilteredArticles] = useState<Article[]>([]);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);

@@ -121,7 +121,7 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
     specific: {}
   });
 
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>('zh-Hans');
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
