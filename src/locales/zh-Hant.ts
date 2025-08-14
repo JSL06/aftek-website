@@ -162,17 +162,17 @@ const zhHant = {
   'about.value.sustainability.desc': '我們致力於永續實踐和環保產品，為子孫後代保護我們的環境。',
 
   // About Page - Timeline
-  'about.timeline.2008.1': '成立Aftek有限公司，專注於建築化學解決方案',
-  'about.timeline.2009.1': '推出防水膜產品線',
-  'about.timeline.2009.2': '擴展到東南亞市場',
-  'about.timeline.2009.3': '在越南開設首個國際辦事處',
-  'about.timeline.2009.4': '與歐洲技術提供商建立合作夥伴關係',
-  'about.timeline.2011.1': '引入先進的密封劑和黏合劑技術',
-  'about.timeline.2013.1': '在台北建立研發中心',
-  'about.timeline.2014.1': '推出高性能地板解決方案',
-  'about.timeline.2015.1': '擴建生產設施以滿足不斷增長的需求',
-  'about.timeline.2017.1': '獲得品質管理ISO認證',
-  'about.timeline.2018.1': '推出技術支援和培訓數位平台',
+  'about.timeline.2008.1': 'ITLS-Taiwan總部在台灣台北成立',
+  'about.timeline.2009.1': 'ITLS-Taiwan在越南、印度尼西亞和馬來西亞建立當地辦事處',
+  'about.timeline.2009.2': '獲得新加坡DIY黏合劑和密封劑製造商Wessbond的技術支援',
+  'about.timeline.2009.3': '獲得澳洲建築材料和木材保護塗料製造商TWA的技術支援',
+  'about.timeline.2009.4': 'ITLS-印度尼西亞砂漿製造工廠成立',
+  'about.timeline.2011.1': 'ITLS-馬來西亞建立自動密封劑重新包裝線',
+  'about.timeline.2013.1': 'TWA-澳洲在馬來西亞獲得RLA製造工廠',
+  'about.timeline.2014.1': 'Atherton和TWA合併為RLA-澳洲',
+  'about.timeline.2015.1': 'ITLS-越南重組',
+  'about.timeline.2017.1': '重組ITLS-Taiwan並在台灣市場正式推出「Aftek」',
+  'about.timeline.2018.1': 'RLA-馬來西亞建立砂漿生產線',
 
   // About Page - CTA
   'about.ctaTitle': '準備好與我們合作了嗎？',

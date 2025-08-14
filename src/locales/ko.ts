@@ -142,17 +142,17 @@ const ko = {
   'about.value.sustainability.desc': '우리는 미래 세대를 위해 환경을 보호하는 지속 가능한 관행과 친환경 제품에 전념합니다.',
 
   // About Page - Timeline
-  'about.timeline.2008.1': '건설 화학 솔루션에 중점을 둔 Aftek Co., Ltd. 설립',
-  'about.timeline.2009.1': '방수막 제품라인 출시',
-  'about.timeline.2009.2': '동남아시아 시장으로 확장',
-  'about.timeline.2009.3': '베트남에 첫 번째 해외 사무소 개설',
-  'about.timeline.2009.4': '유럽 기술 제공업체와 파트너십',
-  'about.timeline.2011.1': '고급 실란트 및 접착제 기술 도입',
-  'about.timeline.2013.1': '타이베이에 연구개발 센터 설립',
-  'about.timeline.2014.1': '고성능 바닥재 솔루션 출시',
-  'about.timeline.2015.1': '증가하는 수요를 충족하기 위해 생산 시설 확장',
-  'about.timeline.2017.1': '품질 관리 ISO 인증 획득',
-  'about.timeline.2018.1': '기술 지원 및 교육을 위한 디지털 플랫폼 출시',
+  'about.timeline.2008.1': 'ITLS-Taiwan 본사가 대만 타이페이에 설립',
+  'about.timeline.2009.1': 'ITLS-Taiwan이 베트남, 인도네시아, 말레이시아에 현지 사무소 설립',
+  'about.timeline.2009.2': '싱가포르 DIY 접착제 및 실란트 제조업체 Wessbond로부터 기술 지원 획득',
+  'about.timeline.2009.3': '호주 건축 자재 및 목재 보호 마감재 제조업체 TWA로부터 기술 지원 획득',
+  'about.timeline.2009.4': 'ITLS-인도네시아 모르타르 제조 공장 설립',
+  'about.timeline.2011.1': 'ITLS-말레이시아가 자동 실란트 재포장 라인 설립',
+  'about.timeline.2013.1': 'TWA-호주가 말레이시아에서 RLA 제조 공장 획득',
+  'about.timeline.2014.1': 'Atherton과 TWA가 RLA-호주로 합병',
+  'about.timeline.2015.1': 'ITLS-베트남 재편성',
+  'about.timeline.2017.1': 'ITLS-Taiwan 재편성 및 대만 시장에서 "Aftek" 공식 출시',
+  'about.timeline.2018.1': 'RLA-말레이시아가 모르타르 생산 라인 설치',
 
   // About Page - CTA
   'about.ctaTitle': '저희와 함께 일할 준비가 되셨나요?',

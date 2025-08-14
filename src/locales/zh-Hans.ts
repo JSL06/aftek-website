@@ -164,17 +164,17 @@ const zhHans = {
   'about.value.sustainability.desc': '我们致力于可持续实践和环保产品，为子孙后代保护我们的环境。',
 
   // About Page - Timeline
-  'about.timeline.2008.1': '成立Aftek有限公司，专注于建筑化学解决方案',
-  'about.timeline.2009.1': '推出防水膜产品线',
-  'about.timeline.2009.2': '扩展到东南亚市场',
-  'about.timeline.2009.3': '在越南开设首个国际办事处',
-  'about.timeline.2009.4': '与欧洲技术提供商建立合作伙伴关系',
-  'about.timeline.2011.1': '引入先进的密封剂和粘合剂技术',
-  'about.timeline.2013.1': '在台北建立研发中心',
-  'about.timeline.2014.1': '推出高性能地板解决方案',
-  'about.timeline.2015.1': '扩建生产设施以满足不断增长的需求',
-  'about.timeline.2017.1': '获得质量管理ISO认证',
-  'about.timeline.2018.1': '推出技术支持和培训数字平台',
+  'about.timeline.2008.1': 'ITLS-Taiwan总部在台湾台北成立',
+  'about.timeline.2009.1': 'ITLS-Taiwan在越南、印度尼西亚和马来西亚建立当地办事处',
+  'about.timeline.2009.2': '获得新加坡DIY粘合剂和密封剂制造商Wessbond的技术支持',
+  'about.timeline.2009.3': '获得澳大利亚建筑材料和木材保护涂料制造商TWA的技术支持',
+  'about.timeline.2009.4': 'ITLS-印度尼西亚砂浆制造工厂成立',
+  'about.timeline.2011.1': 'ITLS-马来西亚建立自动密封剂重新包装线',
+  'about.timeline.2013.1': 'TWA-澳大利亚在马来西亚获得RLA制造工厂',
+  'about.timeline.2014.1': 'Atherton和TWA合并为RLA-澳大利亚',
+  'about.timeline.2015.1': 'ITLS-越南重组',
+  'about.timeline.2017.1': '重组ITLS-Taiwan并在台湾市场正式推出"Aftek"',
+  'about.timeline.2018.1': 'RLA-马来西亚建立砂浆生产线',
 
   // About Page - CTA
   'about.ctaTitle': '准备好与我们合作了吗？',

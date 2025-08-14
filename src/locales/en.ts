@@ -164,17 +164,17 @@ const en = {
   'about.value.sustainability.desc': 'We are committed to sustainable practices and eco-friendly products that protect our environment for future generations.',
 
   // About Page - Timeline
-  'about.timeline.2008.1': 'Established Aftek Co., Ltd. with focus on construction chemical solutions',
-  'about.timeline.2009.1': 'Launched waterproofing membrane product line',
-  'about.timeline.2009.2': 'Expanded into Southeast Asian markets',
-  'about.timeline.2009.3': 'Opened first international office in Vietnam',
-  'about.timeline.2009.4': 'Partnership with European technology providers',
-  'about.timeline.2011.1': 'Introduced advanced sealant and adhesive technologies',
-  'about.timeline.2013.1': 'Established research and development center in Taipei',
-  'about.timeline.2014.1': 'Launched high-performance flooring solutions',
-  'about.timeline.2015.1': 'Expanded production facilities to meet growing demand',
-  'about.timeline.2017.1': 'Received ISO certification for quality management',
-  'about.timeline.2018.1': 'Launched digital platform for technical support and training',
+  'about.timeline.2008.1': 'ITLS-Taiwan headquarters was founded in Taipei, Taiwan',
+  'about.timeline.2009.1': 'ITLS-Taiwan established local offices in Vietnam, Indonesia and Malaysia',
+  'about.timeline.2009.2': 'Obtained technical support from Wessbond, a DIY adhesives and sealant manufacturer in Singapore',
+  'about.timeline.2009.3': 'Obtained technical support from TWA, a manufacturer of construction materials and wood protective finishes in Australia',
+  'about.timeline.2009.4': 'ITLS-Indonesia mortar manufacturing plants was established',
+  'about.timeline.2011.1': 'ITLS-Malaysia established an automatic sealant repackaging line',
+  'about.timeline.2013.1': 'TWA-Australia obtained RLA manufacturing plant in Malaysia',
+  'about.timeline.2014.1': 'Atherton and TWA merged into RLA-Australia',
+  'about.timeline.2015.1': 'ITLS-Vietnam was reorganized',
+  'about.timeline.2017.1': 'Reorganized ITLS-Taiwan and launched "Aftek" in Taiwan market officially',
+  'about.timeline.2018.1': 'RLA-Malaysia set up a mortar production line',
 
   // About Page - CTA
   'about.ctaTitle': 'Ready to Work With Us?',

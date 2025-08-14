@@ -151,17 +151,17 @@ const vi = {
   'about.value.sustainability.desc': 'Chúng tôi cam kết với các thực hành bền vững và sản phẩm thân thiện với môi trường để bảo vệ môi trường cho các thế hệ tương lai.',
 
   // About Page - Timeline
-  'about.timeline.2008.1': 'Thành lập Aftek Co., Ltd. tập trung vào các giải pháp hóa chất xây dựng',
-  'about.timeline.2009.1': 'Ra mắt dòng sản phẩm màng chống thấm',
-  'about.timeline.2009.2': 'Mở rộng ra thị trường Đông Nam Á',
-  'about.timeline.2009.3': 'Mở văn phòng quốc tế đầu tiên tại Việt Nam',
-  'about.timeline.2009.4': 'Hợp tác với các nhà cung cấp công nghệ châu Âu',
-  'about.timeline.2011.1': 'Giới thiệu công nghệ chất bịt kín và keo dán tiên tiến',
-  'about.timeline.2013.1': 'Thành lập trung tâm nghiên cứu và phát triển tại Đài Bắc',
-  'about.timeline.2014.1': 'Ra mắt các giải pháp sàn hiệu suất cao',
-  'about.timeline.2015.1': 'Mở rộng cơ sở sản xuất để đáp ứng nhu cầu ngày càng tăng',
-  'about.timeline.2017.1': 'Nhận chứng nhận ISO cho quản lý chất lượng',
-  'about.timeline.2018.1': 'Ra mắt nền tảng kỹ thuật số cho hỗ trợ kỹ thuật và đào tạo',
+  'about.timeline.2008.1': 'Trụ sở ITLS-Taiwan được thành lập tại Đài Bắc, Đài Loan',
+  'about.timeline.2009.1': 'ITLS-Taiwan thành lập các văn phòng địa phương tại Việt Nam, Indonesia và Malaysia',
+  'about.timeline.2009.2': 'Nhận được hỗ trợ kỹ thuật từ Wessbond, nhà sản xuất keo dán và chất bịt kín DIY tại Singapore',
+  'about.timeline.2009.3': 'Nhận được hỗ trợ kỹ thuật từ TWA, nhà sản xuất vật liệu xây dựng và chất hoàn thiện bảo vệ gỗ tại Australia',
+  'about.timeline.2009.4': 'Nhà máy sản xuất vữa ITLS-Indonesia được thành lập',
+  'about.timeline.2011.1': 'ITLS-Malaysia thành lập dây chuyền đóng gói lại chất bịt kín tự động',
+  'about.timeline.2013.1': 'TWA-Australia có được nhà máy sản xuất RLA tại Malaysia',
+  'about.timeline.2014.1': 'Atherton và TWA sáp nhập thành RLA-Australia',
+  'about.timeline.2015.1': 'ITLS-Việt Nam được tổ chức lại',
+  'about.timeline.2017.1': 'Tổ chức lại ITLS-Taiwan và chính thức ra mắt "Aftek" tại thị trường Đài Loan',
+  'about.timeline.2018.1': 'RLA-Malaysia thiết lập dây chuyền sản xuất vữa',
 
   // About Page - CTA
   'about.ctaTitle': 'Sẵn sàng làm việc với chúng tôi?',

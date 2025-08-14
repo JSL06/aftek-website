@@ -147,17 +147,17 @@ const ja = {
   'about.value.sustainability.desc': '私たちは持続可能な実践と、将来の世代のために環境を保護する環境に優しい製品にコミットしています。',
 
   // About Page - Timeline
-  'about.timeline.2008.1': '建設化学ソリューションに焦点を当てたAftek Co., Ltd.を設立',
-  'about.timeline.2009.1': '防水膜製品ラインを開始',
-  'about.timeline.2009.2': '東南アジア市場に拡大',
-  'about.timeline.2009.3': 'ベトナムに初の海外オフィスを開設',
-  'about.timeline.2009.4': 'ヨーロッパの技術プロバイダーとのパートナーシップ',
-  'about.timeline.2011.1': '先進的なシーラントと接着剤技術を導入',
-  'about.timeline.2013.1': '台北に研究開発センターを設立',
-  'about.timeline.2014.1': '高性能床材ソリューションを開始',
-  'about.timeline.2015.1': '増大する需要に対応するため生産施設を拡大',
-  'about.timeline.2017.1': '品質管理のISO認証を取得',
-  'about.timeline.2018.1': '技術サポートと研修のためのデジタルプラットフォームを開始',
+  'about.timeline.2008.1': 'ITLS-Taiwan本社が台湾台北に設立',
+  'about.timeline.2009.1': 'ITLS-Taiwanがベトナム、インドネシア、マレーシアに現地オフィスを設立',
+  'about.timeline.2009.2': 'シンガポールのDIY接着剤・シーラント製造業者Wessbondから技術支援を獲得',
+  'about.timeline.2009.3': 'オーストラリアの建築材料・木材保護仕上げ製造業者TWAから技術支援を獲得',
+  'about.timeline.2009.4': 'ITLS-インドネシアモルタル製造工場が設立',
+  'about.timeline.2011.1': 'ITLS-マレーシアが自動シーラント再包装ラインを設立',
+  'about.timeline.2013.1': 'TWA-オーストラリアがマレーシアでRLA製造工場を獲得',
+  'about.timeline.2014.1': 'AthertonとTWAがRLA-オーストラリアに合併',
+  'about.timeline.2015.1': 'ITLS-ベトナムが再編成',
+  'about.timeline.2017.1': 'ITLS-Taiwanを再編成し、台湾市場で「Aftek」を正式に立ち上げ',
+  'about.timeline.2018.1': 'RLA-マレーシアがモルタル生産ラインを設置',
 
   // About Page - CTA
   'about.ctaTitle': '私たちと一緒に働く準備はできていますか？',
