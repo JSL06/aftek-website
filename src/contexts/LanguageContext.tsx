@@ -30,13 +30,8 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   // Initialize language on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedLanguage = localStorage.getItem('aftek-language');
-      if (savedLanguage && savedLanguage !== currentLanguage) {
-        // Only change if the saved language is valid
-        if (['en', 'ja', 'ko', 'th', 'vi', 'zh-Hans', 'zh-Hant'].includes(savedLanguage)) {
-          changeLanguage(savedLanguage as Language);
-        }
-      }
+      // Don't force language change on mount to prevent interference
+      // Only set initialized state
       setIsInitialized(true);
     }
   }, []);

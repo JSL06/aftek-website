@@ -128,7 +128,7 @@ export const useTranslation = () => {
     return 'en';
   };
 
-  const [currentLanguage, setCurrentLanguage] = useState<Language>(getInitialLanguage);
+  const [currentLanguage, setCurrentLanguage] = useState<Language>(() => getInitialLanguage());
   const [translations, setTranslations] = useState<Translations>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
