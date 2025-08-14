@@ -10,12 +10,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Edit, Trash2, Save, ArrowLeft, FileText, Calendar, Globe } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
-import ArticleFilter, { ArticleFilters } from '@/components/ArticleFilter';
-import RichTextEditor from '@/components/RichTextEditor';
+import ArticleFilter from '@/components/ArticleFilter';
+import EnhancedRichTextEditor from '@/components/EnhancedRichTextEditor';
 import LanguageSelector, { Language, LANGUAGES } from '@/components/LanguageSelector';
 import MultilingualFormField from '@/components/MultilingualFormField';
 import TranslationStatus from '@/components/TranslationStatus';
 import { useTranslation } from '@/hooks/useTranslation';
+
+interface ArticleFilters {
+  search: string;
+  category: string[];
+}
 
 interface Article {
   id: string;
@@ -114,9 +119,7 @@ const Articles = () => {
     setLoading(false);
   };
 
-  const handleFilterChange = (newFilters: ArticleFilters) => {
-    setFilters(newFilters);
-  };
+
 
   const handleAddNew = () => {
     setEditingArticle(null);
@@ -349,7 +352,7 @@ const Articles = () => {
 
                   <div>
                     <Label htmlFor="content">{t('admin.articles.content')} ({LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName})</Label>
-                    <RichTextEditor
+                    <EnhancedRichTextEditor
                       value={formData.translations[selectedLanguage]?.content || ''}
                       onChange={(value) => handleTranslationChange(selectedLanguage, 'content', value)}
                       placeholder={`${t('admin.articles.contentPlaceholder')} (${LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName})`}
@@ -467,7 +470,14 @@ const Articles = () => {
         </div>
 
         {/* Article Filter */}
-        <ArticleFilter onFilterChange={handleFilterChange} />
+        <ArticleFilter 
+          searchTerm={filters.search}
+          selectedCategory={filters.category.length > 0 ? filters.category[0] : 'all'}
+          onSearchChange={(value) => setFilters(prev => ({ ...prev, search: value }))}
+          onCategoryChange={(value) => setFilters(prev => ({ ...prev, category: value === 'all' ? [] : [value] }))}
+          onSearch={() => {}} // No additional search action needed
+          onClear={() => setFilters({ search: '', category: [] })}
+        />
 
         {loading ? (
           <div className="flex items-center justify-center h-64">
