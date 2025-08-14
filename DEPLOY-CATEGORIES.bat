@@ -31,7 +31,7 @@ git commit -m "Add Category Management System and WYSIWYG Editor
 echo.
 
 echo [5/5] Pushing to GitHub...
-git push origin main
+git push origin master
 echo.
 
 echo ========================================
