@@ -1,6 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -18,7 +17,9 @@ import {
   Code,
   RotateCw,
   Upload,
-  X
+  X,
+  Undo,
+  Redo
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -31,20 +32,20 @@ interface ImageData {
   caption?: string;
 }
 
-interface EnhancedRichTextEditorProps {
+interface WYSIWYGEditorProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
 }
 
-const EnhancedRichTextEditor: React.FC<EnhancedRichTextEditorProps> = ({ 
+const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({ 
   value, 
   onChange, 
-  placeholder = "Start writing your article...",
+  placeholder = "Start writing your content...",
   className = ""
 }) => {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageData, setImageData] = useState<Partial<ImageData>>({
@@ -55,45 +56,105 @@ const EnhancedRichTextEditor: React.FC<EnhancedRichTextEditorProps> = ({
   });
   const [uploading, setUploading] = useState(false);
   
-  // Storage bucket configuration - you can change this to match your Supabase setup
-  const STORAGE_BUCKET = 'product-images'; // Change this to your preferred bucket name
+  // Storage bucket configuration
+  const STORAGE_BUCKET = 'product-images';
 
-  const getSelectedText = () => {
-    if (!textareaRef.current) return '';
-    const start = textareaRef.current.selectionStart;
-    const end = textareaRef.current.selectionEnd;
-    return value.substring(start, end);
-  };
+  // Initialize editor content
+  useEffect(() => {
+    if (editorRef.current && value) {
+      editorRef.current.innerHTML = value;
+    }
+  }, [value]);
 
-  const replaceSelectedText = (replacement: string) => {
-    if (!textareaRef.current) return;
-    const start = textareaRef.current.selectionStart;
-    const end = textareaRef.current.selectionEnd;
-    const newValue = value.substring(0, start) + replacement + value.substring(end);
-    onChange(newValue);
-    
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.selectionStart = start + replacement.length;
-        textareaRef.current.selectionEnd = start + replacement.length;
-        textareaRef.current.focus();
-      }
-    }, 0);
-  };
-
-  const wrapSelectedText = (before: string, after: string = '') => {
-    const selectedText = getSelectedText();
-    if (selectedText) {
-      replaceSelectedText(before + selectedText + after);
-    } else {
-      replaceSelectedText(before + after);
+  // Handle content changes
+  const handleContentChange = () => {
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
     }
   };
 
-  const insertAtCursor = (text: string) => {
-    replaceSelectedText(text);
+  // Get current selection
+  const getSelection = () => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return null;
+    return selection.getRangeAt(0);
   };
 
+  // Save selection
+  const saveSelection = () => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      return selection.getRangeAt(0).cloneRange();
+    }
+    return null;
+  };
+
+  // Restore selection
+  const restoreSelection = (range: Range | null) => {
+    if (range) {
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    }
+  };
+
+  // Execute command for formatting
+  const execCommand = (command: string, value?: string) => {
+    const savedRange = saveSelection();
+    document.execCommand(command, false, value);
+    restoreSelection(savedRange);
+    editorRef.current?.focus();
+    handleContentChange();
+  };
+
+  // Insert HTML at cursor
+  const insertHTML = (html: string) => {
+    const savedRange = saveSelection();
+    document.execCommand('insertHTML', false, html);
+    restoreSelection(savedRange);
+    editorRef.current?.focus();
+    handleContentChange();
+  };
+
+  // Handle keyboard shortcuts
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.ctrlKey || e.metaKey) {
+      switch (e.key.toLowerCase()) {
+        case 'b':
+          e.preventDefault();
+          execCommand('bold');
+          break;
+        case 'i':
+          e.preventDefault();
+          execCommand('italic');
+          break;
+        case 'u':
+          e.preventDefault();
+          execCommand('underline');
+          break;
+        case 'z':
+          e.preventDefault();
+          if (e.shiftKey) {
+            execCommand('redo');
+          } else {
+            execCommand('undo');
+          }
+          break;
+        case 'y':
+          e.preventDefault();
+          execCommand('redo');
+          break;
+        case 'a':
+          e.preventDefault();
+          execCommand('selectAll');
+          break;
+      }
+    }
+  };
+
+  // Handle image upload
   const handleImageUpload = async () => {
     if (!imageFile || !imageData.alt) {
       toast.error('Please select an image and provide alt text');
@@ -102,7 +163,7 @@ const EnhancedRichTextEditor: React.FC<EnhancedRichTextEditorProps> = ({
 
     setUploading(true);
     try {
-      const fileName = `articles/${Date.now()}_${imageFile.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
+      const fileName = `product-descriptions/${Date.now()}_${imageFile.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
       const { data, error } = await supabase.storage
         .from(STORAGE_BUCKET)
         .upload(fileName, imageFile, {
@@ -124,7 +185,7 @@ const EnhancedRichTextEditor: React.FC<EnhancedRichTextEditorProps> = ({
         caption: imageData.caption
       });
 
-      insertAtCursor(imageHtml);
+      insertHTML(imageHtml);
       setShowImageDialog(false);
       setImageFile(null);
       setImageData({ alt: '', orientation: 'center', width: '100%', caption: '' });
@@ -163,59 +224,177 @@ const EnhancedRichTextEditor: React.FC<EnhancedRichTextEditorProps> = ({
     return html;
   };
 
+  // Handle link insertion
   const handleLink = () => {
     const url = prompt('Enter URL:');
     if (url) {
-      const selectedText = getSelectedText();
-      if (selectedText) {
-        wrapSelectedText(`<a href="${url}" target="_blank" rel="noopener noreferrer">`, '</a>');
+      const selection = window.getSelection();
+      if (selection && selection.toString()) {
+        execCommand('createLink', url);
       } else {
-        insertAtCursor(`<a href="${url}" target="_blank" rel="noopener noreferrer">Link text</a>`);
+        insertHTML(`<a href="${url}" target="_blank" rel="noopener noreferrer">Link text</a>`);
       }
     }
   };
 
+  // Handle list insertion
+  const handleList = (ordered: boolean) => {
+    const selection = window.getSelection();
+    if (selection && selection.toString()) {
+      // Convert selected text to list
+      const text = selection.toString();
+      const lines = text.split('\n').filter(line => line.trim());
+      const listItems = lines.map(line => `<li>${line}</li>`).join('');
+      const listTag = ordered ? 'ol' : 'ul';
+      const listHtml = `<${listTag}>${listItems}</${listTag}>`;
+      
+      // Replace selection with list
+      const range = selection.getRangeAt(0);
+      range.deleteContents();
+      const listElement = document.createElement('div');
+      listElement.innerHTML = listHtml;
+      range.insertNode(listElement);
+      handleContentChange();
+    } else {
+      // Insert new list
+      insertHTML(ordered ? '<ol><li>List item</li></ol>' : '<ul><li>List item</li></ul>');
+    }
+  };
+
+  // Handle heading conversion
+  const handleHeading = (level: 1 | 2) => {
+    const selection = window.getSelection();
+    if (selection && selection.toString()) {
+      // Convert selected text to heading
+      const text = selection.toString();
+      const headingTag = `h${level}`;
+      const headingHtml = `<${headingTag}>${text}</${headingTag}>`;
+      
+      // Replace selection with heading
+      const range = selection.getRangeAt(0);
+      range.deleteContents();
+      const headingElement = document.createElement('div');
+      headingElement.innerHTML = headingHtml;
+      range.insertNode(headingElement);
+      handleContentChange();
+    } else {
+      // Insert new heading
+      insertHTML(`<h${level}>Heading ${level}</h${level}>`);
+    }
+  };
+
+  // Handle quote insertion
+  const handleQuote = () => {
+    const selection = window.getSelection();
+    if (selection && selection.toString()) {
+      // Convert selected text to quote
+      const text = selection.toString();
+      const quoteHtml = `<blockquote>${text}</blockquote>`;
+      
+      // Replace selection with quote
+      const range = selection.getRangeAt(0);
+      range.deleteContents();
+      const quoteElement = document.createElement('div');
+      quoteElement.innerHTML = quoteHtml;
+      range.insertNode(quoteElement);
+      handleContentChange();
+    } else {
+      // Insert new quote
+      insertHTML('<blockquote>Quote text</blockquote>');
+    }
+  };
+
+  // Handle code insertion
+  const handleCode = () => {
+    const selection = window.getSelection();
+    if (selection && selection.toString()) {
+      // Convert selected text to code
+      const text = selection.toString();
+      const codeHtml = `<code>${text}</code>`;
+      
+      // Replace selection with code
+      const range = selection.getRangeAt(0);
+      range.deleteContents();
+      const codeElement = document.createElement('div');
+      codeElement.innerHTML = codeHtml;
+      range.insertNode(codeElement);
+      handleContentChange();
+    } else {
+      // Insert new code
+      insertHTML('<code>code text</code>');
+    }
+  };
+
+  // Handle undo/redo properly
+  const handleUndo = () => {
+    document.execCommand('undo');
+    editorRef.current?.focus();
+    handleContentChange();
+  };
+
+  const handleRedo = () => {
+    document.execCommand('redo');
+    editorRef.current?.focus();
+    handleContentChange();
+  };
+
+  // Toolbar buttons configuration
   const toolbarButtons = [
     {
+      icon: <Undo className="h-4 w-4" />,
+      tooltip: 'Undo (Ctrl+Z)',
+      action: handleUndo
+    },
+    {
+      icon: <Redo className="h-4 w-4" />,
+      tooltip: 'Redo (Ctrl+Y)',
+      action: handleRedo
+    },
+    { divider: true },
+    {
       icon: <Bold className="h-4 w-4" />,
-      tooltip: 'Bold',
-      action: () => wrapSelectedText('<strong>', '</strong>')
+      tooltip: 'Bold (Ctrl+B)',
+      action: () => execCommand('bold')
     },
     {
       icon: <Italic className="h-4 w-4" />,
-      tooltip: 'Italic',
-      action: () => wrapSelectedText('<em>', '</em>')
+      tooltip: 'Italic (Ctrl+I)',
+      action: () => execCommand('italic')
     },
+    { divider: true },
     {
       icon: <Heading1 className="h-4 w-4" />,
       tooltip: 'Heading 1',
-      action: () => wrapSelectedText('<h1>', '</h1>')
+      action: () => handleHeading(1)
     },
     {
       icon: <Heading2 className="h-4 w-4" />,
       tooltip: 'Heading 2',
-      action: () => wrapSelectedText('<h2>', '</h2>')
+      action: () => handleHeading(2)
     },
+    { divider: true },
     {
       icon: <List className="h-4 w-4" />,
       tooltip: 'Bullet List',
-      action: () => insertAtCursor('<ul>\n<li>List item</li>\n</ul>')
+      action: () => handleList(false)
     },
     {
       icon: <ListOrdered className="h-4 w-4" />,
       tooltip: 'Numbered List',
-      action: () => insertAtCursor('<ol>\n<li>List item</li>\n</ol>')
+      action: () => handleList(true)
     },
+    { divider: true },
     {
       icon: <Quote className="h-4 w-4" />,
       tooltip: 'Quote',
-      action: () => wrapSelectedText('<blockquote>', '</blockquote>')
+      action: handleQuote
     },
     {
       icon: <Code className="h-4 w-4" />,
       tooltip: 'Code',
-      action: () => wrapSelectedText('<code>', '</code>')
+      action: handleCode
     },
+    { divider: true },
     {
       icon: <Link className="h-4 w-4" />,
       tooltip: 'Insert Link',
@@ -240,35 +419,40 @@ const EnhancedRichTextEditor: React.FC<EnhancedRichTextEditorProps> = ({
   return (
     <div className={`border rounded-lg overflow-hidden ${className}`}>
       {/* Toolbar */}
-      <div className="bg-muted/50 p-2 border-b flex flex-wrap gap-1">
+      <div className="bg-muted/50 p-2 border-b flex flex-wrap gap-1 items-center">
         {toolbarButtons.map((button, index) => (
-          <Button
-            key={index}
-            variant="ghost"
-            size="sm"
-            onClick={button.action}
-            className="h-8 w-8 p-0"
-            title={button.tooltip}
-          >
-            {button.icon}
-          </Button>
+          button.divider ? (
+            <div key={index} className="w-px h-6 bg-border mx-1" />
+          ) : (
+            <Button
+              key={index}
+              variant="ghost"
+              size="sm"
+              onClick={button.action}
+              className="h-8 w-8 p-0"
+              title={button.tooltip}
+            >
+              {button.icon}
+            </Button>
+          )
         ))}
       </div>
 
       {/* Editor */}
-      <Textarea
-        ref={textareaRef}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="min-h-[400px] border-0 resize-none focus:ring-0 font-mono text-sm"
-        onSelect={() => {
-          if (textareaRef.current) {
-            const start = textareaRef.current.selectionStart;
-            const end = textareaRef.current.selectionEnd;
-            // Update selection state if needed
-          }
+      <div
+        ref={editorRef}
+        contentEditable
+        onInput={handleContentChange}
+        onBlur={handleContentChange}
+        onKeyDown={handleKeyDown}
+        className="min-h-[400px] p-4 focus:outline-none prose max-w-none"
+        style={{
+          fontFamily: 'inherit',
+          fontSize: 'inherit',
+          lineHeight: '1.6'
         }}
+        data-placeholder={placeholder}
+        suppressContentEditableWarning
       />
 
       {/* Image Upload Dialog */}
@@ -399,4 +583,4 @@ const EnhancedRichTextEditor: React.FC<EnhancedRichTextEditorProps> = ({
   );
 };
 
-export default EnhancedRichTextEditor;
+export default WYSIWYGEditor;

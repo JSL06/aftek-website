@@ -183,9 +183,10 @@ const ProductDetail = () => {
 
               {/* Short Description */}
               <div className="mb-6">
-                <p className="text-muted-foreground leading-relaxed">
-                  {product.description}
-                </p>
+                <div 
+                  className="text-muted-foreground leading-relaxed prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
               </div>
 
               {/* Features */}
@@ -238,9 +239,10 @@ const ProductDetail = () => {
                 <TabsContent value="description" className="mt-6">
                   <div className="prose max-w-none">
                     <h3 className="text-xl font-semibold mb-4">{t('productDetail.productDescription')}</h3>
-                    <p className="text-muted-foreground leading-relaxed mb-4">
-                      {product.description}
-                    </p>
+                    <div 
+                      className="text-muted-foreground leading-relaxed mb-4 prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: product.description }}
+                    />
                     <p className="text-muted-foreground leading-relaxed">
                       {t('productDetail.descriptionText').replace('{productName}', product.name)}
                     </p>

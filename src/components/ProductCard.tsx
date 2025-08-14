@@ -6,6 +6,14 @@ import { cn } from '../lib/utils';
 
 import { UnifiedProduct } from '@/services/productService';
 
+// Helper function to extract plain text from HTML content
+const stripHtml = (html: string): string => {
+  if (!html) return '';
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+};
+
 interface ProductCardProps {
   product: UnifiedProduct;
   onViewDetails?: (product: UnifiedProduct) => void;
@@ -69,7 +77,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           
           {/* Product Description */}
           <p className={`text-muted-foreground text-sm mb-4 leading-relaxed ${isCompact ? 'line-clamp-2' : ''}`}>
-            {product.description}
+            {stripHtml(product.description)}
           </p>
           
           {/* Specifications Box */}

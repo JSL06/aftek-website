@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { CompanyProvider } from "./contexts/CompanyContext";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Products from "./pages/Products";
@@ -24,6 +25,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/Products";
 import AdminProjects from "./pages/admin/Projects";
 import FilterManager from "./pages/admin/FilterManager";
+import CategoryManager from "./pages/admin/CategoryManager";
 import AdminArticles from "./pages/admin/Articles";
 import MediaManager from "./pages/admin/MediaManager";
 import FeaturedProductsManager from "./pages/admin/FeaturedProductsManager";
@@ -45,43 +47,91 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter basename={basename}>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Layout />}>
-              <Route index element={<ProtectedPage pageName="home"><Home /></ProtectedPage>} />
-              <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
-              <Route path="products" element={<ProtectedPage pageName="products"><Products /></ProtectedPage>} />
-              <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
-              <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
-              <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
-              <Route path="articles/:category" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
-              <Route path="contact" element={<ProtectedPage pageName="contact"><NewContact /></ProtectedPage>} />
-              <Route path="products/flex-pro-pu" element={<ProtectedPage pageName="products"><FlexProPU /></ProtectedPage>} />
-              <Route path="products/:productId" element={<ProtectedPage pageName="products"><ProductDetail /></ProtectedPage>} />
-              <Route path="case-studies" element={<ProtectedPage pageName="projects"><CaseStudies /></ProtectedPage>} />
-              <Route path="resources" element={<ProtectedPage pageName="articles"><Resources /></ProtectedPage>} />
-              <Route path="media" element={<ProtectedPage pageName="articles"><Media /></ProtectedPage>} />
-            </Route>
-            
-            {/* Admin Routes */}
-            <Route path="/admin" element={<Layout />}>
-              <Route path="login" element={<AdminLogin />} />
-              <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="products" element={<UnifiedProducts />} />
-              <Route path="projects" element={<AdminProjects />} />
-              <Route path="filter-manager" element={<FilterManager />} />
-              <Route path="unified-products" element={<UnifiedProducts />} />
-              <Route path="featured-products" element={<FeaturedProductsManager />} />
-              <Route path="articles" element={<AdminArticles />} />
-              <Route path="media" element={<MediaManager />} />
-              <Route path="website-text" element={<WebsiteTextEditor />} />
-              <Route path="website-text-editor" element={<WebsiteTextEditor />} />
-              <Route path="website-text-manager" element={<WebsiteTextManager />} />
-              <Route path="translation-dashboard" element={<TranslationDashboard />} />
-            </Route>
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <CompanyProvider>
+            <Routes>
+              {/* Company-specific Routes */}
+              <Route path="/aftek" element={<Layout />}>
+                <Route index element={<ProtectedPage pageName="home"><Home /></ProtectedPage>} />
+                <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
+                <Route path="products" element={<ProtectedPage pageName="products"><Products /></ProtectedPage>} />
+                <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
+                <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
+                <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
+                <Route path="contact" element={<ProtectedPage pageName="contact"><NewContact /></ProtectedPage>} />
+                <Route path="products/flex-pro-pu" element={<ProtectedPage pageName="products"><FlexProPU /></ProtectedPage>} />
+                <Route path="products/:productId" element={<ProtectedPage pageName="products"><ProductDetail /></ProtectedPage>} />
+                <Route path="case-studies" element={<ProtectedPage pageName="projects"><CaseStudies /></ProtectedPage>} />
+                <Route path="resources" element={<ProtectedPage pageName="articles"><Resources /></ProtectedPage>} />
+                <Route path="media" element={<ProtectedPage pageName="articles"><Media /></ProtectedPage>} />
+              </Route>
+
+              <Route path="/rla" element={<Layout />}>
+                <Route index element={<ProtectedPage pageName="home"><Home /></ProtectedPage>} />
+                <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
+                <Route path="products" element={<ProtectedPage pageName="products"><Products /></ProtectedPage>} />
+                <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
+                <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
+                <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
+                <Route path="contact" element={<ProtectedPage pageName="contact"><NewContact /></ProtectedPage>} />
+                <Route path="products/flex-pro-pu" element={<ProtectedPage pageName="products"><FlexProPU /></ProtectedPage>} />
+                <Route path="products/:productId" element={<ProtectedPage pageName="products"><ProductDetail /></ProtectedPage>} />
+                <Route path="case-studies" element={<ProtectedPage pageName="projects"><CaseStudies /></ProtectedPage>} />
+                <Route path="resources" element={<ProtectedPage pageName="articles"><Resources /></ProtectedPage>} />
+                <Route path="media" element={<ProtectedPage pageName="articles"><Media /></ProtectedPage>} />
+              </Route>
+
+              <Route path="/itls" element={<Layout />}>
+                <Route index element={<ProtectedPage pageName="home"><About /></ProtectedPage>} />
+                <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
+                <Route path="products" element={<ProtectedPage pageName="products"><Products /></ProtectedPage>} />
+                <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
+                <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
+                <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
+                <Route path="contact" element={<ProtectedPage pageName="contact"><NewContact /></ProtectedPage>} />
+                <Route path="products/flex-pro-pu" element={<ProtectedPage pageName="products"><FlexProPU /></ProtectedPage>} />
+                <Route path="products/:productId" element={<ProtectedPage pageName="products"><ProductDetail /></ProtectedPage>} />
+                <Route path="case-studies" element={<ProtectedPage pageName="projects"><CaseStudies /></ProtectedPage>} />
+                <Route path="resources" element={<ProtectedPage pageName="articles"><Resources /></ProtectedPage>} />
+                <Route path="media" element={<ProtectedPage pageName="articles"><Media /></ProtectedPage>} />
+              </Route>
+
+              {/* Default Routes (Aftek) */}
+              <Route path="/" element={<Layout />}>
+                <Route index element={<ProtectedPage pageName="home"><Home /></ProtectedPage>} />
+                <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
+                <Route path="products" element={<ProtectedPage pageName="products"><Products /></ProtectedPage>} />
+                <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
+                <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
+                <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
+                <Route path="contact" element={<ProtectedPage pageName="contact"><NewContact /></ProtectedPage>} />
+                <Route path="products/flex-pro-pu" element={<ProtectedPage pageName="products"><FlexProPU /></ProtectedPage>} />
+                <Route path="products/:productId" element={<ProtectedPage pageName="products"><ProductDetail /></ProtectedPage>} />
+                <Route path="case-studies" element={<ProtectedPage pageName="projects"><CaseStudies /></ProtectedPage>} />
+                <Route path="resources" element={<ProtectedPage pageName="articles"><Resources /></ProtectedPage>} />
+                <Route path="media" element={<ProtectedPage pageName="articles"><Media /></ProtectedPage>} />
+              </Route>
+              
+              {/* Admin Routes (Shared across all companies) */}
+              <Route path="/admin" element={<Layout />}>
+                <Route path="login" element={<AdminLogin />} />
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="products" element={<UnifiedProducts />} />
+                <Route path="projects" element={<AdminProjects />} />
+                <Route path="filter-manager" element={<FilterManager />} />
+                <Route path="category-manager" element={<CategoryManager />} />
+                <Route path="unified-products" element={<UnifiedProducts />} />
+                <Route path="featured-products" element={<FeaturedProductsManager />} />
+                <Route path="articles" element={<AdminArticles />} />
+                <Route path="media" element={<MediaManager />} />
+                <Route path="website-text" element={<WebsiteTextEditor />} />
+                <Route path="website-text-editor" element={<WebsiteTextEditor />} />
+                <Route path="website-text-manager" element={<WebsiteTextManager />} />
+                <Route path="translation-dashboard" element={<TranslationDashboard />} />
+              </Route>
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </CompanyProvider>
         </BrowserRouter>
       </LanguageProvider>
     </TooltipProvider>

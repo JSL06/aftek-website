@@ -32,7 +32,7 @@ const zhHant = {
   'home.services.flooring.desc': '工業和商業地板解決方案，包括環氧樹脂塗料、自流平化合物和各種應用的裝飾地板飾面。',
   'home.services.flooring.features': ['環氧樹脂塗料', '自流平', '裝飾飾面'],
   
-  'home.services.grout.title': 'Redi-Mix G&M',
+  'home.services.grout.title': '預拌灌漿料和砂漿',
   'home.services.grout.desc': '用於建築和修復應用的預拌灌漿料和砂漿。結構和非結構用途的高強度、無收縮配方。',
   'home.services.grout.features': ['高強度', '無收縮', '快速凝固'],
   
@@ -124,7 +124,7 @@ const zhHant = {
   'nav.waterproofing': '防水',
   'nav.sealants': '密封劑與膠黏劑',
   'nav.flooring': '地板系統',
-  'nav.grout': 'Redi-Mix G&M',
+  'nav.grout': '預拌灌漿料和砂漿',
   'nav.insulation': '保溫與塗料',
 
   // Common UI

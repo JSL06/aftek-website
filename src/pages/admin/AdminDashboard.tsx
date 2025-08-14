@@ -1,346 +1,193 @@
-import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   Package, 
   FileText, 
   Image, 
-  Users,
-  Settings,
-  Plus,
-  Database,
-  Trash2,
-  RefreshCw,
-  Building2,
-  Filter,
+  Settings, 
+  Users, 
+  Building2, 
   Globe,
-  Languages
+  ArrowRight,
+  Edit,
+  Trash2,
+  Eye
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from '@/hooks/useTranslation';
-import { ProductMigrationTool } from '@/components/ProductMigrationTool';
-import ContentSyncManager from '@/components/ContentSyncManager';
-import { productService } from '@/services/productService';
-import ProductSyncTester from '@/components/ProductSyncTester';
-
-interface DashboardStats {
-  totalProducts: number;
-  totalProjects: number;
-  totalArticles: number;
-  totalTranslations: number;
-}
-
-const LANGUAGES = [
-  { code: 'en', name: 'English', flag: '🇺🇸', nativeName: 'English' },
-  { code: 'zh-Hans', name: '简体中文', flag: '🇨🇳', nativeName: '简体中文' },
-  { code: 'zh-Hant', name: '繁體中文', flag: '🇹🇼', nativeName: '繁體中文' },
-  { code: 'ja', name: '日本語', flag: '🇯🇵', nativeName: '日本語' },
-  { code: 'ko', name: '한국어', flag: '🇰🇷', nativeName: '한국어' },
-  { code: 'th', name: 'ไทย', flag: '🇹🇭', nativeName: 'ไทย' },
-  { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳', nativeName: 'Tiếng Việt' }
-];
+import { useCompany } from '@/contexts/CompanyContext';
+import CompanySelector from '@/components/admin/CompanySelector';
 
 const AdminDashboard = () => {
-  const { t, currentLanguage, changeLanguage } = useTranslation();
-  const [stats, setStats] = useState<DashboardStats>({
-    totalProducts: 0,
-    totalProjects: 0,
-    totalArticles: 0,
-    totalTranslations: 0
-  });
-  const [loading, setLoading] = useState(true);
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const { t } = useTranslation();
+  const { currentCompany } = useCompany();
+  const [showCompanySelector, setShowCompanySelector] = useState(false);
 
-  // Use current language from context, don't force any specific language
-  useEffect(() => {
-    setSelectedLanguage(currentLanguage);
-  }, [currentLanguage]);
+  const adminCards = [
+    {
+      title: '產品管理',
+      description: '管理產品目錄、類別和特色產品',
+      icon: Package,
+      href: '/admin/products',
+      color: 'bg-blue-500',
+      stats: '150+ 產品'
+    },
+    {
+      title: '類別管理',
+      description: '管理產品類別和分類系統',
+      icon: Package,
+      href: '/admin/category-manager',
+      color: 'bg-teal-500',
+      stats: '管理類別'
+    },
+    {
+      title: '過濾器管理',
+      description: '管理產品和專案的過濾選項',
+      icon: Settings,
+      href: '/admin/filter-manager',
+      color: 'bg-cyan-500',
+      stats: '過濾選項'
+    },
+    {
+      title: '專案管理',
+      description: '管理案例研究和專案展示',
+      icon: Building2,
+      href: '/admin/projects',
+      color: 'bg-green-500',
+      stats: '25+ 專案'
+    },
+    {
+      title: '文章管理',
+      description: '管理部落格文章和技術內容',
+      icon: FileText,
+      href: '/admin/articles',
+      color: 'bg-purple-500',
+      stats: '45+ 文章'
+    },
+    {
+      title: '媒體管理',
+      description: '管理圖片、影片和文件',
+      icon: Image,
+      href: '/admin/media',
+      color: 'bg-orange-500',
+      stats: '200+ 媒體'
+    },
+    {
+      title: '網站文字管理',
+      description: '編輯網站上的所有文字內容',
+      icon: Edit,
+      href: '/admin/website-text-manager',
+      color: 'bg-red-500',
+      stats: '即時更新'
+    },
+    {
+      title: '翻譯管理',
+      description: '管理多語言翻譯和本地化',
+      icon: Globe,
+      href: '/admin/translation-dashboard',
+      color: 'bg-indigo-500',
+      stats: '7 種語言'
+    }
+  ];
 
-  // Simple test to verify translation function
-  console.log('AdminDashboard - Translation test:', {
-    testKey: t('admin.dashboard.title'),
-    testNav: t('nav.home'),
-    currentLanguage: currentLanguage,
-    selectedLanguage: selectedLanguage
-  });
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      setLoading(true);
-      
-      try {
-        // Use productService for products count (same as other admin pages)
-        const products = await productService.getAllProducts();
-        
-        // Fetch counts from other tables
-        const [articlesResult, projectsResult, translationsResult] = await Promise.all([
-          supabase.from('articles').select('*', { count: 'exact', head: true }),
-          supabase.from('projects').select('*', { count: 'exact', head: true }),
-          supabase.from('website_texts').select('*', { count: 'exact', head: true })
-        ]);
 
-        setStats({
-          totalProducts: products.length,
-          totalProjects: projectsResult.count || 0,
-          totalArticles: articlesResult.count || 0,
-          totalTranslations: translationsResult.count || 0
-        });
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-        // Fallback to direct database call if productService fails
-        try {
-          const productsResult = await supabase.from('products').select('*', { count: 'exact', head: true });
-          setStats(prev => ({
-            ...prev,
-            totalProducts: productsResult.count || 0
-          }));
-        } catch (dbError) {
-          console.error('Database fallback also failed:', dbError);
-        }
-      }
-      
-      setLoading(false);
-    };
-
-    fetchStats();
-  }, []);
-
-  const StatCard = ({ title, value, icon: Icon, color = "primary" }: {
-    title: string;
-    value: number;
-    icon: any;
-    color?: string;
-  }) => (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-2xl font-bold">{value}</p>
-          </div>
-          <Icon className={`h-8 w-8 text-${color}`} />
-        </div>
-      </CardContent>
-    </Card>
-  );
-
-  const QuickActionCard = ({ title, description, icon: Icon, link, color = "primary" }: {
-    title: string;
-    description: string;
-    icon: any;
-    link: string;
-    color?: string;
-  }) => (
-    <Link to={link}>
-      <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-        <CardContent className="p-6 text-center">
-          <Icon className={`h-8 w-8 text-${color} mx-auto mb-3`} />
-          <h3 className="font-semibold">{title}</h3>
-          <p className="text-sm text-muted-foreground mt-1">{description}</p>
-        </CardContent>
-      </Card>
-    </Link>
-  );
-
-  const LanguageCard = ({ language }: { language: typeof LANGUAGES[0] }) => (
-    <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-      <CardContent className="p-4 text-center">
-        <div className="text-2xl mb-2">{language.flag}</div>
-        <h3 className="font-semibold text-sm">{language.nativeName}</h3>
-        <p className="text-xs text-muted-foreground">{language.name}</p>
-      </CardContent>
-    </Card>
-  );
-
-  // Test language selection
-  const handleLanguageSelect = (languageCode: string) => {
-    console.log('Language selected:', languageCode);
-    setSelectedLanguage(languageCode);
-  };
-
-  if (loading) {
+  if (showCompanySelector) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto p-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">{t('admin.dashboard.loading')}</p>
-            </div>
-          </div>
+      <div className="container mx-auto p-8">
+        <div className="mb-6">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowCompanySelector(false)}
+            className="mb-4"
+          >
+            ← 返回儀表板
+          </Button>
         </div>
+        <CompanySelector />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pt-24">
+    <div className="container mx-auto p-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground p-6">
-        <div className="container mx-auto">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold">{t('admin.dashboard.title')}</h1>
-              <p className="text-primary-foreground/80 mt-2">{t('admin.dashboard.subtitle')}</p>
-            </div>
-            <Button 
-              variant="secondary" 
-              onClick={() => window.location.reload()}
-              className="ml-4"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              {t('admin.dashboard.refreshStats')}
-            </Button>
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold">管理儀表板</h1>
+            <p className="text-muted-foreground">
+              歡迎回來！您正在管理 <strong>{currentCompany.displayName}</strong>
+            </p>
           </div>
+          <Button 
+            onClick={() => setShowCompanySelector(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Globe className="h-4 w-4" />
+            切換公司
+          </Button>
         </div>
-      </div>
-
-      <div className="container mx-auto p-8">
-        {/* Language Selection */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Globe className="h-5 w-5" />
-            <h2 className="text-xl font-semibold">{t('admin.dashboard.selectLanguage')}</h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-            {LANGUAGES.map(language => (
-              <div key={language.code} onClick={() => handleLanguageSelect(language.code)}>
-                <LanguageCard language={language} />
+        
+        {/* Company Info Card */}
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-lg ${currentCompany.id === 'aftek' ? 'bg-red-100' : currentCompany.id === 'rla' ? 'bg-blue-100' : 'bg-green-100'} flex items-center justify-center`}>
+                  <Building2 className={`h-6 w-6 ${currentCompany.id === 'aftek' ? 'text-red-600' : currentCompany.id === 'rla' ? 'text-blue-600' : 'text-green-600'}`} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">{currentCompany.displayName}</h3>
+                  <p className="text-sm text-muted-foreground">{currentCompany.description}</p>
+                </div>
               </div>
-            ))}
-          </div>
-          <div className="mt-4 p-4 bg-muted rounded-lg">
-            <p className="text-sm text-muted-foreground">
-              {t('admin.dashboard.currentSelection')}: <span className="font-medium">{LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName}</span>
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {t('admin.dashboard.languageDescription')}
-            </p>
-          </div>
-        </div>
-
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-          <StatCard
-            title={t('admin.stats.totalProducts')}
-            value={stats.totalProducts}
-            icon={Package}
-          />
-          <StatCard
-            title={t('admin.stats.totalProjects')}
-            value={stats.totalProjects}
-            icon={Building2}
-          />
-          <StatCard
-            title={t('admin.stats.totalArticles')}
-            value={stats.totalArticles}
-            icon={FileText}
-          />
-
-          <StatCard
-            title={t('admin.stats.totalTranslations')}
-            value={stats.totalTranslations}
-            icon={Languages}
-          />
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <QuickActionCard
-            title={t('admin.actions.translationManagement')}
-            description={t('admin.actions.translationDescription')}
-            icon={Languages}
-            link="/admin/translation-dashboard"
-            color="purple"
-          />
-          <QuickActionCard
-            title={t('admin.actions.websiteTextManagement')}
-            description={t('admin.actions.websiteTextDescription')}
-            icon={FileText}
-            link="/admin/website-text-editor"
-            color="blue"
-          />
-          <QuickActionCard
-            title={t('admin.actions.productManagement')}
-            description={t('admin.actions.productDescription')}
-            icon={Package}
-            link="/admin/products"
-            color="green"
-          />
-          <QuickActionCard
-            title={t('admin.actions.projectManagement')}
-            description={t('admin.actions.projectDescription')}
-            icon={Building2}
-            link="/admin/projects"
-            color="orange"
-          />
-          <QuickActionCard
-            title={t('admin.actions.articleManagement')}
-            description={t('admin.actions.articleDescription')}
-            icon={FileText}
-            link="/admin/articles"
-            color="purple"
-          />
-
-          <QuickActionCard
-            title={t('admin.actions.featuredProducts')}
-            description={t('admin.actions.featuredProductsDescription')}
-            icon={Filter}
-            link="/admin/featured-products"
-            color="red"
-          />
-        </div>
-
-
-
-                 {/* Content Synchronization */}
-         <div className="mb-8">
-           <ContentSyncManager />
-         </div>
-
-         {/* System Tools */}
-         <div className="mb-8">
-           <h2 className="text-xl font-semibold mb-4">{t('admin.tools.systemTools')}</h2>
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             <Card>
-               <CardHeader>
-                 <CardTitle className="flex items-center gap-2">
-                   <Database className="h-5 w-5" />
-                   {t('admin.tools.databaseTools')}
-                 </CardTitle>
-               </CardHeader>
-               <CardContent className="space-y-4">
-                 <ProductMigrationTool />
-               </CardContent>
-             </Card>
-             
-             <Card>
-               <CardHeader>
-                 <CardTitle className="flex items-center gap-2">
-                   <Settings className="h-5 w-5" />
-                   {t('admin.tools.systemSettings')}
-                 </CardTitle>
-               </CardHeader>
-               <CardContent className="space-y-4">
-                 <div className="flex items-center justify-between">
-                   <span className="text-sm">{t('admin.tools.maintenanceMode')}</span>
-                   <Badge variant="secondary">{t('admin.tools.statusOff')}</Badge>
-                 </div>
-                 <div className="flex items-center justify-between">
-                   <span className="text-sm">{t('admin.tools.cacheStatus')}</span>
-                   <Badge variant="outline">{t('admin.tools.statusNormal')}</Badge>
-                 </div>
-                 <div className="flex items-center justify-between">
-                   <span className="text-sm">{t('admin.tools.databaseConnection')}</span>
-                   <Badge variant="outline">{t('admin.tools.statusNormal')}</Badge>
-                 </div>
-               </CardContent>
-             </Card>
-           </div>
-         </div>
+              <div className="text-right">
+                <Badge variant="secondary">{currentCompany.domain}</Badge>
+                <p className="text-sm text-muted-foreground mt-1">{currentCompany.contactInfo.phone}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
+
+
+
+      {/* Main Admin Cards */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-4">管理功能</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {adminCards.map((card, index) => (
+            <Card key={index} className="hover:shadow-lg transition-all duration-300 group">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className={`w-12 h-12 rounded-lg ${card.color} flex items-center justify-center`}>
+                    <card.icon className="h-6 w-6 text-white" />
+                  </div>
+                  <Badge variant="secondary" className="text-xs">
+                    {card.stats}
+                  </Badge>
+                </div>
+                <CardTitle className="text-lg">{card.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground text-sm mb-4">{card.description}</p>
+                <Button asChild className="w-full group-hover:bg-primary group-hover:text-primary-foreground">
+                  <Link to={card.href}>
+                    管理 {card.title}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+
     </div>
   );
 };

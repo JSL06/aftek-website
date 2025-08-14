@@ -88,6 +88,138 @@
   overflow: hidden;
 }
 
+/* Rich text content styles */
+.prose {
+  max-width: 65ch;
+  color: hsl(var(--foreground));
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.prose img.float-left {
+  float: left;
+  margin-right: 1rem;
+  margin-bottom: 0.5rem;
+  max-width: 40%;
+}
+
+.prose img.float-right {
+  float: right;
+  margin-left: 1rem;
+  margin-bottom: 0.5rem;
+  max-width: 40%;
+}
+
+.prose img.mx-auto {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.prose .clearfix::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.prose p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.prose ul, .prose ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.prose li {
+  margin-bottom: 0.25rem;
+}
+
+/* WYSIWYG Editor specific styles */
+[contenteditable="true"] {
+  outline: none;
+}
+
+[contenteditable="true"]:focus {
+  outline: none;
+}
+
+[contenteditable="true"] h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 1.5rem 0 1rem 0;
+  color: hsl(var(--foreground));
+}
+
+[contenteditable="true"] h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.75rem 0;
+  color: hsl(var(--foreground));
+}
+
+[contenteditable="true"] strong {
+  font-weight: 700;
+}
+
+[contenteditable="true"] em {
+  font-style: italic;
+}
+
+[contenteditable="true"] blockquote {
+  border-left: 4px solid hsl(var(--primary));
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: hsl(var(--muted-foreground));
+}
+
+[contenteditable="true"] code {
+  background-color: hsl(var(--muted));
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-family: monospace;
+  font-size: 0.875rem;
+}
+
+[contenteditable="true"] ul, [contenteditable="true"] ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+[contenteditable="true"] li {
+  margin-bottom: 0.5rem;
+}
+
+[contenteditable="true"] a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+}
+
+[contenteditable="true"] a:hover {
+  text-decoration: none;
+}
+
+/* Placeholder styling */
+[contenteditable="true"]:empty:before {
+  content: attr(data-placeholder);
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */

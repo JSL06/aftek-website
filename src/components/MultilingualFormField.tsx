@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { LANGUAGES, Language } from './LanguageSelector';
 import { TranslationStatus } from './TranslationStatus';
+import WYSIWYGEditor from './WYSIWYGEditor';
 
 interface MultilingualFormFieldProps {
   label: string;
@@ -104,14 +105,13 @@ export const MultilingualFormField: React.FC<MultilingualFormFieldProps> = ({
       case 'rich-text':
         return (
           <div className="space-y-2">
-            <Textarea
+            <WYSIWYGEditor
               value={currentValue}
-              onChange={(e) => handleChange(e.target.value)}
+              onChange={handleChange}
               placeholder={placeholder || `${label} (${currentLang?.nativeName})`}
-              className="min-h-[200px] font-mono text-sm"
             />
             <p className="text-xs text-muted-foreground">
-              支持 HTML 标签和 Markdown 格式
+              所見即所得編輯器，支持富文本格式、圖片插入、調整大小和方向
             </p>
           </div>
         );

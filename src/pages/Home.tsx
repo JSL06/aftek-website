@@ -27,6 +27,15 @@ const Home = () => {
   const carouselRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  // Debug: Log language changes
+  useEffect(() => {
+    console.log('Home component: Language changed to:', currentLanguage);
+    console.log('Home component: Testing translations...');
+    console.log('Home component: home.explore.title =', t('home.explore.title'));
+    console.log('Home component: home.explore.products.title =', t('home.explore.products.title'));
+    console.log('Home component: home.explore.articles.title =', t('home.explore.articles.title'));
+  }, [currentLanguage, t]);
+
   useEffect(() => {
     // Check if this is the first time the app has been loaded
     const hasAppBeenLoaded = localStorage.getItem('aftekAppLoaded');
@@ -392,7 +401,7 @@ const Home = () => {
 
 
       {/* Products & Articles Teaser */}
-      <section className="py-24 bg-gradient-subtle">
+      <section className="py-24 bg-gradient-subtle" key={`explore-section-${currentLanguage}`}>
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
@@ -401,7 +410,7 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            <Card className="bg-card border-border shadow-card hover:shadow-elegant transition-all duration-300 group overflow-hidden h-full flex flex-col">
+            <Card className="bg-card border-border shadow-card hover:shadow-elegant transition-all duration-300 group overflow-hidden h-full flex flex-col" key={`products-card-${currentLanguage}`}>
               <CardContent className="p-0 flex flex-col h-full">
                 <div className="h-64 bg-gradient-accent flex items-center justify-center">
                   <Building2 className="h-16 w-16 text-primary" />
@@ -421,7 +430,7 @@ const Home = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-card border-border shadow-card hover:shadow-elegant transition-all duration-300 group overflow-hidden h-full flex flex-col">
+            <Card className="bg-card border-border shadow-card hover:shadow-elegant transition-all duration-300 group overflow-hidden h-full flex flex-col" key={`articles-card-${currentLanguage}`}>
               <CardContent className="p-0 flex flex-col h-full">
                 <div className="h-64 bg-gradient-accent flex items-center justify-center">
                   <FileText className="h-16 w-16 text-primary" />

@@ -241,6 +241,13 @@ export const useTranslation = () => {
       return value || key;
     };
 
+    // Debug: Log translation requests for specific keys
+    if (key.startsWith('home.explore.')) {
+      console.log(`useTranslation: Requesting translation for key: ${key}`);
+      console.log(`useTranslation: Current language: ${currentLanguage}`);
+      console.log(`useTranslation: Loading state: ${loading}`);
+    }
+
     // For specific keys that should always use local translations, prioritize local files
     const alwaysLocalKeys = ['home.about.desc', 'home.mission.content'];
     if (alwaysLocalKeys.includes(key)) {
@@ -256,6 +263,9 @@ export const useTranslation = () => {
     if (!loading) {
       const translation = translations[key];
       if (translation) {
+        if (key.startsWith('home.explore.')) {
+          console.log(`useTranslation: Found database translation for ${key}:`, translation);
+        }
         return getValue(translation);
       }
     }
@@ -264,6 +274,9 @@ export const useTranslation = () => {
     const localTrans = localTranslations[currentLanguage];
     const localValue = localTrans?.[key];
     if (localValue) {
+      if (key.startsWith('home.explore.')) {
+        console.log(`useTranslation: Found local translation for ${key}:`, localValue);
+      }
       return getValue(localValue);
     }
 
@@ -276,6 +289,9 @@ export const useTranslation = () => {
     }
 
     // Show the key instead of falling back to English
+    if (key.startsWith('home.explore.')) {
+      console.log(`useTranslation: No translation found for ${key}, returning key`);
+    }
     return key;
   };
 
