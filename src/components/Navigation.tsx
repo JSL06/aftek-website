@@ -105,8 +105,7 @@ const Navigation = () => {
               value={currentLanguage}
               onChange={(e) => {
                 changeLanguage(e.target.value as Language);
-                // Force refresh translations after language change
-                setTimeout(() => refreshTranslations(), 100);
+                // Don't force refresh translations to prevent interference
               }}
             >
               {languageOptions.map((lang) => (

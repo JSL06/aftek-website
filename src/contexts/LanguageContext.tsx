@@ -44,16 +44,9 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   // Handle route changes to ensure language persistence
   useEffect(() => {
     const handleRouteChange = () => {
-      // Small delay to ensure DOM is updated
-      setTimeout(() => {
-        const savedLanguage = localStorage.getItem('aftek-language');
-        if (savedLanguage && savedLanguage !== currentLanguage) {
-          // Only change if the saved language is valid
-          if (['en', 'ja', 'ko', 'th', 'vi', 'zh-Hans', 'zh-Hant'].includes(savedLanguage)) {
-            changeLanguage(savedLanguage as Language);
-          }
-        }
-      }, 100);
+      // Don't force language change on route change to prevent interference
+      // Only log for debugging
+      console.log('Route changed, current language:', currentLanguage);
     };
 
     // Listen for popstate (browser back/forward)

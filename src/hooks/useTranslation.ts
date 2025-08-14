@@ -201,27 +201,17 @@ export const useTranslation = () => {
 
     // Handle page visibility changes to ensure language sync
     const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        const savedLanguage = localStorage.getItem('aftek-language');
-        if (savedLanguage && savedLanguage !== currentLanguage && Object.keys(localTranslations).includes(savedLanguage)) {
-          // Only change if the saved language is valid
-          if (['en', 'ja', 'ko', 'th', 'vi', 'zh-Hans', 'zh-Hant'].includes(savedLanguage)) {
-            setCurrentLanguage(savedLanguage as Language);
-          }
-        }
-      }
+      // Don't force language change on visibility change to prevent interference
+      // Only log for debugging
+      console.log('Page visibility changed, current language:', currentLanguage);
     };
 
     // Handle storage changes (when language is changed in another tab)
     const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'aftek-language' && event.newValue) {
-        const newLanguage = event.newValue as Language;
-        if (Object.keys(localTranslations).includes(newLanguage) && newLanguage !== currentLanguage) {
-          // Only change if the new language is valid
-          if (['en', 'ja', 'ko', 'th', 'vi', 'zh-Hans', 'zh-Hant'].includes(newLanguage)) {
-            setCurrentLanguage(newLanguage);
-          }
-        }
+      // Don't force language change on storage change to prevent interference
+      // Only log for debugging
+      if (event.key === 'aftek-language') {
+        console.log('Language storage changed:', event.newValue, 'current:', currentLanguage);
       }
     };
 
