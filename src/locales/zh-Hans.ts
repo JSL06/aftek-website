@@ -228,14 +228,20 @@ const zhHans = {
   'products.search.placeholder': '搜索产品...',
   'products.viewDetails': '查看详情',
   'products.specifications': '规格',
-  'products.features': '主要特点',
+  'products.features': '主要特征',
   'products.applications': '应用',
   'products.downloads': '下载',
   'products.showing': '显示 {count} 个产品，共 {total} 个',
-  'products.filtered': '已过滤自',
+  'products.filtered': '从',
   'products.total': '总计',
-  'products.page': '第',
-  'products.of': '页，共',
+  'products.page': '页面',
+  'products.of': '共',
+  'products.noProductsFound': '未找到符合您条件的产品',
+  'products.clearFilters': '清除筛选条件',
+  'products.searchButton': '搜索',
+  'products.clearButton': '清除',
+  'products.inStock': '有库存',
+  'products.outOfStock': '缺货',
 
   // Projects Page
   'projects.title': '项目',
@@ -317,12 +323,21 @@ const zhHans = {
   'filter.category': '类别',
   'filter.features': '特征',
 
-  // Product Categories
+  // Categories
   'category.waterproofing': '防水',
   'category.sealants_adhesives': '密封剂与胶黏剂',
   'category.redimix': 'Redi-Mix G&M',
   'category.flooring': '地板系统',
   'category.others': '其他（保温、涂料）',
+  'category.architectural_coatings': '建筑涂料',
+  'category.stucco': '灰泥',
+  'category.sound_insulation': '隔音材料',
+  'category.textured_paints': '纹理涂料',
+  'category.butyl_tape': '丁基胶带',
+  'category.construction_chemicals': '建筑化学品',
+  'category.building_materials': '建筑材料',
+  'category.industrial_coatings': '工业涂料',
+  'category.maintenance_products': '维护产品',
 
   // Project Categories
   'projectCategory.infrastructure': '基础设施',
@@ -394,6 +409,12 @@ const zhHans = {
   'guide.facilityType7.name': '工业设施',
   'guide.facilityType7.description': '适用于工厂和工业建筑的坚固解决方案',
   'guide.explorer.changeFacility': '更换设施',
+
+  // Building types for the guide page
+  'guide.building.residential': '住宅建筑',
+  'guide.building.commercial': '商业建筑',
+  'guide.building.industrial': '工业设施',
+  'guide.building.infrastructure': '基础设施项目',
 
   // Guide Facilities
   'guide.facilities.residential': '住宅',

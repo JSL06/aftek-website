@@ -59,17 +59,32 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
   // Storage bucket configuration
   const STORAGE_BUCKET = 'product-images';
 
-  // Initialize editor content
+  // Initialize editor content only once
   useEffect(() => {
-    if (editorRef.current && value) {
+    if (editorRef.current && value && !editorRef.current.innerHTML) {
       editorRef.current.innerHTML = value;
+    }
+  }, []); // Only run once on mount
+
+  // Handle external value updates (e.g., from form reset)
+  useEffect(() => {
+    if (editorRef.current && value !== editorRef.current.innerHTML) {
+      // Only update if the value is actually different to avoid disrupting user input
+      const currentContent = editorRef.current.innerHTML;
+      if (value !== currentContent) {
+        editorRef.current.innerHTML = value;
+      }
     }
   }, [value]);
 
   // Handle content changes
   const handleContentChange = () => {
     if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
+      const newContent = editorRef.current.innerHTML;
+      // Only trigger onChange if content actually changed
+      if (newContent !== value) {
+        onChange(newContent);
+      }
     }
   };
 
@@ -80,22 +95,53 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
     return selection.getRangeAt(0);
   };
 
-  // Save selection
+  // Save selection with better cursor position handling
   const saveSelection = () => {
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0) {
-      return selection.getRangeAt(0).cloneRange();
+      const range = selection.getRangeAt(0);
+      const savedRange = range.cloneRange();
+      
+      // Store additional context to help with restoration
+      const container = range.commonAncestorContainer;
+      const offset = range.startOffset;
+      
+      return {
+        range: savedRange,
+        container,
+        offset,
+        timestamp: Date.now()
+      };
     }
     return null;
   };
 
-  // Restore selection
-  const restoreSelection = (range: Range | null) => {
-    if (range) {
-      const selection = window.getSelection();
-      if (selection) {
-        selection.removeAllRanges();
-        selection.addRange(range);
+  // Restore selection with improved positioning
+  const restoreSelection = (savedData: any) => {
+    if (savedData && savedData.range) {
+      try {
+        const selection = window.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(savedData.range);
+          
+          // Ensure the editor has focus
+          if (editorRef.current) {
+            editorRef.current.focus();
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to restore selection:', error);
+        // Fallback: place cursor at end of content
+        if (editorRef.current) {
+          const range = document.createRange();
+          const selection = window.getSelection();
+          range.selectNodeContents(editorRef.current);
+          range.collapse(false);
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+          editorRef.current.focus();
+        }
       }
     }
   };
@@ -105,7 +151,6 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
     const savedRange = saveSelection();
     document.execCommand(command, false, value);
     restoreSelection(savedRange);
-    editorRef.current?.focus();
     handleContentChange();
   };
 
@@ -114,7 +159,6 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
     const savedRange = saveSelection();
     document.execCommand('insertHTML', false, html);
     restoreSelection(savedRange);
-    editorRef.current?.focus();
     handleContentChange();
   };
 
@@ -445,6 +489,17 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
         onInput={handleContentChange}
         onBlur={handleContentChange}
         onKeyDown={handleKeyDown}
+        onFocus={() => {
+          // Ensure proper cursor positioning when editor gains focus
+          if (editorRef.current && !window.getSelection()?.rangeCount) {
+            const range = document.createRange();
+            const selection = window.getSelection();
+            range.selectNodeContents(editorRef.current);
+            range.collapse(false);
+            selection?.removeAllRanges();
+            selection?.addRange(range);
+          }
+        }}
         className="min-h-[400px] p-4 focus:outline-none prose max-w-none"
         style={{
           fontFamily: 'inherit',

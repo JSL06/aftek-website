@@ -11,6 +11,7 @@ import { Plus, Edit, Trash2, Save, ArrowLeft, Package, Star, Eye, RefreshCw, Dat
 import { Link } from 'react-router-dom';
 import { productService, UnifiedProduct } from '@/services/productService';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   AlertDialog, 
   AlertDialogContent, 
@@ -26,6 +27,7 @@ import LanguageSelector, { Language, LANGUAGES } from '@/components/LanguageSele
 import MultilingualFormField from '@/components/MultilingualFormField';
 import TranslationStatus from '@/components/TranslationStatus';
 import { useTranslation } from '@/hooks/useTranslation';
+import ImageUpload from '@/components/ui/ImageUpload';
 
 const FEATURE_OPTIONS = [
   // Application Environment
@@ -42,15 +44,9 @@ const FEATURE_OPTIONS = [
   'Eco Friendly', 'Fire Resistant', 'Anti Microbial', 'Self Leveling', 'Quick Setting', 'Paintable'
 ];
 
-const CATEGORIES = [
-  'Waterproofing',
-  'Sealants & Adhesives',
-  'Redi-Mix G&M',
-  'Flooring Systems',
-  'Others (Insulation, Coatings)'
-];
-
 const UnifiedProducts = () => {
+  // Categories will be loaded from the database
+  const [categories, setCategories] = useState<string[]>([]);
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
   const [products, setProducts] = useState<UnifiedProduct[]>([]);
@@ -66,7 +62,6 @@ const UnifiedProducts = () => {
     name: '',
     description: '',
     category: '',
-    price: 0,
     model: '',
     features: [],
     inStock: true,
@@ -77,9 +72,10 @@ const UnifiedProducts = () => {
     translations: {}
   });
 
-  // Load products on component mount
+  // Load products and categories on component mount
   useEffect(() => {
     loadProducts();
+    loadCategories();
   }, []);
 
   // Filter products when search/filter criteria change
@@ -99,6 +95,42 @@ const UnifiedProducts = () => {
       toast.error(t('admin.products.loadError'));
     }
     setLoading(false);
+  };
+
+  const loadCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('product_categories')
+        .select('name')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+
+      if (error) {
+        console.warn('Could not load categories:', error);
+        // Fallback to default categories if table doesn't exist yet
+        setCategories([
+          'Waterproofing',
+          'Sealants & Adhesives',
+          'Redi-Mix G&M',
+          'Flooring Systems',
+          'Others (Insulation, Coatings)'
+        ]);
+        return;
+      }
+
+      const categoryNames = data?.map(cat => cat.name) || [];
+      setCategories(categoryNames);
+    } catch (error) {
+      console.warn('Error loading categories:', error);
+      // Fallback to default categories
+      setCategories([
+        'Waterproofing',
+        'Sealants & Adhesives',
+        'Redi-Mix G&M',
+        'Flooring Systems',
+        'Others (Insulation, Coatings)'
+      ]);
+    }
   };
 
   const filterProducts = () => {
@@ -135,7 +167,6 @@ const UnifiedProducts = () => {
       name: '',
       description: '',
       category: '',
-      price: 0,
       model: '',
       features: [],
       inStock: true,
@@ -156,7 +187,7 @@ const UnifiedProducts = () => {
     LANGUAGES.forEach(lang => {
       translations[lang.code] = {
         name: lang.code === 'en' ? product.name : (product.names?.[lang.code] || ''),
-        description: lang.code === 'en' ? product.description : (product.names?.[`${lang.code}_description`] || ''),
+        description: lang.code === 'en' ? product.description : (product.descriptions?.[lang.code] || ''),
         category: product.category || ''
       };
     });
@@ -165,7 +196,6 @@ const UnifiedProducts = () => {
       name: product.name,
       description: product.description,
       category: product.category,
-      price: product.price,
       model: product.model,
       features: Array.isArray(product.features) ? [...product.features] : [],
       inStock: product.inStock,
@@ -179,41 +209,66 @@ const UnifiedProducts = () => {
   };
 
   const handleTranslationChange = (language: Language, fieldName: string, value: any) => {
+    setFormData(prev => {
+      const newFormData = {
+        ...prev,
+        translations: {
+          ...prev.translations,
+          [language]: {
+            ...prev.translations[language],
+            [fieldName]: value
+          }
+        }
+      };
+
+      // Also update the basic fields when English is selected (for backward compatibility)
+      if (language === 'en' && (fieldName === 'name' || fieldName === 'description')) {
+        newFormData[fieldName] = value;
+      }
+
+      return newFormData;
+    });
+  };
+
+  const handleBasicFieldChange = (fieldName: string, value: any) => {
     setFormData(prev => ({
       ...prev,
-      translations: {
-        ...prev.translations,
-        [language]: {
-          ...prev.translations[language],
-          [fieldName]: value
-        }
-      }
+      [fieldName]: value
     }));
   };
 
 
 
   const handleSave = async () => {
+    console.log('🔄 handleSave called');
+    console.log('📝 Current formData:', formData);
+    console.log('🌐 Selected language:', selectedLanguage);
+    
     // Validate required fields for current language
     const currentLangData = formData.translations[selectedLanguage] || {};
+    console.log('🌐 Current language data:', currentLangData);
+    
     if (!currentLangData.name && !formData.name?.trim()) {
+      console.log('❌ Validation failed: No name provided');
       toast.error(t('admin.products.name') + ' ' + t('admin.products.required'));
       return;
     }
 
     if (!formData.category) {
+      console.log('❌ Validation failed: No category provided');
       toast.error('Product category is required');
       return;
     }
 
+    console.log('✅ Validation passed, proceeding with save');
     setLoading(true);
+    
     try {
       // Prepare product data with multilingual content
       const productData: Partial<UnifiedProduct> = {
         name: formData.name || currentLangData.name,
         description: formData.description || currentLangData.description,
         category: formData.category,
-        price: formData.price,
         model: formData.model,
         features: formData.features,
         inStock: formData.inStock,
@@ -224,6 +279,8 @@ const UnifiedProducts = () => {
         names: {}
       };
 
+      console.log('📦 Prepared product data:', productData);
+
       // Add multilingual names and descriptions
       LANGUAGES.forEach(lang => {
         const langData = formData.translations[lang.code];
@@ -231,35 +288,44 @@ const UnifiedProducts = () => {
           productData.names![lang.code] = langData.name;
         }
         if (langData?.description) {
-          productData.names![`${lang.code}_description`] = langData.description;
+          // Store descriptions in the descriptions field, not names
+          if (!productData.descriptions) productData.descriptions = {};
+          productData.descriptions![lang.code] = langData.description;
         }
       });
 
-      console.log('Saving product with data:', productData);
+      console.log('🌍 Final product data with translations:', productData);
       
       if (editingProduct) {
+        console.log('✏️ Updating existing product:', editingProduct.id);
         // Update existing product
         const updated = await productService.updateProduct(editingProduct.id, productData);
+        console.log('✅ Update result:', updated);
         if (updated) {
           toast.success(t('admin.products.saveSuccess'));
         } else {
           throw new Error('Product update returned null');
         }
       } else {
+        console.log('➕ Adding new product');
         // Add new product
-        await productService.addProduct(productData);
+        const result = await productService.addProduct(productData);
+        console.log('✅ Add result:', result);
         toast.success(t('admin.products.saveSuccess'));
       }
 
+      console.log('🔄 Reloading products');
       await loadProducts();
       setShowForm(false);
       setEditingProduct(null);
+      console.log('✅ Save operation completed successfully');
     } catch (error) {
-      console.error('Save error details:', error);
+      console.error('❌ Save error details:', error);
       const errorMessage = error?.message || 'Unknown error occurred';
       toast.error(t('admin.products.saveError') + ': ' + errorMessage);
     }
     setLoading(false);
+    console.log('🏁 handleSave completed');
   };
 
   const handleDelete = async (id: string, name: string) => {
@@ -304,13 +370,6 @@ const UnifiedProducts = () => {
       toast.error('Failed to update product status');
       console.error('Error updating product status:', error);
     }
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(price);
   };
 
   if (showForm) {
@@ -360,33 +419,33 @@ const UnifiedProducts = () => {
                   {t('admin.dashboard.currentSelection')}: {LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName}
                 </h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <MultilingualFormField
-                    label={t('admin.products.name')}
-                    fieldName="name"
-                    type="text"
-                    translations={formData.translations}
-                    onTranslationChange={handleTranslationChange}
-                    currentLanguage={selectedLanguage}
-                    required={true}
-                  />
+                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <MultilingualFormField
+                     label={t('admin.products.name')}
+                     fieldName="name"
+                     type="text"
+                     translations={formData.translations}
+                     onTranslationChange={handleTranslationChange}
+                     currentLanguage={selectedLanguage}
+                     required={true}
+                   />
 
-                  <div>
-                    <Label htmlFor="category">{t('admin.products.category')}</Label>
-                    <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('admin.products.allCategories')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {CATEGORIES.map(category => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                   <div>
+                     <Label>{t('admin.products.category')}</Label>
+                     <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
+                       <SelectTrigger id="category" name="category">
+                         <SelectValue placeholder={t('admin.products.allCategories')} />
+                       </SelectTrigger>
+                       <SelectContent>
+                         {categories.map(category => (
+                           <SelectItem key={category} value={category}>
+                             {category}
+                           </SelectItem>
+                         ))}
+                       </SelectContent>
+                     </Select>
+                   </div>
+                 </div>
 
                 <div className="mt-6">
                   <MultilingualFormField
@@ -404,195 +463,191 @@ const UnifiedProducts = () => {
               {/* Common fields */}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="price">{t('admin.products.price')}</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    step="0.01"
-                    value={formData.price || 0}
-                    onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="model">{t('admin.products.model')}</Label>
-                  <Input
-                    id="model"
-                    value={formData.model || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, model: e.target.value }))}
-                    placeholder="Enter model number"
-                  />
-                </div>
+                                 <div>
+                   <Label htmlFor="model">{t('admin.products.model')}</Label>
+                   <Input
+                     id="model"
+                     name="model"
+                     value={formData.model || ''}
+                     onChange={(e) => setFormData(prev => ({ ...prev, model: e.target.value }))}
+                     placeholder="Enter model number"
+                   />
+                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="image">{t('admin.products.image')}</Label>
-                <Input
-                  id="image"
-                  value={formData.image || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                  placeholder="Enter image URL"
-                />
-              </div>
+                             <div>
+                 <Label htmlFor="image">{t('admin.products.image')}</Label>
+                 <ImageUpload
+                   value={formData.image || ''}
+                   onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
+                 />
+               </div>
 
-              <div>
-                <Label>{t('admin.products.features')}</Label>
-                <div className="border rounded-lg p-4 max-h-32 overflow-y-auto">
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {FEATURE_OPTIONS.map(feature => (
-                      <label key={feature} className="flex items-center space-x-2 text-sm">
-                        <input
-                          type="checkbox"
-                          checked={formData.features?.includes(feature) || false}
-                          onChange={(e) => {
-                            const features = formData.features || [];
-                            if (e.target.checked) {
-                              setFormData(prev => ({ ...prev, features: [...features, feature] }));
-                            } else {
-                              setFormData(prev => ({ ...prev, features: features.filter(f => f !== feature) }));
-                            }
-                          }}
-                        />
-                        <span>{feature}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Selected: {formData.features?.length || 0} {t('admin.products.features').toLowerCase()}
-                </p>
-              </div>
+                                              <div>
+                   <Label id="features-label">{t('admin.products.features')}</Label>
+                   <div className="border rounded-lg p-4 max-h-32 overflow-y-auto" role="group" aria-labelledby="features-label">
+                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                       {FEATURE_OPTIONS.map(feature => (
+                         <div key={feature} className="flex items-center space-x-2 text-sm">
+                           <input
+                             type="checkbox"
+                             id={`feature-${feature.replace(/\s+/g, '-').toLowerCase()}`}
+                             name="features"
+                             value={feature}
+                             checked={formData.features?.includes(feature) || false}
+                             onChange={(e) => {
+                               const features = formData.features || [];
+                               if (e.target.checked) {
+                                 setFormData(prev => ({ ...prev, features: [...features, feature] }));
+                               } else {
+                                 setFormData(prev => ({ ...prev, features: features.filter(f => f !== feature) }));
+                               }
+                             }}
+                           />
+                           <label htmlFor={`feature-${feature.replace(/\s+/g, '-').toLowerCase()}`}>{feature}</label>
+                         </div>
+                       ))}
+                     </div>
+                   </div>
+                   <p className="text-xs text-muted-foreground mt-1">
+                     Selected: {formData.features?.length || 0} {t('admin.products.features').toLowerCase()}
+                   </p>
+                 </div>
 
-              <div>
-                <Label>Related Products</Label>
-                <div className="space-y-4">
-                  <div className="flex gap-2 mb-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        // Auto-suggest products with similar tags
-                        const currentTags = formData.features || [];
-                        const suggestions = products
-                          .filter(p => p.id !== formData.id && p.isActive)
-                          .filter(p => {
-                            const productTags = p.features || [];
-                            return productTags.some(tag => currentTags.includes(tag));
-                          })
-                          .slice(0, 5)
-                          .map(p => p.id);
-                        
-                        setFormData(prev => ({
-                          ...prev,
-                          related_products: [...new Set([...(prev.related_products || []), ...suggestions])]
-                        }));
-                      }}
-                    >
-                      <Package className="h-4 w-4 mr-2" />
-                      Auto-Suggest by Tags
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        // Auto-suggest products from same category
-                        const suggestions = products
-                          .filter(p => p.id !== formData.id && p.isActive && p.category === formData.category)
-                          .slice(0, 5)
-                          .map(p => p.id);
-                        
-                        setFormData(prev => ({
-                          ...prev,
-                          related_products: [...new Set([...(prev.related_products || []), ...suggestions])]
-                        }));
-                      }}
-                    >
-                      <Package className="h-4 w-4 mr-2" />
-                      Auto-Suggest by Category
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setFormData(prev => ({ ...prev, related_products: [] }))}
-                    >
-                      Clear All
-                    </Button>
-                  </div>
-                  
-                  <div className="border rounded-lg p-4 max-h-48 overflow-y-auto">
-                    <div className="space-y-2">
-                      {products
-                        .filter(p => p.id !== formData.id && p.isActive)
-                        .map(product => (
-                          <label key={product.id} className="flex items-center space-x-2 text-sm p-2 hover:bg-muted rounded">
-                            <input
-                              type="checkbox"
-                              checked={formData.related_products?.includes(product.id) || false}
-                              onChange={(e) => {
-                                const relatedProducts = formData.related_products || [];
-                                if (e.target.checked) {
-                                  setFormData(prev => ({
-                                    ...prev,
-                                    related_products: [...relatedProducts, product.id]
-                                  }));
-                                } else {
-                                  setFormData(prev => ({
-                                    ...prev,
-                                    related_products: relatedProducts.filter(id => id !== product.id)
-                                  }));
-                                }
-                              }}
-                            />
-                            <div className="flex-1">
-                              <span className="font-medium">{product.name}</span>
-                              <span className="text-muted-foreground ml-2">({product.category})</span>
-                            </div>
-                            <Badge variant="secondary" className="text-xs">
-                              {Array.isArray(product.features) ? product.features.slice(0, 2).join(', ') : ''}
-                            </Badge>
-                          </label>
-                        ))}
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Selected: {formData.related_products?.length || 0} related products
-                  </p>
-                </div>
-              </div>
+                                              <div>
+                   <Label id="related-products-label">Related Products</Label>
+                   <div className="space-y-4" role="group" aria-labelledby="related-products-label">
+                   <div className="flex gap-2 mb-4">
+                     <Button
+                       type="button"
+                       variant="outline"
+                       size="sm"
+                       onClick={() => {
+                         // Auto-suggest products with similar tags
+                         const currentTags = formData.features || [];
+                         const suggestions = products
+                           .filter(p => p.id !== formData.id && p.isActive)
+                           .filter(p => {
+                             const productTags = p.features || [];
+                             return productTags.some(tag => currentTags.includes(tag));
+                           })
+                           .slice(0, 5)
+                           .map(p => p.id);
+                         
+                         setFormData(prev => ({
+                           ...prev,
+                           related_products: [...new Set([...(prev.related_products || []), ...suggestions])]
+                         }));
+                       }}
+                     >
+                       <Package className="h-4 w-4 mr-2" />
+                       Auto-Suggest by Tags
+                     </Button>
+                     <Button
+                       type="button"
+                       variant="outline"
+                       size="sm"
+                       onClick={() => {
+                         // Auto-suggest products from same category
+                         const suggestions = products
+                           .filter(p => p.id !== formData.id && p.isActive && p.category === formData.category)
+                           .slice(0, 5)
+                           .map(p => p.id);
+                         
+                         setFormData(prev => ({
+                           ...prev,
+                           related_products: [...new Set([...(prev.related_products || []), ...suggestions])]
+                         }));
+                       }}
+                     >
+                       <Package className="h-4 w-4 mr-2" />
+                       Auto-Suggest by Category
+                     </Button>
+                     <Button
+                       type="button"
+                       variant="outline"
+                       size="sm"
+                       onClick={() => setFormData(prev => ({ ...prev, related_products: [] }))}
+                     >
+                       Clear All
+                     </Button>
+                   </div>
+                   
+                   <div className="border rounded-lg p-4 max-h-48 overflow-y-auto">
+                     <div className="space-y-2">
+                       {products
+                         .filter(p => p.id !== formData.id && p.isActive)
+                         .map(product => (
+                           <div key={product.id} className="flex items-center space-x-2 text-sm p-2 hover:bg-muted rounded">
+                             <input
+                               type="checkbox"
+                               id={`related-product-${product.id}`}
+                               name="related_products"
+                               value={product.id}
+                               checked={formData.related_products?.includes(product.id) || false}
+                               onChange={(e) => {
+                                 const relatedProducts = formData.related_products || [];
+                                 if (e.target.checked) {
+                                   setFormData(prev => ({
+                                     ...prev,
+                                     related_products: [...relatedProducts, product.id]
+                                   }));
+                                 } else {
+                                   setFormData(prev => ({
+                                     ...prev,
+                                     related_products: relatedProducts.filter(id => id !== product.id)
+                                   }));
+                                 }
+                               }}
+                             />
+                             <label htmlFor={`related-product-${product.id}`} className="flex-1">
+                               <span className="font-medium">{product.name}</span>
+                               <span className="text-muted-foreground ml-2">({product.category})</span>
+                               <Badge variant="secondary" className="text-xs ml-2">
+                                 {Array.isArray(product.features) ? product.features.slice(0, 2).join(', ') : ''}
+                               </Badge>
+                             </label>
+                           </div>
+                         ))}
+                     </div>
+                   </div>
+                   <p className="text-xs text-muted-foreground">
+                     Selected: {formData.related_products?.length || 0} related products
+                   </p>
+                 </div>
+               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="inStock"
-                    checked={formData.inStock || false}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, inStock: checked }))}
-                  />
-                  <Label htmlFor="inStock">{t('admin.products.inStock')}</Label>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="showInFeatured"
-                    checked={formData.showInFeatured || false}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, showInFeatured: checked }))}
-                  />
-                  <Label htmlFor="showInFeatured">{t('admin.products.featured')}</Label>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="isActive"
-                    checked={formData.isActive || false}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
-                  />
-                  <Label htmlFor="isActive">{t('admin.products.active')}</Label>
-                </div>
-              </div>
+                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                 <div className="flex items-center space-x-2">
+                   <Switch
+                     id="inStock"
+                     name="inStock"
+                     checked={formData.inStock || false}
+                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, inStock: checked }))}
+                   />
+                   <Label htmlFor="inStock">{t('admin.products.inStock')}</Label>
+                 </div>
+ 
+                 <div className="flex items-center space-x-2">
+                   <Switch
+                     id="showInFeatured"
+                     name="showInFeatured"
+                     checked={formData.showInFeatured || false}
+                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, showInFeatured: checked }))}
+                   />
+                   <Label htmlFor="showInFeatured">{t('admin.products.featured')}</Label>
+                 </div>
+ 
+                 <div className="flex items-center space-x-2">
+                   <Switch
+                     id="isActive"
+                     name="isActive"
+                     checked={formData.isActive || false}
+                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
+                   />
+                   <Label htmlFor="isActive">{t('admin.products.active')}</Label>
+                 </div>
+               </div>
 
               <div className="flex gap-4">
                 <Button onClick={handleSave} disabled={loading}>
@@ -674,41 +729,43 @@ const UnifiedProducts = () => {
         <Card className="mb-6">
           <CardContent className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <Label htmlFor="search">{t('admin.products.search')}</Label>
-                <Input
-                  id="search"
-                  placeholder="Search by name, description, model..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="category">{t('admin.products.filterByCategory')}</Label>
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t('admin.products.allCategories')}</SelectItem>
-                    {CATEGORIES.map(category => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex items-center space-x-2 mt-6">
-                <Switch
-                  id="showInactive"
-                  checked={showInactiveProducts}
-                  onCheckedChange={setShowInactiveProducts}
-                />
-                <Label htmlFor="showInactive">{t('admin.products.showInactive')}</Label>
-              </div>
+                             <div>
+                 <Label htmlFor="search">{t('admin.products.search')}</Label>
+                 <Input
+                   id="search"
+                   name="search"
+                   placeholder="Search by name, description, model..."
+                   value={searchTerm}
+                   onChange={(e) => setSearchTerm(e.target.value)}
+                 />
+               </div>
+ 
+               <div>
+                 <Label>{t('admin.products.filterByCategory')}</Label>
+                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                   <SelectTrigger id="filter-category" name="filter-category">
+                     <SelectValue />
+                   </SelectTrigger>
+                   <SelectContent>
+                     <SelectItem value="all">{t('admin.products.allCategories')}</SelectItem>
+                     {categories.map(category => (
+                       <SelectItem key={category} value={category}>
+                         {category}
+                       </SelectItem>
+                     ))}
+                   </SelectContent>
+                 </Select>
+               </div>
+ 
+               <div className="flex items-center space-x-2 mt-6">
+                 <Switch
+                   id="showInactive"
+                   name="showInactive"
+                   checked={showInactiveProducts}
+                   onCheckedChange={setShowInactiveProducts}
+                 />
+                 <Label htmlFor="showInactive">{t('admin.products.showInactive')}</Label>
+               </div>
             </div>
           </CardContent>
         </Card>
@@ -743,10 +800,6 @@ const UnifiedProducts = () => {
 
                   <div className="space-y-2 text-sm mb-4">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">{t('admin.products.price')}:</span>
-                      <span className="font-medium">{formatPrice(product.price)}</span>
-                    </div>
-                    <div className="flex justify-between">
                       <span className="text-muted-foreground">{t('admin.products.inStock')}:</span>
                       <Badge variant={product.inStock ? "default" : "destructive"}>
                         {product.inStock ? t('admin.products.inStock') : 'Out of Stock'}
@@ -765,6 +818,8 @@ const UnifiedProducts = () => {
                   <div className="flex gap-6">
                     <div className="flex items-center space-x-2">
                       <Switch
+                        id={`active-${product.id}`}
+                        name={`active-${product.id}`}
                         checked={product.isActive}
                         onCheckedChange={() => productService.updateProduct(product.id, { isActive: !product.isActive }).then(loadProducts)}
                       />
@@ -772,6 +827,8 @@ const UnifiedProducts = () => {
                     </div>
                     <div className="flex items-center space-x-2">
                       <Switch
+                        id={`featured-${product.id}`}
+                        name={`featured-${product.id}`}
                         checked={product.showInFeatured}
                         onCheckedChange={() => toggleFeaturedStatus(product.id, product.showInFeatured)}
                       />

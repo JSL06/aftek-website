@@ -234,6 +234,11 @@ export const useTranslation = () => {
   }, [currentLanguage]);
 
   const t = (key: string): string => {
+    // Safety check: if key is undefined or null, return empty string
+    if (!key) {
+      return '';
+    }
+    
     const getValue = (value: string | string[] | undefined): string => {
       if (Array.isArray(value)) {
         return value.join(', ');

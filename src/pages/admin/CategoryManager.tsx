@@ -38,16 +38,28 @@ const CategoryManager = () => {
   const loadCategories = async () => {
     try {
       setLoading(true);
+      
+      // Simple, direct query without HEAD requests
       const { data, error } = await supabase
         .from('product_categories')
         .select('*')
         .order('display_order', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Error loading categories:', error);
+        // Don't show error toast - just load empty state
+        setCategories([]);
+        return;
+      }
+      
       setCategories(data || []);
+      
+      if (data && data.length === 0) {
+        toast.info('No categories found. Add your first category to get started.');
+      }
     } catch (error) {
       console.error('Error loading categories:', error);
-      toast.error('Failed to load categories');
+      setCategories([]);
     } finally {
       setLoading(false);
     }
@@ -376,19 +388,44 @@ const CategoryManager = () => {
         {/* Categories List */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Filter className="h-5 w-5" />
-              Product Categories
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Manage product categories and their display order
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Filter className="h-5 w-5" />
+                  Product Categories
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Manage product categories and their display order
+                </p>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={loadCategories}
+                disabled={loading}
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                {loading ? 'Loading...' : 'Refresh'}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             {categories.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">
-                No categories added yet
-              </p>
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">
+                  No categories found
+                </p>
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 max-w-md mx-auto">
+                  <h4 className="font-medium text-amber-800 mb-2">Setup Required</h4>
+                  <p className="text-sm text-amber-700 mb-3">
+                    The product categories table needs to be set up in Supabase first.
+                  </p>
+                  <div className="text-xs text-amber-600 space-y-1">
+                    <p>1. Run the setup script: <code className="bg-amber-100 px-1 rounded">setup-product-categories.sql</code></p>
+                    <p>2. Or add your first category manually</p>
+                  </div>
+                </div>
+              </div>
             ) : (
               <div className="space-y-3">
                 {categories.map((category, index) => (

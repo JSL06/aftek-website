@@ -153,10 +153,11 @@ const ProjectFilter = ({ projects, filters, onFiltersChange, className = '' }: P
           <span className="text-sm font-medium text-muted-foreground">Active filters:</span>
           
           {filters.category.map(category => {
-            const translated = t(categoryTranslationMap[category]);
+            const translationKey = categoryTranslationMap[category];
+            const translated = translationKey ? t(translationKey) : category;
             return (
               <Badge key={category} variant="secondary" className="gap-1">
-                {translated === categoryTranslationMap[category] ? category : translated}
+                {translated === translationKey ? category : translated}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -215,11 +216,12 @@ const ProjectFilter = ({ projects, filters, onFiltersChange, className = '' }: P
           <h4 className="text-sm font-medium text-foreground mb-3">{t('filter.category')}</h4>
           <div className="flex flex-wrap gap-2">
             {categories.map(category => {
-              const translated = t(categoryTranslationMap[category]);
+              const translationKey = categoryTranslationMap[category];
+              const translated = translationKey ? t(translationKey) : category;
               return (
                 <FilterButton
                   key={category}
-                  label={translated === categoryTranslationMap[category] ? category : translated}
+                  label={translated === translationKey ? category : translated}
                   isSelected={filters.category.includes(category)}
                   onClick={() => handleCategoryToggle(category)}
                 />

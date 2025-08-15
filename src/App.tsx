@@ -20,16 +20,17 @@ import ProductDetail from "./pages/ProductDetail";
 import CaseStudies from "./pages/CaseStudies";
 import Resources from "./pages/Resources";
 import Media from "./pages/Media";
+import Guide from "./pages/Guide";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/Products";
 import AdminProjects from "./pages/admin/Projects";
-import FilterManager from "./pages/admin/FilterManager";
 import CategoryManager from "./pages/admin/CategoryManager";
 import AdminArticles from "./pages/admin/Articles";
 import MediaManager from "./pages/admin/MediaManager";
 import FeaturedProductsManager from "./pages/admin/FeaturedProductsManager";
 import UnifiedProducts from "./pages/admin/UnifiedProducts";
+import GuideManager from "./pages/admin/GuideManager";
 import WebsiteTextEditor from './pages/admin/WebsiteTextEditor';
 import ProtectedPage from './components/ProtectedPage';
 import WebsiteTextManager from './pages/admin/WebsiteTextManager';
@@ -57,6 +58,7 @@ const App = () => (
                 <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
                 <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
                 <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
+                <Route path="guide" element={<ProtectedPage pageName="guide"><Guide /></ProtectedPage>} />
                 <Route path="contact" element={<ProtectedPage pageName="contact"><NewContact /></ProtectedPage>} />
                 <Route path="products/flex-pro-pu" element={<ProtectedPage pageName="products"><FlexProPU /></ProtectedPage>} />
                 <Route path="products/:productId" element={<ProtectedPage pageName="products"><ProductDetail /></ProtectedPage>} />
@@ -72,6 +74,7 @@ const App = () => (
                 <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
                 <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
                 <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
+                <Route path="guide" element={<ProtectedPage pageName="guide"><Guide /></ProtectedPage>} />
                 <Route path="contact" element={<ProtectedPage pageName="contact"><NewContact /></ProtectedPage>} />
                 <Route path="products/flex-pro-pu" element={<ProtectedPage pageName="products"><FlexProPU /></ProtectedPage>} />
                 <Route path="products/:productId" element={<ProtectedPage pageName="products"><ProductDetail /></ProtectedPage>} />
@@ -87,6 +90,7 @@ const App = () => (
                 <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
                 <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
                 <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
+                <Route path="guide" element={<ProtectedPage pageName="guide"><Guide /></ProtectedPage>} />
                 <Route path="contact" element={<ProtectedPage pageName="contact"><NewContact /></ProtectedPage>} />
                 <Route path="products/flex-pro-pu" element={<ProtectedPage pageName="products"><FlexProPU /></ProtectedPage>} />
                 <Route path="products/:productId" element={<ProtectedPage pageName="products"><ProductDetail /></ProtectedPage>} />
@@ -103,6 +107,7 @@ const App = () => (
                 <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
                 <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
                 <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
+                <Route path="guide" element={<ProtectedPage pageName="guide"><Guide /></ProtectedPage>} />
                 <Route path="contact" element={<ProtectedPage pageName="contact"><NewContact /></ProtectedPage>} />
                 <Route path="products/flex-pro-pu" element={<ProtectedPage pageName="products"><FlexProPU /></ProtectedPage>} />
                 <Route path="products/:productId" element={<ProtectedPage pageName="products"><ProductDetail /></ProtectedPage>} />
@@ -117,9 +122,9 @@ const App = () => (
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="products" element={<UnifiedProducts />} />
                 <Route path="projects" element={<AdminProjects />} />
-                <Route path="filter-manager" element={<FilterManager />} />
                 <Route path="category-manager" element={<CategoryManager />} />
                 <Route path="unified-products" element={<UnifiedProducts />} />
+                <Route path="guide-manager" element={<GuideManager />} />
                 <Route path="featured-products" element={<FeaturedProductsManager />} />
                 <Route path="articles" element={<AdminArticles />} />
                 <Route path="media" element={<MediaManager />} />

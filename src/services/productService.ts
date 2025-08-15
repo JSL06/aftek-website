@@ -29,6 +29,7 @@ export interface UnifiedProduct {
   updated_at: string;
   translations?: Record<string, any>;
   names?: Record<string, any>;
+  descriptions?: Record<string, any>;
   isActive?: boolean;
   showInFeatured?: boolean;
   tags?: string[];
@@ -63,34 +64,56 @@ export const productService = {
   },
 
   async getProducts(filters?: ProductFilter): Promise<UnifiedProduct[]> {
-    let query = supabase
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
+    console.log('productService: Starting getProducts with filters:', filters);
+    
+    try {
+      let query = supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (filters?.category) {
-      query = query.eq('category', filters.category);
-    }
+      if (filters?.category) {
+        query = query.eq('category', filters.category);
+      }
 
-    if (filters?.search) {
-      query = query.ilike('name', `%${filters.search}%`);
-    }
+      if (filters?.search) {
+        query = query.ilike('name', `%${filters.search}%`);
+      }
 
-    const { data, error } = await query;
+      console.log('productService: Executing query...');
+      const { data, error } = await query;
+      console.log('productService: Query result - data:', data, 'error:', error);
 
-    if (error) {
-      console.error('Error fetching products:', error);
+      if (error) {
+        console.error('productService: Error fetching products:', error);
+        throw error;
+      }
+
+      if (!data || data.length === 0) {
+        console.log('productService: No data returned from query');
+        return [];
+      }
+
+      console.log('productService: Raw data received:', data.length, 'products');
+
+      // Transform the data to match UnifiedProduct interface
+      const transformedData = data.map(product => {
+        console.log('productService: Processing product:', product);
+        return {
+          ...product,
+          features: product.features || [],
+          price: product.price || 0,
+          inStock: product.inStock || product.in_stock || false,
+          image: product.image || product.image_url || '',
+        };
+      });
+      
+      console.log('productService: Transformed data:', transformedData);
+      return transformedData;
+    } catch (error) {
+      console.error('productService: Exception in getProducts:', error);
       throw error;
     }
-
-    // Transform the data to match UnifiedProduct interface
-    return (data || []).map(product => ({
-      ...product,
-      features: product.features || [],
-      price: product.price || 0,
-      inStock: product.inStock || product.in_stock || false,
-      image: product.image || product.image_url || '',
-    }));
   },
 
   async getProduct(id: string): Promise<UnifiedProduct | null> {
@@ -229,5 +252,27 @@ export const productService = {
     } else {
       console.log('Database debug result:', data);
     }
+  },
+
+  async forceRefresh(): Promise<void> {
+    // This method is called by the admin interface to force a refresh
+    // We'll just log it for now since the actual refresh is handled by loadProducts()
+    console.log('Force refresh requested for products');
+  },
+
+  async updateFeaturedStatus(id: string, showInFeatured: boolean): Promise<boolean> {
+    const { data, error } = await supabase
+      .from('products')
+      .update({ showInFeatured })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating featured status:', error);
+      throw error;
+    }
+
+    return !!data;
   }
 }; 

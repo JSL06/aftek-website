@@ -77,6 +77,22 @@ const Home = () => {
     }
   }, [location.pathname]);
 
+  useEffect(() => {
+    // Listen for language changes and reload the page
+    const handleLanguageChange = (event: CustomEvent) => {
+      console.log('Home page: Language changed to:', event.detail);
+      // Reload the entire page to ensure all text updates
+      window.location.reload();
+    };
+
+    // Add event listener for language changes
+    window.addEventListener('languageChange', handleLanguageChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('languageChange', handleLanguageChange as EventListener);
+    };
+  }, []);
+
   // Fetch featured products
 
 
@@ -329,9 +345,9 @@ const Home = () => {
               </h2>
             </div>
             
-            <div className="prose prose-lg max-w-none text-center">
+            <div className="text-center">
               {t('home.mission.content').split('\n\n').map((paragraph, index) => (
-                <p key={index} className="text-lg md:text-xl text-foreground leading-relaxed font-medium mb-6 last:mb-0">
+                <p key={index} className="text-lg md:text-xl text-foreground leading-relaxed font-medium mb-6 last:mb-0 max-w-4xl mx-auto">
                   {paragraph}
                 </p>
               ))}

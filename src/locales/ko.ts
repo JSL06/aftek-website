@@ -214,6 +214,12 @@ const ko = {
   'products.total': '총',
   'products.page': '페이지',
   'products.of': '/',
+  'products.noProductsFound': '조건에 맞는 제품을 찾을 수 없습니다',
+  'products.clearFilters': '필터 지우기',
+  'products.searchButton': '검색',
+  'products.clearButton': '지우기',
+  'products.inStock': '재고 있음',
+  'products.outOfStock': '재고 없음',
 
   // Projects Page
   'projects.title': '프로젝트',
@@ -287,6 +293,15 @@ const ko = {
   'category.redimix': 'Redi-Mix G&M',
   'category.flooring': '바닥재 시스템',
   'category.others': '기타 (단열, 코팅)',
+  'category.architectural_coatings': '건축용 코팅',
+  'category.stucco': '스터코',
+  'category.sound_insulation': '방음재',
+  'category.textured_paints': '텍스처 페인트',
+  'category.butyl_tape': '부틸 테이프',
+  'category.construction_chemicals': '건설용 화학제품',
+  'category.building_materials': '건축 자재',
+  'category.industrial_coatings': '산업용 코팅',
+  'category.maintenance_products': '유지보수 제품',
 
   // Project Categories
   'projectCategory.infrastructure': '인프라',
@@ -367,6 +382,12 @@ const ko = {
   'guide.facilityType7.name': '산업 시설',
   'guide.facilityType7.description': '공장과 산업 건물을 위한 견고한 솔루션',
   'guide.explorer.changeFacility': '시설 변경',
+
+  // Building types for the guide page
+  'guide.building.residential': '주거용 건물',
+  'guide.building.commercial': '상업용 건물',
+  'guide.building.industrial': '산업 시설',
+  'guide.building.infrastructure': '인프라 프로젝트',
 
   // Guide Facilities
   'guide.facilities.residential': '주거',

@@ -54,6 +54,8 @@ export const MultilingualFormField: React.FC<MultilingualFormFieldProps> = ({
       case 'textarea':
         return (
           <Textarea
+            id={`${fieldName}-${currentLanguage}`}
+            name={`${fieldName}-${currentLanguage}`}
             value={currentValue}
             onChange={(e) => handleChange(e.target.value)}
             placeholder={placeholder || `${label} (${currentLang?.nativeName})`}
@@ -64,7 +66,7 @@ export const MultilingualFormField: React.FC<MultilingualFormFieldProps> = ({
       case 'select':
         return (
           <Select value={currentValue} onValueChange={handleChange}>
-            <SelectTrigger>
+            <SelectTrigger id={`${fieldName}-${currentLanguage}`} name={`${fieldName}-${currentLanguage}`}>
               <SelectValue placeholder={placeholder || `选择${label} (${currentLang?.nativeName})`} />
             </SelectTrigger>
             <SelectContent>
@@ -82,6 +84,8 @@ export const MultilingualFormField: React.FC<MultilingualFormFieldProps> = ({
         return (
           <div className="space-y-2">
             <select
+              id={`${fieldName}-${currentLanguage}`}
+              name={`${fieldName}-${currentLanguage}`}
               multiple
               className="w-full border rounded-md p-2 min-h-[100px]"
               value={currentValues}
@@ -104,7 +108,7 @@ export const MultilingualFormField: React.FC<MultilingualFormFieldProps> = ({
 
       case 'rich-text':
         return (
-          <div className="space-y-2">
+          <div className="space-y-2" role="group" aria-labelledby={`${fieldName}-${currentLanguage}-label`}>
             <WYSIWYGEditor
               value={currentValue}
               onChange={handleChange}
@@ -119,6 +123,8 @@ export const MultilingualFormField: React.FC<MultilingualFormFieldProps> = ({
       default:
         return (
           <Input
+            id={`${fieldName}-${currentLanguage}`}
+            name={`${fieldName}-${currentLanguage}`}
             value={currentValue}
             onChange={(e) => handleChange(e.target.value)}
             placeholder={placeholder || `${label} (${currentLang?.nativeName})`}
@@ -130,10 +136,17 @@ export const MultilingualFormField: React.FC<MultilingualFormFieldProps> = ({
   return (
     <div className={`space-y-3 ${className}`}>
       <div className="flex items-center justify-between">
-        <Label htmlFor={`${fieldName}-${currentLanguage}`} className="text-sm font-medium">
-          {label} ({LANGUAGES.find(l => l.code === currentLanguage)?.nativeName})
-          {required && <span className="text-red-500 ml-1">*</span>}
-        </Label>
+        {type === 'rich-text' ? (
+          <Label id={`${fieldName}-${currentLanguage}-label`} className="text-sm font-medium">
+            {label} ({LANGUAGES.find(l => l.code === currentLanguage)?.nativeName})
+            {required && <span className="text-red-500 ml-1">*</span>}
+          </Label>
+        ) : (
+          <Label htmlFor={`${fieldName}-${currentLanguage}`} className="text-sm font-medium">
+            {label} ({LANGUAGES.find(l => l.code === currentLanguage)?.nativeName})
+            {required && <span className="text-red-500 ml-1">*</span>}
+          </Label>
+        )}
         {showTranslationStatus && (
           <TranslationStatus
             translations={translations}
@@ -148,7 +161,7 @@ export const MultilingualFormField: React.FC<MultilingualFormFieldProps> = ({
       
       {type === 'multiselect' && getCurrentValue() && Array.isArray(getCurrentValue()) && (
         <div className="flex flex-wrap gap-1">
-          {getCurrentValue().map((value: string, index: number) => (
+          {getCurrentValue().map((value: string, index: string) => (
             <Badge key={index} variant="secondary" className="text-xs">
               {value}
             </Badge>

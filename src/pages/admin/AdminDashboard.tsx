@@ -13,7 +13,10 @@ import {
   ArrowRight,
   Edit,
   Trash2,
-  Eye
+  Eye,
+  FolderOpen,
+  Edit3,
+  MapPin
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -32,31 +35,13 @@ const AdminDashboard = () => {
       icon: Package,
       href: '/admin/products',
       color: 'bg-blue-500',
-      stats: '150+ 產品'
-    },
-    {
-      title: '類別管理',
-      description: '管理產品類別和分類系統',
-      icon: Package,
-      href: '/admin/category-manager',
-      color: 'bg-teal-500',
-      stats: '管理類別'
-    },
-    {
-      title: '過濾器管理',
-      description: '管理產品和專案的過濾選項',
-      icon: Settings,
-      href: '/admin/filter-manager',
-      color: 'bg-cyan-500',
-      stats: '過濾選項'
     },
     {
       title: '專案管理',
       description: '管理案例研究和專案展示',
-      icon: Building2,
+      icon: FolderOpen,
       href: '/admin/projects',
       color: 'bg-green-500',
-      stats: '25+ 專案'
     },
     {
       title: '文章管理',
@@ -64,7 +49,6 @@ const AdminDashboard = () => {
       icon: FileText,
       href: '/admin/articles',
       color: 'bg-purple-500',
-      stats: '45+ 文章'
     },
     {
       title: '媒體管理',
@@ -72,24 +56,21 @@ const AdminDashboard = () => {
       icon: Image,
       href: '/admin/media',
       color: 'bg-orange-500',
-      stats: '200+ 媒體'
     },
     {
       title: '網站文字管理',
       description: '編輯網站上的所有文字內容',
-      icon: Edit,
-      href: '/admin/website-text-manager',
+      icon: Edit3,
+      href: '/admin/website-text',
       color: 'bg-red-500',
-      stats: '即時更新'
     },
     {
-      title: '翻譯管理',
-      description: '管理多語言翻譯和本地化',
-      icon: Globe,
-      href: '/admin/translation-dashboard',
+      title: '互動指南管理',
+      description: '管理建築指南、熱點和產品關聯',
+      icon: MapPin,
+      href: '/admin/guide-manager',
       color: 'bg-indigo-500',
-      stats: '7 種語言'
-    }
+    },
   ];
 
 
@@ -167,9 +148,6 @@ const AdminDashboard = () => {
                   <div className={`w-12 h-12 rounded-lg ${card.color} flex items-center justify-center`}>
                     <card.icon className="h-6 w-6 text-white" />
                   </div>
-                  <Badge variant="secondary" className="text-xs">
-                    {card.stats}
-                  </Badge>
                 </div>
                 <CardTitle className="text-lg">{card.title}</CardTitle>
               </CardHeader>

@@ -223,6 +223,12 @@ const vi = {
   'products.total': 'tổng cộng',
   'products.page': 'Trang',
   'products.of': 'trên',
+  'products.noProductsFound': 'Không tìm thấy sản phẩm nào phù hợp với tiêu chí của bạn',
+  'products.clearFilters': 'Xóa bộ lọc',
+  'products.searchButton': 'Tìm kiếm',
+  'products.clearButton': 'Xóa',
+  'products.inStock': 'Còn hàng',
+  'products.outOfStock': 'Hết hàng',
 
   // Projects Page
   'projects.title': 'Dự án',
@@ -290,12 +296,21 @@ const vi = {
   'filter.category': 'Danh mục',
   'filter.features': 'Tính năng',
 
-  // Product Categories
+  // Categories
   'category.waterproofing': 'Chống thấm',
   'category.sealants_adhesives': 'Chất bịt kín & Keo dán',
   'category.redimix': 'Redi-Mix G&M',
   'category.flooring': 'Hệ thống sàn',
   'category.others': 'Khác (Cách nhiệt, Lớp phủ)',
+  'category.architectural_coatings': 'Lớp phủ kiến trúc',
+  'category.stucco': 'Vữa trát',
+  'category.sound_insulation': 'Vật liệu cách âm',
+  'category.textured_paints': 'Sơn kết cấu',
+  'category.butyl_tape': 'Băng keo butyl',
+  'category.construction_chemicals': 'Hóa chất xây dựng',
+  'category.building_materials': 'Vật liệu xây dựng',
+  'category.industrial_coatings': 'Lớp phủ công nghiệp',
+  'category.maintenance_products': 'Sản phẩm bảo trì',
 
   // Project Categories
   'projectCategory.infrastructure': 'Cơ sở hạ tầng',
@@ -367,6 +382,12 @@ const vi = {
   'guide.facilityType7.name': 'Cơ sở công nghiệp',
   'guide.facilityType7.description': 'Giải pháp mạnh mẽ cho nhà máy và tòa nhà công nghiệp',
   'guide.explorer.changeFacility': 'Thay đổi cơ sở',
+
+  // Building types for the guide page
+  'guide.building.residential': 'Tòa nhà dân cư',
+  'guide.building.commercial': 'Tòa nhà thương mại',
+  'guide.building.industrial': 'Cơ sở công nghiệp',
+  'guide.building.infrastructure': 'Dự án cơ sở hạ tầng',
 
   // Guide Facilities
   'guide.facilities.residential': 'Dân cư',

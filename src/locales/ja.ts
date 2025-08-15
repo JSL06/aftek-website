@@ -219,6 +219,12 @@ const ja = {
   'products.total': '合計',
   'products.page': 'ページ',
   'products.of': '/',
+  'products.noProductsFound': '条件に一致する製品が見つかりません',
+  'products.clearFilters': 'フィルターをクリア',
+  'products.searchButton': '検索',
+  'products.clearButton': 'クリア',
+  'products.inStock': '在庫あり',
+  'products.outOfStock': '在庫切れ',
 
   // Projects Page
   'projects.title': 'プロジェクト',
@@ -437,6 +443,15 @@ const ja = {
   'category.redimix': 'Redi-Mix G&M',
   'category.flooring': '床材システム',
   'category.others': 'その他（断熱・コーティング）',
+  'category.architectural_coatings': '建築用コーティング',
+  'category.stucco': 'スタッコ',
+  'category.sound_insulation': '防音材',
+  'category.textured_paints': 'テクスチャペイント',
+  'category.butyl_tape': 'ブチルテープ',
+  'category.construction_chemicals': '建設用化学品',
+  'category.building_materials': '建材',
+  'category.industrial_coatings': '工業用コーティング',
+  'category.maintenance_products': 'メンテナンス製品',
 
   // Product Features
   'features.application_environment': '適用環境',
@@ -498,6 +513,12 @@ const ja = {
   'guide.facilityType7.name': '産業施設',
   'guide.facilityType7.description': '工場や産業建築のための堅牢なソリューション',
   'guide.explorer.changeFacility': '施設を変更',
+
+  // Building types for the guide page
+  'guide.building.residential': '住宅建築',
+  'guide.building.commercial': '商業建築',
+  'guide.building.industrial': '産業施設',
+  'guide.building.infrastructure': 'インフラプロジェクト',
 
   // Guide Facilities
   'guide.facilities.residential': '住宅',

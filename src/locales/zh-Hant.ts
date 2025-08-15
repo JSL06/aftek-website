@@ -226,14 +226,20 @@ const zhHant = {
   'products.search.placeholder': '搜尋產品...',
   'products.viewDetails': '查看詳情',
   'products.specifications': '規格',
-  'products.features': '主要特點',
+  'products.features': '主要特徵',
   'products.applications': '應用',
   'products.downloads': '下載',
   'products.showing': '顯示 {count} 個產品，共 {total} 個',
-  'products.filtered': '已過濾自',
+  'products.filtered': '從',
   'products.total': '總計',
-  'products.page': '第',
-  'products.of': '頁，共',
+  'products.page': '頁面',
+  'products.of': '共',
+  'products.noProductsFound': '未找到符合您條件的產品',
+  'products.clearFilters': '清除篩選條件',
+  'products.searchButton': '搜尋',
+  'products.clearButton': '清除',
+  'products.inStock': '有庫存',
+  'products.outOfStock': '缺貨',
 
   // Projects Page
   'projects.title': '專案',
@@ -315,12 +321,23 @@ const zhHant = {
   'filter.category': '類別',
   'filter.features': '特徵',
 
-  // Product Categories
+  // Categories
   'category.waterproofing': '防水',
   'category.sealants_adhesives': '密封劑與膠黏劑',
   'category.redimix': 'Redi-Mix G&M',
   'category.flooring': '地板系統',
+  'category.flooring_simple': '地板',
   'category.others': '其他（保溫、塗料）',
+  'category.others_simple': '其他',
+  'category.architectural_coatings': '建築塗料',
+  'category.stucco': '灰泥',
+  'category.sound_insulation': '隔音材料',
+  'category.textured_paints': '紋理塗料',
+  'category.butyl_tape': '丁基膠帶',
+  'category.construction_chemicals': '建築化學品',
+  'category.building_materials': '建築材料',
+  'category.industrial_coatings': '工業塗料',
+  'category.maintenance_products': '維護產品',
 
   // Project Categories
   'projectCategory.infrastructure': '基礎設施',
@@ -390,6 +407,12 @@ const zhHant = {
   'guide.facilityType7.name': '工業設施',
   'guide.facilityType7.description': '適用於工廠和工業建築的堅固解決方案',
   'guide.explorer.changeFacility': '更換設施',
+
+  // Building types for the guide page
+  'guide.building.residential': '住宅建築',
+  'guide.building.commercial': '商業建築',
+  'guide.building.industrial': '工業設施',
+  'guide.building.infrastructure': '基礎設施項目',
 
   // Guide Facilities
   'guide.facilities.residential': '住宅',

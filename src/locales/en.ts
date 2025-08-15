@@ -281,6 +281,12 @@ const en = {
   'products.total': 'total',
   'products.page': 'Page',
   'products.of': 'of',
+  'products.noProductsFound': 'No products found matching your criteria',
+  'products.clearFilters': 'Clear filters',
+  'products.searchButton': 'Search',
+  'products.clearButton': 'Clear',
+  'products.inStock': 'In Stock',
+  'products.outOfStock': 'Out of Stock',
 
   // Projects Page
   'projects.title': 'Projects',
@@ -419,12 +425,23 @@ const en = {
   'filter.category': 'Categories',
   'filter.features': 'Features',
 
-  // Product Categories
+  // Categories
   'category.waterproofing': 'Waterproofing',
   'category.sealants_adhesives': 'Sealants & Adhesives',
   'category.redimix': 'Redi-Mix G&M',
   'category.flooring': 'Flooring Systems',
+  'category.flooring_simple': 'Flooring',
   'category.others': 'Others (Insulation, Coatings)',
+  'category.others_simple': 'Others',
+  'category.architectural_coatings': 'Architectural Coatings',
+  'category.stucco': 'Stucco',
+  'category.sound_insulation': 'Sound Insulation',
+  'category.textured_paints': 'Textured Paints',
+  'category.butyl_tape': 'Butyl Tape',
+  'category.construction_chemicals': 'Construction Chemicals',
+  'category.building_materials': 'Building Materials',
+  'category.industrial_coatings': 'Industrial Coatings',
+  'category.maintenance_products': 'Maintenance Products',
 
   // Project Categories
   'projectCategory.infrastructure': 'Infrastructure',
@@ -495,6 +512,12 @@ const en = {
   'guide.facilityType6.description': 'Hygienic solutions for hospitals and clinics',
   'guide.facilityType7.name': 'Industrial Facility',
   'guide.facilityType7.description': 'Robust solutions for factories and industrial buildings',
+
+  // Building types for the guide page
+  'guide.building.residential': 'Residential Building',
+  'guide.building.commercial': 'Commercial Building',
+  'guide.building.industrial': 'Industrial Facility',
+  'guide.building.infrastructure': 'Infrastructure Project',
 
   // Articles - Additional Keys
   'articles.filters.title': 'Filter Articles',

@@ -132,5 +132,36 @@ export const filterService = {
         'Lighting Design'
       ];
     }
+  },
+
+  async getCategories(): Promise<string[]> {
+    // Get categories from the product_categories table
+    try {
+      const { data, error } = await supabase
+        .from('product_categories')
+        .select('name')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+      
+      if (error) throw error;
+      return data.map(cat => cat.name);
+    } catch (error) {
+      console.error('Error fetching categories from database:', error);
+      // Fallback to default categories if database query fails
+      return [
+        'Infrastructure',
+        'Industrial',
+        'High-Tech',
+        'Commercial',
+        'Residential',
+        'Healthcare',
+        'Education',
+        'Transportation',
+        'Energy',
+        'Water Treatment',
+        'Manufacturing',
+        'General'
+      ];
+    }
   }
 }; 

@@ -214,6 +214,12 @@ const th = {
   'products.total': 'ทั้งหมด',
   'products.page': 'หน้า',
   'products.of': 'จาก',
+  'products.noProductsFound': 'ไม่พบผลิตภัณฑ์ที่ตรงกับเงื่อนไขของคุณ',
+  'products.clearFilters': 'ล้างตัวกรอง',
+  'products.searchButton': 'ค้นหา',
+  'products.clearButton': 'ล้าง',
+  'products.inStock': 'มีสินค้า',
+  'products.outOfStock': 'สินค้าหมด',
 
   // Projects Page
   'projects.title': 'โครงการ',
@@ -287,6 +293,15 @@ const th = {
   'category.redimix': 'Redi-Mix G&M',
   'category.flooring': 'ระบบพื้น',
   'category.others': 'อื่นๆ (ฉนวน, เคลือบผิว)',
+  'category.architectural_coatings': 'สีเคลือบอาคาร',
+  'category.stucco': 'ปูนฉาบ',
+  'category.sound_insulation': 'ฉนวนกันเสียง',
+  'category.textured_paints': 'สีเนื้อ',
+  'category.butyl_tape': 'เทปบิวทิล',
+  'category.construction_chemicals': 'สารเคมีก่อสร้าง',
+  'category.building_materials': 'วัสดุก่อสร้าง',
+  'category.industrial_coatings': 'สีเคลือบอุตสาหกรรม',
+  'category.maintenance_products': 'ผลิตภัณฑ์บำรุงรักษา',
 
   // Project Categories
   'projectCategory.infrastructure': 'โครงสร้างพื้นฐาน',
@@ -605,6 +620,12 @@ const th = {
   'admin.login.loginButton': 'เข้าสู่แผงควบคุม',
   'admin.login.demoCredentials': 'ข้อมูลประจำตัวสำหรับการสาธิต: admin / aftek2024',
   'admin.login.invalidCredentials': 'ข้อมูลประจำตัวไม่ถูกต้อง กรุณาใช้ admin/aftek2024',
+
+  // Building types for the guide page
+  'guide.building.residential': 'อาคารที่อยู่อาศัย',
+  'guide.building.commercial': 'อาคารพาณิชย์',
+  'guide.building.industrial': 'สิ่งอำนวยความสะดวกทางอุตสาหกรรม',
+  'guide.building.infrastructure': 'โครงการโครงสร้างพื้นฐาน',
 
 };
 
