@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +27,22 @@ const AdminDashboard = () => {
   const { t } = useTranslation();
   const { currentCompany } = useCompany();
   const [showCompanySelector, setShowCompanySelector] = useState(false);
+  
+  // Listen for language changes and force reload to ensure all translations are loaded
+  useEffect(() => {
+    const handleLanguageChange = (event: CustomEvent) => {
+      console.log('AdminDashboard page: Language changed to:', event.detail);
+      // Force reload the page to ensure all translations are properly loaded
+      window.location.reload();
+    };
+
+    // Add event listener for language changes
+    window.addEventListener('languageChange', handleLanguageChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('languageChange', handleLanguageChange as EventListener);
+    };
+  }, []);
 
   const adminCards = [
     {

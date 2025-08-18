@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Editor Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        input, textarea { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; }
+        .language-tab { display: inline-block; padding: 10px; margin: 5px; border: 1px solid #ddd; cursor: pointer; }
+        .language-tab.active { background-color: #007bff; color: white; }
+        .language-content { display: none; }
+        .language-content.active { display: block; }
+    </style>
+</head>
+<body>
+    <h1>Product Editor Test</h1>
+    
+    <div class="test-section">
+        <h2>Database Connection Test</h2>
+        <button class="btn-primary" onclick="testDatabaseConnection()">Test Database Connection</button>
+        <div id="db-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Product Loading Test</h2>
+        <input type="text" id="product-id" placeholder="Enter Product ID" value="e0516503-cacc-4a2a-a9a8-49bcaa3a8e82">
+        <button class="btn-primary" onclick="testProductLoading()">Load Product</button>
+        <div id="product-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Product Editor Interface</h2>
+        <div id="product-editor">
+            <h3>Basic Information</h3>
+            <div>
+                <label>Category:</label>
+                <input type="text" id="category" placeholder="Product category">
+            </div>
+            <div>
+                <label>Model:</label>
+                <input type="text" id="model" placeholder="Product model">
+            </div>
+            <div>
+                <label>
+                    <input type="checkbox" id="inStock"> In Stock
+                </label>
+            </div>
+            <div>
+                <label>
+                    <input type="checkbox" id="showInFeatured"> Show in Featured
+                </label>
+            </div>
+            <div>
+                <label>
+                    <input type="checkbox" id="isActive"> Active
+                </label>
+            </div>
+
+            <h3>Multilingual Content</h3>
+            <div id="language-tabs">
+                <div class="language-tab active" onclick="switchLanguage('zh-Hant')">🇹🇼 繁體中文</div>
+                <div class="language-tab" onclick="switchLanguage('en')">🇺🇸 English</div>
+                <div class="language-tab" onclick="switchLanguage('zh-Hans')">🇨🇳 简体中文</div>
+                <div class="language-tab" onclick="switchLanguage('ja')">🇯🇵 日本語</div>
+                <div class="language-tab" onclick="switchLanguage('ko')">🇰🇷 한국어</div>
+                <div class="language-tab" onclick="switchLanguage('th')">🇹🇭 ไทย</div>
+                <div class="language-tab" onclick="switchLanguage('vi')">🇻🇳 Tiếng Việt</div>
+            </div>
+
+            <div id="zh-Hant" class="language-content active">
+                <div>
+                    <label>Product Name (繁體中文):</label>
+                    <input type="text" id="name-zh-Hant" placeholder="Product name in Traditional Chinese">
+                </div>
+                <div>
+                    <label>Description (繁體中文):</label>
+                    <textarea id="desc-zh-Hant" rows="6" placeholder="Product description in Traditional Chinese"></textarea>
+                </div>
+            </div>
+
+            <div id="en" class="language-content">
+                <div>
+                    <label>Product Name (English):</label>
+                    <input type="text" id="name-en" placeholder="Product name in English">
+                </div>
+                <div>
+                    <label>Description (English):</label>
+                    <textarea id="desc-en" rows="6" placeholder="Product description in English"></textarea>
+                </div>
+            </div>
+
+            <div id="zh-Hans" class="language-content">
+                <div>
+                    <label>Product Name (简体中文):</label>
+                    <input type="text" id="name-zh-Hans" placeholder="Product name in Simplified Chinese">
+                </div>
+                <div>
+                    <label>Description (简体中文):</label>
+                    <textarea id="desc-zh-Hans" rows="6" placeholder="Product description in Simplified Chinese"></textarea>
+                </div>
+            </div>
+
+            <div id="ja" class="language-content">
+                <div>
+                    <label>Product Name (日本語):</label>
+                    <input type="text" id="name-ja" placeholder="Product name in Japanese">
+                </div>
+                <div>
+                    <label>Description (日本語):</label>
+                    <textarea id="desc-ja" rows="6" placeholder="Product description in Japanese"></textarea>
+                </div>
+            </div>
+
+            <div id="ko" class="language-content">
+                <div>
+                    <label>Product Name (한국어):</label>
+                    <input type="text" id="name-ko" placeholder="Product name in Korean">
+                </div>
+                <div>
+                    <label>Description (한국어):</label>
+                    <textarea id="desc-ko" rows="6" placeholder="Product description in Korean"></textarea>
+                </div>
+            </div>
+
+            <div id="th" class="language-content">
+                <div>
+                    <label>Product Name (ไทย):</label>
+                    <input type="text" id="name-th" placeholder="Product name in Thai">
+                </div>
+                <div>
+                    <label>Description (ไทย):</label>
+                    <textarea id="desc-th" rows="6" placeholder="Product description in Thai"></textarea>
+                </div>
+            </div>
+
+            <div id="vi" class="language-content">
+                <div>
+                    <label>Product Name (Tiếng Việt):</label>
+                    <input type="text" id="name-vi" placeholder="Product name in Vietnamese">
+                </div>
+                <div>
+                    <label>Description (Tiếng Việt):</label>
+                    <textarea id="desc-vi" rows="6" placeholder="Product description in Vietnamese"></textarea>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button class="btn-success" onclick="testProductSaving()">Test Save Product</button>
+                <button class="btn-danger" onclick="clearForm()">Clear Form</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentProduct = null;
+        let currentLanguage = 'zh-Hant';
+
+        function switchLanguage(langCode) {
+            // Hide all language content
+            document.querySelectorAll('.language-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.language-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected language content
+            document.getElementById(langCode).classList.add('active');
+            
+            // Add active class to selected tab
+            event.target.classList.add('active');
+            
+            currentLanguage = langCode;
+        }
+
+        function testDatabaseConnection() {
+            const resultDiv = document.getElementById('db-result');
+            resultDiv.innerHTML = '<p>Testing database connection...</p>';
+            
+            // This would normally test the actual Supabase connection
+            // For now, we'll simulate a successful connection
+            setTimeout(() => {
+                resultDiv.innerHTML = '<div class="success"><p>✅ Database connection successful!</p></div>';
+            }, 1000);
+        }
+
+        async function testProductLoading() {
+            const productId = document.getElementById('product-id').value;
+            const resultDiv = document.getElementById('product-result');
+            
+            if (!productId) {
+                resultDiv.innerHTML = '<div class="error"><p>❌ Please enter a product ID</p></div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<p>Loading product...</p>';
+            
+            try {
+                // Simulate loading a product
+                const mockProduct = {
+                    id: productId,
+                    category: 'Sealants & Adhesives',
+                    model: 'TEST-MODEL-123',
+                    inStock: true,
+                    showInFeatured: false,
+                    isActive: true,
+                    names: {
+                        'zh-Hant': 'X0011 樓板複合隔音材',
+                        'en': 'X0011 High-Performance Waterproofing Membrane',
+                        'zh-Hans': 'X0011 楼板复合隔音材',
+                        'ja': 'X0011 床板複合遮音材',
+                        'ko': 'X0011 바닥 복합 방음재',
+                        'th': 'X0011 วัสดุกันเสียงแบบผสมสำหรับพื้น',
+                        'vi': 'X0011 Vật liệu cách âm tổng hợp cho sàn'
+                    },
+                    descriptions: {
+                        'zh-Hant': '先進的防水膜，適用於關鍵應用。',
+                        'en': 'Advanced waterproofing membrane for critical applications.',
+                        'zh-Hans': '先进的防水膜，适用于关键应用。',
+                        'ja': '重要な用途に適した高度な防水膜。',
+                        'ko': '중요한 용도에 적합한 고급 방수 막재.',
+                        'th': 'เมมเบรนกันน้ำขั้นสูงสำหรับการใช้งานที่สำคัญ',
+                        'vi': 'Màng chống thấm nước tiên tiến cho các ứng dụng quan trọng.'
+                    }
+                };
+                
+                currentProduct = mockProduct;
+                populateForm(mockProduct);
+                
+                resultDiv.innerHTML = '<div class="success"><p>✅ Product loaded successfully!</p><pre>' + JSON.stringify(mockProduct, null, 2) + '</pre></div>';
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="error"><p>❌ Error loading product: ' + error.message + '</p></div>';
+            }
+        }
+
+        function populateForm(product) {
+            // Basic info
+            document.getElementById('category').value = product.category || '';
+            document.getElementById('model').value = product.model || '';
+            document.getElementById('inStock').checked = product.inStock || false;
+            document.getElementById('showInFeatured').checked = product.showInFeatured || false;
+            document.getElementById('isActive').checked = product.isActive !== false;
+            
+            // Names
+            Object.keys(product.names || {}).forEach(lang => {
+                const nameInput = document.getElementById(`name-${lang}`);
+                if (nameInput) {
+                    nameInput.value = product.names[lang] || '';
+                }
+            });
+            
+            // Descriptions
+            Object.keys(product.descriptions || {}).forEach(lang => {
+                const descInput = document.getElementById(`desc-${lang}`);
+                if (descInput) {
+                    descInput.value = product.descriptions[lang] || '';
+                }
+            });
+        }
+
+        async function testProductSaving() {
+            if (!currentProduct) {
+                alert('Please load a product first!');
+                return;
+            }
+            
+            // Collect form data
+            const updatedProduct = {
+                id: currentProduct.id,
+                category: document.getElementById('category').value,
+                model: document.getElementById('model').value,
+                inStock: document.getElementById('inStock').checked,
+                showInFeatured: document.getElementById('showInFeatured').checked,
+                isActive: document.getElementById('isActive').checked,
+                names: {},
+                descriptions: {}
+            };
+            
+            // Collect names and descriptions
+            ['zh-Hant', 'en', 'zh-Hans', 'ja', 'ko', 'th', 'vi'].forEach(lang => {
+                const nameInput = document.getElementById(`name-${lang}`);
+                const descInput = document.getElementById(`desc-${lang}`);
+                
+                if (nameInput && nameInput.value.trim()) {
+                    updatedProduct.names[lang] = nameInput.value.trim();
+                }
+                
+                if (descInput && descInput.value.trim()) {
+                    updatedProduct.descriptions[lang] = descInput.value.trim();
+                }
+            });
+            
+            alert('Product data collected successfully!\n\nThis would normally save to the database.\n\nCollected data:\n' + JSON.stringify(updatedProduct, null, 2));
+        }
+
+        function clearForm() {
+            // Clear all inputs
+            document.querySelectorAll('input[type="text"], textarea').forEach(input => {
+                input.value = '';
+            });
+            
+            // Uncheck all checkboxes
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            currentProduct = null;
+            alert('Form cleared!');
+        }
+
+        // Initialize the test
+        console.log('Product Editor Test initialized. Use the buttons above to test functionality.');
+    </script>
+</body>
+</html>

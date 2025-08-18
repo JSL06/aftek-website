@@ -53,7 +53,9 @@ const vi = {
   
   'home.projects.title': 'Dự án đã qua',
   'home.projects.desc': 'Khám phá danh mục các dự án xây dựng thành công trên khắp Châu Á-Thái Bình Dương',
+  'home.projects.portfolio': 'Khám phá danh mục các dự án xây dựng thành công trên khắp Châu Á-Thái Bình Dương',
   'home.projects.viewAll': 'Xem tất cả dự án',
+  'home.projects.viewAllButton': 'Xem tất cả dự án',
   'home.projects.project1.title': 'Mở rộng tàu điện ngầm Taipei',
   'home.projects.project1.location': 'Taipei, Đài Loan',
   'home.projects.project1.image': 'Xây dựng ga tàu điện ngầm',
@@ -213,6 +215,7 @@ const vi = {
   'products.filters.grout': 'Redi-Mix G&M',
   'products.filters.insulation': 'Cách nhiệt & Lớp phủ',
   'products.search.placeholder': 'Tìm kiếm sản phẩm...',
+  'products.searchPlaceholder': 'Tìm kiếm sản phẩm...',
   'products.viewDetails': 'Xem chi tiết',
   'products.specifications': 'Thông số kỹ thuật',
   'products.features': 'Tính năng chính',

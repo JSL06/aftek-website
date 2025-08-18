@@ -78,10 +78,10 @@ const Home = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    // Listen for language changes and reload the page
+    // Listen for language changes and force reload to ensure all translations are loaded
     const handleLanguageChange = (event: CustomEvent) => {
       console.log('Home page: Language changed to:', event.detail);
-      // Reload the entire page to ensure all text updates
+      // Force reload the page to ensure all translations are properly loaded
       window.location.reload();
     };
 

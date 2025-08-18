@@ -27,12 +27,15 @@ import {
 import { cn } from '@/lib/utils';
 import AdminSidebar from './AdminSidebar';
 import CommandPalette from './CommandPalette';
+import AdminLanguageSwitcher from './AdminLanguageSwitcher';
 import { useTheme } from 'next-themes';
+import { useAdminLanguage } from '@/contexts/AdminLanguageContext';
 
 const AdminLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const { t } = useAdminLanguage();
   const {
     sidebar,
     notifications,
@@ -132,14 +135,14 @@ const AdminLayout: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="global-search"
-                placeholder="Search content, media, settings..."
+                placeholder={t('admin.search.placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 bg-muted/50 border-0 focus:bg-background"
               />
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                 <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-                  <span className="text-xs">⌘</span>K
+                  <span className="text-xs">{t('admin.search.shortcut')}</span>
                 </kbd>
               </div>
             </div>
@@ -153,24 +156,27 @@ const AdminLayout: React.FC = () => {
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                   <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                  <span className="sr-only">Toggle theme</span>
+                  <span className="sr-only">{t('admin.theme.toggle')}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setTheme('light')}>
                   <Sun className="mr-2 h-4 w-4" />
-                  <span>Light</span>
+                  <span>{t('admin.theme.light')}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme('dark')}>
                   <Moon className="mr-2 h-4 w-4" />
-                  <span>Dark</span>
+                  <span>{t('admin.theme.dark')}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme('system')}>
                   <Monitor className="mr-2 h-4 w-4" />
-                  <span>System</span>
+                  <span>{t('admin.theme.system')}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {/* Language Switcher */}
+            <AdminLanguageSwitcher />
 
             {/* Notifications */}
             <DropdownMenu>
@@ -189,20 +195,20 @@ const AdminLayout: React.FC = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80">
                 <div className="flex items-center justify-between p-2">
-                  <h4 className="font-medium">Notifications</h4>
+                  <h4 className="font-medium">{t('admin.notifications.title')}</h4>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={clearNotifications}
                     className="h-6 px-2 text-xs"
                   >
-                    Clear all
+                    {t('admin.notifications.clearAll')}
                   </Button>
                 </div>
                 <DropdownMenuSeparator />
                 {notifications.length === 0 ? (
                   <div className="p-4 text-center text-muted-foreground">
-                    No notifications
+                    {t('admin.notifications.noNotifications')}
                   </div>
                 ) : (
                   <div className="max-h-64 overflow-y-auto">
@@ -247,12 +253,12 @@ const AdminLayout: React.FC = () => {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => navigate('/admin/settings')}>
                   <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
+                  <span>{t('admin.user.settings')}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Logout</span>
+                  <span>{t('admin.user.logout')}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

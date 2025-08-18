@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Product Connection</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>AFTEK Website - Test Product Connection</h1>
+    
+    <div class="test-section info">
+        <h3>Database Connection Test</h3>
+        <p>This page tests the connection to your Supabase database and product operations.</p>
+        <button onclick="testConnection()">Test Connection</button>
+        <button onclick="testProductRead()">Test Product Read</button>
+        <button onclick="testProductCreate()">Test Product Create</button>
+        <button onclick="testProductUpdate()">Test Product Update</button>
+        <button onclick="testProductDelete()">Test Product Delete</button>
+        <button onclick="showAllProducts()">Show All Products</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        // Supabase configuration (same as your app)
+        const supabaseUrl = 'https://txjhhwootljiqavnnghm.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4amhod29vdGxqaXFhdm5uZ2htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE1ODc5MDQsImV4cCI6MjA2NzE2MzkwNH0.fJHzXibofO5jhnWp1COLbcHkamLf1l6hzwGdLpbt7YM';
+        
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-section ${type}`;
+            div.innerHTML = `<h4>${type.toUpperCase()}</h4><pre>${message}</pre>`;
+            results.appendChild(div);
+        }
+
+        async function testConnection() {
+            try {
+                log('Testing Supabase connection...', 'info');
+                
+                // Test basic connection
+                const { data, error } = await supabase.from('products').select('count').limit(1);
+                
+                if (error) {
+                    log(`Connection failed: ${error.message}`, 'error');
+                    return;
+                }
+                
+                log('✅ Connection successful! Database is accessible.', 'success');
+            } catch (err) {
+                log(`❌ Connection error: ${err.message}`, 'error');
+            }
+        }
+
+        async function testProductRead() {
+            try {
+                log('Testing product read operation...', 'info');
+                
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .limit(3);
+                
+                if (error) {
+                    log(`Read failed: ${error.message}`, 'error');
+                    return;
+                }
+                
+                log(`✅ Read successful! Found ${data.length} products: ${JSON.stringify(data, null, 2)}`, 'success');
+            } catch (err) {
+                log(`❌ Read error: ${err.message}`, 'error');
+            }
+        }
+
+        async function testProductCreate() {
+            try {
+                log('Testing product create operation...', 'info');
+                
+                const testProduct = {
+                    name: 'Test Product - ' + new Date().toISOString(),
+                    description: 'This is a test product created by the test page',
+                    category: 'Test Category',
+                    price: 99.99,
+                    isActive: true,
+                    showInFeatured: false,
+                    names: { en: 'Test Product', zh: '测试产品' },
+                    tags: ['test', 'verification'],
+                    features: ['Test Feature 1', 'Test Feature 2']
+                };
+                
+                const { data, error } = await supabase
+                    .from('products')
+                    .insert([testProduct])
+                    .select();
+                
+                if (error) {
+                    log(`Create failed: ${error.message}`, 'error');
+                    return;
+                }
+                
+                log(`✅ Create successful! Product created: ${JSON.stringify(data[0], null, 2)}`, 'success');
+            } catch (err) {
+                log(`❌ Create error: ${err.message}`, 'error');
+            }
+        }
+
+        async function testProductUpdate() {
+            try {
+                log('Testing product update operation...', 'info');
+                
+                // First get a product to update
+                const { data: products, error: fetchError } = await supabase
+                    .from('products')
+                    .select('id, name')
+                    .limit(1);
+                
+                if (fetchError || !products.length) {
+                    log(`No products to update: ${fetchError?.message || 'No products found'}`, 'error');
+                    return;
+                }
+                
+                const product = products[0];
+                const updateData = {
+                    description: 'Updated description - ' + new Date().toISOString()
+                };
+                
+                const { data, error } = await supabase
+                    .from('products')
+                    .update(updateData)
+                    .eq('id', product.id)
+                    .select();
+                
+                if (error) {
+                    log(`Update failed: ${error.message}`, 'error');
+                    return;
+                }
+                
+                log(`✅ Update successful! Product updated: ${JSON.stringify(data[0], null, 2)}`, 'success');
+            } catch (err) {
+                log(`❌ Update error: ${err.message}`, 'error');
+            }
+        }
+
+        async function testProductDelete() {
+            try {
+                log('Testing product delete operation...', 'info');
+                
+                // First get a test product to delete
+                const { data: products, error: fetchError } = await supabase
+                    .from('products')
+                    .select('id, name')
+                    .like('name', 'Test Product%')
+                    .limit(1);
+                
+                if (fetchError || !products.length) {
+                    log(`No test products to delete: ${fetchError?.message || 'No test products found'}`, 'error');
+                    return;
+                }
+                
+                const product = products[0];
+                
+                const { error } = await supabase
+                    .from('products')
+                    .delete()
+                    .eq('id', product.id);
+                
+                if (error) {
+                    log(`Delete failed: ${error.message}`, 'error');
+                    return;
+                }
+                
+                log(`✅ Delete successful! Product "${product.name}" deleted.`, 'success');
+            } catch (err) {
+                log(`❌ Delete error: ${err.message}`, 'error');
+            }
+        }
+
+        async function showAllProducts() {
+            try {
+                log('Fetching all products...', 'info');
+                
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    log(`Fetch failed: ${error.message}`, 'error');
+                    return;
+                }
+                
+                log(`✅ Found ${data.length} products: ${JSON.stringify(data, null, 2)}`, 'success');
+            } catch (err) {
+                log(`❌ Fetch error: ${err.message}`, 'error');
+            }
+        }
+
+        // Auto-run connection test on page load
+        window.onload = function() {
+            log('Page loaded. Click buttons to test different operations.', 'info');
+        };
+    </script>
+</body>
+</html>

@@ -29,6 +29,22 @@ const ArticleDetail = () => {
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Listen for language changes and force reload to ensure all translations are loaded
+  useEffect(() => {
+    const handleLanguageChange = (event: CustomEvent) => {
+      console.log('ArticleDetail page: Language changed to:', event.detail);
+      // Force reload the page to ensure all translations are properly loaded
+      window.location.reload();
+    };
+
+    // Add event listener for language changes
+    window.addEventListener('languageChange', handleLanguageChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('languageChange', handleLanguageChange as EventListener);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchArticle = async () => {

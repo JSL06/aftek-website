@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Field Update Diagnostic</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .section { 
+            margin: 20px 0; 
+            padding: 20px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            background: #fafafa;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        button { 
+            padding: 10px 20px; 
+            margin: 5px; 
+            cursor: pointer; 
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover { background: #0056b3; }
+        .test-button { background: #28a745; }
+        .test-button:hover { background: #1e7e34; }
+        .delete-button { background: #dc3545; }
+        .delete-button:hover { background: #c82333; }
+        pre { 
+            background: #f8f9fa; 
+            padding: 10px; 
+            border-radius: 4px; 
+            overflow-x: auto; 
+            border: 1px solid #e9ecef;
+            font-size: 12px;
+        }
+        .log { 
+            max-height: 400px; 
+            overflow-y: auto; 
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+        }
+        .field-test {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+        }
+        .field-test h4 {
+            margin-top: 0;
+            color: #333;
+        }
+        .field-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .field-success { background: #d4edda; }
+        .field-error { background: #f8d7da; }
+        .field-info { background: #d1ecf1; }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-size: 12px;
+        }
+        .comparison-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+        .highlight { background: #fff3cd; }
+        .mismatch { background: #f8d7da; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Text Field Update Diagnostic</h1>
+        <p>This tool specifically tests text field updates to identify the exact data mapping issue.</p>
+        
+        <!-- Configuration Section -->
+        <div class="section info">
+            <h2>📋 Configuration</h2>
+            <p><strong>Supabase URL:</strong> <span id="supabase-url">Loading...</span></p>
+            <button onclick="testConnection()">Test Connection</button>
+            <div id="connection-result"></div>
+        </div>
+
+        <!-- Test Controls -->
+        <div class="section">
+            <h2>🧪 Text Field Tests</h2>
+            <button class="test-button" onclick="runFullTextTest()">🚀 Run Full Text Field Test</button>
+            <button onclick="createTestProduct()">1️⃣ Create Test Product</button>
+            <button onclick="testTextUpdates()">2️⃣ Test Text Field Updates</button>
+            <button onclick="analyzeDataStructure()">3️⃣ Analyze Data Structure</button>
+            <button onclick="compareFields()">4️⃣ Compare Field Mappings</button>
+            <button class="delete-button" onclick="deleteTestProduct()">🗑️ Delete Test Product</button>
+            <button onclick="clearLog()">🗑️ Clear Log</button>
+        </div>
+
+        <!-- Test Results -->
+        <div class="section">
+            <h2>📊 Test Results</h2>
+            <div id="test-results"></div>
+        </div>
+
+        <!-- Detailed Log -->
+        <div class="section">
+            <h2>📋 Detailed Log</h2>
+            <div id="log" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://txjhhwootljiqavnnghm.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4amhod29vdGxqaXFhdm5uZ2htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE1ODc5MDQsImV4cCI6MjA2NzE2MzkwNH0.fJHzXibofO5jhnWp1COLbcHkamLf1l6hzwGdLpbt7YM';
+        
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        let testProductId = null;
+        let originalProductData = null;
+        let updatedProductData = null;
+
+        // Update configuration display
+        document.getElementById('supabase-url').textContent = supabaseUrl;
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            logEntry.className = type;
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function updateTestResults(html) {
+            document.getElementById('test-results').innerHTML = html;
+        }
+
+        async function testConnection() {
+            log('🔌 Testing Supabase connection...');
+            const resultDiv = document.getElementById('connection-result');
+            
+            try {
+                const { data, error } = await supabase.from('products').select('count').limit(1);
+                
+                if (error) {
+                    log(`❌ Connection failed: ${error.message}`, 'error');
+                    resultDiv.innerHTML = `<div class="error">❌ Connection failed: ${error.message}</div>`;
+                } else {
+                    log('✅ Connection successful!', 'success');
+                    resultDiv.innerHTML = '<div class="success">✅ Connection successful!</div>';
+                }
+            } catch (err) {
+                log(`❌ Connection error: ${err.message}`, 'error');
+                resultDiv.innerHTML = `<div class="error">❌ Connection error: ${err.message}</div>`;
+            }
+        }
+
+        async function createTestProduct() {
+            log('🚀 Creating test product for text field analysis...');
+            
+            try {
+                const testProduct = {
+                    name: 'Text Field Test Product - ' + Date.now(),
+                    description: 'This is a test product to analyze text field updates',
+                    category: 'test',
+                    price: 99.99,
+                    model: 'TEXT-TEST-' + Date.now(),
+                    inStock: true,
+                    isActive: true,
+                    showInFeatured: false,
+                    features: ['Test Feature'],
+                    tags: ['test', 'text-analysis'],
+                    names: { 
+                        'en': 'Text Field Test Product', 
+                        'zh-Hant': '文字欄位測試產品'
+                    },
+                    descriptions: { 
+                        'en': 'This is a test product for text field analysis', 
+                        'zh-Hant': '這是用於文字欄位分析的測試產品'
+                    }
+                };
+
+                log('📝 Creating product with text data:', 'info');
+                log(JSON.stringify(testProduct, null, 2), 'info');
+
+                const { data, error } = await supabase
+                    .from('products')
+                    .insert([testProduct])
+                    .select()
+                    .single();
+
+                if (error) {
+                    log(`❌ Product creation failed: ${error.message}`, 'error');
+                    return false;
+                }
+
+                testProductId = data.id;
+                originalProductData = { ...data };
+                log(`✅ Test product created! ID: ${data.id}`, 'success');
+                
+                updateTestResults(`
+                    <div class="field-test">
+                        <h4>✅ Test Product Created</h4>
+                        <p><strong>ID:</strong> ${data.id}</p>
+                        <p><strong>Name:</strong> ${data.name}</p>
+                        <p><strong>Description:</strong> ${data.description}</p>
+                        <p><strong>Category:</strong> ${data.category}</p>
+                    </div>
+                `);
+                
+                return true;
+
+            } catch (err) {
+                log(`❌ Product creation error: ${err.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testTextUpdates() {
+            if (!testProductId) {
+                log('⚠️ No test product to update. Create one first.', 'warning');
+                return false;
+            }
+
+            log('✏️ Testing text field updates...');
+            
+            try {
+                // Test different types of text updates
+                const updateData = {
+                    name: 'UPDATED Text Field Test Product - ' + Date.now(),
+                    description: 'This description has been UPDATED for testing',
+                    names: { 
+                        'en': 'UPDATED Text Field Test Product', 
+                        'zh-Hant': '已更新文字欄位測試產品'
+                    },
+                    descriptions: { 
+                        'en': 'This description has been UPDATED for testing', 
+                        'zh-Hant': '此描述已更新用於測試'
+                    }
+                };
+
+                log('📝 Updating text fields with data:', 'info');
+                log(JSON.stringify(updateData, null, 2), 'info');
+
+                const { data, error } = await supabase
+                    .from('products')
+                    .update(updateData)
+                    .eq('id', testProductId)
+                    .select()
+                    .single();
+
+                if (error) {
+                    log(`❌ Text update failed: ${error.message}`, 'error');
+                    return false;
+                }
+
+                updatedProductData = { ...data };
+                log(`✅ Text fields updated!`, 'success');
+                
+                // Show what was actually saved
+                updateTestResults(`
+                    <div class="field-test">
+                        <h4>✅ Text Fields Updated</h4>
+                        <p><strong>New Name:</strong> ${data.name}</p>
+                        <p><strong>New Description:</strong> ${data.description}</p>
+                        <p><strong>Multilingual Names:</strong> ${JSON.stringify(data.names)}</p>
+                        <p><strong>Multilingual Descriptions:</strong> ${JSON.stringify(data.descriptions)}</p>
+                    </div>
+                `);
+                
+                return true;
+
+            } catch (err) {
+                log(`❌ Text update error: ${err.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function analyzeDataStructure() {
+            if (!testProductId) {
+                log('⚠️ No test product to analyze. Create one first.', 'warning');
+                return false;
+            }
+
+            log('🔍 Analyzing data structure...');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .eq('id', testProductId)
+                    .single();
+
+                if (error) {
+                    log(`❌ Data analysis failed: ${error.message}`, 'error');
+                    return false;
+                }
+
+                log('📊 Current data structure:', 'info');
+                log(JSON.stringify(data, null, 2), 'info');
+
+                // Analyze text field structure
+                const textFieldAnalysis = {
+                    basicFields: {
+                        name: { value: data.name, type: typeof data.name, length: data.name?.length },
+                        description: { value: data.description, type: typeof data.description, length: data.description?.length },
+                        category: { value: data.category, type: typeof data.category }
+                    },
+                    multilingualFields: {
+                        names: { value: data.names, type: typeof data.names, keys: Object.keys(data.names || {}) },
+                        descriptions: { value: data.descriptions, type: typeof data.descriptions, keys: Object.keys(data.descriptions || {}) }
+                    },
+                    metadata: {
+                        id: data.id,
+                        created_at: data.created_at,
+                        updated_at: data.updated_at
+                    }
+                };
+
+                updateTestResults(`
+                    <div class="field-test">
+                        <h4>🔍 Data Structure Analysis</h4>
+                        <h5>Basic Text Fields:</h5>
+                        <table class="comparison-table">
+                            <tr><th>Field</th><th>Value</th><th>Type</th><th>Length</th></tr>
+                            <tr><td>name</td><td>${textFieldAnalysis.basicFields.name.value}</td><td>${textFieldAnalysis.basicFields.name.type}</td><td>${textFieldAnalysis.basicFields.name.length}</td></tr>
+                            <tr><td>description</td><td>${textFieldAnalysis.basicFields.description.value}</td><td>${textFieldAnalysis.basicFields.description.type}</td><td>${textFieldAnalysis.basicFields.description.length}</td></tr>
+                            <tr><td>category</td><td>${textFieldAnalysis.basicFields.category.value}</td><td>${textFieldAnalysis.basicFields.category.type}</td><td>-</td></tr>
+                        </table>
+                        
+                        <h5>Multilingual Fields:</h5>
+                        <table class="comparison-table">
+                            <tr><th>Field</th><th>Type</th><th>Keys</th><th>Sample Value</th></tr>
+                            <tr><td>names</td><td>${textFieldAnalysis.multilingualFields.names.type}</td><td>${textFieldAnalysis.multilingualFields.names.keys.join(', ')}</td><td>${JSON.stringify(textFieldAnalysis.multilingualFields.names.value?.en || 'N/A')}</td></tr>
+                            <tr><td>descriptions</td><td>${textFieldAnalysis.multilingualFields.descriptions.type}</td><td>${textFieldAnalysis.multilingualFields.descriptions.keys.join(', ')}</td><td>${JSON.stringify(textFieldAnalysis.multilingualFields.descriptions.value?.en || 'N/A')}</td></tr>
+                        </table>
+                    </div>
+                `);
+
+                return true;
+
+            } catch (err) {
+                log(`❌ Data analysis error: ${err.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function compareFields() {
+            if (!originalProductData || !updatedProductData) {
+                log('⚠️ Need both original and updated data to compare. Run tests first.', 'warning');
+                return false;
+            }
+
+            log('🔍 Comparing field changes...');
+            
+            try {
+                // Compare each field type
+                const fieldComparison = {
+                    basicText: {
+                        name: { original: originalProductData.name, updated: updatedProductData.name, changed: originalProductData.name !== updatedProductData.name },
+                        description: { original: originalProductData.description, updated: updatedProductData.description, changed: originalProductData.description !== updatedProductData.description },
+                        category: { original: originalProductData.category, updated: updatedProductData.category, changed: originalProductData.category !== updatedProductData.category }
+                    },
+                    multilingual: {
+                        names: { 
+                            original: JSON.stringify(originalProductData.names), 
+                            updated: JSON.stringify(updatedProductData.names), 
+                            changed: JSON.stringify(originalProductData.names) !== JSON.stringify(updatedProductData.names)
+                        },
+                        descriptions: { 
+                            original: JSON.stringify(originalProductData.descriptions), 
+                            updated: JSON.stringify(updatedProductData.descriptions), 
+                            changed: JSON.stringify(originalProductData.descriptions) !== JSON.stringify(updatedProductData.descriptions)
+                        }
+                    }
+                };
+
+                // Check what actually changed in the database
+                const { data: currentData, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .eq('id', testProductId)
+                    .single();
+
+                if (error) {
+                    log(`❌ Current data fetch failed: ${error.message}`, 'error');
+                    return false;
+                }
+
+                // Compare with what's actually in the database
+                const databaseComparison = {
+                    name: { expected: updatedProductData.name, actual: currentData.name, matches: updatedProductData.name === currentData.name },
+                    description: { expected: updatedProductData.description, actual: currentData.description, matches: updatedProductData.description === currentData.description },
+                    names: { expected: JSON.stringify(updatedProductData.names), actual: JSON.stringify(currentData.names), matches: JSON.stringify(updatedProductData.names) === JSON.stringify(currentData.names) },
+                    descriptions: { expected: JSON.stringify(updatedProductData.descriptions), actual: JSON.stringify(currentData.descriptions), matches: JSON.stringify(updatedProductData.descriptions) === JSON.stringify(currentData.descriptions) }
+                };
+
+                updateTestResults(`
+                    <div class="field-test">
+                        <h4>🔍 Field Change Comparison</h4>
+                        
+                        <h5>What We Tried to Update:</h5>
+                        <table class="comparison-table">
+                            <tr><th>Field</th><th>Original</th><th>Updated</th><th>Changed?</th></tr>
+                            <tr class="${fieldComparison.basicText.name.changed ? 'highlight' : ''}">
+                                <td>name</td><td>${fieldComparison.basicText.name.original}</td><td>${fieldComparison.basicText.name.updated}</td><td>${fieldComparison.basicText.name.changed ? '✅' : '❌'}</td>
+                            </tr>
+                            <tr class="${fieldComparison.basicText.description.changed ? 'highlight' : ''}">
+                                <td>description</td><td>${fieldComparison.basicText.description.original}</td><td>${fieldComparison.basicText.description.updated}</td><td>${fieldComparison.basicText.description.changed ? '✅' : '❌'}</td>
+                            </tr>
+                            <tr class="${fieldComparison.basicText.category.changed ? 'highlight' : ''}">
+                                <td>category</td><td>${fieldComparison.basicText.category.original}</td><td>${fieldComparison.basicText.category.updated}</td><td>${fieldComparison.basicText.category.changed ? '✅' : '❌'}</td>
+                            </tr>
+                        </table>
+
+                        <h5>What's Actually in Database:</h5>
+                        <table class="comparison-table">
+                            <tr><th>Field</th><th>Expected</th><th>Actual in DB</th><th>Matches?</th></tr>
+                            <tr class="${databaseComparison.name.matches ? 'field-success' : 'field-error'}">
+                                <td>name</td><td>${databaseComparison.name.expected}</td><td>${databaseComparison.name.actual}</td><td>${databaseComparison.name.matches ? '✅' : '❌'}</td>
+                            </tr>
+                            <tr class="${databaseComparison.description.matches ? 'field-success' : 'field-error'}">
+                                <td>description</td><td>${databaseComparison.description.expected}</td><td>${databaseComparison.description.actual}</td><td>${databaseComparison.description.matches ? '✅' : '❌'}</td>
+                            </tr>
+                            <tr class="${databaseComparison.names.matches ? 'field-success' : 'field-error'}">
+                                <td>names</td><td>${databaseComparison.names.expected}</td><td>${databaseComparison.names.actual}</td><td>${databaseComparison.names.matches ? '✅' : '❌'}</td>
+                            </tr>
+                            <tr class="${databaseComparison.descriptions.matches ? 'field-success' : 'field-error'}">
+                                <td>descriptions</td><td>${databaseComparison.descriptions.expected}</td><td>${databaseComparison.descriptions.actual}</td><td>${databaseComparison.descriptions.matches ? '✅' : '❌'}</td>
+                            </tr>
+                        </table>
+
+                        <h5>🔍 Analysis:</h5>
+                        <ul>
+                            ${!databaseComparison.name.matches ? '<li class="field-error">❌ Name field update failed - data not persisted to database</li>' : '<li class="field-success">✅ Name field update successful</li>'}
+                            ${!databaseComparison.description.matches ? '<li class="field-error">❌ Description field update failed - data not persisted to database</li>' : '<li class="field-success">✅ Description field update successful</li>'}
+                            ${!databaseComparison.names.matches ? '<li class="field-error">❌ Multilingual names update failed - data not persisted to database</li>' : '<li class="field-success">✅ Multilingual names update successful</li>'}
+                            ${!databaseComparison.descriptions.matches ? '<li class="field-error">❌ Multilingual descriptions update failed - data not persisted to database</li>' : '<li class="field-success">✅ Multilingual descriptions update successful</li>'}
+                        </ul>
+                    </div>
+                `);
+
+                return true;
+
+            } catch (err) {
+                log(`❌ Field comparison error: ${err.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function deleteTestProduct() {
+            if (!testProductId) {
+                log('⚠️ No test product to delete.', 'warning');
+                return false;
+            }
+
+            log('🗑️ Deleting test product...');
+            
+            try {
+                const { error } = await supabase
+                    .from('products')
+                    .delete()
+                    .eq('id', testProductId);
+
+                if (error) {
+                    log(`❌ Product deletion failed: ${error.message}`, 'error');
+                    return false;
+                }
+
+                log('✅ Test product deleted successfully!', 'success');
+                
+                // Reset state
+                testProductId = null;
+                originalProductData = null;
+                updatedProductData = null;
+                
+                updateTestResults(`
+                    <div class="field-test">
+                        <h4>✅ Test Product Deleted</h4>
+                        <p>Test product has been removed from the database.</p>
+                    </div>
+                `);
+                
+                return true;
+
+            } catch (err) {
+                log(`❌ Product deletion error: ${err.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function runFullTextTest() {
+            log('🚀 Starting full text field diagnostic test...');
+            
+            try {
+                // Run all tests in sequence
+                if (await createTestProduct()) {
+                    if (await testTextUpdates()) {
+                        if (await analyzeDataStructure()) {
+                            await compareFields();
+                        }
+                    }
+                }
+                
+                log('🏁 Full text field test completed!', 'info');
+                
+            } catch (error) {
+                log(`❌ Full test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            log('🗑️ Log cleared');
+        }
+
+        // Auto-run connection test on page load
+        window.addEventListener('load', () => {
+            log('🚀 Text field diagnostic tool loaded. Starting connection test...');
+            setTimeout(testConnection, 1000);
+        });
+    </script>
+</body>
+</html>

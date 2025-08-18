@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAdminStore } from '@/stores/adminStore';
+import { useAdminLanguage } from '@/contexts/AdminLanguageContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -34,77 +35,9 @@ interface SidebarItem {
   children?: Omit<SidebarItem, 'children'>[];
 }
 
-const sidebarItems: SidebarItem[] = [
-  {
-    id: 'dashboard',
-    title: '仪表板',
-    icon: LayoutDashboard,
-    href: '/admin/dashboard'
-  },
-  {
-    id: 'content',
-    title: '内容管理',
-    icon: FileText,
-    children: [
-      {
-        id: 'products',
-        title: '产品管理',
-        icon: Package,
-        href: '/admin/products',
-        badge: '12'
-      },
-      {
-        id: 'projects',
-        title: '项目管理',
-        icon: Building2,
-        href: '/admin/projects',
-        badge: '8'
-      },
-      {
-        id: 'articles',
-        title: '文章管理',
-        icon: FileText,
-        href: '/admin/articles',
-        badge: '24'
-      }
-    ]
-  },
-  {
-    id: 'media',
-    title: '媒体库',
-    icon: Image,
-    href: '/admin/media',
-    badge: '156'
-  },
-  {
-    id: 'translations',
-    title: '翻译管理',
-    icon: Languages,
-    href: '/admin/translations',
-    badge: '5'
-  },
-  {
-    id: 'analytics',
-    title: '数据分析',
-    icon: BarChart3,
-    href: '/admin/analytics'
-  },
-  {
-    id: 'users',
-    title: '用户管理',
-    icon: Users,
-    href: '/admin/users'
-  },
-  {
-    id: 'settings',
-    title: '系统设置',
-    icon: Settings,
-    href: '/admin/settings'
-  }
-];
-
 const AdminSidebar: React.FC = () => {
   const location = useLocation();
+  const { t } = useAdminLanguage();
   const { sidebar, setActiveSection } = useAdminStore();
   const [expandedSections, setExpandedSections] = React.useState<string[]>(['content']);
 
@@ -222,6 +155,75 @@ const AdminSidebar: React.FC = () => {
     );
   };
 
+  const sidebarItems: SidebarItem[] = [
+    {
+      id: 'dashboard',
+      title: t('sidebar.dashboard'),
+      icon: LayoutDashboard,
+      href: '/admin/dashboard'
+    },
+    {
+      id: 'content',
+      title: t('sidebar.contentManagement'),
+      icon: FileText,
+      children: [
+        {
+          id: 'products',
+          title: t('sidebar.products'),
+          icon: Package,
+          href: '/admin/products',
+          badge: '12'
+        },
+        {
+          id: 'projects',
+          title: t('sidebar.projects'),
+          icon: Building2,
+          href: '/admin/projects',
+          badge: '8'
+        },
+        {
+          id: 'articles',
+          title: t('sidebar.articles'),
+          icon: FileText,
+          href: '/admin/articles',
+          badge: '24'
+        }
+      ]
+    },
+    {
+      id: 'media',
+      title: t('sidebar.media'),
+      icon: Image,
+      href: '/admin/media',
+      badge: '156'
+    },
+    {
+      id: 'translations',
+      title: t('sidebar.translations'),
+      icon: Languages,
+      href: '/admin/translations',
+      badge: '5'
+    },
+    {
+      id: 'analytics',
+      title: t('sidebar.analytics'),
+      icon: BarChart3,
+      href: '/admin/analytics'
+    },
+    {
+      id: 'users',
+      title: t('sidebar.users'),
+      icon: Users,
+      href: '/admin/users'
+    },
+    {
+      id: 'settings',
+      title: t('sidebar.settings'),
+      icon: Settings,
+      href: '/admin/settings'
+    }
+  ];
+
   return (
     <aside
       className={cn(
@@ -246,7 +248,7 @@ const AdminSidebar: React.FC = () => {
                 onClick={() => {/* TODO: Open content creation modal */}}
               >
                 <Plus className="mr-2 h-4 w-4" />
-                创建内容
+                {t('sidebar.createContent')}
               </Button>
               <Button
                 variant="outline"
@@ -255,7 +257,7 @@ const AdminSidebar: React.FC = () => {
                 onClick={() => {/* TODO: Open media upload modal */}}
               >
                 <Image className="mr-2 h-4 w-4" />
-                上传媒体
+                {t('sidebar.uploadMedia')}
               </Button>
             </div>
           </div>

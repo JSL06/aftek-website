@@ -7,6 +7,7 @@ import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { CompanyProvider } from "./contexts/CompanyContext";
+import { AdminLanguageProvider } from "./contexts/AdminLanguageContext";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Products from "./pages/Products";
@@ -35,6 +36,7 @@ import WebsiteTextEditor from './pages/admin/WebsiteTextEditor';
 import ProtectedPage from './components/ProtectedPage';
 import WebsiteTextManager from './pages/admin/WebsiteTextManager';
 import TranslationDashboard from './pages/admin/TranslationDashboard';
+import ProductEdit from './pages/admin/ProductEdit';
 
 const queryClient = new QueryClient();
 
@@ -117,10 +119,15 @@ const App = () => (
               </Route>
               
               {/* Admin Routes (Shared across all companies) */}
-              <Route path="/admin" element={<Layout />}>
+              <Route path="/admin" element={
+                <AdminLanguageProvider>
+                  <Layout />
+                </AdminLanguageProvider>
+              }>
                 <Route path="login" element={<AdminLogin />} />
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="products" element={<UnifiedProducts />} />
+                <Route path="products/edit/:productId" element={<ProductEdit />} />
                 <Route path="projects" element={<AdminProjects />} />
                 <Route path="category-manager" element={<CategoryManager />} />
                 <Route path="unified-products" element={<UnifiedProducts />} />

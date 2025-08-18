@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Simple Save</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        input, textarea { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 3px; }
+        .result { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 3px; white-space: pre-wrap; }
+        .error { background: #f8d7da; color: #721c24; }
+        .success { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <h1>Test Simple Save Functionality</h1>
+    
+    <div class="test-section">
+        <h3>Step 1: Check Current Product Data</h3>
+        <button onclick="checkCurrentProduct()">Check Current Product</button>
+        <div id="currentProductResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Step 2: Test Name Update</h3>
+        <label>Language Code:</label>
+        <input type="text" id="langCode" value="en" placeholder="en, zh-Hant, etc.">
+        <label>New Name:</label>
+        <input type="text" id="newName" value="TEST NAME" placeholder="Enter new name">
+        <button onclick="testNameUpdate()">Test Name Update</button>
+        <div id="nameUpdateResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Step 3: Verify Save</h3>
+        <button onclick="verifySave()">Verify Save</button>
+        <div id="verifyResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Step 4: Check Database State</h3>
+        <button onclick="checkDatabaseState()">Check Database</button>
+        <div id="databaseResult" class="result"></div>
+    </div>
+
+    <script>
+        // Configuration - Update these values
+        const SUPABASE_URL = 'https://txjhhwootljiqavnnghm.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4amhob3dvdGxqaXFhdm5uZ2htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1MDMyNDIsImV4cCI6MjA3MTA3OTI0Mn0.iz3keq6t1n';
+        
+        let currentProductId = null;
+        let currentProductData = null;
+
+        // Initialize Supabase client
+        const supabase = window.supabase || {
+            from: (table) => ({
+                select: (columns) => ({
+                    eq: (field, value) => ({
+                        single: async () => {
+                            console.log(`Mock: SELECT ${columns} FROM ${table} WHERE ${field} = ${value}`);
+                            return { data: null, error: null };
+                        }
+                    }),
+                    in: (field, values) => ({
+                        async then(callback) {
+                            console.log(`Mock: SELECT ${columns} FROM ${table} WHERE ${field} IN [${values}]`);
+                            callback({ data: [], error: null });
+                        }
+                    })
+                }),
+                update: (data) => ({
+                    eq: (field, value) => ({
+                        async then(callback) {
+                            console.log(`Mock: UPDATE ${table} SET ${JSON.stringify(data)} WHERE ${field} = ${value}`);
+                            callback({ data: null, error: null });
+                        }
+                    })
+                }),
+                upsert: (data, options) => ({
+                    async then(callback) {
+                        console.log(`Mock: UPSERT ${table} ${JSON.stringify(data)} ${JSON.stringify(options)}`);
+                        callback({ data: null, error: null });
+                    }
+                })
+            })
+        };
+
+        async function checkCurrentProduct() {
+            try {
+                const resultDiv = document.getElementById('currentProductResult');
+                resultDiv.innerHTML = 'Checking...';
+                
+                // Get the first product
+                const { data: products, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .limit(1);
+                
+                if (error) throw error;
+                
+                if (products && products.length > 0) {
+                    currentProductId = products[0].id;
+                    currentProductData = products[0];
+                    
+                    // Get translations for this product
+                    const { data: translations, error: transError } = await supabase
+                        .from('product_translations')
+                        .select('*')
+                        .eq('product_id', currentProductId);
+                    
+                    if (transError) throw transError;
+                    
+                    resultDiv.innerHTML = `
+                        <strong>Product Found:</strong>
+                        ID: ${currentProductId}
+                        Name: ${currentProductData.name}
+                        Category: ${currentProductData.category}
+                        
+                        <strong>Translations:</strong>
+                        ${translations ? translations.map(t => 
+                            `${t.language_code}: name="${t.name || 'NULL'}", description="${t.description ? t.description.substring(0, 50) + '...' : 'NULL'}"`
+                        ).join('\n') : 'No translations found'}
+                    `;
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.innerHTML = 'No products found';
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                document.getElementById('currentProductResult').innerHTML = `Error: ${error.message}`;
+                document.getElementById('currentProductResult').className = 'result error';
+            }
+        }
+
+        async function testNameUpdate() {
+            try {
+                if (!currentProductId) {
+                    alert('Please check current product first');
+                    return;
+                }
+                
+                const langCode = document.getElementById('langCode').value;
+                const newName = document.getElementById('newName').value;
+                const resultDiv = document.getElementById('nameUpdateResult');
+                
+                resultDiv.innerHTML = 'Updating...';
+                
+                // Update the name in product_translations
+                const { data, error } = await supabase
+                    .from('product_translations')
+                    .upsert({
+                        product_id: currentProductId,
+                        language_code: langCode,
+                        name: newName
+                    }, {
+                        onConflict: 'product_id,language_code'
+                    });
+                
+                if (error) throw error;
+                
+                resultDiv.innerHTML = `
+                    <strong>Name Update Successful:</strong>
+                    Language: ${langCode}
+                    New Name: ${newName}
+                    Result: ${JSON.stringify(data, null, 2)}
+                `;
+                resultDiv.className = 'result success';
+                
+            } catch (error) {
+                document.getElementById('nameUpdateResult').innerHTML = `Error: ${error.message}`;
+                document.getElementById('nameUpdateResult').className = 'result error';
+            }
+        }
+
+        async function verifySave() {
+            try {
+                if (!currentProductId) {
+                    alert('Please check current product first');
+                    return;
+                }
+                
+                const langCode = document.getElementById('langCode').value;
+                const resultDiv = document.getElementById('verifyResult');
+                
+                resultDiv.innerHTML = 'Verifying...';
+                
+                // Check if the name was saved
+                const { data, error } = await supabase
+                    .from('product_translations')
+                    .select('*')
+                    .eq('product_id', currentProductId)
+                    .eq('language_code', langCode)
+                    .single();
+                
+                if (error) throw error;
+                
+                resultDiv.innerHTML = `
+                    <strong>Verification Result:</strong>
+                    Language: ${langCode}
+                    Saved Name: ${data.name || 'NULL'}
+                    Saved Description: ${data.description ? data.description.substring(0, 100) + '...' : 'NULL'}
+                    Full Data: ${JSON.stringify(data, null, 2)}
+                `;
+                resultDiv.className = 'result success';
+                
+            } catch (error) {
+                document.getElementById('verifyResult').innerHTML = `Error: ${error.message}`;
+                document.getElementById('verifyResult').className = 'result error';
+            }
+        }
+
+        async function checkDatabaseState() {
+            try {
+                if (!currentProductId) {
+                    alert('Please check current product first');
+                    return;
+                }
+                
+                const resultDiv = document.getElementById('databaseResult');
+                resultDiv.innerHTML = 'Checking...';
+                
+                // Get all translations for this product
+                const { data, error } = await supabase
+                    .from('product_translations')
+                    .select('*')
+                    .eq('product_id', currentProductId);
+                
+                if (error) throw error;
+                
+                resultDiv.innerHTML = `
+                    <strong>Database State for Product ${currentProductId}:</strong>
+                    
+                    ${data.map(t => `
+                        ${t.language_code}:
+                        - Name: ${t.name || 'NULL'}
+                        - Description: ${t.description ? t.description.substring(0, 100) + '...' : 'NULL'}
+                        - Created: ${t.created_at}
+                        - Updated: ${t.updated_at}
+                    `).join('\n')}
+                `;
+                resultDiv.className = 'result success';
+                
+            } catch (error) {
+                document.getElementById('databaseResult').innerHTML = `Error: ${error.message}`;
+                document.getElementById('databaseResult').className = 'result error';
+            }
+        }
+
+        // Check if we're in the right environment
+        if (typeof window.supabase === 'undefined') {
+            console.log('Supabase not found globally, using mock client');
+        } else {
+            console.log('Supabase found globally');
+        }
+    </script>
+</body>
+</html>

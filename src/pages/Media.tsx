@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface MediaItem {
   id: string;
@@ -11,8 +12,25 @@ interface MediaItem {
 }
 
 const Media = () => {
+  const { t } = useTranslation();
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(false);
+  
+  // Listen for language changes and force reload to ensure all translations are loaded
+  useEffect(() => {
+    const handleLanguageChange = (event: CustomEvent) => {
+      console.log('Media page: Language changed to:', event.detail);
+      // Force reload the page to ensure all translations are properly loaded
+      window.location.reload();
+    };
+
+    // Add event listener for language changes
+    window.addEventListener('languageChange', handleLanguageChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('languageChange', handleLanguageChange as EventListener);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchMedia = async () => {

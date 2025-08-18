@@ -17,6 +17,22 @@ const ProductDetail = () => {
   const [product, setProduct] = useState<UnifiedProduct | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<UnifiedProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Listen for language changes and force reload to ensure all translations are loaded
+  useEffect(() => {
+    const handleLanguageChange = (event: CustomEvent) => {
+      console.log('ProductDetail page: Language changed to:', event.detail);
+      // Force reload the page to ensure all translations are properly loaded
+      window.location.reload();
+    };
+
+    // Add event listener for language changes
+    window.addEventListener('languageChange', handleLanguageChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('languageChange', handleLanguageChange as EventListener);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchProduct = async () => {

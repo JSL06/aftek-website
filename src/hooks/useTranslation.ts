@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 // Import local translation files
@@ -139,7 +139,7 @@ export const useTranslation = () => {
   console.log('Test admin key:', localTranslations[currentLanguage]?.['admin.dashboard.title']);
 
   // Fetch translations from Supabase with local fallback
-  const fetchTranslations = async (language: Language) => {
+  const fetchTranslations = useCallback(async (language: Language) => {
     console.log('Fetching translations for language:', language);
     try {
       const { data, error } = await supabase
@@ -179,25 +179,25 @@ export const useTranslation = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchTranslations(currentLanguage);
     // Set the lang attribute on initial load
     document.documentElement.lang = currentLanguage;
-  }, [currentLanguage]);
+  }, [currentLanguage, fetchTranslations]);
 
-      // Listen for language changes from other components
-    useEffect(() => {
-      const handleLanguageChange = (event: CustomEvent) => {
-        const newLanguage = event.detail as Language;
-        if (newLanguage && newLanguage !== currentLanguage) {
-          // Only change if the new language is valid
-          if (['en', 'ja', 'ko', 'th', 'vi', 'zh-Hans', 'zh-Hant'].includes(newLanguage)) {
-            setCurrentLanguage(newLanguage);
-          }
+  // Listen for language changes from other components
+  useEffect(() => {
+    const handleLanguageChange = (event: CustomEvent) => {
+      const newLanguage = event.detail as Language;
+      if (newLanguage && newLanguage !== currentLanguage) {
+        // Only change if the new language is valid
+        if (['en', 'ja', 'ko', 'th', 'vi', 'zh-Hans', 'zh-Hant'].includes(newLanguage)) {
+          setCurrentLanguage(newLanguage);
         }
-      };
+      }
+    };
 
     // Handle page visibility changes to ensure language sync
     const handleVisibilityChange = () => {
@@ -231,7 +231,7 @@ export const useTranslation = () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('translationUpdate', handleTranslationUpdate);
     };
-  }, [currentLanguage]);
+  }, []); // Remove currentLanguage dependency to prevent infinite loops
 
   const t = (key: string): string => {
     // Safety check: if key is undefined or null, return empty string
@@ -251,6 +251,18 @@ export const useTranslation = () => {
       console.log(`useTranslation: Requesting translation for key: ${key}`);
       console.log(`useTranslation: Current language: ${currentLanguage}`);
       console.log(`useTranslation: Loading state: ${loading}`);
+    }
+
+    // For Traditional Chinese, prioritize local translations to prevent database interference
+    if (currentLanguage === 'zh-Hant') {
+      const localTrans = localTranslations[currentLanguage];
+      const localValue = localTrans?.[key];
+      if (localValue) {
+        if (key.startsWith('home.explore.')) {
+          console.log(`useTranslation: Using local Traditional Chinese translation for ${key}:`, localValue);
+        }
+        return getValue(localValue);
+      }
     }
 
     // For specific keys that should always use local translations, prioritize local files

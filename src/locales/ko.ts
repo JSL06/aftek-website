@@ -53,7 +53,9 @@ const ko = {
   
   'home.projects.title': '과거 프로젝트',
   'home.projects.desc': '아시아태평양 지역의 성공적인 건설 프로젝트 포트폴리오 탐색',
+  'home.projects.portfolio': '아시아태평양 지역의 성공적인 건설 프로젝트 포트폴리오 탐색',
   'home.projects.viewAll': '모든 프로젝트 보기',
+  'home.projects.viewAllButton': '모든 프로젝트 보기',
   'home.projects.project1.title': '타이베이 지하철 연장',
   'home.projects.project1.location': '타이베이, 대만',
   'home.projects.project1.image': '지하철역 건설',
@@ -204,6 +206,7 @@ const ko = {
   'products.filters.grout': 'Redi-Mix G&M',
   'products.filters.insulation': '단열 및 코팅',
   'products.search.placeholder': '제품 검색...',
+  'products.searchPlaceholder': '제품 검색...',
   'products.viewDetails': '자세히 보기',
   'products.specifications': '사양',
   'products.features': '주요 특징',

@@ -2,65 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import ProductCard from '@/components/ProductCard';
 import ProductDetailsModal from '@/components/ProductDetailsModal';
-import { productService, UnifiedProduct } from '@/services/productService';
+import { UnifiedProduct } from '@/services/productService';
+import { useProducts } from '@/hooks/useProducts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { supabase } from '@/integrations/supabase/client';
 
 const Products: React.FC = () => {
   const { t, currentLanguage } = useTranslation();
-  const [products, setProducts] = useState<UnifiedProduct[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { products, loading, refreshProducts } = useProducts();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedProduct, setSelectedProduct] = useState<UnifiedProduct | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    loadProducts();
-    
-    // Test database connection
-    const testConnection = async () => {
-      try {
-        console.log('Products: Testing database connection...');
-        
-        // Test 1: Simple count query
-        const { data: countData, error: countError } = await supabase
-          .from('products')
-          .select('*', { count: 'exact', head: true });
-        console.log('Products: Count query result:', { countData, countError });
-        
-        // Test 2: Get first few products
-        const { data: sampleData, error: sampleError } = await supabase
-          .from('products')
-          .select('id, name, category')
-          .limit(3);
-        console.log('Products: Sample query result:', { sampleData, sampleError });
-        
-        // Test 3: Check if we can access specific columns
-        const { data: columnData, error: columnError } = await supabase
-          .from('products')
-          .select('id')
-          .limit(1);
-        console.log('Products: Column access test:', { columnData, columnError });
-        
-        if (countError || sampleError || columnError) {
-          console.error('Products: Database connection error:', { countError, sampleError, columnError });
-        } else {
-          console.log('Products: Database connection successful');
-        }
-      } catch (err) {
-        console.error('Products: Connection test failed:', err);
-      }
-    };
-    
-    testConnection();
-    
-    // Listen for language changes and reload the page
+    // Listen for language changes and force reload to ensure all translations are loaded
     const handleLanguageChange = (event: CustomEvent) => {
       console.log('Products page: Language changed to:', event.detail);
-      // Reload the entire page to ensure all text updates
+      // Force reload the page to ensure all translations are properly loaded
       window.location.reload();
     };
 
@@ -72,45 +32,27 @@ const Products: React.FC = () => {
     };
   }, []);
 
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
-      console.log('Products: Starting to load products...');
-      const filters = {
-        search: searchTerm || undefined,
-        category: selectedCategory !== 'all' ? selectedCategory : undefined,
-      };
-      console.log('Products: Filters:', filters);
-      
-      // Test direct database query first
-      console.log('Products: Testing direct Supabase query...');
-      const { data: testData, error: testError } = await supabase
-        .from('products')
-        .select('*')
-        .limit(5);
-      console.log('Products: Direct query result:', { testData, testError });
-      
-      const data = await productService.getProducts(filters);
-      console.log('Products: Received data from service:', data);
-      console.log('Products: Data length:', data?.length);
-      console.log('Products: Data type:', typeof data);
-      console.log('Products: Is array?', Array.isArray(data));
-      setProducts(data || []);
-    } catch (error) {
-      console.error('Products: Error loading products:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Filter products based on search and category
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = !searchTerm || 
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCategory = selectedCategory === 'all' || 
+      product.category === selectedCategory;
+    
+    return matchesSearch && matchesCategory;
+  });
 
   const handleSearch = () => {
-    loadProducts();
+    // Search is handled by the filteredProducts computed value
+    // No need to call any function
   };
 
   const handleClearFilters = () => {
     setSearchTerm('');
     setSelectedCategory('all');
-    loadProducts();
+    // Filters are applied automatically via filteredProducts
   };
 
   const handleViewDetails = (product: UnifiedProduct) => {
@@ -184,7 +126,7 @@ const Products: React.FC = () => {
       </div>
 
       {/* Products Grid */}
-      {loading ? (
+      {loading || products.length === 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {[...Array(6)].map((_, index) => (
             <div key={index} className="animate-pulse">
@@ -195,9 +137,9 @@ const Products: React.FC = () => {
             </div>
           ))}
         </div>
-      ) : products.length > 0 ? (
+      ) : filteredProducts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {products.map((product) => (
+          {filteredProducts.map((product) => (
             <ProductCard
               key={product.id}
               product={product}

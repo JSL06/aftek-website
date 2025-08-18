@@ -2,8 +2,27 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Building, MapPin, Calendar, Users, ArrowRight, FileText } from 'lucide-react';
+import { useEffect } from 'react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const CaseStudies = () => {
+  const { t } = useTranslation();
+  
+  // Listen for language changes and force reload to ensure all translations are loaded
+  useEffect(() => {
+    const handleLanguageChange = (event: CustomEvent) => {
+      console.log('CaseStudies page: Language changed to:', event.detail);
+      // Force reload the page to ensure all translations are properly loaded
+      window.location.reload();
+    };
+
+    // Add event listener for language changes
+    window.addEventListener('languageChange', handleLanguageChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('languageChange', handleLanguageChange as EventListener);
+    };
+  }, []);
   const caseStudies = [
     {
       title: 'Marina Bay Financial Centre',

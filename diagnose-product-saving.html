@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Saving Diagnostic Tool</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .log { max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Product Saving Diagnostic Tool</h1>
+    
+    <div class="section info">
+        <h2>📋 Current Configuration</h2>
+        <p><strong>Supabase URL:</strong> <span id="supabase-url">Loading...</span></p>
+        <p><strong>Supabase Key:</strong> <span id="supabase-key">Loading...</span></p>
+        <p><strong>Environment:</strong> <span id="environment">Loading...</span></p>
+    </div>
+
+    <div class="section">
+        <h2>🔌 Connection Test</h2>
+        <button onclick="testConnection()">Test Supabase Connection</button>
+        <div id="connection-result"></div>
+    </div>
+
+    <div class="section">
+        <h2>🗄️ Database Structure Check</h2>
+        <button onclick="checkTableStructure()">Check Products Table Structure</button>
+        <div id="structure-result"></div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Sample Data Check</h2>
+        <button onclick="checkSampleData()">Check Existing Products</button>
+        <div id="sample-data-result"></div>
+    </div>
+
+    <div class="section">
+        <h2>➕ Test Product Creation</h2>
+        <button onclick="testProductCreation()">Create Test Product</button>
+        <div id="creation-result"></div>
+    </div>
+
+    <div class="section">
+        <h2>📝 Test Product Update</h2>
+        <button onclick="testProductUpdate()">Update Test Product</button>
+        <div id="update-result"></div>
+    </div>
+
+    <div class="section">
+        <h2>🗑️ Test Product Deletion</h2>
+        <button onclick="testProductDeletion()">Delete Test Product</button>
+        <div id="deletion-result"></div>
+    </div>
+
+    <div class="section">
+        <h2>📋 Detailed Log</h2>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://txjhhwootljiqavnnghm.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4amhod29vdGxqaXFhdm5uZ2htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE1ODc5MDQsImV4cCI6MjA2NzE2MzkwNH0.fJHzXibofO5jhnWp1COLbcHkamLf1l6hzwGdLpbt7YM';
+        
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        let testProductId = null;
+
+        // Update configuration display
+        document.getElementById('supabase-url').textContent = supabaseUrl;
+        document.getElementById('supabase-key').textContent = supabaseKey.substring(0, 20) + '...';
+        document.getElementById('environment').textContent = 'Production';
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            logEntry.className = type;
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        async function testConnection() {
+            log('🔌 Testing Supabase connection...');
+            const resultDiv = document.getElementById('connection-result');
+            
+            try {
+                const { data, error } = await supabase.from('products').select('count').limit(1);
+                
+                if (error) {
+                    log(`❌ Connection failed: ${error.message}`, 'error');
+                    resultDiv.innerHTML = `<div class="error">❌ Connection failed: ${error.message}</div>`;
+                } else {
+                    log('✅ Connection successful!', 'success');
+                    resultDiv.innerHTML = '<div class="success">✅ Connection successful!</div>';
+                }
+            } catch (err) {
+                log(`❌ Connection error: ${err.message}`, 'error');
+                resultDiv.innerHTML = `<div class="error">❌ Connection error: ${err.message}</div>`;
+            }
+        }
+
+        async function checkTableStructure() {
+            log('🗄️ Checking products table structure...');
+            const resultDiv = document.getElementById('structure-result');
+            
+            try {
+                // Get table structure using information_schema
+                const { data, error } = await supabase.rpc('get_table_structure', { table_name: 'products' });
+                
+                if (error) {
+                    // Fallback: try to get column info from a sample query
+                    log('⚠️ RPC failed, trying fallback method...');
+                    const { data: sampleData, error: sampleError } = await supabase.from('products').select('*').limit(1);
+                    
+                    if (sampleError) {
+                        log(`❌ Structure check failed: ${sampleError.message}`, 'error');
+                        resultDiv.innerHTML = `<div class="error">❌ Structure check failed: ${sampleError.message}</div>`;
+                        return;
+                    }
+                    
+                    if (sampleData && sampleData.length > 0) {
+                        const columns = Object.keys(sampleData[0]);
+                        log(`✅ Table structure retrieved. Columns: ${columns.join(', ')}`, 'success');
+                        resultDiv.innerHTML = `
+                            <div class="success">
+                                <h4>✅ Table structure retrieved</h4>
+                                <p><strong>Columns found:</strong></p>
+                                <pre>${JSON.stringify(columns, null, 2)}</pre>
+                            </div>
+                        `;
+                    } else {
+                        log('⚠️ Table is empty, cannot determine structure', 'info');
+                        resultDiv.innerHTML = '<div class="info">⚠️ Table is empty, cannot determine structure</div>';
+                    }
+                } else {
+                    log('✅ Table structure retrieved successfully', 'success');
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Table structure retrieved</h4>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                log(`❌ Structure check error: ${err.message}`, 'error');
+                resultDiv.innerHTML = `<div class="error">❌ Structure check error: ${err.message}</div>`;
+            }
+        }
+
+        async function checkSampleData() {
+            log('📊 Checking existing products...');
+            const resultDiv = document.getElementById('sample-data-result');
+            
+            try {
+                const { data, error } = await supabase.from('products').select('*').limit(5);
+                
+                if (error) {
+                    log(`❌ Sample data check failed: ${error.message}`, 'error');
+                    resultDiv.innerHTML = `<div class="error">❌ Sample data check failed: ${error.message}</div>`;
+                } else {
+                    log(`✅ Found ${data.length} products`, 'success');
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Sample data retrieved</h4>
+                            <p><strong>Found ${data.length} products:</strong></p>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                log(`❌ Sample data check error: ${err.message}`, 'error');
+                resultDiv.innerHTML = `<div class="error">❌ Sample data check error: ${err.message}</div>`;
+            }
+        }
+
+        async function testProductCreation() {
+            log('➕ Testing product creation...');
+            const resultDiv = document.getElementById('creation-result');
+            
+            try {
+                const testProduct = {
+                    name: 'Test Product - ' + Date.now(),
+                    description: 'This is a test product created by the diagnostic tool',
+                    category: 'test',
+                    price: 99.99,
+                    model: 'TEST-' + Date.now(),
+                    inStock: true,
+                    isActive: true,
+                    showInFeatured: false,
+                    features: ['Test Feature 1', 'Test Feature 2'],
+                    tags: ['test', 'diagnostic'],
+                    related_products: [],
+                    names: { 'en': 'Test Product' },
+                    descriptions: { 'en': 'Test description' }
+                };
+
+                log('📝 Attempting to create product with data:', 'info');
+                log(JSON.stringify(testProduct, null, 2), 'info');
+
+                const { data, error } = await supabase
+                    .from('products')
+                    .insert([testProduct])
+                    .select()
+                    .single();
+
+                if (error) {
+                    log(`❌ Product creation failed: ${error.message}`, 'error');
+                    log(`Error details: ${JSON.stringify(error, null, 2)}`, 'error');
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h4>❌ Product creation failed</h4>
+                            <p><strong>Error:</strong> ${error.message}</p>
+                            <p><strong>Details:</strong></p>
+                            <pre>${JSON.stringify(error, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    testProductId = data.id;
+                    log(`✅ Product created successfully! ID: ${data.id}`, 'success');
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Product created successfully!</h4>
+                            <p><strong>Product ID:</strong> ${data.id}</p>
+                            <p><strong>Created data:</strong></p>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                log(`❌ Product creation error: ${err.message}`, 'error');
+                resultDiv.innerHTML = `<div class="error">❌ Product creation error: ${err.message}</div>`;
+            }
+        }
+
+        async function testProductUpdate() {
+            if (!testProductId) {
+                log('⚠️ No test product to update. Create one first.', 'info');
+                return;
+            }
+
+            log(`✏️ Testing product update for ID: ${testProductId}...`);
+            const resultDiv = document.getElementById('update-result');
+            
+            try {
+                const updateData = {
+                    name: 'Updated Test Product - ' + Date.now(),
+                    price: 149.99,
+                    features: ['Updated Feature 1', 'Updated Feature 2', 'New Feature 3']
+                };
+
+                log('📝 Attempting to update product with data:', 'info');
+                log(JSON.stringify(updateData, null, 2), 'info');
+
+                const { data, error } = await supabase
+                    .from('products')
+                    .update(updateData)
+                    .eq('id', testProductId)
+                    .select()
+                    .single();
+
+                if (error) {
+                    log(`❌ Product update failed: ${error.message}`, 'error');
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h4>❌ Product update failed</h4>
+                            <p><strong>Error:</strong> ${error.message}</p>
+                        </div>
+                    `;
+                } else {
+                    log(`✅ Product updated successfully!`, 'success');
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Product updated successfully!</h4>
+                            <p><strong>Updated data:</strong></p>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                log(`❌ Product update error: ${err.message}`, 'error');
+                resultDiv.innerHTML = `<div class="error">❌ Product update error: ${err.message}</div>`;
+            }
+        }
+
+        async function testProductDeletion() {
+            if (!testProductId) {
+                log('⚠️ No test product to delete. Create one first.', 'info');
+                return;
+            }
+
+            log(`🗑️ Testing product deletion for ID: ${testProductId}...`);
+            const resultDiv = document.getElementById('deletion-result');
+            
+            try {
+                const { error } = await supabase
+                    .from('products')
+                    .delete()
+                    .eq('id', testProductId);
+
+                if (error) {
+                    log(`❌ Product deletion failed: ${error.message}`, 'error');
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h4>❌ Product deletion failed</h4>
+                            <p><strong>Error:</strong> ${error.message}</p>
+                        </div>
+                    `;
+                } else {
+                    log(`✅ Product deleted successfully!`, 'success');
+                    resultDiv.innerHTML = '<div class="success">✅ Product deleted successfully!</div>';
+                    testProductId = null;
+                }
+            } catch (err) {
+                log(`❌ Product deletion error: ${err.message}`, 'error');
+                resultDiv.innerHTML = `<div class="error">❌ Product deletion error: ${err.message}</div>`;
+            }
+        }
+
+        // Auto-run connection test on page load
+        window.addEventListener('load', () => {
+            log('🚀 Diagnostic tool loaded. Starting connection test...');
+            setTimeout(testConnection, 1000);
+        });
+    </script>
+</body>
+</html>

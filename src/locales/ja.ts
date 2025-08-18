@@ -53,7 +53,9 @@ const ja = {
   
   'home.projects.title': '過去のプロジェクト',
   'home.projects.desc': 'アジア太平洋地域での成功した建設プロジェクトのポートフォリオを探索',
+  'home.projects.portfolio': 'アジア太平洋地域での成功した建設プロジェクトのポートフォリオを探索',
   'home.projects.viewAll': 'すべてのプロジェクトを見る',
+  'home.projects.viewAllButton': 'すべてのプロジェクトを見る',
   'home.projects.project1.title': '台北メトロ延伸',
   'home.projects.project1.location': '台北、台湾',
   'home.projects.project1.image': '地下鉄駅建設',
@@ -209,6 +211,7 @@ const ja = {
   'products.filters.grout': 'Redi-Mix G&M',
   'products.filters.insulation': '断熱・コーティング',
   'products.search.placeholder': '製品を検索...',
+  'products.searchPlaceholder': '製品を検索...',
   'products.viewDetails': '詳細を見る',
   'products.specifications': '仕様',
   'products.features': '主な特徴',

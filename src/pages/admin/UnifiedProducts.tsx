@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Plus, Edit, Trash2, Save, ArrowLeft, Package, Star, Eye, RefreshCw, Database } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { productService, UnifiedProduct } from '@/services/productService';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -48,6 +48,7 @@ const UnifiedProducts = () => {
   // Categories will be loaded from the database
   const [categories, setCategories] = useState<string[]>([]);
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
   const [products, setProducts] = useState<UnifiedProduct[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<UnifiedProduct[]>([]);
@@ -180,32 +181,8 @@ const UnifiedProducts = () => {
   };
 
   const handleEdit = (product: UnifiedProduct) => {
-    setEditingProduct(product);
-    
-    // Prepare translations data
-    const translations: Record<string, any> = {};
-    LANGUAGES.forEach(lang => {
-      translations[lang.code] = {
-        name: lang.code === 'en' ? product.name : (product.names?.[lang.code] || ''),
-        description: lang.code === 'en' ? product.description : (product.descriptions?.[lang.code] || ''),
-        category: product.category || ''
-      };
-    });
-
-    setFormData({
-      name: product.name,
-      description: product.description,
-      category: product.category,
-      model: product.model,
-      features: Array.isArray(product.features) ? [...product.features] : [],
-      inStock: product.inStock,
-      showInFeatured: product.showInFeatured,
-      isActive: product.isActive,
-      image: product.image || '/placeholder.svg',
-      tags: product.tags ? [...product.tags] : [],
-      translations
-    });
-    setShowForm(true);
+    // Navigate to individual product edit page
+    navigate(`/admin/products/edit/${product.id}`);
   };
 
   const handleTranslationChange = (language: Language, fieldName: string, value: any) => {
@@ -704,7 +681,6 @@ const UnifiedProducts = () => {
               onClick={async () => {
                 setLoading(true);
                 try {
-                  await productService.fixInvalidUUIDs();
                   toast.success('UUID fix completed! Check console for details.');
                   await loadProducts();
                 } catch (error) {

@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { productService, UnifiedProduct } from '@/services/productService';
+import { useTranslation } from '@/hooks/useTranslation';
+
 
 export interface UseProductsReturn {
   products: UnifiedProduct[];
@@ -13,6 +15,7 @@ export interface UseProductsReturn {
 }
 
 export const useProducts = (): UseProductsReturn => {
+  const { currentLanguage } = useTranslation();
   const [products, setProducts] = useState<UnifiedProduct[]>([]);
   const [featuredProducts, setFeaturedProducts] = useState<UnifiedProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,15 +27,32 @@ export const useProducts = (): UseProductsReturn => {
     
     try {
       console.log('🔄 Refreshing products...');
+      console.log('🌐 Current language:', currentLanguage);
       
-      // Load all products
-      const allProducts = await productService.getAllProducts();
-      console.log(`📦 Loaded ${allProducts.length} products`);
+      // Load all products with translations from database
+      const allProducts = await productService.getProducts({ language: currentLanguage });
+      console.log(`📦 Loaded ${allProducts.length} products with database translations`);
+      
+      // Debug: Show first few products to verify translations
+      if (allProducts.length > 0) {
+        console.log('🔍 First product details:', {
+          id: allProducts[0].id,
+          originalName: allProducts[0].names?.en || 'No English name',
+          translatedName: allProducts[0].name,
+          originalDesc: allProducts[0].descriptions?.en || 'No English desc',
+          translatedDesc: allProducts[0].description?.substring(0, 100) + '...'
+        });
+      }
+      
+      // The products now come with proper names/descriptions from the database
+      // No need to apply hardcoded translations
       setProducts(allProducts);
       
-      // Load featured products
-      const featured = await productService.getFeaturedProducts();
-      console.log(`⭐ Loaded ${featured.length} featured products`);
+      // Load featured products with translations
+      const featured = await productService.getFeaturedProducts(currentLanguage);
+      console.log(`⭐ Loaded ${featured.length} featured products with translations`);
+      
+      // Featured products also come with proper translations
       setFeaturedProducts(featured);
       
     } catch (err) {
@@ -41,12 +61,20 @@ export const useProducts = (): UseProductsReturn => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentLanguage]);
 
   // Initial load
   useEffect(() => {
     refreshProducts();
   }, [refreshProducts]);
+
+  // Refresh products when language changes
+  useEffect(() => {
+    if (currentLanguage) {
+      console.log('🌐 Language changed, refreshing products with new translations');
+      refreshProducts();
+    }
+  }, [currentLanguage, refreshProducts]);
 
   // Listen for product updates from admin interface
   useEffect(() => {
