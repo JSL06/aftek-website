@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { productService, UnifiedProduct } from '@/services/productService';
 import SimpleRichTextEditor from '@/components/SimpleRichTextEditor';
 import { useAdminLanguage } from '@/contexts/AdminLanguageContext';
@@ -19,6 +20,22 @@ const languages = [
   { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
   { code: 'th', name: 'Thai', nativeName: 'ไทย', flag: '🇹🇭' },
   { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', flag: '🇻🇳' }
+];
+
+// Predefined product categories
+const productCategories = [
+  'Waterproofing',
+  'Sealants & Adhesives',
+  'Redi-Mix G&M',
+  'Flooring Systems',
+  'Grouts',
+  'Coatings',
+  'Additives',
+  'Adhesives & Sealants',
+  'Flooring Solutions',
+  'Concrete & Mortar',
+  'Protective Coatings',
+  'Others (Insulation, Coatings)'
 ];
 
 export default function ProductEdit() {
@@ -39,10 +56,12 @@ export default function ProductEdit() {
   const loadProduct = async () => {
     try {
       setLoading(true);
-      const productData = await productService.getProduct(productId!, 'en'); // Use English as default for admin
+      const productData = await productService.getProduct(productId!); // Load without language to get all translations
       console.log('ProductEdit: Loaded product data:', productData);
       console.log('ProductEdit: Names:', productData?.names);
       console.log('ProductEdit: Descriptions:', productData?.descriptions);
+      console.log('ProductEdit: Names object keys:', Object.keys(productData?.names || {}));
+      console.log('ProductEdit: Descriptions object keys:', Object.keys(productData?.descriptions || {}));
       
       // Ensure names and descriptions are properly initialized
       if (productData) {
@@ -54,6 +73,8 @@ export default function ProductEdit() {
         
         // Don't override names with defaults - use what's in the database
         console.log('ProductEdit: Final initialized product:', initializedProduct);
+        console.log('ProductEdit: Final names object:', initializedProduct.names);
+        console.log('ProductEdit: Final descriptions object:', initializedProduct.descriptions);
         
         setProduct(initializedProduct);
       }
@@ -106,8 +127,22 @@ export default function ProductEdit() {
         console.log(`🌐 Language ${lang}: description = "${descStr?.substring(0, 100)}..." (type: ${typeof desc}, length: ${descStr?.length})`);
       });
 
+      // Debug: Check if names object is not empty
+      const hasNames = Object.keys(updateData.names).length > 0;
+      const hasDescriptions = Object.keys(updateData.descriptions).length > 0;
+      console.log(`🔍 Debug: Has names: ${hasNames}, Has descriptions: ${hasDescriptions}`);
+      console.log(`🔍 Debug: Names object keys:`, Object.keys(updateData.names));
+      console.log(`🔍 Debug: Descriptions object keys:`, Object.keys(updateData.descriptions));
+      
+      // Debug: Check if names object contains actual string values
+      const namesWithValues = Object.entries(updateData.names).filter(([lang, name]) => name && typeof name === 'string' && name.trim().length > 0);
+      console.log(`🔍 Debug: Names with actual values:`, namesWithValues);
+      console.log(`🔍 Debug: Total names with values: ${namesWithValues.length}`);
+
       const result = await productService.updateProduct(product.id, updateData);
       console.log('✅ ProductEdit: Save result:', result);
+      console.log('✅ ProductEdit: Save result names:', result?.names);
+      console.log('✅ ProductEdit: Save result descriptions:', result?.descriptions);
       
       toast.success(t('messages.saveSuccess'));
       
@@ -215,11 +250,16 @@ export default function ProductEdit() {
             <CardContent className="space-y-6">
               <div>
                 <label className="block text-sm font-medium mb-2">{t('basic.category')}</label>
-                <Input
-                  value={product.category || ''}
-                  onChange={(e) => updateBasicField('category', e.target.value)}
-                  placeholder={t('basic.category')}
-                />
+                <Select onValueChange={(value) => updateBasicField('category', value)} defaultValue={product.category || ''}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t('basic.category')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {productCategories.map(category => (
+                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               
               <div>

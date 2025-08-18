@@ -131,7 +131,7 @@ export const productService = {
         console.log('productService: Processing product:', product);
         const productTranslations = translationsByProduct[product.id] || { names: {}, descriptions: {} };
         
-        // If a specific language is requested, use that language's content
+        // Always use the first available translation or fallback to original
         let displayName = product.name; // fallback to original
         let displayDescription = product.description; // fallback to original
         
@@ -139,6 +139,13 @@ export const productService = {
           // For ALL languages including English, use the translations table
           displayName = productTranslations.names[filters.language] || product.name;
           displayDescription = productTranslations.descriptions[filters.language] || product.description;
+        } else {
+          // If no specific language requested, use the first available translation
+          const firstLanguage = Object.keys(productTranslations.names)[0];
+          if (firstLanguage) {
+            displayName = productTranslations.names[firstLanguage] || product.name;
+            displayDescription = productTranslations.descriptions[firstLanguage] || product.description;
+          }
         }
         
         return {
@@ -215,11 +222,22 @@ export const productService = {
 
       // 4. Transform the data to match UnifiedProduct interface
       const targetLanguage = language || 'en';
+      
+      // Ensure we have at least one translation to display
+      let displayName = product.name; // fallback to original
+      let displayDescription = product.description; // fallback to original
+      
+      if (Object.keys(names).length > 0) {
+        // If we have translations, use the target language or first available
+        displayName = names[targetLanguage] || Object.values(names)[0] || product.name;
+        displayDescription = descriptions[targetLanguage] || Object.values(descriptions)[0] || product.description;
+      }
+      
       const unifiedProduct: UnifiedProduct = {
         ...product,
         // Use translated content for display, fallback to original
-        name: names[targetLanguage] || product.name,
-        description: descriptions[targetLanguage] || product.description,
+        name: displayName,
+        description: displayDescription,
         features: product.features || [],
         price: product.price || 0,
         inStock: product.inStock || product.in_stock || false,
@@ -397,8 +415,13 @@ export const productService = {
         
         // Process names (product names in different languages)
         if (names) {
+          console.log('Product service: Processing names object:', names);
+          console.log('Product service: Names object keys:', Object.keys(names));
+          console.log('Product service: Names object values:', Object.values(names));
+          
           for (const [languageCode, name] of Object.entries(names)) {
             console.log(`Product service: Updating name for language ${languageCode}:`, name);
+            console.log(`Product service: Name type: ${typeof name}, length: ${name?.length}`);
             
             // Get existing translation or create new one
             const existing = existingByLanguage[languageCode] || {};

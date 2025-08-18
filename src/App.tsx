@@ -37,6 +37,7 @@ import ProtectedPage from './components/ProtectedPage';
 import WebsiteTextManager from './pages/admin/WebsiteTextManager';
 import TranslationDashboard from './pages/admin/TranslationDashboard';
 import ProductEdit from './pages/admin/ProductEdit';
+import AdminLayout from './components/admin/AdminLayout';
 
 const queryClient = new QueryClient();
 
@@ -121,7 +122,7 @@ const App = () => (
               {/* Admin Routes (Shared across all companies) */}
               <Route path="/admin" element={
                 <AdminLanguageProvider>
-                  <Layout />
+                  <AdminLayout />
                 </AdminLanguageProvider>
               }>
                 <Route path="login" element={<AdminLogin />} />
