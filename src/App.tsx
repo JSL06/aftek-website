@@ -8,6 +8,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { CompanyProvider } from "./contexts/CompanyContext";
 import { AdminLanguageProvider } from "./contexts/AdminLanguageContext";
+import { AdminStoreProvider } from "./stores/adminStore";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Products from "./pages/Products";
@@ -122,7 +123,9 @@ const App = () => (
               {/* Admin Routes (Shared across all companies) */}
               <Route path="/admin" element={
                 <AdminLanguageProvider>
-                  <AdminLayout />
+                  <AdminStoreProvider>
+                    <AdminLayout />
+                  </AdminStoreProvider>
                 </AdminLanguageProvider>
               }>
                 <Route path="login" element={<AdminLogin />} />
