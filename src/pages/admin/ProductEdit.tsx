@@ -129,6 +129,16 @@ export default function ProductEdit() {
       
       // UNIFIED SAVE: Prepare ALL data together (categories, names, descriptions, everything)
       console.log('🔍 UNIFIED SAVE: Preparing all data for unified save operation');
+      console.log('🔍 UNIFIED SAVE: Current product state:', {
+        id: product.id,
+        category: product.category,
+        model: product.model,
+        inStock: product.inStock,
+        showInFeatured: product.showInFeatured,
+        isActive: product.isActive,
+        names: product.names,
+        descriptions: product.descriptions
+      });
       
       const updateData = {
         // Basic fields (category, model, checkboxes)
@@ -152,6 +162,12 @@ export default function ProductEdit() {
         inStock: updateData.inStock,
         showInFeatured: updateData.showInFeatured,
         isActive: updateData.isActive
+      });
+      console.log('📝 UNIFIED SAVE: Basic fields type check:', {
+        categoryType: typeof updateData.category,
+        modelType: typeof updateData.model,
+        categoryValue: updateData.category,
+        modelValue: updateData.model
       });
 
       // UNIFIED SAVE: Send everything to the service in one operation
@@ -232,7 +248,26 @@ export default function ProductEdit() {
 
   const updateBasicField = (field: string, value: any) => {
     if (!product) return;
-    setProduct(prev => ({ ...prev!, [field]: value }));
+    console.log(`🔍 updateBasicField called - Field: ${field}, Value: "${value}"`);
+    console.log(`🔍 Current product state before update:`, {
+      category: product.category,
+      model: product.model,
+      inStock: product.inStock,
+      showInFeatured: product.showInFeatured,
+      isActive: product.isActive
+    });
+    
+    setProduct(prev => {
+      const updated = { ...prev!, [field]: value };
+      console.log(`🔍 Product state after ${field} update:`, {
+        category: updated.category,
+        model: updated.model,
+        inStock: updated.inStock,
+        showInFeatured: updated.showInFeatured,
+        isActive: updated.isActive
+      });
+      return updated;
+    });
   };
 
   if (loading) {
