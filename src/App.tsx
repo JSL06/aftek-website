@@ -27,7 +27,7 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/Products";
 import AdminProjects from "./pages/admin/Projects";
-import CategoryManager from "./pages/admin/CategoryManager";
+import MultilingualCategoryManager from "./pages/admin/MultilingualCategoryManager";
 import AdminArticles from "./pages/admin/Articles";
 import MediaManager from "./pages/admin/MediaManager";
 import FeaturedProductsManager from "./pages/admin/FeaturedProductsManager";
@@ -39,6 +39,9 @@ import WebsiteTextManager from './pages/admin/WebsiteTextManager';
 import TranslationDashboard from './pages/admin/TranslationDashboard';
 import ProductEdit from './pages/admin/ProductEdit';
 import AdminLayout from './components/admin/AdminLayout';
+import Analytics from './pages/admin/Analytics';
+import Users from './pages/admin/Users';
+import Settings from './pages/admin/Settings';
 
 const queryClient = new QueryClient();
 
@@ -133,7 +136,7 @@ const App = () => (
                 <Route path="products" element={<UnifiedProducts />} />
                 <Route path="products/edit/:productId" element={<ProductEdit />} />
                 <Route path="projects" element={<AdminProjects />} />
-                <Route path="category-manager" element={<CategoryManager />} />
+                <Route path="category-manager" element={<MultilingualCategoryManager />} />
                 <Route path="unified-products" element={<UnifiedProducts />} />
                 <Route path="guide-manager" element={<GuideManager />} />
                 <Route path="featured-products" element={<FeaturedProductsManager />} />
@@ -143,6 +146,9 @@ const App = () => (
                 <Route path="website-text-editor" element={<WebsiteTextEditor />} />
                 <Route path="website-text-manager" element={<WebsiteTextManager />} />
                 <Route path="translation-dashboard" element={<TranslationDashboard />} />
+                <Route path="analytics" element={<Analytics />} />
+                <Route path="users" element={<Users />} />
+                <Route path="settings" element={<Settings />} />
               </Route>
               
               <Route path="*" element={<NotFound />} />

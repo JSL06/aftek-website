@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAdminStore } from '@/stores/adminStore';
 import { useAdminLanguage } from '@/contexts/AdminLanguageContext';
+import { useAdminCounts } from '@/hooks/useAdminCounts';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -12,9 +13,7 @@ import {
   FileText,
   Image,
   Languages,
-  BarChart3,
   Settings,
-  Users,
   FolderOpen,
   Plus,
   ChevronDown,
@@ -39,6 +38,7 @@ const AdminSidebar: React.FC = () => {
   const location = useLocation();
   const { t } = useAdminLanguage();
   const { sidebar, setActiveSection } = useAdminStore();
+  const { counts, loading: countsLoading } = useAdminCounts();
   const [expandedSections, setExpandedSections] = React.useState<string[]>(['content']);
 
   const toggleSection = (sectionId: string) => {
@@ -155,6 +155,7 @@ const AdminSidebar: React.FC = () => {
     );
   };
 
+  // Create sidebar items with dynamic counts
   const sidebarItems: SidebarItem[] = [
     {
       id: 'dashboard',
@@ -172,21 +173,39 @@ const AdminSidebar: React.FC = () => {
           title: t('sidebar.products'),
           icon: Package,
           href: '/admin/products',
-          badge: '12'
+          badge: countsLoading ? '...' : counts.products.toString()
         },
         {
           id: 'projects',
           title: t('sidebar.projects'),
           icon: Building2,
           href: '/admin/projects',
-          badge: '8'
+          badge: countsLoading ? '...' : counts.projects.toString()
         },
         {
           id: 'articles',
           title: t('sidebar.articles'),
           icon: FileText,
           href: '/admin/articles',
-          badge: '24'
+          badge: countsLoading ? '...' : counts.articles.toString()
+        },
+        {
+          id: 'categories',
+          title: t('sidebar.categories'),
+          icon: FolderOpen,
+          href: '/admin/category-manager'
+        },
+        {
+          id: 'featured',
+          title: t('sidebar.featuredProducts'),
+          icon: Package,
+          href: '/admin/featured-products'
+        },
+        {
+          id: 'guide',
+          title: t('sidebar.guideContent'),
+          icon: FileText,
+          href: '/admin/guide-manager'
         }
       ]
     },
@@ -195,27 +214,16 @@ const AdminSidebar: React.FC = () => {
       title: t('sidebar.media'),
       icon: Image,
       href: '/admin/media',
-      badge: '156'
+      badge: countsLoading ? '...' : counts.media.toString()
     },
     {
       id: 'translations',
       title: t('sidebar.translations'),
       icon: Languages,
-      href: '/admin/translations',
-      badge: '5'
+      href: '/admin/translation-dashboard',
+      badge: countsLoading ? '...' : counts.translations.toString()
     },
-    {
-      id: 'analytics',
-      title: t('sidebar.analytics'),
-      icon: BarChart3,
-      href: '/admin/analytics'
-    },
-    {
-      id: 'users',
-      title: t('sidebar.users'),
-      icon: Users,
-      href: '/admin/users'
-    },
+
     {
       id: 'settings',
       title: t('sidebar.settings'),

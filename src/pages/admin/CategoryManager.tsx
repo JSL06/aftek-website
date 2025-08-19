@@ -39,6 +39,8 @@ const CategoryManager = () => {
     try {
       setLoading(true);
       
+      console.log('🔄 Loading categories from database...');
+      
       // Simple, direct query without HEAD requests
       const { data, error } = await supabase
         .from('product_categories')
@@ -46,19 +48,20 @@ const CategoryManager = () => {
         .order('display_order', { ascending: true });
 
       if (error) {
-        console.warn('Error loading categories:', error);
+        console.error('❌ Error loading categories:', error);
         // Don't show error toast - just load empty state
         setCategories([]);
         return;
       }
       
+      console.log('📊 Categories loaded from database:', data);
       setCategories(data || []);
       
       if (data && data.length === 0) {
         toast.info('No categories found. Add your first category to get started.');
       }
     } catch (error) {
-      console.error('Error loading categories:', error);
+      console.error('❌ Error loading categories:', error);
       setCategories([]);
     } finally {
       setLoading(false);
@@ -74,9 +77,11 @@ const CategoryManager = () => {
     try {
       setSaving(true);
       
+      console.log('🔄 Adding category:', newCategory);
+      
       // Check if category already exists
       const exists = categories.some(
-        cat => cat.name.toLowerCase() === newCategory.name.toLowerCase()
+        cat => cat.name.toLowerCase() === newCategory.name.trim().toLowerCase()
       );
       
       if (exists) {
@@ -84,26 +89,35 @@ const CategoryManager = () => {
         return;
       }
 
+      const insertData = {
+        name: newCategory.name.trim(),
+        description: newCategory.description.trim() || null,
+        parent_id: newCategory.parent_id || null,
+        display_order: categories.length + 1,
+        is_active: true
+      };
+
+      console.log('📝 Inserting category data:', insertData);
+
       const { data, error } = await supabase
         .from('product_categories')
-        .insert({
-          name: newCategory.name.trim(),
-          description: newCategory.description.trim() || null,
-          parent_id: newCategory.parent_id || null,
-          display_order: categories.length + 1,
-          is_active: true
-        })
+        .insert(insertData)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Database insert error:', error);
+        throw error;
+      }
+
+      console.log('✅ Category inserted successfully:', data);
 
       setCategories(prev => [...prev, data]);
       setNewCategory({ name: '', description: '', parent_id: '' });
       setShowAddForm(false);
       toast.success('Category added successfully');
     } catch (error) {
-      console.error('Error adding category:', error);
+      console.error('❌ Error adding category:', error);
       toast.error('Failed to add category');
     } finally {
       setSaving(false);
@@ -119,15 +133,26 @@ const CategoryManager = () => {
     try {
       setSaving(true);
       
+      console.log('🔄 Editing category ID:', id, 'with data:', editingData);
+      
+      const updateData = { 
+        name: editingData.name.trim(),
+        description: editingData.description.trim() || null
+      };
+
+      console.log('📝 Updating category with data:', updateData);
+
       const { error } = await supabase
         .from('product_categories')
-        .update({ 
-          name: editingData.name.trim(),
-          description: editingData.description.trim() || null
-        })
+        .update(updateData)
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Database update error:', error);
+        throw error;
+      }
+
+      console.log('✅ Category updated successfully');
 
       setCategories(prev => 
         prev.map(cat => 
@@ -143,7 +168,7 @@ const CategoryManager = () => {
       setEditingData({ name: '', description: '' });
       toast.success('Category updated successfully');
     } catch (error) {
-      console.error('Error updating category:', error);
+      console.error('❌ Error updating category:', error);
       toast.error('Failed to update category');
     } finally {
       setSaving(false);

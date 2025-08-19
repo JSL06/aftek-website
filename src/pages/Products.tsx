@@ -4,56 +4,44 @@ import ProductCard from '@/components/ProductCard';
 import ProductDetailsModal from '@/components/ProductDetailsModal';
 import { UnifiedProduct } from '@/services/productService';
 import { useProducts } from '@/hooks/useProducts';
+import { useCategories } from '@/hooks/useCategories';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 
 const Products: React.FC = () => {
   const { t, currentLanguage } = useTranslation();
   const { products, loading, refreshProducts } = useProducts();
+  const { categories: allCategoriesData } = useCategories(currentLanguage);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedProduct, setSelectedProduct] = useState<UnifiedProduct | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Listen for product updates from admin panel
   useEffect(() => {
-    // Listen for language changes and force reload to ensure all translations are loaded
-    const handleLanguageChange = (event: CustomEvent) => {
-      console.log('Products page: Language changed to:', event.detail);
-      // Force reload the page to ensure all translations are properly loaded
-      window.location.reload();
+    const handleProductUpdate = () => {
+      console.log('🔄 Products page: Product updated, refreshing data...');
+      refreshProducts();
+      toast.success('Products refreshed automatically');
     };
 
-    // Add event listener for language changes
-    window.addEventListener('languageChange', handleLanguageChange as EventListener);
-    
-    return () => {
-      window.removeEventListener('languageChange', handleLanguageChange as EventListener);
-    };
-  }, []);
+    window.addEventListener('productUpdated', handleProductUpdate);
+    return () => window.removeEventListener('productUpdated', handleProductUpdate);
+  }, [refreshProducts]);
 
   // Filter products based on search and category
   const filteredProducts = products.filter(product => {
     const matchesSearch = !searchTerm || 
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase());
+      (product.name && product.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesCategory = selectedCategory === 'all' || 
       product.category === selectedCategory;
     
     return matchesSearch && matchesCategory;
   });
-
-  const handleSearch = () => {
-    // Search is handled by the filteredProducts computed value
-    // No need to call any function
-  };
-
-  const handleClearFilters = () => {
-    setSearchTerm('');
-    setSelectedCategory('all');
-    // Filters are applied automatically via filteredProducts
-  };
 
   const handleViewDetails = (product: UnifiedProduct) => {
     setSelectedProduct(product);
@@ -65,19 +53,17 @@ const Products: React.FC = () => {
     setSelectedProduct(null);
   };
 
-  // Get unique categories from actual products
-  const getUniqueCategories = () => {
-    const categories = products.map(product => product.category).filter(Boolean);
-    const uniqueCategories = [...new Set(categories)];
-    return uniqueCategories.map(category => ({
-      value: category,
-      label: category
-    }));
-  };
-
+  // Use categories from the product_categories table (same as admin page)
+  // Filter to show only active categories on the frontend
+  // Use translated names based on current language
   const allCategories = [
     { value: 'all', label: t('products.filters.all') },
-    ...getUniqueCategories()
+    ...allCategoriesData
+      .filter(category => category.is_active === true)
+      .map(category => ({
+        value: category.name, // Keep original name for filtering
+        label: category.names[currentLanguage] || category.name // Show translated name, fallback to original
+      }))
   ];
 
   return (
@@ -114,19 +100,11 @@ const Products: React.FC = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex gap-2">
-            <Button onClick={handleSearch} className="bg-primary text-primary-foreground">
-              {t('products.searchButton')}
-            </Button>
-            <Button onClick={handleClearFilters} variant="outline">
-              {t('products.clearButton')}
-            </Button>
-          </div>
         </div>
       </div>
 
       {/* Products Grid */}
-      {loading || products.length === 0 ? (
+      {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {[...Array(6)].map((_, index) => (
             <div key={index} className="animate-pulse">
@@ -136,6 +114,10 @@ const Products: React.FC = () => {
               <div className="h-4 bg-gray-200 rounded w-3/4"></div>
             </div>
           ))}
+        </div>
+      ) : products.length === 0 ? (
+        <div className="text-center mb-8">
+          <p className="text-muted-foreground mb-4">No products found. Loading...</p>
         </div>
       ) : filteredProducts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
@@ -149,11 +131,9 @@ const Products: React.FC = () => {
         </div>
       ) : (
         <div className="text-center mb-8">
-          <p className="text-muted-foreground mb-4">
-            {t('products.noProductsFound')}
-          </p>
-          <Button onClick={handleClearFilters} variant="outline">
-            {t('products.clearFilters')}
+          <p className="text-muted-foreground mb-4">{t('products.noProductsFound')}</p>
+          <Button onClick={() => { setSearchTerm(''); setSelectedCategory('all'); }} variant="outline">
+            Clear Filters
           </Button>
         </div>
       )}

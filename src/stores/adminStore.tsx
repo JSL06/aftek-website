@@ -43,34 +43,34 @@ export const AdminStoreProvider: React.FC<{ children: ReactNode }> = ({ children
   
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const toggleSidebar = () => {
+  const toggleSidebar = React.useCallback(() => {
     setSidebar(prev => ({ ...prev, collapsed: !prev.collapsed }));
-  };
+  }, []);
 
-  const setActiveSection = (section: string) => {
+  const setActiveSection = React.useCallback((section: string) => {
     setSidebar(prev => ({ ...prev, activeSection: section }));
-  };
+  }, []);
 
-  const addNotification = (notification: Omit<Notification, 'id' | 'createdAt'>) => {
+  const addNotification = React.useCallback((notification: Omit<Notification, 'id' | 'createdAt'>) => {
     const newNotification: Notification = {
       ...notification,
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString()
     };
     setNotifications(prev => [newNotification, ...prev]);
-  };
+  }, []);
 
-  const markNotificationAsRead = (id: string) => {
+  const markNotificationAsRead = React.useCallback((id: string) => {
     setNotifications(prev => 
       prev.map(notification =>
         notification.id === id ? { ...notification, read: true } : notification
       )
     );
-  };
+  }, []);
 
-  const clearNotifications = () => {
+  const clearNotifications = React.useCallback(() => {
     setNotifications([]);
-  };
+  }, []);
 
   const value: AdminContextType = {
     sidebar,

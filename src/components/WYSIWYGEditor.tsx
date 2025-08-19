@@ -77,7 +77,7 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
     }
   }, [value]);
 
-  // Handle content changes
+  // Simple content change handler - let contenteditable handle everything naturally
   const handleContentChange = () => {
     if (editorRef.current) {
       const newContent = editorRef.current.innerHTML;
@@ -88,114 +88,55 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
     }
   };
 
-  // Get current selection
-  const getSelection = () => {
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return null;
-    return selection.getRangeAt(0);
-  };
-
-  // Save selection with better cursor position handling
-  const saveSelection = () => {
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      const savedRange = range.cloneRange();
-      
-      // Store additional context to help with restoration
-      const container = range.commonAncestorContainer;
-      const offset = range.startOffset;
-      
-      return {
-        range: savedRange,
-        container,
-        offset,
-        timestamp: Date.now()
-      };
-    }
-    return null;
-  };
-
-  // Restore selection with improved positioning
-  const restoreSelection = (savedData: any) => {
-    if (savedData && savedData.range) {
-      try {
-        const selection = window.getSelection();
-        if (selection) {
-          selection.removeAllRanges();
-          selection.addRange(savedData.range);
-          
-          // Ensure the editor has focus
-          if (editorRef.current) {
-            editorRef.current.focus();
-          }
-        }
-      } catch (error) {
-        console.warn('Failed to restore selection:', error);
-        // Fallback: place cursor at end of content
-        if (editorRef.current) {
-          const range = document.createRange();
-          const selection = window.getSelection();
-          range.selectNodeContents(editorRef.current);
-          range.collapse(false);
-          selection?.removeAllRanges();
-          selection?.addRange(range);
-          editorRef.current.focus();
-        }
-      }
-    }
-  };
-
-  // Execute command for formatting
+  // Execute command for formatting - simplified
   const execCommand = (command: string, value?: string) => {
-    const savedRange = saveSelection();
     document.execCommand(command, false, value);
-    restoreSelection(savedRange);
+    editorRef.current?.focus();
     handleContentChange();
   };
 
-  // Insert HTML at cursor
+  // Insert HTML at cursor - simplified
   const insertHTML = (html: string) => {
-    const savedRange = saveSelection();
     document.execCommand('insertHTML', false, html);
-    restoreSelection(savedRange);
+    editorRef.current?.focus();
     handleContentChange();
   };
 
-  // Handle keyboard shortcuts
+  // Handle keyboard shortcuts - ONLY for formatting, NOT for text input
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.ctrlKey || e.metaKey) {
+    // ONLY handle formatting shortcuts
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
       switch (e.key.toLowerCase()) {
         case 'b':
           e.preventDefault();
-          execCommand('bold');
+          document.execCommand('bold');
           break;
         case 'i':
           e.preventDefault();
-          execCommand('italic');
+          document.execCommand('italic');
           break;
         case 'u':
           e.preventDefault();
-          execCommand('underline');
+          document.execCommand('underline');
           break;
         case 'z':
           e.preventDefault();
-          if (e.shiftKey) {
-            execCommand('redo');
-          } else {
-            execCommand('undo');
-          }
+          document.execCommand('undo');
           break;
         case 'y':
           e.preventDefault();
-          execCommand('redo');
+          document.execCommand('redo');
           break;
         case 'a':
           e.preventDefault();
-          execCommand('selectAll');
+          document.execCommand('selectAll');
           break;
       }
+      // Return focus to editor after command
+      editorRef.current?.focus();
+      handleContentChange();
     }
+    // DO NOT handle regular character input here - let contenteditable handle it naturally
   };
 
   // Handle image upload
@@ -268,20 +209,20 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
     return html;
   };
 
-  // Handle link insertion
+  // Handle link insertion - simplified
   const handleLink = () => {
     const url = prompt('Enter URL:');
     if (url) {
       const selection = window.getSelection();
       if (selection && selection.toString()) {
-        execCommand('createLink', url);
+        document.execCommand('createLink', false, url);
       } else {
         insertHTML(`<a href="${url}" target="_blank" rel="noopener noreferrer">Link text</a>`);
       }
     }
   };
 
-  // Handle list insertion
+  // Handle list insertion - simplified
   const handleList = (ordered: boolean) => {
     const selection = window.getSelection();
     if (selection && selection.toString()) {
@@ -305,7 +246,7 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
     }
   };
 
-  // Handle heading conversion
+  // Handle heading conversion - simplified
   const handleHeading = (level: 1 | 2) => {
     const selection = window.getSelection();
     if (selection && selection.toString()) {
@@ -327,7 +268,7 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
     }
   };
 
-  // Handle quote insertion
+  // Handle quote insertion - simplified
   const handleQuote = () => {
     const selection = window.getSelection();
     if (selection && selection.toString()) {
@@ -348,7 +289,7 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
     }
   };
 
-  // Handle code insertion
+  // Handle code insertion - simplified
   const handleCode = () => {
     const selection = window.getSelection();
     if (selection && selection.toString()) {
@@ -369,7 +310,7 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
     }
   };
 
-  // Handle undo/redo properly
+  // Handle undo/redo - simplified
   const handleUndo = () => {
     document.execCommand('undo');
     editorRef.current?.focus();
@@ -472,7 +413,11 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
               key={index}
               variant="ghost"
               size="sm"
-              onClick={button.action}
+              onMouseDown={(e) => e.preventDefault()} // Prevent selection loss
+              onClick={() => {
+                button.action();
+                editorRef.current?.focus(); // Return focus to editor
+              }}
               className="h-8 w-8 p-0"
               title={button.tooltip}
             >
@@ -485,7 +430,7 @@ const WYSIWYGEditor: React.FC<WYSIWYGEditorProps> = ({
       {/* Editor */}
       <div
         ref={editorRef}
-        contentEditable
+        contentEditable="true"
         onInput={handleContentChange}
         onBlur={handleContentChange}
         onKeyDown={handleKeyDown}

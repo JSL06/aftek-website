@@ -22,6 +22,7 @@ export const useProducts = (): UseProductsReturn => {
   const [error, setError] = useState<string | null>(null);
 
   const refreshProducts = useCallback(async () => {
+    console.log('🔄 Starting refreshProducts...');
     setLoading(true);
     setError(null);
     
@@ -40,13 +41,16 @@ export const useProducts = (): UseProductsReturn => {
           originalName: allProducts[0].names?.en || 'No English name',
           translatedName: allProducts[0].name,
           originalDesc: allProducts[0].descriptions?.en || 'No English desc',
-          translatedDesc: allProducts[0].description?.substring(0, 100) + '...'
+          translatedDesc: allProducts[0].description?.substring(0, 100) + '...',
+          allNames: allProducts[0].names,
+          allDescriptions: allProducts[0].descriptions
         });
       }
       
       // The products now come with proper names/descriptions from the database
       // No need to apply hardcoded translations
       setProducts(allProducts);
+      console.log('✅ Products state updated with new data');
       
       // Load featured products with translations
       const featured = await productService.getFeaturedProducts(currentLanguage);
@@ -54,12 +58,14 @@ export const useProducts = (): UseProductsReturn => {
       
       // Featured products also come with proper translations
       setFeaturedProducts(featured);
+      console.log('✅ Featured products state updated');
       
     } catch (err) {
       console.error('❌ Error loading products:', err);
       setError(err instanceof Error ? err.message : 'Failed to load products');
     } finally {
       setLoading(false);
+      console.log('🔄 refreshProducts completed');
     }
   }, [currentLanguage]);
 
@@ -80,15 +86,21 @@ export const useProducts = (): UseProductsReturn => {
   useEffect(() => {
     const handleProductUpdate = () => {
       console.log('🔔 Product update detected, refreshing...');
+      console.log('🔔 Event details:', { timestamp: new Date().toISOString() });
       refreshProducts();
     };
 
+    console.log('🎧 Setting up product update listeners...');
+    
     // Listen for custom events from admin interface
     window.addEventListener('productUpdated', handleProductUpdate);
     window.addEventListener('productDeleted', handleProductUpdate);
     window.addEventListener('productAdded', handleProductUpdate);
     
+    console.log('✅ Product update listeners set up successfully');
+    
     return () => {
+      console.log('🧹 Cleaning up product update listeners...');
       window.removeEventListener('productUpdated', handleProductUpdate);
       window.removeEventListener('productDeleted', handleProductUpdate);
       window.removeEventListener('productAdded', handleProductUpdate);

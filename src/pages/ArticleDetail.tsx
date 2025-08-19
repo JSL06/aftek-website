@@ -61,7 +61,6 @@ const ArticleDetail = () => {
           .from('articles')
           .select('*')
           .eq('slug', slug)
-          .eq('isactive', true)
           .eq('is_published', true)
           .single();
 
@@ -72,7 +71,6 @@ const ArticleDetail = () => {
             .from('articles')
             .select('*')
             .eq('id', slug)
-            .eq('isactive', true)
             .eq('is_published', true)
             .single();
           
@@ -89,10 +87,13 @@ const ArticleDetail = () => {
           console.error('Error fetching article:', error);
           setError('Article not found');
         } else {
-          setArticle(data);
-          // Increment view count
-          if (data) {
+          // FIX: Filter active article in memory if isactive column exists
+          if (data && (data.isactive === true || data.isactive === undefined)) {
+            setArticle(data);
+            // Increment view count
             await supabase.rpc('increment_article_view_count', { article_id: data.id });
+          } else {
+            setError('Article not found or inactive');
           }
         }
       } catch (err) {

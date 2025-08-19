@@ -97,10 +97,10 @@ const About = () => {
   useEffect(() => {
     const fetchLeadership = async () => {
       try {
+      // FIX: Handle missing isActive column gracefully
       const { data, error } = await supabase
         .from('leadership')
         .select('*')
-        .eq('isActive', true)
         .order('display_order', { ascending: true });
         
         if (error) {
@@ -108,7 +108,11 @@ const About = () => {
           console.warn('Leadership table not available:', error.message);
           setLeadership([]);
         } else {
-          setLeadership(data || []);
+          // Filter active leadership in memory if isActive column exists
+          const activeLeadership = data?.filter(leader => 
+            leader.isActive === true || leader.isActive === undefined
+          ) || [];
+          setLeadership(activeLeadership);
         }
       } catch (err) {
         // Catch any other errors and handle silently

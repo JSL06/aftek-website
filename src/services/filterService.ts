@@ -95,7 +95,6 @@ export const filterService = {
       .from('filter_options')
       .select('*')
       .eq('type', type)
-      .eq('is_active', true)
       .order('display_order', { ascending: true });
 
     if (error) {
@@ -103,7 +102,11 @@ export const filterService = {
       throw error;
     }
 
-    return data || [];
+    // FIX: Filter active options in memory if is_active column exists
+    const activeOptions = data?.filter(option => 
+      option.is_active === true || option.is_active === undefined
+    ) || [];
+    return activeOptions;
   },
 
   async getFeatures(): Promise<string[]> {
@@ -140,11 +143,15 @@ export const filterService = {
       const { data, error } = await supabase
         .from('product_categories')
         .select('name')
-        .eq('is_active', true)
         .order('display_order', { ascending: true });
       
       if (error) throw error;
-      return data.map(cat => cat.name);
+      
+      // FIX: Filter active categories in memory if is_active column exists
+      const activeCategories = data?.filter(cat => 
+        cat.is_active === true || cat.is_active === undefined
+      ) || [];
+      return activeCategories.map(cat => cat.name);
     } catch (error) {
       console.error('Error fetching categories from database:', error);
       // Fallback to default categories if database query fails

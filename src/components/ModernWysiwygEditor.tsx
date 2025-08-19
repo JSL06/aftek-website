@@ -343,11 +343,10 @@ const ModernWysiwygEditor: React.FC<ModernWysiwygEditorProps> = ({
     e.target.value = ''; // Reset input
   }, [uploadImage]);
 
-  // Handle paste events
+  // Handle paste events - let contenteditable handle paste naturally
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const text = e.clipboardData.getData('text/plain');
-    document.execCommand('insertText', false, text);
+    // DO NOT prevent default - let contenteditable handle paste naturally
+    // This prevents text insertion issues and cursor jumping
   }, []);
 
   return (

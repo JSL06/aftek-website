@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { productService, UnifiedProduct } from '@/services/productService';
 import SimpleRichTextEditor from '@/components/SimpleRichTextEditor';
 import { useAdminLanguage } from '@/contexts/AdminLanguageContext';
+import { supabase } from '@/integrations/supabase/client';
 
 // Language configuration
 const languages = [
@@ -56,7 +57,9 @@ export default function ProductEdit() {
   const loadProduct = async () => {
     try {
       setLoading(true);
-      const productData = await productService.getProduct(productId!); // Load without language to get all translations
+      
+      // CRITICAL FIX: Load product with explicit language to ensure translations are loaded
+      const productData = await productService.getProduct(productId!, 'en');
       console.log('ProductEdit: Loaded product data:', productData);
       console.log('ProductEdit: Names:', productData?.names);
       console.log('ProductEdit: Descriptions:', productData?.descriptions);
@@ -67,14 +70,21 @@ export default function ProductEdit() {
       if (productData) {
         const initializedProduct = {
           ...productData,
+          // CRITICAL FIX: Ensure names and descriptions are always objects, never undefined
           names: productData.names || {},
           descriptions: productData.descriptions || {}
         };
         
-        // Don't override names with defaults - use what's in the database
-        console.log('ProductEdit: Final initialized product:', initializedProduct);
-        console.log('ProductEdit: Final names object:', initializedProduct.names);
-        console.log('ProductEdit: Final descriptions object:', initializedProduct.descriptions);
+        // CRITICAL FIX: Log the exact structure being set
+        console.log('ProductEdit: Final initialized product:', {
+          id: initializedProduct.id,
+          names: initializedProduct.names,
+          descriptions: initializedProduct.descriptions,
+          namesType: typeof initializedProduct.names,
+          descriptionsType: typeof initializedProduct.descriptions,
+          namesKeys: Object.keys(initializedProduct.names),
+          descriptionsKeys: Object.keys(initializedProduct.descriptions)
+        });
         
         setProduct(initializedProduct);
       }
@@ -88,72 +98,76 @@ export default function ProductEdit() {
 
   const handleSave = async () => {
     if (!product) return;
-    
+
     try {
       setSaving(true);
       
-      // Debug: Log the current product state
-      console.log('🔍 ProductEdit: Current product state before save:', {
-        id: product.id,
-        names: product.names,
-        descriptions: product.descriptions,
-        category: product.category,
-        model: product.model
-      });
+      // UNIFIED SAVE: Prepare ALL data together (categories, names, descriptions, everything)
+      console.log('🔍 UNIFIED SAVE: Preparing all data for unified save operation');
       
-      // Prepare the update data
       const updateData = {
+        // Basic fields (category, model, checkboxes)
         category: product.category,
         model: product.model,
         inStock: product.inStock,
         showInFeatured: product.showInFeatured,
         isActive: product.isActive,
+        
+        // Multilingual content (names and descriptions for all languages)
         names: product.names || {},
         descriptions: product.descriptions || {}
       };
 
-      console.log('📝 ProductEdit: Saving product with data:', updateData);
-      console.log('📝 ProductEdit: Names to save:', updateData.names);
-      console.log('📝 ProductEdit: Descriptions to save:', updateData.descriptions);
-
-      // Debug: Check if names object has actual values
-      Object.entries(updateData.names).forEach(([lang, name]) => {
-        console.log(`🌐 Language ${lang}: name = "${name}" (type: ${typeof name}, length: ${name?.length})`);
+      console.log('📝 UNIFIED SAVE: Complete data being sent to service:', updateData);
+      console.log('📝 UNIFIED SAVE: Names object:', updateData.names);
+      console.log('📝 UNIFIED SAVE: Descriptions object:', updateData.descriptions);
+      console.log('📝 UNIFIED SAVE: Basic fields:', {
+        category: updateData.category,
+        model: updateData.model,
+        inStock: updateData.inStock,
+        showInFeatured: updateData.showInFeatured,
+        isActive: updateData.isActive
       });
 
-      // Debug: Check if descriptions object has actual values
-      Object.entries(updateData.descriptions).forEach(([lang, desc]) => {
-        const descStr = desc as string;
-        console.log(`🌐 Language ${lang}: description = "${descStr?.substring(0, 100)}..." (type: ${typeof desc}, length: ${descStr?.length})`);
-      });
-
-      // Debug: Check if names object is not empty
-      const hasNames = Object.keys(updateData.names).length > 0;
-      const hasDescriptions = Object.keys(updateData.descriptions).length > 0;
-      console.log(`🔍 Debug: Has names: ${hasNames}, Has descriptions: ${hasDescriptions}`);
-      console.log(`🔍 Debug: Names object keys:`, Object.keys(updateData.names));
-      console.log(`🔍 Debug: Descriptions object keys:`, Object.keys(updateData.descriptions));
-      
-      // Debug: Check if names object contains actual string values
-      const namesWithValues = Object.entries(updateData.names).filter(([lang, name]) => name && typeof name === 'string' && name.trim().length > 0);
-      console.log(`🔍 Debug: Names with actual values:`, namesWithValues);
-      console.log(`🔍 Debug: Total names with values: ${namesWithValues.length}`);
-
+      // UNIFIED SAVE: Send everything to the service in one operation
       const result = await productService.updateProduct(product.id, updateData);
-      console.log('✅ ProductEdit: Save result:', result);
-      console.log('✅ ProductEdit: Save result names:', result?.names);
-      console.log('✅ ProductEdit: Save result descriptions:', result?.descriptions);
+      console.log('✅ UNIFIED SAVE: Service result:', result);
+      
+      // Don't update local state with server result - it might overwrite our changes
+      // The local state already has the correct data from user edits
+      // This prevents the "edits disappearing" bug
       
       toast.success(t('messages.saveSuccess'));
       
-      // Reload the product to show updated data
-      await loadProduct();
+      // Dispatch custom event to refresh admin counts and frontend website
+      console.log('🔄 UNIFIED SAVE: Dispatching productUpdated event to refresh frontend...');
+      window.dispatchEvent(new CustomEvent('productUpdated'));
+      console.log('✅ UNIFIED SAVE: productUpdated event dispatched successfully');
       
-      // Don't navigate away - stay on the edit page to see changes
       toast.success(t('messages.saveAndReload'));
+      
     } catch (error) {
-      console.error('❌ ProductEdit: Error saving product:', error);
-      toast.error(t('messages.saveError'));
+      console.error('❌ UNIFIED SAVE: Error saving product:', error);
+      
+      // More detailed error logging
+      if (error instanceof Error) {
+        console.error('❌ UNIFIED SAVE: Error details:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
+        
+        // Check if it's a database error
+        if (error.message.includes('relation') || error.message.includes('table')) {
+          toast.error('Database table missing. Please run database setup script.');
+        } else if (error.message.includes('permission') || error.message.includes('policy')) {
+          toast.error('Database permission denied. Check RLS policies.');
+        } else {
+          toast.error(`Save failed: ${error.message}`);
+        }
+      } else {
+        toast.error('Save failed with unknown error');
+      }
     } finally {
       setSaving(false);
     }
@@ -166,8 +180,8 @@ export default function ProductEdit() {
   const updateTranslation = (languageCode: string, field: 'name' | 'description', value: string) => {
     if (!product) return;
 
-    console.log(`🔄 ProductEdit: updateTranslation called - Language: ${languageCode}, Field: ${field}, Value: "${value}"`);
-    console.log(`🔄 ProductEdit: Current product state before update:`, {
+    console.log(`🔄 UPDATE DEBUG: updateTranslation called - Language: ${languageCode}, Field: ${field}, Value: "${value}"`);
+    console.log(`🔄 UPDATE DEBUG: Current product state before update:`, {
       names: product.names,
       descriptions: product.descriptions
     });
@@ -177,12 +191,16 @@ export default function ProductEdit() {
 
       if (field === 'name') {
         const newNames = { ...prev.names, [languageCode]: value };
-        console.log(`🔄 ProductEdit: Updated names object:`, newNames);
-        return { ...prev, names: newNames };
+        console.log(`🔄 UPDATE DEBUG: Updated names object:`, newNames);
+        const updatedProduct = { ...prev, names: newNames };
+        console.log(`🔄 UPDATE DEBUG: Product state after name update:`, updatedProduct);
+        return updatedProduct;
       } else {
         const newDescriptions = { ...prev.descriptions, [languageCode]: value };
-        console.log(`🔄 ProductEdit: Updated descriptions object:`, newDescriptions);
-        return { ...prev, descriptions: newDescriptions };
+        console.log(`🔄 UPDATE DEBUG: Updated descriptions object:`, newDescriptions);
+        const updatedProduct = { ...prev, descriptions: newDescriptions };
+        console.log(`🔄 UPDATE DEBUG: Product state after description update:`, updatedProduct);
+        return updatedProduct;
       }
     });
   };
@@ -319,7 +337,7 @@ export default function ProductEdit() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="zh-Hant" className="w-full">
+              <Tabs defaultValue="en" className="w-full">
                 {/* Language Tabs - Horizontal Layout */}
                 <TabsList className="grid w-full grid-cols-7 h-12 mb-6">
                   {languages.map(lang => (

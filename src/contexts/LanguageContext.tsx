@@ -40,8 +40,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   useEffect(() => {
     const handleRouteChange = () => {
       // Don't force language change on route change to prevent interference
-      // Only log for debugging
-      console.log('Route changed, current language:', currentLanguage);
+      // Removed console.log to prevent performance issues
     };
 
     // Listen for popstate (browser back/forward)
@@ -54,7 +53,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
       window.removeEventListener('popstate', handleRouteChange);
       window.removeEventListener('routeChange', handleRouteChange);
     };
-  }, [currentLanguage, changeLanguage]);
+  }, [currentLanguage]); // ✅ Removed changeLanguage dependency to prevent infinite loops
 
   const contextValue: LanguageContextType = {
     currentLanguage,

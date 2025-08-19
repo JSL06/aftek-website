@@ -179,7 +179,7 @@ export const useTranslation = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, []); // ✅ No dependencies needed - function is stable
 
   useEffect(() => {
     fetchTranslations(currentLanguage);

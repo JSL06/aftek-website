@@ -49,16 +49,20 @@ const Articles = () => {
   useEffect(() => {
     const fetchArticles = async () => {
       setLoading(true);
+      // FIX: Handle missing isactive column gracefully
       const { data, error } = await supabase
         .from('articles')
         .select('*')
-        .eq('isactive', true)
         .eq('is_published', true)
         .order('displayorder', { ascending: true });
       if (error) {
         console.error('Error fetching articles:', error);
       } else {
-        setArticles(data || []);
+        // Filter active articles in memory if isactive column exists
+        const activeArticles = data?.filter(article => 
+          article.isactive === true || article.isactive === undefined
+        ) || [];
+        setArticles(activeArticles);
       }
       setLoading(false);
     };

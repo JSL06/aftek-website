@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAdminStore } from '@/stores/adminStore';
+import { useCategories } from '@/hooks/useCategories';
 import { Button } from '@/components/ui/button';
+
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -93,6 +95,7 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
 }) => {
   const navigate = useNavigate();
   const { language } = useAdminStore();
+  const { categories, loading: categoriesLoading } = useCategories();
   const [formData, setFormData] = useState<ContentFormData>({
     basic: {
       status: 'draft',
@@ -203,18 +206,18 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
 
   const getContentTypeConfig = () => {
     switch (contentType) {
-      case 'product':
-        return {
-          title: '产品编辑器',
-          icon: '📦',
-          specificFields: [
-            { key: 'sku', label: 'SKU', type: 'text' },
-            { key: 'price', label: '价格', type: 'number' },
-            { key: 'inventory', label: '库存', type: 'number' },
-            { key: 'category', label: '分类', type: 'select' },
-            { key: 'features', label: '特性', type: 'tags' }
-          ]
-        };
+             case 'product':
+         return {
+           title: '产品编辑器',
+           icon: '📦',
+           specificFields: [
+             { key: 'sku', label: 'SKU', type: 'text' },
+             { key: 'price', label: '价格', type: 'number' },
+             { key: 'inventory', label: '库存', type: 'number' },
+             { key: 'category', label: '产品分类', type: 'select' },
+             { key: 'features', label: '特性', type: 'tags' }
+           ]
+         };
       case 'project':
         return {
           title: '项目编辑器',
@@ -363,51 +366,53 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="source-title">标题</Label>
-              <Input
-                id="source-title"
-                value={formData.multilingual.en.title}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  multilingual: {
-                    ...prev.multilingual,
-                    en: { ...prev.multilingual.en, title: e.target.value }
-                  }
-                }))}
-                placeholder="输入英文标题..."
-              />
+                             <Input
+                 id="source-title"
+                 value={formData.multilingual.en.title}
+                 onChange={(e) => setFormData(prev => ({
+                   ...prev,
+                   multilingual: {
+                     ...prev.multilingual,
+                     en: { ...prev.multilingual.en, title: e.target.value }
+                   }
+                 }))}
+                 placeholder="输入英文标题..."
+               />
             </div>
-            <div>
-              <Label htmlFor="source-description">描述</Label>
-              <Textarea
-                id="source-description"
-                value={formData.multilingual.en.description}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  multilingual: {
-                    ...prev.multilingual,
-                    en: { ...prev.multilingual.en, description: e.target.value }
-                  }
-                }))}
-                placeholder="输入英文描述..."
-                rows={3}
-              />
-            </div>
-            <div>
-              <Label htmlFor="source-content">内容</Label>
-              <Textarea
-                id="source-content"
-                value={formData.multilingual.en.content}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  multilingual: {
-                    ...prev.multilingual,
-                    en: { ...prev.multilingual.en, content: e.target.value }
-                  }
-                }))}
-                placeholder="输入英文内容..."
-                rows={8}
-              />
-            </div>
+                         <div>
+               <Label htmlFor="source-description">描述</Label>
+               <textarea
+                 id="source-description"
+                 value={formData.multilingual.en.description}
+                 onChange={(e) => setFormData(prev => ({
+                   ...prev,
+                   multilingual: {
+                     ...prev.multilingual,
+                     en: { ...prev.multilingual.en, description: e.target.value }
+                   }
+                 }))}
+                 placeholder="输入英文描述..."
+                 rows={3}
+                 className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none"
+               />
+             </div>
+                         <div>
+               <Label htmlFor="source-content">内容</Label>
+               <textarea
+                 id="source-content"
+                 value={formData.multilingual.en.content}
+                 onChange={(e) => setFormData(prev => ({
+                   ...prev,
+                   multilingual: {
+                     ...prev.multilingual,
+                     en: { ...prev.multilingual.en, content: e.target.value }
+                   }
+                 }))}
+                 placeholder="输入英文内容..."
+                 rows={8}
+                 className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none"
+               />
+             </div>
           </CardContent>
         </Card>
 
@@ -422,60 +427,62 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="target-title">标题</Label>
-              <Input
-                id="target-title"
-                value={formData.multilingual[selectedLanguage].title}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  multilingual: {
-                    ...prev.multilingual,
-                    [selectedLanguage]: { 
-                      ...prev.multilingual[selectedLanguage], 
-                      title: e.target.value 
-                    }
-                  }
-                }))}
-                placeholder={`输入${LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName}标题...`}
-              />
+                             <Input
+                 id="target-title"
+                 value={formData.multilingual[selectedLanguage].title}
+                 onChange={(e) => setFormData(prev => ({
+                   ...prev,
+                   multilingual: {
+                     ...prev.multilingual,
+                     [selectedLanguage]: { 
+                       ...prev.multilingual[selectedLanguage], 
+                       title: e.target.value
+                     }
+                   }
+                 }))}
+                 placeholder={`输入${LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName}标题...`}
+               />
             </div>
-            <div>
-              <Label htmlFor="target-description">描述</Label>
-              <Textarea
-                id="target-description"
-                value={formData.multilingual[selectedLanguage].description}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  multilingual: {
-                    ...prev.multilingual,
-                    [selectedLanguage]: { 
-                      ...prev.multilingual[selectedLanguage], 
-                      description: e.target.value 
-                    }
-                  }
-                }))}
-                placeholder={`输入${LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName}描述...`}
-                rows={3}
-              />
-            </div>
-            <div>
-              <Label htmlFor="target-content">内容</Label>
-              <Textarea
-                id="target-content"
-                value={formData.multilingual[selectedLanguage].content}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  multilingual: {
-                    ...prev.multilingual,
-                    [selectedLanguage]: { 
-                      ...prev.multilingual[selectedLanguage], 
-                      content: e.target.value 
-                    }
-                  }
-                }))}
-                placeholder={`输入${LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName}内容...`}
-                rows={8}
-              />
-            </div>
+                         <div>
+               <Label htmlFor="target-description">描述</Label>
+               <textarea
+                 id="target-description"
+                 value={formData.multilingual[selectedLanguage].description}
+                 onChange={(e) => setFormData(prev => ({
+                   ...prev,
+                   multilingual: {
+                     ...prev.multilingual,
+                     [selectedLanguage]: { 
+                       ...prev.multilingual[selectedLanguage], 
+                       description: e.target.value
+                     }
+                   }
+                 }))}
+                 placeholder={`输入${LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName}描述...`}
+                 rows={3}
+                 className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none"
+               />
+             </div>
+                         <div>
+               <Label htmlFor="target-content">内容</Label>
+               <textarea
+                 id="target-content"
+                 value={formData.multilingual[selectedLanguage].content}
+                 onChange={(e) => setFormData(prev => ({
+                   ...prev,
+                   multilingual: {
+                     ...prev.multilingual,
+                     [selectedLanguage]: { 
+                       ...prev.multilingual[selectedLanguage], 
+                       content: e.target.value
+                     }
+                   }
+                 }))}
+                 placeholder={`输入${LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName}内容...`}
+                 rows={8}
+                 className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none"
+               />
+             </div>
           </CardContent>
         </Card>
       </div>
@@ -564,7 +571,7 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
               </div>
               <div>
                 <Label htmlFor="seo-description">SEO 描述</Label>
-                <Textarea
+                <textarea
                   id="seo-description"
                   value={formData.seo.description}
                   onChange={(e) => setFormData(prev => ({
@@ -573,6 +580,7 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
                   }))}
                   placeholder="SEO 描述..."
                   rows={3}
+                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none"
                 />
               </div>
             </CardContent>
@@ -609,11 +617,31 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
           </Card>
         </TabsContent>
 
-        <TabsContent value="specific" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>{config.title} 特定字段</CardTitle>
-            </CardHeader>
+                 <TabsContent value="specific" className="space-y-4">
+           <Card>
+             <CardHeader className="flex flex-row items-center justify-between">
+               <CardTitle>{config.title} 特定字段</CardTitle>
+               {config.specificFields.some(field => field.type === 'select' && field.key === 'category') && (
+                 <div className="flex gap-2">
+                   <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={() => window.location.reload()}
+                     className="text-xs"
+                   >
+                     刷新分类
+                   </Button>
+                   <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={() => navigate('/admin/category-manager')}
+                     className="text-xs"
+                   >
+                     管理分类
+                   </Button>
+                 </div>
+               )}
+             </CardHeader>
             <CardContent className="space-y-4">
               {config.specificFields.map(field => (
                 <div key={field.key}>
@@ -639,24 +667,50 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
                       }))}
                     />
                   )}
-                  {field.type === 'select' && (
-                    <Select
-                      value={formData.specific[field.key] || ''}
-                      onValueChange={(value) => setFormData(prev => ({
-                        ...prev,
-                        specific: { ...prev.specific, [field.key]: value }
-                      }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={`选择${field.label}`} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="option1">选项 1</SelectItem>
-                        <SelectItem value="option2">选项 2</SelectItem>
-                        <SelectItem value="option3">选项 3</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
+                                     {field.type === 'select' && field.key === 'category' && (
+                     <Select
+                       value={formData.specific[field.key] || ''}
+                       onValueChange={(value) => setFormData(prev => ({
+                         ...prev,
+                         specific: { ...prev.specific, [field.key]: value }
+                       }))}
+                     >
+                       <SelectTrigger>
+                         <SelectValue placeholder={`选择${field.label}`} />
+                       </SelectTrigger>
+                       <SelectContent>
+                         {categoriesLoading ? (
+                           <SelectItem value="" disabled>加载中...</SelectItem>
+                         ) : categories.length === 0 ? (
+                           <SelectItem value="" disabled>暂无分类</SelectItem>
+                         ) : (
+                           categories.map(category => (
+                             <SelectItem key={category.id} value={category.id}>
+                               {category.name}
+                             </SelectItem>
+                           ))
+                         )}
+                       </SelectContent>
+                     </Select>
+                   )}
+                   {field.type === 'select' && field.key !== 'category' && (
+                     <Select
+                       value={formData.specific[field.key] || ''}
+                       onValueChange={(value) => setFormData(prev => ({
+                         ...prev,
+                         specific: { ...prev.specific, [field.key]: value }
+                       }))}
+                     >
+                       <SelectTrigger>
+                         <SelectValue placeholder={`选择${field.label}`} />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="option1">选项 1</SelectItem>
+                         <SelectItem value="option2">选项 2</SelectItem>
+                         <SelectItem value="select">选项 3</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   )}
                 </div>
               ))}
             </CardContent>

@@ -26,13 +26,34 @@ const ProductDetail = () => {
       window.location.reload();
     };
 
-    // Add event listener for language changes
+    // Listen for product updates from admin panel
+    const handleProductUpdate = () => {
+      console.log('ProductDetail page: Product updated, refreshing product data...');
+      // Refresh the current product data
+      if (productId) {
+        const refreshProduct = async () => {
+          try {
+            const productData = await productService.getProduct(productId);
+            if (productData) {
+              setProduct(productData);
+            }
+          } catch (error) {
+            console.error('Error refreshing product:', error);
+          }
+        };
+        refreshProduct();
+      }
+    };
+
+    // Add event listeners
     window.addEventListener('languageChange', handleLanguageChange as EventListener);
+    window.addEventListener('productUpdated', handleProductUpdate);
     
     return () => {
       window.removeEventListener('languageChange', handleLanguageChange as EventListener);
+      window.removeEventListener('productUpdated', handleProductUpdate);
     };
-  }, []);
+  }, [productId]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -44,9 +65,11 @@ const ProductDetail = () => {
       setLoading(true);
       try {
         // Try to get product by ID first, then by slug
-        let productData = await productService.getProductById(productId);
+        let productData = await productService.getProduct(productId);
         if (!productData) {
-          productData = await productService.getProductBySlug(productId);
+          // If not found by ID, try to find by slug from all products
+          const allProducts = await productService.getAllProducts();
+          productData = allProducts.find(p => p.slug === productId);
         }
         
         if (!productData) {

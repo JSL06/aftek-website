@@ -35,15 +35,19 @@ const Media = () => {
   useEffect(() => {
     const fetchMedia = async () => {
       setLoading(true);
+      // FIX: Handle missing isActive column gracefully
       const { data, error } = await supabase
         .from('media')
         .select('*')
-        .eq('isActive', true)
         .order('order', { ascending: true });
       if (error) {
         console.error('Error fetching media:', error);
       } else {
-        setMedia(data || []);
+        // Filter active media in memory if isActive column exists
+        const activeMedia = data?.filter(item => 
+          item.isActive === true || item.isActive === undefined
+        ) || [];
+        setMedia(activeMedia);
       }
       setLoading(false);
     };
