@@ -64,12 +64,12 @@ const languages = [
 export default function ProductEdit() {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
-  const { t } = useAdminLanguage();
+  const { t, language } = useAdminLanguage();
   
   // Use dynamic categories from the database instead of hardcoded list
   const { categories: productCategories } = useCategories('en');
   
-  const [product, setProduct] = useState<UnifiedProduct | null>(null);
+  const [product, setProduct] = useState<UnifiedProduct & { features_multilingual?: Record<string, string[]> } | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -88,8 +88,10 @@ export default function ProductEdit() {
       console.log('ProductEdit: Loaded product data:', productData);
       console.log('ProductEdit: Names:', productData?.names);
       console.log('ProductEdit: Descriptions:', productData?.descriptions);
+      console.log('ProductEdit: Features:', productData?.features);
       console.log('ProductEdit: Names object keys:', Object.keys(productData?.names || {}));
       console.log('ProductEdit: Descriptions object keys:', Object.keys(productData?.descriptions || {}));
+      console.log('ProductEdit: Features type:', typeof productData?.features, 'Features value:', productData?.features);
       
       // Ensure names and descriptions are properly initialized
       if (productData) {
@@ -97,7 +99,11 @@ export default function ProductEdit() {
           ...productData,
           // CRITICAL FIX: Ensure names and descriptions are always objects, never undefined
           names: productData.names || {},
-          descriptions: productData.descriptions || {}
+          descriptions: productData.descriptions || {},
+          // Initialize multilingual features from translations
+          features_multilingual: productData.features_multilingual || {
+            en: productData.features || []
+          }
         };
         
         // CRITICAL FIX: Log the exact structure being set
@@ -105,10 +111,13 @@ export default function ProductEdit() {
           id: initializedProduct.id,
           names: initializedProduct.names,
           descriptions: initializedProduct.descriptions,
+          features: initializedProduct.features,
           namesType: typeof initializedProduct.names,
           descriptionsType: typeof initializedProduct.descriptions,
+          featuresType: typeof initializedProduct.features,
           namesKeys: Object.keys(initializedProduct.names),
-          descriptionsKeys: Object.keys(initializedProduct.descriptions)
+          descriptionsKeys: Object.keys(initializedProduct.descriptions),
+          featuresLength: Array.isArray(initializedProduct.features) ? initializedProduct.features.length : 'not array'
         });
         
         setProduct(initializedProduct);
@@ -136,6 +145,7 @@ export default function ProductEdit() {
         inStock: product.inStock,
         showInFeatured: product.showInFeatured,
         isActive: product.isActive,
+        features: product.features,
         names: product.names,
         descriptions: product.descriptions
       });
@@ -148,9 +158,10 @@ export default function ProductEdit() {
         showInFeatured: product.showInFeatured,
         isActive: product.isActive,
         
-        // Multilingual content (names and descriptions for all languages)
+        // Multilingual content (names, descriptions, and features for all languages)
         names: product.names || {},
-        descriptions: product.descriptions || {}
+        descriptions: product.descriptions || {},
+        features_multilingual: product.features_multilingual || {}
       };
 
       console.log('📝 UNIFIED SAVE: Complete data being sent to service:', updateData);
@@ -270,6 +281,53 @@ export default function ProductEdit() {
     });
   };
 
+  const addFeature = (languageCode: string) => {
+    if (product) {
+      const currentFeatures = product.features_multilingual?.[languageCode] || [];
+      console.log(`🔍 addFeature: Language ${languageCode}, Current features:`, currentFeatures);
+      const newFeatures = [...currentFeatures, ''];
+      console.log(`🔍 addFeature: Language ${languageCode}, New features:`, newFeatures);
+      setProduct({
+        ...product,
+        features_multilingual: {
+          ...product.features_multilingual,
+          [languageCode]: newFeatures
+        }
+      });
+    }
+  };
+
+  const updateFeature = (index: number, value: string, languageCode: string) => {
+    if (product) {
+      const currentFeatures = product.features_multilingual?.[languageCode] || [];
+      const newFeatures = [...currentFeatures];
+      newFeatures[index] = value;
+      console.log(`🔍 updateFeature: Language ${languageCode}, Index ${index}, Value "${value}", New features:`, newFeatures);
+      setProduct({
+        ...product,
+        features_multilingual: {
+          ...product.features_multilingual,
+          [languageCode]: newFeatures
+        }
+      });
+    }
+  };
+
+  const removeFeature = (index: number, languageCode: string) => {
+    if (product) {
+      const currentFeatures = product.features_multilingual?.[languageCode] || [];
+      const newFeatures = currentFeatures.filter((_, i) => i !== index);
+      console.log(`🔍 removeFeature: Language ${languageCode}, Index ${index}, New features:`, newFeatures);
+      setProduct({
+        ...product,
+        features_multilingual: {
+          ...product.features_multilingual,
+          [languageCode]: newFeatures
+        }
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -350,6 +408,8 @@ export default function ProductEdit() {
                   placeholder={t('basic.model')}
                 />
               </div>
+
+
 
               <div className="space-y-4">
                 <div className="flex items-center space-x-2">
@@ -450,6 +510,47 @@ export default function ProductEdit() {
                             placeholder={t('multilingual.enterDescription')}
                             height="300px"
                           />
+                        </div>
+
+                        {/* Product Features */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            <span className="inline-flex items-center gap-2">
+                              <span className="w-4 h-4 bg-primary rounded-full"></span>
+                              Product Features ({lang.nativeName})
+                            </span>
+                          </label>
+                          <div className="space-y-2">
+                            {Array.isArray(product.features_multilingual?.[lang.code]) && product.features_multilingual![lang.code].length > 0 ? (
+                              product.features_multilingual![lang.code].map((feature, index) => (
+                                <div key={index} className="flex gap-2">
+                                  <Input
+                                    value={feature}
+                                    onChange={(e) => updateFeature(index, e.target.value, lang.code)}
+                                    placeholder="Enter feature"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => removeFeature(index, lang.code)}
+                                    className="px-2"
+                                  >
+                                    ×
+                                  </Button>
+                                </div>
+                              ))
+                            ) : null}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => addFeature(lang.code)}
+                              className="w-full"
+                            >
+                              + Add Feature
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </div>

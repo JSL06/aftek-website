@@ -3,7 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 // Project interface that matches database structure
 export interface Project {
   id: string;
-  name: string;
   title: string;
   titles?: Record<string, string>; // Multilingual titles
   slug?: string;
@@ -37,14 +36,61 @@ export interface Project {
   updated_at?: string;
 }
 
+// Interface for project translations
+export interface ProjectTranslation {
+  id: string;
+  project_id: string;
+  language_code: string;
+  title: string;
+  description?: string;
+  challenges?: string;
+  solutions?: string;
+  results?: string;
+  location?: string;
+  client?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Interface for multilingual project data
+export interface MultilingualProject {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  category: string;
+  client: string;
+  completion_date: string;
+  project_type: string;
+  image?: string;
+  gallery?: string[];
+  case_study_pdf?: string;
+  features: string[];
+  specifications?: Record<string, any>;
+  products_used?: string[];
+  project_value?: string;
+  duration?: string;
+  challenges?: string;
+  solutions?: string;
+  results?: string;
+  testimonial?: string;
+  isActive: boolean;
+  showInFeatured: boolean;
+  displayOrder: number;
+  tags?: string[];
+  created_at: string;
+  updated_at?: string;
+  // Multilingual content
+  titles: Record<string, string>;
+  descriptions: Record<string, string>;
+  challenges_multilingual: Record<string, string>;
+  solutions_multilingual: Record<string, string>;
+  results_multilingual: Record<string, string>;
+  locations_multilingual: Record<string, string>;
+  clients_multilingual: Record<string, string>;
+}
+
 class ProjectService {
-  private projects: Project[] = [];
-  private initialized = false;
-
-  constructor() {
-    this.initializeProjects();
-  }
-
   // Generate SEO-friendly slug from project title
   private generateSlug(title: string): string {
     return title
@@ -55,183 +101,407 @@ class ProjectService {
       .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
   }
 
-  // Ensure all projects have slugs
-  private ensureSlugs(projects: Project[]): Project[] {
-    return projects.map(project => ({
-      ...project,
-      slug: project.slug || this.generateSlug(project.title)
-    }));
-  }
-
-  // Initialize projects from database
-  private async initializeProjects(): Promise<void> {
-    if (this.initialized) return;
-
+  // Get all projects with translations for admin
+  async getProjects(languageCode: string = 'en'): Promise<MultilingualProject[]> {
     try {
-      await this.loadFromDatabase();
-      console.log('Loaded projects from database');
-      this.initialized = true;
+      console.log('Project service: Fetching projects with translations for language:', languageCode);
+      
+      // 1. Get all projects
+      const { data: projects, error: projectsError } = await supabase
+        .from('projects')
+        .select('*')
+        .order('displayOrder', { ascending: true });
+
+      if (projectsError) {
+        console.error('Project service: Error fetching projects:', projectsError);
+        throw new Error(`Failed to fetch projects: ${projectsError.message}`);
+      }
+
+      // 2. Get all translations
+      const { data: translations, error: translationsError } = await supabase
+        .from('project_translations')
+        .select('*');
+
+      if (translationsError) {
+        console.error('Project service: Error fetching translations:', translationsError);
+        throw new Error(`Failed to fetch translations: ${translationsError.message}`);
+      }
+
+      // 3. Organize translations by project
+      const translationsByProject: Record<string, ProjectTranslation[]> = {};
+      translations?.forEach(translation => {
+        if (!translationsByProject[translation.project_id]) {
+          translationsByProject[translation.project_id] = [];
+        }
+        translationsByProject[translation.project_id].push(translation);
+      });
+
+      // 4. Build multilingual projects
+      const multilingualProjects: MultilingualProject[] = (projects || []).map(project => {
+        const projectTranslations = translationsByProject[project.id] || [];
+        
+        // Initialize multilingual content
+        const titles: Record<string, string> = {};
+        const descriptions: Record<string, string> = {};
+        const challenges_multilingual: Record<string, string> = {};
+        const solutions_multilingual: Record<string, string> = {};
+        const results_multilingual: Record<string, string> = {};
+        const locations_multilingual: Record<string, string> = {};
+        const clients_multilingual: Record<string, string> = {};
+
+        // Populate from translations
+        projectTranslations.forEach(translation => {
+          const lang = translation.language_code;
+          if (translation.title) titles[lang] = translation.title;
+          if (translation.description) descriptions[lang] = translation.description;
+          if (translation.challenges) challenges_multilingual[lang] = translation.challenges;
+          if (translation.solutions) solutions_multilingual[lang] = translation.solutions;
+          if (translation.results) results_multilingual[lang] = translation.results;
+          if (translation.location) locations_multilingual[lang] = translation.location;
+          if (translation.client) clients_multilingual[lang] = translation.client;
+        });
+
+        // Fallback to base project data if no translations
+        if (!titles['en'] && project.title) titles['en'] = project.title;
+        if (!descriptions['en'] && project.description) descriptions['en'] = project.description;
+        if (!challenges_multilingual['en'] && project.challenges) challenges_multilingual['en'] = project.challenges;
+        if (!solutions_multilingual['en'] && project.solutions) solutions_multilingual['en'] = project.solutions;
+        if (!results_multilingual['en'] && project.results) results_multilingual['en'] = project.results;
+        if (!locations_multilingual['en'] && project.location) locations_multilingual['en'] = project.location;
+        if (!clients_multilingual['en'] && project.client) clients_multilingual['en'] = project.client;
+
+        return {
+          ...project,
+          titles,
+          descriptions,
+          challenges_multilingual,
+          solutions_multilingual,
+          results_multilingual,
+          locations_multilingual,
+          clients_multilingual
+        };
+      });
+
+      console.log('Project service: Successfully fetched', multilingualProjects.length, 'projects');
+      return multilingualProjects;
+      
     } catch (error) {
-      console.error('Failed to initialize projects:', error);
-      this.projects = [];
-      this.initialized = true;
+      console.error('Project service: Error in getProjects:', error);
+      throw error;
     }
   }
 
-  // Load projects from Supabase database
-  private async loadFromDatabase(): Promise<void> {
-    const { data, error } = await supabase
+  // Get a single project with translations
+  async getProject(id: string, languageCode: string = 'en'): Promise<MultilingualProject | null> {
+    try {
+      console.log('Project service: Fetching project', id, 'for language:', languageCode);
+      
+      // 1. Get the project
+      const { data: project, error: projectError } = await supabase
       .from('projects')
       .select('*')
-      .order('created_at', { ascending: false });
+        .eq('id', id)
+        .single();
 
-    if (error) {
-      throw new Error(`Database error: ${error.message}`);
-    }
-
-    // Convert database format to project format
-    this.projects = (data || []).map(this.convertDatabaseToProject.bind(this));
-  }
-
-  // Convert database project to Project format
-  private convertDatabaseToProject(dbProject: any): Project {
-    // Helper function to safely parse JSON strings from database
-    const safeJsonParse = (jsonData: any, defaultValue: any) => {
-      try {
-        if (typeof jsonData === 'string') {
-          return JSON.parse(jsonData);
-        }
-        return jsonData || defaultValue;
-      } catch (error) {
-        console.warn('Failed to parse JSON:', jsonData, error);
-        return defaultValue;
+      if (projectError) {
+        console.error('Project service: Error fetching project:', projectError);
+        return null;
       }
-    };
 
-    return {
-      id: dbProject.id,
-      name: dbProject.name,
-      title: dbProject.title,
-      slug: dbProject.slug,
-      description: dbProject.description || '',
-      location: dbProject.location || '',
-      category: dbProject.category || 'General',
-      client: dbProject.client || '',
-      completion_date: dbProject.completion_date || '',
-      project_type: dbProject.project_type || '',
-      image: dbProject.image || '/placeholder.svg',
-      gallery: safeJsonParse(dbProject.gallery, []),
-      case_study_pdf: dbProject.case_study_pdf,
-      features: dbProject.features || [],
-      specifications: safeJsonParse(dbProject.specifications, {}),
-      products_used: dbProject.products_used || [],
-      project_value: dbProject.project_value,
-      duration: dbProject.duration,
-      challenges: dbProject.challenges,
-      solutions: dbProject.solutions,
-      results: dbProject.results,
-      testimonial: dbProject.testimonial,
-      isActive: dbProject.isActive !== false,
-      showInFeatured: dbProject.showInFeatured || false,
-      displayOrder: dbProject.displayOrder || 99,
-      tags: dbProject.tags || [],
-      created_at: dbProject.created_at || new Date().toISOString(),
-      updated_at: dbProject.updated_at
-    };
+      // 2. Get all translations for this project
+      const { data: translations, error: translationsError } = await supabase
+        .from('project_translations')
+        .select('*')
+        .eq('project_id', id);
+
+      if (translationsError) {
+        console.error('Project service: Error fetching translations:', translationsError);
+        // Continue without translations
+      }
+
+      // 3. Build multilingual project
+      const titles: Record<string, string> = {};
+      const descriptions: Record<string, string> = {};
+      const challenges_multilingual: Record<string, string> = {};
+      const solutions_multilingual: Record<string, string> = {};
+      const results_multilingual: Record<string, string> = {};
+      const locations_multilingual: Record<string, string> = {};
+      const clients_multilingual: Record<string, string> = {};
+
+      // Populate from translations
+      (translations || []).forEach(translation => {
+        const lang = translation.language_code;
+        if (translation.title) titles[lang] = translation.title;
+        if (translation.description) descriptions[lang] = translation.description;
+        if (translation.challenges) challenges_multilingual[lang] = translation.challenges;
+        if (translation.solutions) solutions_multilingual[lang] = translation.solutions;
+        if (translation.results) results_multilingual[lang] = translation.results;
+        if (translation.location) locations_multilingual[lang] = translation.location;
+        if (translation.client) clients_multilingual[lang] = translation.client;
+      });
+
+      // Fallback to base project data if no translations
+      if (!titles['en'] && project.title) titles['en'] = project.title;
+      if (!descriptions['en'] && project.description) descriptions['en'] = project.description;
+      if (!challenges_multilingual['en'] && project.challenges) challenges_multilingual['en'] = project.challenges;
+      if (!solutions_multilingual['en'] && project.solutions) solutions_multilingual['en'] = project.solutions;
+      if (!results_multilingual['en'] && project.results) results_multilingual['en'] = project.results;
+      if (!locations_multilingual['en'] && project.location) locations_multilingual['en'] = project.location;
+      if (!clients_multilingual['en'] && project.client) clients_multilingual['en'] = project.client;
+
+      const multilingualProject: MultilingualProject = {
+        ...project,
+        titles,
+        descriptions,
+        challenges_multilingual,
+        solutions_multilingual,
+        results_multilingual,
+        locations_multilingual,
+        clients_multilingual
+      };
+
+      console.log('Project service: Successfully fetched project:', multilingualProject.title);
+      return multilingualProject;
+      
+    } catch (error) {
+      console.error('Project service: Error in getProject:', error);
+      return null;
+    }
   }
 
-  // Convert Project format to database format
-  private convertProjectToDatabase(project: Project): any {
-    return {
-      id: project.id,
-      name: project.name,
-      title: project.title,
-      slug: project.slug,
-      description: project.description,
-      location: project.location,
-      category: project.category,
-      client: project.client,
-      completion_date: project.completion_date,
-      project_type: project.project_type,
-      image: project.image,
-      gallery: JSON.stringify(project.gallery || []),
-      case_study_pdf: project.case_study_pdf,
-      features: project.features,
-      specifications: JSON.stringify(project.specifications || {}),
-      products_used: project.products_used,
-      project_value: project.project_value,
-      duration: project.duration,
-      challenges: project.challenges,
-      solutions: project.solutions,
-      results: project.results,
-      testimonial: project.testimonial,
-      isActive: project.isActive,
-      showInFeatured: project.showInFeatured,
-      displayOrder: project.displayOrder,
-      tags: project.tags,
-      created_at: project.created_at,
-      updated_at: project.updated_at
-    };
-  }
-
-  // Get all projects
-  async getAllProjects(): Promise<Project[]> {
-    await this.initializeProjects();
-    return this.ensureSlugs([...this.projects]);
-  }
-
-  // Get projects for website display (filtered)
-  async getWebsiteProjects(): Promise<Project[]> {
-    await this.initializeProjects();
-    return this.ensureSlugs(
-      this.projects
-        .filter(project => project.isActive)
-        .sort((a, b) => a.displayOrder - b.displayOrder)
-    );
+  // Get projects for website display (filtered by isActive)
+  async getWebsiteProjects(languageCode: string = 'en'): Promise<MultilingualProject[]> {
+    try {
+      const allProjects = await this.getProjects(languageCode);
+      return allProjects.filter(project => project.isActive);
+    } catch (error) {
+      console.error('Project service: Error in getWebsiteProjects:', error);
+      return [];
+    }
   }
 
   // Get featured projects
-  async getFeaturedProjects(): Promise<Project[]> {
-    await this.initializeProjects();
-    return this.projects
-      .filter(project => project.showInFeatured && project.isActive)
-      .sort((a, b) => a.displayOrder - b.displayOrder);
+  async getFeaturedProjects(languageCode: string = 'en'): Promise<MultilingualProject[]> {
+    try {
+      const allProjects = await this.getProjects(languageCode);
+      return allProjects.filter(project => project.showInFeatured && project.isActive);
+    } catch (error) {
+      console.error('Project service: Error in getFeaturedProjects:', error);
+      return [];
+    }
   }
 
   // Get projects for admin (all projects)
-  async getAdminProjects(): Promise<Project[]> {
-    await this.initializeProjects();
-    return [...this.projects].sort((a, b) => 
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-  }
-
-  // Get project by ID
-  async getProjectById(id: string): Promise<Project | null> {
-    await this.initializeProjects();
-    const project = this.projects.find(project => project.id === id);
-    if (project) {
-      return this.ensureSlugs([project])[0];
+  async getAdminProjects(languageCode: string = 'en'): Promise<MultilingualProject[]> {
+    try {
+      return await this.getProjects(languageCode);
+    } catch (error) {
+      console.error('Project service: Error in getAdminProjects:', error);
+      return [];
     }
-    return null;
   }
 
   // Get project by slug
-  async getProjectBySlug(slug: string): Promise<Project | null> {
-    await this.initializeProjects();
-    const projectsWithSlugs = this.ensureSlugs(this.projects);
-    return projectsWithSlugs.find(project => project.slug === slug) || null;
+  async getProjectBySlug(slug: string, languageCode: string = 'en'): Promise<MultilingualProject | null> {
+    try {
+      const allProjects = await this.getProjects(languageCode);
+      return allProjects.find(project => project.slug === slug) || null;
+    } catch (error) {
+      console.error('Project service: Error in getProjectBySlug:', error);
+      return null;
+    }
+  }
+
+  // Unified save method (similar to products)
+  async updateProject(id: string, updateData: {
+    // Basic fields
+    title?: string;
+    description?: string;
+    location?: string;
+    category?: string;
+    client?: string;
+    completion_date?: string;
+    project_type?: string;
+    image?: string;
+    gallery?: string[];
+    case_study_pdf?: string;
+    features?: string[];
+    specifications?: Record<string, any>;
+    products_used?: string[];
+    project_value?: string;
+    duration?: string;
+    challenges?: string;
+    solutions?: string;
+    results?: string;
+    testimonial?: string;
+    isActive?: boolean;
+    showInFeatured?: boolean;
+    displayOrder?: number;
+    tags?: string[];
+    // Multilingual content
+    titles?: Record<string, string>;
+    descriptions?: Record<string, string>;
+    challenges_multilingual?: Record<string, string>;
+    solutions_multilingual?: Record<string, string>;
+    results_multilingual?: Record<string, string>;
+    locations_multilingual?: Record<string, string>;
+    clients_multilingual?: Record<string, string>;
+  }): Promise<MultilingualProject> {
+    try {
+      console.log('Project service: UNIFIED SAVE - Starting update for project:', id);
+      
+      // 1. UNIFIED SAVE: Separate basic fields from multilingual content
+      const basicFields: any = {};
+      const multilingualFields = ['titles', 'descriptions', 'challenges_multilingual', 'solutions_multilingual', 'results_multilingual', 'locations_multilingual', 'clients_multilingual'];
+      
+      Object.entries(updateData).forEach(([key, value]) => {
+        if (!multilingualFields.includes(key)) {
+          basicFields[key] = value;
+        }
+      });
+
+      const { titles, descriptions, challenges_multilingual, solutions_multilingual, results_multilingual, locations_multilingual, clients_multilingual } = updateData;
+
+      // 2. UNIFIED SAVE: Update all translations together
+      if (titles || descriptions || challenges_multilingual || solutions_multilingual || results_multilingual || locations_multilingual || clients_multilingual) {
+        console.log('Project service: UNIFIED SAVE - Updating translations for all languages');
+        
+        // Get all supported languages (you can expand this)
+        const supportedLanguages = ['en', 'zh-Hant', 'zh-Hans', 'ja', 'ko', 'th', 'vi'];
+        
+        for (const languageCode of supportedLanguages) {
+          const newTitle = titles?.[languageCode];
+          const newDescription = descriptions?.[languageCode];
+          const newChallenges = challenges_multilingual?.[languageCode];
+          const newSolutions = solutions_multilingual?.[languageCode];
+          const newResults = results_multilingual?.[languageCode];
+          const newLocation = locations_multilingual?.[languageCode];
+          const newClient = clients_multilingual?.[languageCode];
+
+          if (newTitle || newDescription || newChallenges || newSolutions || newResults || newLocation || newClient) {
+            console.log(`Project service: UNIFIED SAVE - Updating ${languageCode} translations`);
+            
+            const { error: translationError } = await supabase
+              .from('project_translations')
+              .upsert({
+                project_id: id,
+                language_code: languageCode,
+                title: newTitle || null,
+                description: newDescription || null,
+                challenges: newChallenges || null,
+                solutions: newSolutions || null,
+                results: newResults || null,
+                location: newLocation || null,
+                client: newClient || null
+              }, {
+                onConflict: 'project_id,language_code'
+              });
+
+            if (translationError) {
+              console.error(`Project service: UNIFIED SAVE - Error updating ${languageCode}:`, translationError);
+              throw translationError;
+            }
+            console.log(`Project service: UNIFIED SAVE - Successfully updated ${languageCode}`);
+          }
+        }
+      }
+
+      // 3. UNIFIED SAVE: Update basic fields together
+      if (Object.keys(basicFields).length > 0) {
+        console.log('Project service: UNIFIED SAVE - Updating basic fields:', basicFields);
+        
+        // Clean and prepare basic field updates
+        const cleanBasicUpdates: any = {};
+        Object.entries(basicFields).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            cleanBasicUpdates[key] = value;
+          }
+        });
+        
+        if (Object.keys(cleanBasicUpdates).length > 0) {
+          console.log('Project service: UNIFIED SAVE - Clean basic updates:', cleanBasicUpdates);
+          
+          const { error: basicError } = await supabase
+            .from('projects')
+            .update(cleanBasicUpdates)
+            .eq('id', id);
+
+          if (basicError) {
+            console.error('Project service: UNIFIED SAVE - Error updating basic fields:', basicError);
+            throw basicError;
+          }
+          console.log('Project service: UNIFIED SAVE - Basic fields updated successfully');
+        }
+      }
+
+      // 4. UNIFIED SAVE: Mirror English content to base table for reliability
+      if (titles?.['en'] || descriptions?.['en'] || challenges_multilingual?.['en'] || solutions_multilingual?.['en'] || results_multilingual?.['en'] || locations_multilingual?.['en'] || clients_multilingual?.['en']) {
+        console.log('Project service: UNIFIED SAVE - Mirroring English content to base table');
+        
+        const baseUpdates: any = {};
+        if (titles?.['en']) {
+          baseUpdates.title = titles['en'].trim();
+          console.log(`Project service: UNIFIED SAVE - Mirroring English title: "${titles['en']}"`);
+        }
+        if (descriptions?.['en']) {
+          baseUpdates.description = descriptions['en'].trim();
+          console.log(`Project service: UNIFIED SAVE - Mirroring English description: "${descriptions['en'].substring(0, 50)}..."`);
+        }
+        if (challenges_multilingual?.['en']) {
+          baseUpdates.challenges = challenges_multilingual['en'].trim();
+        }
+        if (solutions_multilingual?.['en']) {
+          baseUpdates.solutions = solutions_multilingual['en'].trim();
+        }
+        if (results_multilingual?.['en']) {
+          baseUpdates.results = results_multilingual['en'].trim();
+        }
+        if (locations_multilingual?.['en']) {
+          baseUpdates.location = locations_multilingual['en'].trim();
+        }
+        if (clients_multilingual?.['en']) {
+          baseUpdates.client = clients_multilingual['en'].trim();
+        }
+        
+        if (Object.keys(baseUpdates).length > 0) {
+          const { error: mirrorError } = await supabase
+            .from('projects')
+            .update(baseUpdates)
+            .eq('id', id);
+
+          if (mirrorError) {
+            console.error('Project service: UNIFIED SAVE - Error mirroring to base table:', mirrorError);
+            throw mirrorError;
+          }
+          console.log('Project service: UNIFIED SAVE - English content mirrored to base table');
+        }
+      }
+
+      // 5. UNIFIED SAVE: Fetch final result
+      console.log('Project service: UNIFIED SAVE - Fetching final project');
+      const finalProject = await this.getProject(id);
+      
+      if (!finalProject) {
+        throw new Error('Failed to fetch updated project');
+      }
+
+      console.log('Project service: UNIFIED SAVE - Project updated successfully:', finalProject.title);
+      return finalProject;
+      
+    } catch (error) {
+      console.error('Project service: UNIFIED SAVE - Error updating project:', error);
+      throw error;
+    }
   }
 
   // Add new project
-  async addProject(projectData: Partial<Project>): Promise<Project> {
-    await this.initializeProjects();
-
-    const newProject: Project = {
-      id: this.generateUUID(),
-      name: projectData.name || projectData.title?.toLowerCase().replace(/\s+/g, '-') || '',
-      title: projectData.title || '',
-      slug: projectData.slug || this.generateSlug(projectData.title || ''),
+  async addProject(projectData: Partial<MultilingualProject>): Promise<MultilingualProject> {
+    try {
+      console.log('Project service: Adding new project:', projectData.title || 'Untitled');
+      
+      // 1. Prepare basic project data
+      const basicProjectData = {
+        title: projectData.title || 'Untitled Project',
       description: projectData.description || '',
       location: projectData.location || '',
       category: projectData.category || 'General',
@@ -246,133 +516,79 @@ class ProjectService {
       products_used: projectData.products_used || [],
       project_value: projectData.project_value,
       duration: projectData.duration,
-      challenges: projectData.challenges,
-      solutions: projectData.solutions,
-      results: projectData.results,
+        challenges: projectData.challenges || '',
+        solutions: projectData.solutions || '',
+        results: projectData.results || '',
       testimonial: projectData.testimonial,
       isActive: projectData.isActive ?? true,
       showInFeatured: projectData.showInFeatured ?? false,
-      displayOrder: projectData.displayOrder ?? this.projects.length + 1,
-      tags: projectData.tags || [],
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
+        displayOrder: projectData.displayOrder ?? 99,
+        tags: projectData.tags || []
+      };
 
-    try {
-      // Save to database
-      const dbProject = this.convertProjectToDatabase(newProject);
-      const { error } = await supabase
+      // 2. Insert basic project
+      const { data: newProject, error: insertError } = await supabase
         .from('projects')
-        .insert([dbProject]);
+        .insert([basicProjectData])
+        .select()
+        .single();
 
-      if (error) {
-        throw new Error(`Failed to add project: ${error.message}`);
+      if (insertError) {
+        console.error('Project service: Error inserting project:', insertError);
+        throw new Error(`Failed to add project: ${insertError.message}`);
       }
 
-      // Add to local array
-      this.projects.push(newProject);
-
-      console.log('✅ Project added successfully:', newProject.title);
-      return newProject;
-    } catch (error) {
-      console.error('❌ Error adding project:', error);
-      throw error;
-    }
-  }
-
-  // Update existing project
-  async updateProject(id: string, updates: Partial<Project>): Promise<Project | null> {
-    await this.initializeProjects();
-
-    const index = this.projects.findIndex(project => project.id === id);
-    if (index === -1) {
-      throw new Error(`Project with ID ${id} not found`);
-    }
-
-    // Update the project
-    this.projects[index] = {
-      ...this.projects[index],
-      ...updates,
-      id, // Ensure ID doesn't change
-      created_at: this.projects[index].created_at, // Preserve original date
-      updated_at: new Date().toISOString(),
-      // Ensure slug is updated if title changes
-      slug: updates.title ? this.generateSlug(updates.title) : this.projects[index].slug
-    };
-
-    try {
-      // Persist to database
-      const dbProject = this.convertProjectToDatabase(this.projects[index]);
-      const { error } = await supabase
-        .from('projects')
-        .update(dbProject)
-        .eq('id', id);
-
-      if (error) {
-        throw new Error(`Failed to update project: ${error.message}`);
+      // 3. Add translations if provided
+      if (projectData.titles || projectData.descriptions || projectData.challenges_multilingual || projectData.solutions_multilingual || projectData.results_multilingual || projectData.locations_multilingual || projectData.clients_multilingual) {
+        await this.updateProject(newProject.id, projectData);
       }
 
-      console.log('✅ Project updated successfully:', this.projects[index].title);
-      return this.projects[index];
+      // 4. Fetch final result
+      const finalProject = await this.getProject(newProject.id);
+      if (!finalProject) {
+        throw new Error('Failed to fetch created project');
+      }
+
+      console.log('Project service: Project added successfully:', finalProject.title);
+      return finalProject;
+      
     } catch (error) {
-      console.error('❌ Error updating project:', error);
+      console.error('Project service: Error in addProject:', error);
       throw error;
     }
   }
 
   // Delete project
   async deleteProject(id: string): Promise<boolean> {
-    await this.initializeProjects();
-
-    const index = this.projects.findIndex(project => project.id === id);
-    if (index === -1) {
-      console.log(`Project with ID ${id} not found`);
-      return false;
-    }
-
-    const project = this.projects[index];
-    
     try {
-      console.log(`🗑️ Deleting project: "${project.title}" (ID: ${id})`);
+      console.log('Project service: Deleting project:', id);
       
-      // Delete from database
       const { error } = await supabase
         .from('projects')
         .delete()
         .eq('id', id);
 
       if (error) {
+        console.error('Project service: Error deleting project:', error);
         throw new Error(`Failed to delete project: ${error.message}`);
       }
 
-      // Remove from local array
-      this.projects.splice(index, 1);
-      
-      console.log(`✅ Successfully deleted "${project.title}"`);
+      console.log('Project service: Project deleted successfully');
       return true;
       
     } catch (error) {
-      console.error('❌ Error deleting project:', error);
-      
-      // Emergency fallback - remove from local array anyway
-      this.projects.splice(index, 1);
-      console.log(`🚨 Emergency removal of "${project.title}" from local array`);
-      
-      return true;
+      console.error('Project service: Error in deleteProject:', error);
+      throw error;
     }
   }
 
-  // Update featured status
-  async updateFeaturedStatus(id: string, showInFeatured: boolean): Promise<boolean> {
-    return (await this.updateProject(id, { showInFeatured })) !== null;
-  }
-
   // Search projects
-  async searchProjects(query: string): Promise<Project[]> {
-    await this.initializeProjects();
-
-    const searchTerm = query.toLowerCase();
-    return this.projects.filter(project => 
+  async searchProjects(query: string, languageCode: string = 'en'): Promise<MultilingualProject[]> {
+    try {
+      const allProjects = await this.getProjects(languageCode);
+      const searchTerm = query.toLowerCase();
+      
+      return allProjects.filter(project => 
       project.title.toLowerCase().includes(searchTerm) ||
       project.description.toLowerCase().includes(searchTerm) ||
       project.location.toLowerCase().includes(searchTerm) ||
@@ -381,35 +597,42 @@ class ProjectService {
       project.features.some(feature => feature.toLowerCase().includes(searchTerm)) ||
       (project.tags && project.tags.some(tag => tag.toLowerCase().includes(searchTerm)))
     );
+    } catch (error) {
+      console.error('Project service: Error in searchProjects:', error);
+      return [];
+    }
   }
 
-  // Filter projects by category
-  async getProjectsByCategory(category: string): Promise<Project[]> {
-    await this.initializeProjects();
-    return this.projects.filter(project => 
+  // Get projects by category
+  async getProjectsByCategory(category: string, languageCode: string = 'en'): Promise<MultilingualProject[]> {
+    try {
+      const allProjects = await this.getProjects(languageCode);
+      return allProjects.filter(project => 
       project.category === category && project.isActive
     );
+    } catch (error) {
+      console.error('Project service: Error in getProjectsByCategory:', error);
+      return [];
+    }
   }
 
   // Get all categories
-  async getCategories(): Promise<string[]> {
-    await this.initializeProjects();
-    const categories = new Set(this.projects.map(project => project.category));
+  async getCategories(languageCode: string = 'en'): Promise<string[]> {
+    try {
+      const allProjects = await this.getProjects(languageCode);
+      const categories = new Set(allProjects.map(project => project.category));
     return Array.from(categories).sort();
+    } catch (error) {
+      console.error('Project service: Error in getCategories:', error);
+      return [];
+    }
   }
 
-  // Force refresh projects from database (bypass cache)
+  // Force refresh projects from database
   async forceRefresh(): Promise<void> {
-    console.log('🔄 Force refreshing projects from database...');
-    this.initialized = false;
-    this.projects = [];
-    await this.initializeProjects();
-    console.log('✅ Force refresh complete');
-  }
-
-  // Generate UUID
-  private generateUUID(): string {
-    return crypto.randomUUID();
+    console.log('Project service: Force refreshing projects from database...');
+    // This will be handled by the next getProjects call
+    console.log('Project service: Force refresh complete');
   }
 }
 

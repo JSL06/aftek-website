@@ -136,11 +136,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const isDetailed = variant === 'detailed';
 
   return (
-    <Card className={`bg-card border-border shadow-card hover:shadow-elegant transition-all duration-300 group h-full flex flex-col ${className}`}>
+    <Card className={`bg-card border-border shadow-card hover:shadow-elegant transition-all duration-300 group h-full flex flex-col ${className}`} style={{ aspectRatio: '1 / 1.3' }}>
       <CardContent className="p-0 flex flex-col h-full">
         {/* Product Image - Display actual image or placeholder */}
         <div 
-          className={`${isCompact ? 'h-48' : 'h-64'} bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center rounded-t-lg overflow-hidden cursor-pointer relative group`}
+          className={`${isCompact ? 'h-96' : 'h-[28rem]'} w-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center rounded-t-lg overflow-hidden cursor-pointer relative group`}
+          style={{ aspectRatio: '1 / 1.3' }}
           onClick={handleViewDetails}
         >
           {product.image && product.image !== '/placeholder.svg' ? (
@@ -173,49 +174,80 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         </div>
         
-        <div className={`${isCompact ? 'p-4' : 'p-6'} flex flex-col h-full`}>
+        <div className={`${isCompact ? 'p-3' : 'p-4'} flex flex-col h-full`}>
           {/* Product Name */}
-          <h3 className={`font-bold text-foreground mb-3 ${isCompact ? 'text-lg' : 'text-xl'}`}>
+          <h3 className={`font-bold text-foreground mb-2 ${isCompact ? 'text-lg' : 'text-xl'}`}>
             {product.name}
           </h3>
           
-          {/* Product Description - Exactly 2 lines with truncation */}
-          <div className={`text-muted-foreground text-sm mb-4 leading-relaxed line-clamp-2 min-h-[3rem] max-h-[3rem] flex-grow overflow-hidden`}>
-            {stripHtml(product.description)}
-          </div>
-          
-          {/* Bottom section - Always at the same position */}
-          <div className="mt-auto">
-            {/* Stock Status Box */}
-            <div className="bg-muted/50 rounded-lg p-2 mb-4 border border-border/50">
-              <div className="flex items-center justify-center">
-                {product.inStock || product.in_stock ? (
-                  <>
-                    <CheckCircle className="h-3 w-3 text-green-600 mr-1" />
-                    <span className="text-xs text-green-600 font-medium">{t('products.inStock')}</span>
-                  </>
-                ) : (
-                  <>
-                    <XCircle className="h-3 w-3 text-red-600 mr-1" />
-                    <span className="text-xs text-red-600 font-medium">{t('products.outOfStock')}</span>
-                  </>
+          {/* Product Features - Show first 3 features prominently */}
+          {(() => {
+            console.log(`🔍 ProductCard ${product.id}: Features debug:`, {
+              features: product.features,
+              featuresType: typeof product.features,
+              isArray: Array.isArray(product.features),
+              length: Array.isArray(product.features) ? product.features.length : 'not array'
+            });
+            return null;
+          })()}
+          {Array.isArray(product.features) && product.features.length > 0 ? (
+            <div className="mb-2 flex-grow">
+              <div className="space-y-1">
+                {product.features.slice(0, 3).map((feature, index) => (
+                  <div key={index} className="flex items-center">
+                    <div className="w-2 h-2 bg-primary rounded-full mr-2 flex-shrink-0"></div>
+                    <span className="text-sm text-muted-foreground line-clamp-1">
+                      {feature}
+                    </span>
+                  </div>
+                ))}
+                {product.features.length > 3 && (
+                  <div className="text-xs text-muted-foreground/70 pl-4">
+                    +{product.features.length - 3} more features
+                  </div>
                 )}
               </div>
             </div>
-            
-            {/* Category Tags */}
-            {product.category && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+          ) : (
+            /* Fallback when no features - maintain layout height */
+            <div className="mb-2 flex-grow">
+              <div className="space-y-1">
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-muted rounded-full mr-2 flex-shrink-0"></div>
+                  <span className="text-sm text-muted-foreground/50">No features listed</span>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Bottom section - Always at the same position */}
+          <div className="mt-auto">
+            {/* Stock Status and Category - Same row, smaller size */}
+            <div className="mb-2 flex items-center gap-2">
+              {product.inStock || product.in_stock ? (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                  <CheckCircle className="h-2.5 w-2.5 mr-1" />
+                  {t('products.inStock')}
+                </span>
+              ) : (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                  <XCircle className="h-2.5 w-2.5 mr-1" />
+                  {t('products.outOfStock')}
+                </span>
+              )}
+              
+              {/* Category Badge - Same row as stock status */}
+              {product.category && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
                   {getTranslatedCategory(product.category, t)}
                 </span>
-              </div>
-            )}
+              )}
+            </div>
             
-            {/* Action Button */}
+            {/* Action Button - Red theme styling */}
             <Button 
               onClick={handleViewDetails}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors duration-200"
+              className="w-full bg-red-600 hover:bg-red-700 text-white transition-colors duration-200"
             >
               <Eye className="h-4 w-4 mr-2" />
               {t('products.viewDetails')}

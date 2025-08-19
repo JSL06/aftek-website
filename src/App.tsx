@@ -19,6 +19,7 @@ import NewContact from "./pages/NewContact";
 import NotFound from "./pages/NotFound";
 import FlexProPU from "./pages/products/FlexProPU";
 import ProductDetail from "./pages/ProductDetail";
+import ProjectDetail from "./pages/ProjectDetail";
 import CaseStudies from "./pages/CaseStudies";
 import Resources from "./pages/Resources";
 import Media from "./pages/Media";
@@ -63,6 +64,7 @@ const App = () => (
                 <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
                 <Route path="products" element={<ProtectedPage pageName="products"><Products /></ProtectedPage>} />
                 <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
+                <Route path="projects/:slug" element={<ProtectedPage pageName="projects"><ProjectDetail /></ProtectedPage>} />
                 <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
                 <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
                 <Route path="guide" element={<ProtectedPage pageName="guide"><Guide /></ProtectedPage>} />
@@ -79,6 +81,7 @@ const App = () => (
                 <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
                 <Route path="products" element={<ProtectedPage pageName="products"><Products /></ProtectedPage>} />
                 <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
+                <Route path="projects/:slug" element={<ProtectedPage pageName="projects"><ProjectDetail /></ProtectedPage>} />
                 <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
                 <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
                 <Route path="guide" element={<ProtectedPage pageName="guide"><Guide /></ProtectedPage>} />
@@ -95,6 +98,7 @@ const App = () => (
                 <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
                 <Route path="products" element={<ProtectedPage pageName="products"><Products /></ProtectedPage>} />
                 <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
+                <Route path="projects/:slug" element={<ProtectedPage pageName="projects"><ProjectDetail /></ProtectedPage>} />
                 <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
                 <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
                 <Route path="guide" element={<ProtectedPage pageName="guide"><Guide /></ProtectedPage>} />
@@ -112,6 +116,7 @@ const App = () => (
                 <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
                 <Route path="products" element={<ProtectedPage pageName="products"><Products /></ProtectedPage>} />
                 <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
+                <Route path="projects/:slug" element={<ProtectedPage pageName="projects"><ProjectDetail /></ProtectedPage>} />
                 <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
                 <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
                 <Route path="guide" element={<ProtectedPage pageName="guide"><Guide /></ProtectedPage>} />

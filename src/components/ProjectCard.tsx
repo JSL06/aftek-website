@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin, Calendar, Building2, ExternalLink, FileText } from 'lucide-react';
 import { Project } from '@/services/projectService';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useNavigate } from 'react-router-dom';
 
 interface ProjectCardProps {
   project: Project;
@@ -15,6 +16,7 @@ interface ProjectCardProps {
 
 const ProjectCard = ({ project, onViewGallery, onViewCaseStudy, className = '' }: ProjectCardProps) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -39,6 +41,12 @@ const ProjectCard = ({ project, onViewGallery, onViewCaseStudy, className = '' }
     }
   };
 
+  const handleCardClick = () => {
+    // Navigate to project detail page
+    const projectUrl = project.slug ? `/projects/${project.slug}` : `/projects/${project.id}`;
+    navigate(projectUrl);
+  };
+
   // Mapping of category values to translation keys
   const categoryTranslationMap: Record<string, string> = {
     'Infrastructure': 'projectCategory.infrastructure',
@@ -56,7 +64,10 @@ const ProjectCard = ({ project, onViewGallery, onViewCaseStudy, className = '' }
   };
 
   return (
-    <Card className={`border-0 shadow-lg hover:shadow-xl transition-all duration-300 group ${className}`}>
+    <Card 
+      className={`border-0 shadow-lg hover:shadow-xl transition-all duration-300 group cursor-pointer ${className}`}
+      onClick={handleCardClick}
+    >
       <CardContent className="p-0">
         {/* Project Image */}
         <div className="relative h-64 bg-muted rounded-t-lg overflow-hidden">
@@ -197,7 +208,7 @@ const ProjectCard = ({ project, onViewGallery, onViewCaseStudy, className = '' }
           )}
           
           {/* Action Buttons */}
-          <div className="flex gap-2">
+          <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
             <Button 
               variant="outline" 
               size="sm" 

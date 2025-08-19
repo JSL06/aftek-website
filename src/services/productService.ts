@@ -20,6 +20,7 @@ export interface UnifiedProduct {
   image_url?: string;
   price?: number | string;
   features?: string[];
+  features_multilingual?: Record<string, string[]>; // New multilingual features field
   model?: string;
   sku?: string;
   inStock?: boolean;
@@ -115,7 +116,7 @@ export const productService = {
       console.log('🔍 Number of translations found:', translations?.length || 0);
 
       // Organize translations by product ID
-      const translationsByProduct: Record<string, { names: Record<string, string>, descriptions: Record<string, string> }> = {};
+      const translationsByProduct: Record<string, { names: Record<string, string>, descriptions: Record<string, string>, features: Record<string, string[]> }> = {};
       
       if (translations) {
         translations.forEach(translation => {
@@ -123,17 +124,21 @@ export const productService = {
             product_id: translation.product_id,
             language_code: translation.language_code,
             name: translation.name,
-            description: translation.description?.substring(0, 50) + '...'
+            description: translation.description?.substring(0, 50) + '...',
+            features: translation.features
           });
           
           if (!translationsByProduct[translation.product_id]) {
-            translationsByProduct[translation.product_id] = { names: {}, descriptions: {} };
+            translationsByProduct[translation.product_id] = { names: {}, descriptions: {}, features: {} };
           }
           if (translation.name) {
             translationsByProduct[translation.product_id].names[translation.language_code] = translation.name;
           }
           if (translation.description) {
             translationsByProduct[translation.product_id].descriptions[translation.language_code] = translation.description;
+          }
+          if (translation.features && Array.isArray(translation.features)) {
+            translationsByProduct[translation.product_id].features[translation.language_code] = translation.features;
           }
         });
       }
@@ -143,7 +148,7 @@ export const productService = {
       // Transform the data to match UnifiedProduct interface
       const transformedData = data.map(product => {
         console.log('🔍 Processing product:', product.id);
-        const productTranslations = translationsByProduct[product.id] || { names: {}, descriptions: {} };
+        const productTranslations = translationsByProduct[product.id] || { names: {}, descriptions: {}, features: {} };
         console.log('🔍 Product translations:', productTranslations);
         
         // Always use the first available translation or fallback to original
@@ -191,13 +196,21 @@ export const productService = {
           ...product,
           name: displayName, // This will be displayed on the website
           description: displayDescription, // This will be displayed on the website
-          features: product.features || [],
+          features: productTranslations.features[filters?.language || 'en'] || product.features || [],
           price: product.price || 0,
           inStock: product.inStock || product.in_stock || false,
           image: product.image || product.image_url || '',
           names: productTranslations.names,
-          descriptions: productTranslations.descriptions
+          descriptions: productTranslations.descriptions,
+          features_multilingual: productTranslations.features
         };
+        
+        console.log(`🔍 Features debug for product ${product.id}:`, {
+          originalFeatures: product.features,
+          finalFeatures: transformedProduct.features,
+          featuresType: typeof transformedProduct.features,
+          featuresLength: Array.isArray(transformedProduct.features) ? transformedProduct.features.length : 'not array'
+        });
         
         console.log(`🔍 Final transformed product ${product.id}:`, {
           originalName: product.name,
@@ -205,7 +218,9 @@ export const productService = {
           originalDesc: product.description?.substring(0, 50) + '...',
           finalDesc: transformedProduct.description?.substring(0, 50) + '...',
           availableNames: productTranslations.names,
-          availableDescriptions: Object.keys(productTranslations.descriptions)
+          availableDescriptions: Object.keys(productTranslations.descriptions),
+          availableFeatures: Object.keys(productTranslations.features),
+          features_multilingual: productTranslations.features
         });
         
         return transformedProduct;
@@ -238,6 +253,9 @@ export const productService = {
       if (!product) return null;
 
       console.log('Product service: Main product data:', product);
+      console.log('Product service: Raw product features:', product.features);
+      console.log('Product service: Raw product features type:', typeof product.features);
+      console.log('Product service: Raw product features isArray:', Array.isArray(product.features));
 
       // 2. Get translations for this product
       const { data: translations, error: translationError } = await supabase
@@ -254,9 +272,10 @@ export const productService = {
       console.log('Product service: Raw translations data:', translations);
       console.log('Product service: Number of translations found:', translations?.length || 0);
 
-      // 3. Organize translations into names and descriptions
+      // 3. Organize translations into names, descriptions, and features
       const names: Record<string, string> = {};
       const descriptions: Record<string, string> = {};
+      const features_multilingual: Record<string, string[]> = {};
 
       if (translations && translations.length > 0) {
         translations.forEach(translation => {
@@ -268,6 +287,10 @@ export const productService = {
           if (translation.description && translation.description.trim() !== '') {
             descriptions[translation.language_code] = translation.description;
             console.log(`Product service: Added description for ${translation.language_code}: "${translation.description.substring(0, 50)}..."`);
+          }
+          if (translation.features && Array.isArray(translation.features) && translation.features.length > 0) {
+            features_multilingual[translation.language_code] = translation.features;
+            console.log(`Product service: Added features for ${translation.language_code}: ${translation.features.length} features`);
           }
         });
       } else {
@@ -330,13 +353,22 @@ export const productService = {
         // Use translated content for display, fallback to original
         name: displayName,
         description: displayDescription,
-        features: product.features || [],
+        features: features_multilingual[targetLanguage] || product.features || [],
         price: product.price || 0,
         inStock: product.inStock || product.in_stock || false,
         image: product.image || product.image_url || '',
         names,
-        descriptions
+        descriptions,
+        features_multilingual
       };
+      
+      console.log('Product service: Features debug:', {
+        originalFeatures: product.features,
+        finalFeatures: unifiedProduct.features,
+        featuresType: typeof unifiedProduct.features,
+        featuresLength: Array.isArray(unifiedProduct.features) ? unifiedProduct.features.length : 'not array',
+        features_multilingual: features_multilingual
+      });
 
       console.log('Product service: Successfully fetched product with translations:', unifiedProduct);
       return unifiedProduct;
@@ -450,7 +482,7 @@ export const productService = {
       console.log('Product service: UNIFIED SAVE - All updates to apply:', updates);
 
       // Extract all content from updates
-      const { names, descriptions, ...basicFields } = updates;
+      const { names, descriptions, features_multilingual, ...basicFields } = updates;
 
       // UNIFIED APPROACH: Save everything in one operation like descriptions do
       console.log('Product service: UNIFIED SAVE - Processing all fields together');
@@ -466,19 +498,20 @@ export const productService = {
         throw fetchError;
       }
       
-      const existingByLanguage: Record<string, { name?: string | null, description?: string | null }> = {};
+      const existingByLanguage: Record<string, { name?: string | null, description?: string | null, features?: string[] | null }> = {};
       (existingTranslations || []).forEach(t => {
-        existingByLanguage[t.language_code] = { name: t.name, description: t.description };
+        existingByLanguage[t.language_code] = { name: t.name, description: t.description, features: t.features };
       });
 
-      // 2. UNIFIED SAVE: Process ALL translations (names + descriptions) together
-      if (names || descriptions) {
+      // 2. UNIFIED SAVE: Process ALL translations (names + descriptions + features) together
+      if (names || descriptions || features_multilingual) {
         console.log('Product service: UNIFIED SAVE - Processing multilingual content');
         
         // Get all language codes that need updates
         const allLanguages = new Set([
           ...(names ? Object.keys(names) : []),
-          ...(descriptions ? Object.keys(descriptions) : [])
+          ...(descriptions ? Object.keys(descriptions) : []),
+          ...(features_multilingual ? Object.keys(features_multilingual) : [])
         ]);
         
         console.log('Product service: UNIFIED SAVE - Languages to update:', Array.from(allLanguages));
@@ -490,17 +523,19 @@ export const productService = {
           const existing = existingByLanguage[languageCode] || {};
           const newName = names?.[languageCode] || existing.name;
           const newDescription = descriptions?.[languageCode] || existing.description;
+          const newFeatures = features_multilingual?.[languageCode] || existing.features;
           
-          console.log(`Product service: UNIFIED SAVE - ${languageCode}: name="${newName}", description="${newDescription?.substring(0, 50)}..."`);
+          console.log(`Product service: UNIFIED SAVE - ${languageCode}: name="${newName}", description="${newDescription?.substring(0, 50)}...", features="${JSON.stringify(newFeatures)}"`);
           
-          // UNIFIED UPSERT: Save both name and description together (like descriptions do)
+          // UNIFIED UPSERT: Save name, description, and features together
           const { error: translationError } = await supabase
             .from('product_translations')
             .upsert({
               product_id: id,
               language_code: languageCode,
               name: newName || null,
-              description: newDescription || null
+              description: newDescription || null,
+              features: newFeatures || null
             }, {
               onConflict: 'product_id,language_code'
             });
@@ -513,7 +548,7 @@ export const productService = {
         }
       }
 
-      // 3. UNIFIED SAVE: Update basic fields (category, model, etc.) together
+      // 3. UNIFIED SAVE: Update basic fields (category, model, features, etc.) together
       if (Object.keys(basicFields).length > 0) {
         console.log('Product service: UNIFIED SAVE - Updating basic fields:', basicFields);
         
@@ -760,7 +795,7 @@ export const productService = {
 
       // Transform the data to match UnifiedProduct interface
       const transformedProducts = featuredProducts.map(product => {
-        const productTranslations = translationsByProduct[product.id] || { names: {}, descriptions: {} };
+        const productTranslations = translationsByProduct[product.id] || { names: {}, descriptions: {}, features: {} };
         
         // If a specific language is requested, use that language's content
         let displayName = product.name; // fallback to original
@@ -776,12 +811,13 @@ export const productService = {
           ...product,
           name: displayName, // This will be displayed on the website
           description: displayDescription, // This will be displayed on the website
-          features: product.features || [],
+          features: productTranslations.features[language || 'en'] || product.features || [],
           price: product.price || 0,
           inStock: product.inStock || product.in_stock || false,
           image: product.image || product.image_url || '',
           names: productTranslations.names,
-          descriptions: productTranslations.descriptions
+          descriptions: productTranslations.descriptions,
+          features_multilingual: productTranslations.features
         };
       });
 

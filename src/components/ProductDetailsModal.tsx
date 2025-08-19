@@ -256,19 +256,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
               </div>
             )}
 
-            {/* Metadata Section */}
-            <div className="pt-6 border-t border-border">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <span>Created: {formatDate(product.createdAt || product.created_at)}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <span>Updated: {formatDate(product.updatedAt || product.updated_at)}</span>
-                </div>
-              </div>
-            </div>
+
           </div>
         </div>
 

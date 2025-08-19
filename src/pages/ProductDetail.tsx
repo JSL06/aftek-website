@@ -185,12 +185,13 @@ const ProductDetail = () => {
               {/* Product Title and Rating */}
               <div className="flex items-start justify-between mb-4">
                 <h1 className="text-4xl font-bold text-foreground pr-4">{product.name}</h1>
-                {product.rating && (
+                {/* Rating temporarily removed - property doesn't exist on UnifiedProduct */}
+                {/* {product.rating && (
                   <div className="flex items-center">
                     <Star className="h-5 w-5 text-yellow-500 fill-current" />
                     <span className="text-lg text-muted-foreground ml-2">{product.rating}</span>
                   </div>
-                )}
+                )} */}
               </div>
 
               {/* Category */}
@@ -220,15 +221,7 @@ const ProductDetail = () => {
                 )}
               </div>
 
-              {/* Short Description */}
-              <div className="mb-6">
-                <div 
-                  className="text-muted-foreground leading-relaxed prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: product.description }}
-                />
-              </div>
-
-              {/* Features */}
+              {/* Features - Show first and prominently */}
               {product.features && product.features.length > 0 && (
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold mb-3">{t('productDetail.keyFeatures')}</h3>
@@ -242,6 +235,15 @@ const ProductDetail = () => {
                   </div>
                 </div>
               )}
+
+              {/* Product Description - Moved below features */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">{t('productDetail.productDescription')}</h3>
+                <div 
+                  className="text-muted-foreground leading-relaxed prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
+              </div>
 
               {/* Contact Information */}
               <div className="space-y-4 pt-6 border-t">
@@ -291,23 +293,13 @@ const ProductDetail = () => {
                 <TabsContent value="specifications" className="mt-6">
                   <div>
                     <h3 className="text-xl font-semibold mb-4">{t('productDetail.technicalSpecifications')}</h3>
-                    {product.specifications && Object.keys(product.specifications).length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {Object.entries(product.specifications).map(([key, value]) => (
-                          <div key={key} className="flex justify-between py-2 border-b border-border">
-                            <span className="font-medium">{key}:</span>
-                            <span className="text-muted-foreground">{value}</span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="bg-muted/50 rounded-lg p-6 text-center">
-                        <Package className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                        <p className="text-muted-foreground">
-                          {t('productDetail.specificationsText').replace('{productName}', product.name)}
-                        </p>
-                      </div>
-                    )}
+                    {/* Specifications temporarily removed - property doesn't exist on UnifiedProduct */}
+                    <div className="bg-muted/50 rounded-lg p-6 text-center">
+                      <Package className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-muted-foreground">
+                        {t('productDetail.specificationsText').replace('{productName}', product.name)}
+                      </p>
+                    </div>
                   </div>
                 </TabsContent>
                 
