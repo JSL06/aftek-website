@@ -306,6 +306,15 @@ export default function ProductEdit() {
                   </SelectContent>
                 </Select>
               </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-2">{t('basic.model')}</label>
+                <Input
+                  value={product.model || ''}
+                  onChange={(e) => updateBasicField('model', e.target.value)}
+                  placeholder={t('basic.model')}
+                />
+              </div>
 
               <div className="space-y-4">
                 <div className="flex items-center space-x-2">
@@ -355,25 +364,6 @@ export default function ProductEdit() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Model Field - Single input since models are alphanumeric codes */}
-              <div className="mb-6 p-4 bg-muted/30 rounded-lg">
-                <label className="block text-sm font-medium mb-2 flex items-center gap-2">
-                  <Type className="h-4 w-4" />
-                  {t('basic.model')} (Product Code)
-                  <Badge variant="secondary" className="text-xs">🔒 LOCKED</Badge>
-                </label>
-                <Input
-                  value={product.model || ''}
-                  onChange={(e) => updateBasicField('model', e.target.value)}
-                  placeholder={t('basic.model')}
-                  className="text-lg font-medium"
-                  title="This field is locked to prevent code changes. The system is fully functional."
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Product model/code - <span className="text-orange-600 font-medium">🔒 LOCKED: Fully functional, no code changes needed</span>
-                </p>
-              </div>
-
               <Tabs defaultValue="en" className="w-full">
                 {/* Language Tabs - Horizontal Layout */}
                 <TabsList className="grid w-full grid-cols-7 h-12 mb-6">
@@ -401,29 +391,23 @@ export default function ProductEdit() {
                       <div className="space-y-4">
                         {/* Product Name */}
                         <div>
-                          <label className="block text-sm font-medium mb-2 flex items-center gap-2">
-                            <Type className="h-4 w-4" />
+                          <label className="block text-sm font-medium mb-2">
+                            <Type className="h-4 w-4 inline mr-2" />
                             {t('multilingual.productName')} ({lang.nativeName})
-                            <Badge variant="secondary" className="text-xs">🔒 LOCKED</Badge>
                           </label>
                           <Input
                             value={product.names?.[lang.code] || ''}
                             onChange={(e) => updateTranslation(lang.code, 'name', e.target.value)}
                             placeholder={t('multilingual.enterName')}
                             className="text-lg font-medium"
-                            title="This editor is locked to prevent code changes. The system is fully functional."
                           />
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {t('multilingual.simpleTextInput')} - <span className="text-orange-600 font-medium">🔒 LOCKED: Fully functional, no code changes needed</span>
-                          </p>
                         </div>
 
                         {/* Product Description */}
                         <div>
-                          <label className="block text-sm font-medium mb-2 flex items-center gap-2">
-                            <FileText className="h-4 w-4" />
+                          <label className="block text-sm font-medium mb-2">
+                            <FileText className="h-4 w-4 inline mr-2" />
                             {t('multilingual.productDescription')} ({lang.nativeName})
-                            <Badge variant="secondary" className="text-xs">🔒 LOCKED</Badge>
                           </label>
                           <SimpleRichTextEditor
                             value={product.descriptions?.[lang.code] || ''}
@@ -431,9 +415,6 @@ export default function ProductEdit() {
                             placeholder={t('multilingual.enterDescription')}
                             height="300px"
                           />
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {t('multilingual.richTextEditor')} - <span className="text-orange-600 font-medium">🔒 LOCKED: Fully functional, no code changes needed</span>
-                          </p>
                         </div>
                       </div>
                     </div>
