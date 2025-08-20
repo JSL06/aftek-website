@@ -15,6 +15,7 @@ export interface Project {
   project_type: string;
   image?: string;
   gallery?: string[];
+  gallery_images?: string[]; // New gallery images field
   case_study_pdf?: string;
   features: string[];
   specifications?: Record<string, any>;
@@ -27,6 +28,13 @@ export interface Project {
   solutions_multilingual?: Record<string, string>; // Multilingual solutions
   results?: string;
   results_multilingual?: Record<string, string>; // Multilingual results
+  locations_multilingual?: Record<string, string>; // Multilingual locations
+  clients_multilingual?: Record<string, string>; // Multilingual clients
+  categories_multilingual?: Record<string, string>; // Multilingual categories
+  completion_dates_multilingual?: Record<string, string>; // Multilingual completion dates
+  project_types_multilingual?: Record<string, string>; // Multilingual project types
+  project_values_multilingual?: Record<string, string>; // Multilingual project values
+  durations_multilingual?: Record<string, string>; // Multilingual durations
   testimonial?: string;
   isActive: boolean;
   showInFeatured: boolean;
@@ -48,14 +56,20 @@ export interface ProjectTranslation {
   results?: string;
   location?: string;
   client?: string;
+  category?: string;
+  completion_date?: string;
+  project_type?: string;
+  project_value?: string;
+  duration?: string;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 // Interface for multilingual project data
 export interface MultilingualProject {
   id: string;
   title: string;
+  slug?: string;
   description: string;
   location: string;
   category: string;
@@ -64,6 +78,7 @@ export interface MultilingualProject {
   project_type: string;
   image?: string;
   gallery?: string[];
+  gallery_images?: string[]; // New gallery images field
   case_study_pdf?: string;
   features: string[];
   specifications?: Record<string, any>;
@@ -88,6 +103,11 @@ export interface MultilingualProject {
   results_multilingual: Record<string, string>;
   locations_multilingual: Record<string, string>;
   clients_multilingual: Record<string, string>;
+  categories_multilingual: Record<string, string>;
+  completion_dates_multilingual: Record<string, string>;
+  project_types_multilingual: Record<string, string>;
+  project_values_multilingual: Record<string, string>;
+  durations_multilingual: Record<string, string>;
 }
 
 class ProjectService {
@@ -148,6 +168,11 @@ class ProjectService {
         const results_multilingual: Record<string, string> = {};
         const locations_multilingual: Record<string, string> = {};
         const clients_multilingual: Record<string, string> = {};
+        const categories_multilingual: Record<string, string> = {};
+        const completion_dates_multilingual: Record<string, string> = {};
+        const project_types_multilingual: Record<string, string> = {};
+        const project_values_multilingual: Record<string, string> = {};
+        const durations_multilingual: Record<string, string> = {};
 
         // Populate from translations
         projectTranslations.forEach(translation => {
@@ -159,6 +184,11 @@ class ProjectService {
           if (translation.results) results_multilingual[lang] = translation.results;
           if (translation.location) locations_multilingual[lang] = translation.location;
           if (translation.client) clients_multilingual[lang] = translation.client;
+          if (translation.category) categories_multilingual[lang] = translation.category;
+          if (translation.completion_date) completion_dates_multilingual[lang] = translation.completion_date;
+          if (translation.project_type) project_types_multilingual[lang] = translation.project_type;
+          if (translation.project_value) project_values_multilingual[lang] = translation.project_value;
+          if (translation.duration) durations_multilingual[lang] = translation.duration;
         });
 
         // Fallback to base project data if no translations
@@ -169,6 +199,11 @@ class ProjectService {
         if (!results_multilingual['en'] && project.results) results_multilingual['en'] = project.results;
         if (!locations_multilingual['en'] && project.location) locations_multilingual['en'] = project.location;
         if (!clients_multilingual['en'] && project.client) clients_multilingual['en'] = project.client;
+        if (!categories_multilingual['en'] && project.category) categories_multilingual['en'] = project.category;
+        if (!completion_dates_multilingual['en'] && project.completion_date) completion_dates_multilingual['en'] = project.completion_date;
+        if (!project_types_multilingual['en'] && project.project_type) project_types_multilingual['en'] = project.project_type;
+        if (!project_values_multilingual['en'] && project.project_value) project_values_multilingual['en'] = project.project_value;
+        if (!durations_multilingual['en'] && project.duration) durations_multilingual['en'] = project.duration;
 
         return {
           ...project,
@@ -178,7 +213,12 @@ class ProjectService {
           solutions_multilingual,
           results_multilingual,
           locations_multilingual,
-          clients_multilingual
+          clients_multilingual,
+          categories_multilingual,
+          completion_dates_multilingual,
+          project_types_multilingual,
+          project_values_multilingual,
+          durations_multilingual
         };
       });
 
@@ -227,6 +267,11 @@ class ProjectService {
       const results_multilingual: Record<string, string> = {};
       const locations_multilingual: Record<string, string> = {};
       const clients_multilingual: Record<string, string> = {};
+      const categories_multilingual: Record<string, string> = {};
+      const completion_dates_multilingual: Record<string, string> = {};
+      const project_types_multilingual: Record<string, string> = {};
+      const project_values_multilingual: Record<string, string> = {};
+      const durations_multilingual: Record<string, string> = {};
 
       // Populate from translations
       (translations || []).forEach(translation => {
@@ -238,6 +283,11 @@ class ProjectService {
         if (translation.results) results_multilingual[lang] = translation.results;
         if (translation.location) locations_multilingual[lang] = translation.location;
         if (translation.client) clients_multilingual[lang] = translation.client;
+        if (translation.category) categories_multilingual[lang] = translation.category;
+        if (translation.completion_date) completion_dates_multilingual[lang] = translation.completion_date;
+        if (translation.project_type) project_types_multilingual[lang] = translation.project_type;
+        if (translation.project_value) project_values_multilingual[lang] = translation.project_value;
+        if (translation.duration) durations_multilingual[lang] = translation.duration;
       });
 
       // Fallback to base project data if no translations
@@ -248,6 +298,11 @@ class ProjectService {
       if (!results_multilingual['en'] && project.results) results_multilingual['en'] = project.results;
       if (!locations_multilingual['en'] && project.location) locations_multilingual['en'] = project.location;
       if (!clients_multilingual['en'] && project.client) clients_multilingual['en'] = project.client;
+      if (!categories_multilingual['en'] && project.category) categories_multilingual['en'] = project.category;
+      if (!completion_dates_multilingual['en'] && project.completion_date) completion_dates_multilingual['en'] = project.completion_date;
+      if (!project_types_multilingual['en'] && project.project_type) project_types_multilingual['en'] = project.project_type;
+      if (!project_values_multilingual['en'] && project.project_value) project_values_multilingual['en'] = project.project_value;
+      if (!durations_multilingual['en'] && project.duration) durations_multilingual['en'] = project.duration;
 
       const multilingualProject: MultilingualProject = {
         ...project,
@@ -257,7 +312,12 @@ class ProjectService {
         solutions_multilingual,
         results_multilingual,
         locations_multilingual,
-        clients_multilingual
+        clients_multilingual,
+        categories_multilingual,
+        completion_dates_multilingual,
+        project_types_multilingual,
+        project_values_multilingual,
+        durations_multilingual
       };
 
       console.log('Project service: Successfully fetched project:', multilingualProject.title);
@@ -346,13 +406,58 @@ class ProjectService {
     results_multilingual?: Record<string, string>;
     locations_multilingual?: Record<string, string>;
     clients_multilingual?: Record<string, string>;
+    categories_multilingual?: Record<string, string>;
+    completion_dates_multilingual?: Record<string, string>;
+    project_types_multilingual?: Record<string, string>;
+    project_values_multilingual?: Record<string, string>;
+    durations_multilingual?: Record<string, string>;
   }): Promise<MultilingualProject> {
     try {
       console.log('Project service: UNIFIED SAVE - Starting update for project:', id);
       
+      // Check if database schema is ready for new multilingual fields
+      let hasNewSchema = false;
+      let missingColumns: string[] = [];
+      try {
+        // Check each new column individually to identify exactly what's missing
+        const columnsToCheck = ['category', 'completion_date', 'project_type', 'project_value', 'duration'];
+        const columnChecks = await Promise.all(
+          columnsToCheck.map(async (column) => {
+            try {
+              const { error } = await supabase
+                .from('project_translations')
+                .select(column)
+                .limit(1);
+              return { column, exists: !error };
+            } catch {
+              return { column, exists: false };
+            }
+          })
+        );
+        
+        missingColumns = columnChecks.filter(check => !check.exists).map(check => check.column);
+        hasNewSchema = missingColumns.length === 0;
+        
+        if (hasNewSchema) {
+          console.log('Project service: UNIFIED SAVE - Database schema check passed - all new columns available');
+        } else {
+          console.warn(`Project service: UNIFIED SAVE - Missing columns: ${missingColumns.join(', ')}`);
+          console.warn('Project service: UNIFIED SAVE - Falling back to basic multilingual fields only');
+          
+          // Log a helpful message for the user
+          console.warn(`Project service: UNIFIED SAVE - To enable full multilingual support, run this SQL in Supabase:`);
+          console.warn(`UPDATE_PROJECTS_MULTILINGUAL.sql`);
+          console.warn(`Missing columns: ${missingColumns.join(', ')}`);
+        }
+      } catch (schemaCheckError) {
+        console.warn('Project service: UNIFIED SAVE - Schema check failed, using fallback:', schemaCheckError);
+        hasNewSchema = false;
+        missingColumns = ['category', 'completion_date', 'project_type', 'project_value', 'duration'];
+      }
+      
       // 1. UNIFIED SAVE: Separate basic fields from multilingual content
       const basicFields: any = {};
-      const multilingualFields = ['titles', 'descriptions', 'challenges_multilingual', 'solutions_multilingual', 'results_multilingual', 'locations_multilingual', 'clients_multilingual'];
+      const multilingualFields = ['titles', 'descriptions', 'challenges_multilingual', 'solutions_multilingual', 'results_multilingual', 'locations_multilingual', 'clients_multilingual', 'categories_multilingual', 'completion_dates_multilingual', 'project_types_multilingual', 'project_values_multilingual', 'durations_multilingual'];
       
       Object.entries(updateData).forEach(([key, value]) => {
         if (!multilingualFields.includes(key)) {
@@ -360,10 +465,10 @@ class ProjectService {
         }
       });
 
-      const { titles, descriptions, challenges_multilingual, solutions_multilingual, results_multilingual, locations_multilingual, clients_multilingual } = updateData;
+      const { titles, descriptions, challenges_multilingual, solutions_multilingual, results_multilingual, locations_multilingual, clients_multilingual, categories_multilingual, completion_dates_multilingual, project_types_multilingual, project_values_multilingual, durations_multilingual } = updateData;
 
       // 2. UNIFIED SAVE: Update all translations together
-      if (titles || descriptions || challenges_multilingual || solutions_multilingual || results_multilingual || locations_multilingual || clients_multilingual) {
+      if (titles || descriptions || challenges_multilingual || solutions_multilingual || results_multilingual || locations_multilingual || clients_multilingual || categories_multilingual || completion_dates_multilingual || project_types_multilingual || project_values_multilingual || durations_multilingual) {
         console.log('Project service: UNIFIED SAVE - Updating translations for all languages');
         
         // Get all supported languages (you can expand this)
@@ -377,31 +482,123 @@ class ProjectService {
           const newResults = results_multilingual?.[languageCode];
           const newLocation = locations_multilingual?.[languageCode];
           const newClient = clients_multilingual?.[languageCode];
+          const newCategory = categories_multilingual?.[languageCode];
+          const newCompletionDate = completion_dates_multilingual?.[languageCode];
+          const newProjectType = project_types_multilingual?.[languageCode];
+          const newProjectValue = project_values_multilingual?.[languageCode];
+          const newDuration = durations_multilingual?.[languageCode];
 
-          if (newTitle || newDescription || newChallenges || newSolutions || newResults || newLocation || newClient) {
+          console.log(`Project service: UNIFIED SAVE - Processing ${languageCode}:`, {
+            title: newTitle,
+            description: newDescription,
+            challenges: newChallenges,
+            solutions: newSolutions,
+            results: newResults,
+            location: newLocation,
+            client: newClient,
+            category: newCategory,
+            completion_date: newCompletionDate,
+            project_type: newProjectType,
+            project_value: newProjectValue,
+            duration: newDuration
+          });
+
+          if (newTitle || newDescription || newChallenges || newSolutions || newResults || newLocation || newClient || newCategory || newCompletionDate || newProjectType || newProjectValue || newDuration) {
             console.log(`Project service: UNIFIED SAVE - Updating ${languageCode} translations`);
+            console.log(`Project service: UNIFIED SAVE - Data for ${languageCode}:`, {
+              title: newTitle,
+              description: newDescription,
+              challenges: newChallenges,
+              solutions: newSolutions,
+              results: newResults,
+              location: newLocation,
+              client: newClient,
+              category: newCategory,
+              completion_date: newCompletionDate,
+              project_type: newProjectType,
+              project_value: newProjectValue,
+              duration: newDuration
+            });
             
-            const { error: translationError } = await supabase
-              .from('project_translations')
-              .upsert({
+            try {
+              // Only create upsert data if we have at least one non-null value
+              const hasValidData = newTitle || newDescription || newChallenges || newSolutions || newResults || newLocation || newClient || (hasNewSchema && (newCategory || newCompletionDate || newProjectType || newProjectValue || newDuration));
+              
+              if (!hasValidData) {
+                console.log(`Project service: UNIFIED SAVE - Skipping ${languageCode} - no valid data to save`);
+                continue;
+              }
+              
+              // CRITICAL: Title is required for project_translations table
+              if (!newTitle || !newTitle.trim()) {
+                console.warn(`Project service: UNIFIED SAVE - Skipping ${languageCode} - title is required but not provided`);
+                continue;
+              }
+              
+              const upsertData: any = {
                 project_id: id,
-                language_code: languageCode,
-                title: newTitle || null,
-                description: newDescription || null,
-                challenges: newChallenges || null,
-                solutions: newSolutions || null,
-                results: newResults || null,
-                location: newLocation || null,
-                client: newClient || null
-              }, {
-                onConflict: 'project_id,language_code'
-              });
+                language_code: languageCode
+              };
+              
+              // Only include fields that have actual values (not null/undefined)
+              if (newTitle && newTitle.trim()) upsertData.title = newTitle.trim();
+              if (newDescription && newDescription.trim()) upsertData.description = newDescription.trim();
+              if (newChallenges && newChallenges.trim()) upsertData.challenges = newChallenges.trim();
+              if (newSolutions && newSolutions.trim()) upsertData.solutions = newSolutions.trim();
+              if (newResults && newResults.trim()) upsertData.results = newResults.trim();
+              if (newLocation && newLocation.trim()) upsertData.location = newLocation.trim();
+              if (newClient && newClient.trim()) upsertData.client = newClient.trim();
+              
+              // Only include new fields if schema supports them AND they have values
+              if (hasNewSchema) {
+                if (newCategory && newCategory.trim()) upsertData.category = newCategory.trim();
+                if (newCompletionDate && newCompletionDate.trim()) upsertData.completion_date = newCompletionDate.trim();
+                if (newProjectType && newProjectType.trim()) upsertData.project_type = newProjectType.trim();
+                if (newProjectValue && newProjectValue.trim()) upsertData.project_value = newProjectValue.trim();
+                if (newDuration && newDuration.trim()) upsertData.duration = newDuration.trim();
+              }
+              
+              console.log(`Project service: UNIFIED SAVE - Upsert data for ${languageCode}:`, upsertData);
+              
+              const { error: translationError } = await supabase
+                .from('project_translations')
+                .upsert(upsertData, {
+                  onConflict: 'project_id,language_code'
+                });
 
-            if (translationError) {
-              console.error(`Project service: UNIFIED SAVE - Error updating ${languageCode}:`, translationError);
-              throw translationError;
+              if (translationError) {
+                console.error(`Project service: UNIFIED SAVE - Error updating ${languageCode}:`, translationError);
+                console.error(`Project service: UNIFIED SAVE - Error details:`, {
+                  code: translationError.code,
+                  message: translationError.message,
+                  details: translationError.details,
+                  hint: translationError.hint
+                });
+                
+                // Check if this is a constraint violation FIRST (most common issue)
+                if (translationError.code === '23502') {
+                  console.error(`Project service: UNIFIED SAVE - Constraint violation for ${languageCode}. Upsert data:`, upsertData);
+                  
+                  // Check if title is missing (most common constraint violation)
+                  if (!upsertData.title) {
+                    throw new Error(`Cannot save translation for ${languageCode}: Title is required but was not provided. Please ensure the title field has a value.`);
+                  }
+                  
+                  throw new Error(`Database constraint violation: ${translationError.message}. This usually means required fields are missing or null.`);
+                }
+                
+                // Check if this is a schema-related error (less common)
+                if (translationError.code === '42703' || translationError.message?.includes('column') || translationError.message?.includes('does not exist')) {
+                  throw new Error(`Database schema not ready for new multilingual fields. Please run UPDATE_PROJECTS_MULTILINGUAL.sql in Supabase first. Error: ${translationError.message}`);
+                }
+                
+                throw translationError;
+              }
+              console.log(`Project service: UNIFIED SAVE - Successfully updated ${languageCode}`);
+            } catch (error) {
+              console.error(`Project service: UNIFIED SAVE - Exception updating ${languageCode}:`, error);
+              throw error;
             }
-            console.log(`Project service: UNIFIED SAVE - Successfully updated ${languageCode}`);
           }
         }
       }
@@ -435,7 +632,7 @@ class ProjectService {
       }
 
       // 4. UNIFIED SAVE: Mirror English content to base table for reliability
-      if (titles?.['en'] || descriptions?.['en'] || challenges_multilingual?.['en'] || solutions_multilingual?.['en'] || results_multilingual?.['en'] || locations_multilingual?.['en'] || clients_multilingual?.['en']) {
+      if (titles?.['en'] || descriptions?.['en'] || challenges_multilingual?.['en'] || solutions_multilingual?.['en'] || results_multilingual?.['en'] || locations_multilingual?.['en'] || clients_multilingual?.['en'] || categories_multilingual?.['en'] || completion_dates_multilingual?.['en'] || project_types_multilingual?.['en'] || project_values_multilingual?.['en'] || durations_multilingual?.['en']) {
         console.log('Project service: UNIFIED SAVE - Mirroring English content to base table');
         
         const baseUpdates: any = {};
@@ -461,6 +658,21 @@ class ProjectService {
         }
         if (clients_multilingual?.['en']) {
           baseUpdates.client = clients_multilingual['en'].trim();
+        }
+        if (categories_multilingual?.['en']) {
+          baseUpdates.category = categories_multilingual['en'].trim();
+        }
+        if (completion_dates_multilingual?.['en']) {
+          baseUpdates.completion_date = completion_dates_multilingual['en'].trim();
+        }
+        if (project_types_multilingual?.['en']) {
+          baseUpdates.project_type = project_types_multilingual['en'].trim();
+        }
+        if (project_values_multilingual?.['en']) {
+          baseUpdates.project_value = project_values_multilingual['en'].trim();
+        }
+        if (durations_multilingual?.['en']) {
+          baseUpdates.duration = durations_multilingual['en'].trim();
         }
         
         if (Object.keys(baseUpdates).length > 0) {
@@ -539,7 +751,7 @@ class ProjectService {
       }
 
       // 3. Add translations if provided
-      if (projectData.titles || projectData.descriptions || projectData.challenges_multilingual || projectData.solutions_multilingual || projectData.results_multilingual || projectData.locations_multilingual || projectData.clients_multilingual) {
+      if (projectData.titles || projectData.descriptions || projectData.challenges_multilingual || projectData.solutions_multilingual || projectData.results_multilingual || projectData.locations_multilingual || projectData.clients_multilingual || projectData.categories_multilingual || projectData.completion_dates_multilingual || projectData.project_types_multilingual || projectData.project_values_multilingual || projectData.durations_multilingual) {
         await this.updateProject(newProject.id, projectData);
       }
 
@@ -637,7 +849,4 @@ class ProjectService {
 }
 
 // Export a singleton instance
-export const projectService = new ProjectService();
-
-// Export the class for testing
-export { ProjectService }; 
+export const projectService = new ProjectService(); 

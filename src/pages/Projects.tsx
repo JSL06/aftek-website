@@ -40,6 +40,7 @@ const Projects = () => {
       window.removeEventListener('languageChange', handleLanguageChange as EventListener);
     };
   }, []);
+
   const [filters, setFilters] = useState<ProjectFilters>({ 
     search: '', 
     category: [], 
@@ -147,116 +148,139 @@ const Projects = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div 
+      className="min-h-screen" 
+      style={{
+        backgroundImage: 'url(/src/assets/17580.jpg)',
+        backgroundSize: 'cover',
+        backgroundAttachment: 'fixed',
+        backgroundPosition: 'center'
+      }}
+    >
       {/* Spacer to prevent header overlap */}
       <div style={{ height: '80px' }}></div>
-      <div className="container mx-auto p-8">
-          <div className="flex flex-col items-center mb-12">
-            <h1 className="uniform-page-title">{t('projects.title') || 'Projects'}</h1>
-          </div>
-
-          {/* Filter Section */}
-          {projects && projects.length > 0 && (
-            <ProjectFilter
-              projects={projects}
-              filters={filters}
-              onFiltersChange={setFilters}
-            />
-          )}
-
-          {/* Loading State */}
-          {loading && (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-              <p className="text-muted-foreground mt-4">Loading projects...</p>
-            </div>
-          )}
-
-          {/* No Projects State */}
-          {!loading && filteredProjects.length === 0 && projects && projects.length > 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No projects match your current filters.</p>
-              <Button 
-                variant="outline" 
-                onClick={() => setFilters({ search: '', category: [], features: [], completionYear: [] })}
-                className="mt-4"
-              >
-                Clear Filters
-              </Button>
-            </div>
-          )}
-
-          {/* Empty State */}
-          {!loading && projects && projects.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No projects available at the moment.</p>
-            </div>
-          )}
-
-          {/* Projects Grid */}
-          {!loading && currentProjects.length > 0 && (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {currentProjects.map((project) => (
-                  <ProjectCard
-                    key={project.id}
-                    project={project}
-                    onViewGallery={handleViewGallery}
-                    onViewCaseStudy={handleViewCaseStudy}
-                  />
-                ))}
-              </div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex justify-center mt-12">
-                  <Pagination>
-                    <PaginationContent>
-                      {currentPage > 1 && (
-                        <PaginationItem>
-                          <PaginationPrevious 
-                            href="#" 
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setCurrentPage(currentPage - 1);
-                            }}
-                          />
-                        </PaginationItem>
-                      )}
-                      
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                        <PaginationItem key={page}>
-                          <PaginationLink
-                            href="#"
-                            isActive={currentPage === page}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setCurrentPage(page);
-                            }}
-                          >
-                            {page}
-                          </PaginationLink>
-                        </PaginationItem>
-                      ))}
-                      
-                      {currentPage < totalPages && (
-                        <PaginationItem>
-                          <PaginationNext 
-                            href="#" 
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setCurrentPage(currentPage + 1);
-                            }}
-                          />
-                        </PaginationItem>
-                      )}
-                    </PaginationContent>
-                  </Pagination>
-                </div>
-              )}
-            </>
-          )}
+      
+      {/* Title Section with Special Background */}
+      <div 
+        className="relative py-16 mb-12"
+        style={{
+          backgroundImage: 'url(/src/assets/pexels-pixabay-159306.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="relative z-10 container mx-auto text-center">
+          <h1 className="uniform-page-title text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+            {t('projects.title') || 'Projects'}
+          </h1>
         </div>
+      </div>
+      
+      <div className="container mx-auto p-8 max-w-6xl">
+        {/* Filter Section */}
+        {projects && projects.length > 0 && (
+          <ProjectFilter
+            projects={projects}
+            filters={filters}
+            onFiltersChange={setFilters}
+          />
+        )}
+
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground mt-4">Loading projects...</p>
+          </div>
+        )}
+
+        {/* No Projects State */}
+        {!loading && filteredProjects.length === 0 && projects && projects.length > 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No projects match your current filters.</p>
+            <Button 
+              variant="outline" 
+              onClick={() => setFilters({ search: '', category: [], features: [], completionYear: [] })}
+              className="mt-4"
+            >
+              Clear Filters
+            </Button>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && projects && projects.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No projects available at the moment.</p>
+          </div>
+        )}
+
+        {/* Projects Grid */}
+        {!loading && currentProjects.length > 0 && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {currentProjects.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  onViewGallery={handleViewGallery}
+                  onViewCaseStudy={handleViewCaseStudy}
+                />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center mt-12">
+                <Pagination>
+                  <PaginationContent>
+                    {currentPage > 1 && (
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          href="#" 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setCurrentPage(currentPage - 1);
+                          }}
+                        />
+                      </PaginationItem>
+                    )}
+                    
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          href="#"
+                          isActive={currentPage === page}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setCurrentPage(page);
+                          }}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    
+                    {currentPage < totalPages && (
+                      <PaginationItem>
+                        <PaginationNext 
+                          href="#" 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setCurrentPage(currentPage + 1);
+                          }}
+                        />
+                      </PaginationItem>
+                    )}
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Gallery Modal */}
       <Dialog open={showGallery} onOpenChange={closeGallery}>

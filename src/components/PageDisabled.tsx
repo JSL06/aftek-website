@@ -12,7 +12,7 @@ const PageDisabled = ({ pageName }: PageDisabledProps) => {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen bg-[#fcf7ed] flex items-center justify-center py-12 px-4">
+            <div className="min-h-screen bg-background flex items-center justify-center py-12 px-4">
       <Card className="max-w-md mx-auto text-center">
         <CardContent className="p-8">
           <div className="w-16 h-16 bg-yellow-100 rounded-full mx-auto mb-6 flex items-center justify-center">

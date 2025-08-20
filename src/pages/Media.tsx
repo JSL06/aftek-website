@@ -55,24 +55,57 @@ const Media = () => {
   }, []);
 
   return (
-    <div>
-      <h1>Media Gallery</h1>
-      {loading ? (
-        <p>Loading media...</p>
-      ) : (
-        <div className="media-grid">
-          {media.map(item => (
-            <div key={item.id} className="media-item">
-              {item.type === 'image' ? (
-                <img src={item.url} alt={item.title} />
-              ) : (
-                <video src={item.url} controls />
-              )}
-              <div>{item.title}</div>
-            </div>
-          ))}
+    <div 
+      className="min-h-screen" 
+      style={{
+        backgroundImage: 'url(/src/assets/17580.jpg)',
+        backgroundSize: 'cover',
+        backgroundAttachment: 'fixed',
+        backgroundPosition: 'center'
+      }}
+    >
+      {/* Spacer to prevent header overlap */}
+      <div style={{ height: '80px' }}></div>
+      
+      {/* Title Section with Special Background */}
+      <div 
+        className="relative py-16 mb-12"
+        style={{
+          backgroundImage: 'url(/src/assets/pexels-pixabay-159306.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="relative z-10 container mx-auto text-center">
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+            Media Gallery
+          </h1>
         </div>
-      )}
+      </div>
+      
+      <div className="container mx-auto p-8 max-w-6xl">
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground mt-4">Loading media...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {media.map(item => (
+              <div key={item.id} className="bg-white/90 backdrop-blur-sm rounded-xl shadow-elegant p-6 border border-border">
+                {item.type === 'image' ? (
+                  <img src={item.url} alt={item.title} className="w-full h-48 object-cover rounded-lg mb-4" />
+                ) : (
+                  <video src={item.url} controls className="w-full h-48 object-cover rounded-lg mb-4" />
+                )}
+                <div className="text-lg font-semibold text-foreground">{item.title}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -453,9 +453,9 @@ const UnifiedProducts = () => {
                    <FeaturesChecklist
                      features={[]}
                      selectedFeatures={formData.features || []}
-                     onFeaturesChange={(featureIds) => {
-                       // featureIds are now the actual feature IDs from the database
-                       setFormData(prev => ({ ...prev, features: featureIds }));
+                     onFeaturesChange={(featureKeys) => {
+                       // featureKeys are now the feature keys (language-agnostic)
+                       setFormData(prev => ({ ...prev, features: featureKeys }));
                      }}
                      language={selectedLanguage}
                      placeholder={t('admin.products.searchFeatures')}

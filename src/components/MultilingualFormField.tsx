@@ -135,27 +135,22 @@ export const MultilingualFormField: React.FC<MultilingualFormFieldProps> = ({
 
   return (
     <div className={`space-y-3 ${className}`}>
-      <div className="flex items-center justify-between">
-        {type === 'rich-text' ? (
-          <Label id={`${fieldName}-${currentLanguage}-label`} className="text-sm font-medium">
-            {label} ({LANGUAGES.find(l => l.code === currentLanguage)?.nativeName})
-            {required && <span className="text-red-500 ml-1">*</span>}
-          </Label>
-        ) : (
-          <Label htmlFor={`${fieldName}-${currentLanguage}`} className="text-sm font-medium">
-            {label} ({LANGUAGES.find(l => l.code === currentLanguage)?.nativeName})
-            {required && <span className="text-red-500 ml-1">*</span>}
-          </Label>
-        )}
-        {showTranslationStatus && (
-          <TranslationStatus
-            translations={translations}
-            requiredFields={requiredFields}
-            variant="minimal"
-            showLabels={false}
-          />
-        )}
-      </div>
+      {label && (
+        <div className="flex items-center justify-between">
+          {type === 'rich-text' ? (
+            <Label id={`${fieldName}-${currentLanguage}-label`} className="text-sm font-medium">
+              {label} ({LANGUAGES.find(l => l.code === currentLanguage)?.nativeName})
+              {required && <span className="text-red-500 ml-1">*</span>}
+            </Label>
+          ) : (
+            <Label htmlFor={`${fieldName}-${currentLanguage}`} className="text-sm font-medium">
+              {label} ({LANGUAGES.find(l => l.code === currentLanguage)?.nativeName})
+              {required && <span className="text-red-500 ml-1">*</span>}
+            </Label>
+          )}
+
+        </div>
+      )}
       
       {renderField()}
       

@@ -21,10 +21,41 @@ const Resources = () => {
   }, []);
   
   return (
-    <div className="min-h-screen bg-background pt-32">
-      <div className="container mx-auto px-6 mb-24">
-        <div className="title-container">
-          <h1 className="uniform-page-title">{t('resources.title')}</h1>
+    <div 
+      className="min-h-screen" 
+      style={{
+        backgroundImage: 'url(/src/assets/17580.jpg)',
+        backgroundSize: 'cover',
+        backgroundAttachment: 'fixed',
+        backgroundPosition: 'center'
+      }}
+    >
+      {/* Spacer to prevent header overlap */}
+      <div style={{ height: '80px' }}></div>
+      
+      {/* Title Section with Special Background */}
+      <div 
+        className="relative py-16 mb-12"
+        style={{
+          backgroundImage: 'url(/src/assets/pexels-pixabay-159306.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="relative z-10 container mx-auto text-center">
+          <h1 className="uniform-page-title text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+            {t('resources.title')}
+          </h1>
+        </div>
+      </div>
+      
+      <div className="container mx-auto px-6 max-w-4xl">
+        <div className="text-center">
+          <p className="text-lg text-muted-foreground">
+            Resources and documentation coming soon...
+          </p>
         </div>
       </div>
     </div>

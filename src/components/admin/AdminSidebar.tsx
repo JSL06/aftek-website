@@ -17,7 +17,8 @@ import {
   FolderOpen,
   Plus,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Filter
 } from 'lucide-react';
 import {
   Collapsible,
@@ -196,6 +197,12 @@ const AdminSidebar: React.FC = () => {
           href: '/admin/category-manager'
         },
         {
+          id: 'features',
+          title: t('sidebar.features'),
+          icon: Filter,
+          href: '/admin/features-editor'
+        },
+        {
           id: 'featured',
           title: t('sidebar.featuredProducts'),
           icon: Package,
@@ -216,13 +223,7 @@ const AdminSidebar: React.FC = () => {
       href: '/admin/media',
       badge: countsLoading ? '...' : counts.media.toString()
     },
-    {
-      id: 'translations',
-      title: t('sidebar.translations'),
-      icon: Languages,
-      href: '/admin/translation-dashboard',
-      badge: countsLoading ? '...' : counts.translations.toString()
-    },
+
 
     {
       id: 'settings',

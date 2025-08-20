@@ -9,6 +9,8 @@ import { FileText, Star, Tag, ArrowLeft, ExternalLink, Package, Check } from 'lu
 import { productService, UnifiedProduct } from '@/services/productService';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useCategories } from '@/hooks/useCategories';
+import { projectService, MultilingualProject } from '@/services/projectService';
 
 const ProductDetail = () => {
   const { productId } = useParams();
@@ -17,6 +19,8 @@ const ProductDetail = () => {
   const [product, setProduct] = useState<UnifiedProduct | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<UnifiedProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [allProducts, setAllProducts] = useState<UnifiedProduct[]>([]);
+  const [allProjects, setAllProjects] = useState<MultilingualProject[]>([]);
   
   // Listen for language changes and force reload to ensure all translations are loaded
   useEffect(() => {
@@ -54,6 +58,51 @@ const ProductDetail = () => {
       window.removeEventListener('productUpdated', handleProductUpdate);
     };
   }, [productId]);
+
+  // Load all products for related products display
+  useEffect(() => {
+    const loadAllProducts = async () => {
+      try {
+        const products = await productService.getAllProducts();
+        setAllProducts(products);
+      } catch (error) {
+        console.error('Error loading all products:', error);
+      }
+    };
+    
+    loadAllProducts();
+  }, []);
+
+  // Load all projects for examples tab
+  useEffect(() => {
+    const loadAllProjects = async () => {
+      try {
+        const projects = await projectService.getProjects();
+        setAllProjects(projects);
+      } catch (error) {
+        console.error('Error loading all projects:', error);
+      }
+    };
+
+    loadAllProjects();
+  }, []);
+
+  // Debug logging for product data
+  useEffect(() => {
+    if (product) {
+      console.log('🔍 ProductDetail: Product data loaded:', {
+        id: product.id,
+        name: product.name,
+        related_products: product.related_products,
+        related_productsType: typeof product.related_products,
+        related_productsIsArray: Array.isArray(product.related_products),
+        projects_used: product.projects_used,
+        projects_usedType: typeof product.projects_used,
+        projects_usedIsArray: Array.isArray(product.projects_used),
+        specifications: product.specifications
+      });
+    }
+  }, [product]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -195,17 +244,10 @@ const ProductDetail = () => {
               </div>
 
               {/* Category */}
-              <div className="flex flex-wrap items-center gap-4 mb-6">
-                <Badge variant="secondary" className="text-primary">
+              <div className="mb-6">
+                <Badge variant="secondary" className="text-sm">
                   {product.category}
                 </Badge>
-              </div>
-
-              {/* Price */}
-              <div className="mb-6">
-                <span className="text-3xl font-bold text-foreground">
-                  ${typeof product.price === 'number' ? product.price.toFixed(2) : product.price}
-                </span>
               </div>
 
               {/* Stock Status */}
@@ -266,57 +308,159 @@ const ProductDetail = () => {
           </div>
         </div>
 
+
+
         {/* Additional Information Tabs */}
         <div className="mt-16">
           <Card>
             <CardContent className="p-8">
-              <Tabs defaultValue="description" className="w-full">
+              <Tabs defaultValue="specifications" className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="description">{t('productDetail.description')}</TabsTrigger>
                   <TabsTrigger value="specifications">{t('productDetail.specifications')}</TabsTrigger>
                   <TabsTrigger value="examples">{t('productDetail.examples')}</TabsTrigger>
+                  <TabsTrigger value="related">{t('productDetail.relatedProducts')}</TabsTrigger>
                 </TabsList>
-                
-                <TabsContent value="description" className="mt-6">
-                  <div className="prose max-w-none">
-                    <h3 className="text-xl font-semibold mb-4">{t('productDetail.productDescription')}</h3>
-                    <div 
-                      className="text-muted-foreground leading-relaxed mb-4 prose prose-sm max-w-none"
-                      dangerouslySetInnerHTML={{ __html: product.description }}
-                    />
-                    <p className="text-muted-foreground leading-relaxed">
-                      {t('productDetail.descriptionText').replace('{productName}', product.name)}
-                    </p>
-                  </div>
-                </TabsContent>
                 
                 <TabsContent value="specifications" className="mt-6">
                   <div>
                     <h3 className="text-xl font-semibold mb-4">{t('productDetail.technicalSpecifications')}</h3>
-                    {/* Specifications temporarily removed - property doesn't exist on UnifiedProduct */}
-                    <div className="bg-muted/50 rounded-lg p-6 text-center">
-                      <Package className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                      <p className="text-muted-foreground">
-                        {t('productDetail.specificationsText').replace('{productName}', product.name)}
-                      </p>
-                    </div>
+                    {product.specifications && Object.keys(product.specifications).length > 0 ? (
+                      <div>
+                        {product.specifications[currentLanguage] ? (
+                          <div 
+                            className="prose prose-sm max-w-none"
+                            dangerouslySetInnerHTML={{ __html: product.specifications[currentLanguage] as string }}
+                          />
+                        ) : (
+                          <div className="bg-muted/50 rounded-lg p-6 text-center">
+                            <Package className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                            <p className="text-muted-foreground">
+                              {t('productDetail.specificationsText').replace('{productName}', product.name)}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="bg-muted/50 rounded-lg p-6 text-center">
+                        <Package className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                        <p className="text-muted-foreground">
+                          {t('productDetail.specificationsText').replace('{productName}', product.name)}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
                 
                 <TabsContent value="examples" className="mt-6">
-                  <div className="text-center py-8">
-                    <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                    <h3 className="text-lg font-semibold mb-2">{t('productDetail.pastExamples')}</h3>
-                    <p className="text-muted-foreground mb-6">
-                      {t('productDetail.examplesDescription').replace('{productName}', product.name)}
-                    </p>
-                    <Button 
-                      onClick={() => navigate('/projects')}
-                      className="bg-primary hover:bg-primary/90"
-                    >
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      {t('productDetail.viewProjects')}
-                    </Button>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4">{t('productDetail.pastExamples')}</h3>
+                    {product.projects_used && Array.isArray(product.projects_used) && product.projects_used.length > 0 ? (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {product.projects_used.map((projectId, index) => {
+                            const project = allProjects.find(p => p.id === projectId);
+                            if (!project) return null;
+                            
+                            return (
+                              <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <div className="flex items-center space-x-3">
+                                  {project.image && (
+                                    <img
+                                      src={project.image}
+                                      alt={project.title}
+                                      className="w-16 h-16 object-cover rounded"
+                                    />
+                                  )}
+                                  <div className="flex-1">
+                                    <h4 className="font-semibold text-lg">{project.title}</h4>
+                                    <p className="text-sm text-muted-foreground">{project.category}</p>
+                                    <p className="text-xs text-muted-foreground">{project.client}</p>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="mt-2"
+                                      onClick={() => navigate(`/projects/${project.id}`)}
+                                    >
+                                      View Project
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                        <p className="text-muted-foreground mb-6">
+                          {t('productDetail.examplesDescription').replace('{productName}', product.name)}
+                        </p>
+                        <Button 
+                          onClick={() => navigate('/projects')}
+                          className="bg-primary hover:bg-primary/90"
+                        >
+                          <ExternalLink className="mr-2 h-4 w-4" />
+                          {t('productDetail.viewProjects')}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="related" className="mt-6">
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4">{t('productDetail.relatedProducts')}</h3>
+                    {product.related_products && Array.isArray(product.related_products) && product.related_products.length > 0 ? (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {product.related_products.map((relatedProductId, index) => {
+                            const relatedProduct = allProducts.find(p => p.id === relatedProductId);
+                            if (!relatedProduct) return null;
+                            
+                            return (
+                              <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <div className="flex items-center space-x-3">
+                                  {relatedProduct.image && (
+                                    <img
+                                      src={relatedProduct.image}
+                                      alt={relatedProduct.name}
+                                      className="w-16 h-16 object-cover rounded"
+                                    />
+                                  )}
+                                  <div className="flex-1">
+                                    <h4 className="font-semibold text-lg">{relatedProduct.name}</h4>
+                                    <p className="text-sm text-muted-foreground">{relatedProduct.category}</p>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="mt-2"
+                                      onClick={() => navigate(`/products/${relatedProduct.id}`)}
+                                    >
+                                      View Details
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Package className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                        <p className="text-muted-foreground mb-6">
+                          {t('productDetail.noRelatedProducts').replace('{productName}', product.name)}
+                        </p>
+                        <Button 
+                          onClick={() => navigate('/products')}
+                          className="bg-primary hover:bg-primary/90"
+                        >
+                          <ExternalLink className="mr-2 h-4 w-4" />
+                          {t('productDetail.browseProducts')}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
               </Tabs>
@@ -324,56 +468,7 @@ const ProductDetail = () => {
           </Card>
         </div>
 
-        {/* Related Products Section */}
-        {relatedProducts.length > 0 && (
-          <div className="mt-16 mb-8">
-            <Card>
-              <CardContent className="p-8">
-                <h2 className="text-2xl font-bold mb-6">{t('productDetail.relatedProducts')}</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {relatedProducts.map((relatedProduct) => (
-                    <Card 
-                      key={relatedProduct.id} 
-                      className="cursor-pointer hover:shadow-lg transition-all duration-300 group"
-                      onClick={() => {
-                        const productUrl = relatedProduct.slug ? `/products/${relatedProduct.slug}` : `/products/${relatedProduct.id}`;
-                        navigate(productUrl);
-                      }}
-                    >
-                      <CardContent className="p-6">
-                        <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center rounded-lg mb-4 relative overflow-hidden">
-                          {relatedProduct.image && relatedProduct.image !== '/placeholder.svg' ? (
-                            <img 
-                              src={relatedProduct.image} 
-                              alt={relatedProduct.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <Package className="h-8 w-8 text-gray-400" />
-                          )}
-                        </div>
-                        <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
-                          {relatedProduct.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                          {relatedProduct.description}
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-foreground">
-                            ${typeof relatedProduct.price === 'number' ? relatedProduct.price.toFixed(2) : relatedProduct.price}
-                          </span>
-                          <Badge variant="secondary" className="text-xs">
-                            {relatedProduct.category}
-                          </Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+
       </div>
     </div>
   );

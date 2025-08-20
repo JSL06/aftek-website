@@ -30,11 +30,19 @@ const NotFound = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">{t('notFound.title')}</h1>
-        <p className="text-xl text-gray-600 mb-4">{t('notFound.subtitle')}</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
+    <div 
+      className="min-h-screen flex items-center justify-center" 
+      style={{
+        backgroundImage: 'url(/src/assets/17580.jpg)',
+        backgroundSize: 'cover',
+        backgroundAttachment: 'fixed',
+        backgroundPosition: 'center'
+      }}
+    >
+      <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-elegant p-12 border border-border text-center max-w-md mx-4">
+        <h1 className="text-4xl font-bold mb-4 text-foreground">{t('notFound.title')}</h1>
+        <p className="text-xl text-muted-foreground mb-6">{t('notFound.subtitle')}</p>
+        <a href="/" className="text-primary hover:text-primary-hover underline font-medium">
           {t('notFound.home')}
         </a>
       </div>

@@ -15,8 +15,8 @@ export interface Feature {
 
 interface FeaturesChecklistProps {
   features: Feature[]; // This prop is kept for backward compatibility but not used
-  selectedFeatures: string[];
-  onFeaturesChange: (features: string[]) => void;
+  selectedFeatures: string[]; // This should now be feature keys, not names
+  onFeaturesChange: (featureKeys: string[]) => void; // Now returns feature keys
   language: string;
   placeholder?: string;
   className?: string;
@@ -31,6 +31,8 @@ export const FeaturesChecklist: React.FC<FeaturesChecklistProps> = ({
   className = ""
 }) => {
   const { t } = useTranslation();
+  
+
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<string[]>(['environment']);
   const [featureCategories, setFeatureCategories] = useState<FeatureCategory[]>([]);
@@ -46,6 +48,8 @@ export const FeaturesChecklist: React.FC<FeaturesChecklistProps> = ({
         const categories = await FeaturesService.getFeaturesByCategory();
         setFeatureCategories(categories);
         
+
+        
         // Auto-expand first category if available
         if (categories.length > 0) {
           setExpandedCategories([categories[0].id]);
@@ -55,34 +59,64 @@ export const FeaturesChecklist: React.FC<FeaturesChecklistProps> = ({
                  // Fallback to default features if database is not ready
          const fallbackCategories = [
            {
-             id: 'environment',
-             name: 'Environmental',
+             id: 'environmental-resistance',
+             name: 'Environmental Resistance',
              features: [
-               { id: 'fireproof', feature_key: 'fireproof', category: 'environment', display_order: 1, is_active: true, translations: { en: 'Fireproof', 'zh-Hant': '防火', 'zh-Hans': '防火', ja: '耐火', ko: '내화', th: 'ทนไฟ', vi: 'Chống cháy' } },
-               { id: 'waterproof', feature_key: 'waterproof', category: 'environment', display_order: 2, is_active: true, translations: { en: 'Waterproof', 'zh-Hant': '防水', 'zh-Hans': '防水', ja: '防水', ko: '방수', th: 'กันน้ำ', vi: 'Chống nước' } },
-               { id: 'heat-resistant', feature_key: 'heat-resistant', category: 'environment', display_order: 3, is_active: true, translations: { en: 'Heat Resistant', 'zh-Hant': '耐熱', 'zh-Hans': '耐热', ja: '耐熱', ko: '내열', th: 'ทนความร้อน', vi: 'Chịu nhiệt' } },
-               { id: 'cold-resistant', feature_key: 'cold-resistant', category: 'environment', display_order: 4, is_active: true, translations: { en: 'Cold Resistant', 'zh-Hant': '耐寒', 'zh-Hans': '耐寒', ja: '耐寒', ko: '내한', th: 'ทนความเย็น', vi: 'Chịu lạnh' } },
-               { id: 'uv-resistant', feature_key: 'uv-resistant', category: 'environment', display_order: 5, is_active: true, translations: { en: 'UV Resistant', 'zh-Hant': '抗紫外線', 'zh-Hans': '抗紫外线', ja: 'UV耐性', ko: '자외선 차단', th: 'ทนรังสี UV', vi: 'Chống tia UV' } }
+               { id: 'abrasion-resistant', feature_key: 'abrasion-resistant', category: 'environmental-resistance', display_order: 1, is_active: true, translations: { en: 'Abrasion Resistant', 'zh-Hant': '耐磨', 'zh-Hans': '耐磨', ja: '耐摩耗', ko: '내마모성', th: 'ทนการขัดสี', vi: 'Chống mài mòn' } },
+               { id: 'chemical-exposure', feature_key: 'chemical-exposure', category: 'environmental-resistance', display_order: 2, is_active: true, translations: { en: 'Chemical Exposure', 'zh-Hant': '化學暴露', 'zh-Hans': '化学暴露', ja: '化学暴露', ko: '화학 노출', th: 'ทนสารเคมี', vi: 'Chống hóa chất' } },
+               { id: 'dry-conditions', feature_key: 'dry-conditions', category: 'environmental-resistance', display_order: 3, is_active: true, translations: { en: 'Dry Conditions', 'zh-Hant': '乾燥條件', 'zh-Hans': '干燥条件', ja: '乾燥条件', ko: '건조 조건', th: 'สภาพแห้ง', vi: 'Điều kiện khô' } },
+               { id: 'high-traffic-areas', feature_key: 'high-traffic-areas', category: 'environmental-resistance', display_order: 4, is_active: true, translations: { en: 'High Traffic Areas', 'zh-Hant': '高流量區域', 'zh-Hans': '高流量区域', ja: '高交通量エリア', ko: '고교통량 지역', th: 'พื้นที่ที่มีการใช้งานสูง', vi: 'Khu vực sử dụng cao' } },
+               { id: 'uv-resistant', feature_key: 'uv-resistant', category: 'environmental-resistance', display_order: 5, is_active: true, translations: { en: 'UV Resistant', 'zh-Hant': '抗紫外線', 'zh-Hans': '抗紫外线', ja: 'UV耐性', ko: '자외선 저항', th: 'ทนรังสี UV', vi: 'Chống tia UV' } },
+               { id: 'fireproof', feature_key: 'fireproof', category: 'environmental-resistance', display_order: 6, is_active: true, translations: { en: 'Fireproof', 'zh-Hant': '防火', 'zh-Hans': '防火', ja: '耐火', ko: '내화', th: 'ทนไฟ', vi: 'Chống cháy' } },
+               { id: 'waterproof', feature_key: 'waterproof', category: 'environmental-resistance', display_order: 7, is_active: true, translations: { en: 'Waterproof', 'zh-Hant': '防水', 'zh-Hans': '防水', ja: '防水', ko: '방수', th: 'กันน้ำ', vi: 'Chống nước' } },
+               { id: 'heat-resistant', feature_key: 'heat-resistant', category: 'environmental-resistance', display_order: 8, is_active: true, translations: { en: 'Heat Resistant', 'zh-Hant': '耐熱', 'zh-Hans': '耐热', ja: '耐熱', ko: '내열', th: 'ทนความร้อน', vi: 'Chịu nhiệt' } },
+               { id: 'cold-resistant', feature_key: 'cold-resistant', category: 'environmental-resistance', display_order: 9, is_active: true, translations: { en: 'Cold Resistant', 'zh-Hant': '耐寒', 'zh-Hans': '耐寒', ja: '耐寒', ko: '내한', th: 'ทนความเย็น', vi: 'Chịu lạnh' } }
              ]
            },
            {
-             id: 'performance',
-             name: 'Performance',
+             id: 'performance-properties',
+             name: 'Performance Properties',
              features: [
-               { id: 'high-strength', feature_key: 'high-strength', category: 'performance', display_order: 6, is_active: true, translations: { en: 'High Strength', 'zh-Hant': '高強度', 'zh-Hans': '高强度', ja: '高強度', ko: '고강도', th: 'ความแข็งแรงสูง', vi: 'Độ bền cao' } },
-               { id: 'durable', feature_key: 'durable', category: 'performance', display_order: 7, is_active: true, translations: { en: 'Durable', 'zh-Hant': '耐用', 'zh-Hans': '耐用', ja: '耐久', ko: '내구성', th: 'ทนทาน', vi: 'Bền bỉ' } },
-               { id: 'flexible', feature_key: 'flexible', category: 'performance', display_order: 8, is_active: true, translations: { en: 'Flexible', 'zh-Hant': '靈活', 'zh-Hans': '灵活', ja: '柔軟', ko: '유연', th: 'ยืดหยุ่น', vi: 'Linh hoạt' } },
-               { id: 'fast-curing', feature_key: 'fast-curing', category: 'performance', display_order: 9, is_active: true, translations: { en: 'Fast Curing', 'zh-Hant': '快速固化', 'zh-Hans': '快速固化', ja: '速乾', ko: '빠른 경화', th: 'แห้งเร็ว', vi: 'Khô nhanh' } },
-               { id: 'low-voc', feature_key: 'low-voc', category: 'performance', display_order: 10, is_active: true, translations: { en: 'Low VOC', 'zh-Hant': '低揮發性', 'zh-Hans': '低挥发性', ja: '低VOC', ko: '저VOC', th: 'VOC ต่ำ', vi: 'VOC thấp' } }
+               { id: 'chemical-resistant', feature_key: 'chemical-resistant', category: 'performance-properties', display_order: 1, is_active: true, translations: { en: 'Chemical Resistant', 'zh-Hant': '耐化學', 'zh-Hans': '耐化学', ja: '耐薬品', ko: '내화학', th: 'ทนสารเคมี', vi: 'Chống hóa chất' } },
+               { id: 'fast-cure', feature_key: 'fast-cure', category: 'performance-properties', display_order: 2, is_active: true, translations: { en: 'Fast Cure', 'zh-Hant': '快速固化', 'zh-Hans': '快速固化', ja: '速乾', ko: '빠른 경화', th: 'แห้งเร็ว', vi: 'Khô nhanh' } },
+               { id: 'flexible', feature_key: 'flexible', category: 'performance-properties', display_order: 3, is_active: true, translations: { en: 'Flexible', 'zh-Hant': '靈活', 'zh-Hans': '灵活', ja: '柔軟', ko: '유연', th: 'ยืดหยุ่น', vi: 'Linh hoạt' } },
+               { id: 'high-strength', feature_key: 'high-strength', category: 'performance-properties', display_order: 4, is_active: true, translations: { en: 'High Strength', 'zh-Hant': '高強度', 'zh-Hans': '高强度', ja: '高強度', ko: '고강도', th: 'ความแข็งแรงสูง', vi: 'Độ bền cao' } },
+               { id: 'impact-resistant', feature_key: 'impact-resistant', category: 'performance-properties', display_order: 5, is_active: true, translations: { en: 'Impact Resistant', 'zh-Hant': '抗衝擊', 'zh-Hans': '抗冲击', ja: '衝撃耐性', ko: '충격 저항', th: 'ทนการกระแทก', vi: 'Chống va đập' } },
+               { id: 'long-lasting', feature_key: 'long-lasting', category: 'performance-properties', display_order: 6, is_active: true, translations: { en: 'Long Lasting', 'zh-Hant': '持久', 'zh-Hans': '持久', ja: '長持ち', ko: '오래 지속', th: 'ทนทานยาวนาน', vi: 'Bền lâu' } },
+               { id: 'low-odor', feature_key: 'low-odor', category: 'performance-properties', display_order: 7, is_active: true, translations: { en: 'Low Odor', 'zh-Hant': '低氣味', 'zh-Hans': '低气味', ja: '低臭', ko: '낮은 냄새', th: 'กลิ่นน้อย', vi: 'Ít mùi' } },
+               { id: 'temperature-resistant', feature_key: 'temperature-resistant', category: 'performance-properties', display_order: 8, is_active: true, translations: { en: 'Temperature Resistant', 'zh-Hant': '耐溫', 'zh-Hans': '耐温', ja: '温度耐性', ko: '온도 저항', th: 'ทนอุณหภูมิ', vi: 'Chịu nhiệt độ' } },
+               { id: 'weather-resistant', feature_key: 'weather-resistant', category: 'performance-properties', display_order: 9, is_active: true, translations: { en: 'Weather Resistant', 'zh-Hant': '耐候', 'zh-Hans': '耐候', ja: '耐候性', ko: '내후성', th: 'ทนสภาพอากาศ', vi: 'Chịu thời tiết' } }
              ]
            },
            {
-             id: 'safety',
-             name: 'Safety',
+             id: 'material-composition',
+             name: 'Material Composition',
              features: [
-               { id: 'non-toxic', feature_key: 'non-toxic', category: 'safety', display_order: 11, is_active: true, translations: { en: 'Non-Toxic', 'zh-Hant': '無毒', 'zh-Hans': '无毒', ja: '無毒', ko: '무독성', th: 'ไม่เป็นพิษ', vi: 'Không độc hại' } },
-               { id: 'eco-friendly', feature_key: 'eco-friendly', category: 'safety', display_order: 12, is_active: true, translations: { en: 'Eco-Friendly', 'zh-Hant': '環保', 'zh-Hans': '环保', ja: '環境にやさしい', ko: '친환경', th: 'เป็นมิตรกับสิ่งแวดล้อม', vi: 'Thân thiện môi trường' } },
-               { id: 'child-safe', feature_key: 'child-safe', category: 'safety', display_order: 13, is_active: true, translations: { en: 'Child Safe', 'zh-Hant': '兒童安全', 'zh-Hans': '儿童安全', ja: '子供に安全', ko: '어린이 안전', th: 'ปลอดภัยสำหรับเด็ก', vi: 'An toàn cho trẻ em' } }
+               { id: 'acrylic', feature_key: 'acrylic', category: 'material-composition', display_order: 1, is_active: true, translations: { en: 'Acrylic', 'zh-Hant': '丙烯酸', 'zh-Hans': '丙烯酸', ja: 'アクリル', ko: '아크릴', th: 'อะคริลิก', vi: 'Acrylic' } },
+               { id: 'bitumen-based', feature_key: 'bitumen-based', category: 'material-composition', display_order: 2, is_active: true, translations: { en: 'Bitumen Based', 'zh-Hant': '瀝青基', 'zh-Hans': '沥青基', ja: 'ビチューメンベース', ko: '비투멘 기반', th: 'บิทูเมน', vi: 'Bitumen' } },
+               { id: 'cement-based', feature_key: 'cement-based', category: 'material-composition', display_order: 3, is_active: true, translations: { en: 'Cement Based', 'zh-Hant': '水泥基', 'zh-Hans': '水泥基', ja: 'セメントベース', ko: '시멘트 기반', th: 'ปูนซีเมนต์', vi: 'Xi măng' } },
+               { id: 'epoxy', feature_key: 'epoxy', category: 'material-composition', display_order: 4, is_active: true, translations: { en: 'Epoxy', 'zh-Hant': '環氧樹脂', 'zh-Hans': '环氧树脂', ja: 'エポキシ', ko: '에폭시', th: 'อีพ็อกซี่', vi: 'Epoxy' } },
+               { id: 'fiber-reinforced', feature_key: 'fiber-reinforced', category: 'material-composition', display_order: 5, is_active: true, translations: { en: 'Fiber Reinforced', 'zh-Hant': '纖維增強', 'zh-Hans': '纤维增强', ja: '繊維強化', ko: '섬유 강화', th: 'เสริมใย', vi: 'Gia cố sợi' } },
+               { id: 'hybrid', feature_key: 'hybrid', category: 'material-composition', display_order: 6, is_active: true, translations: { en: 'Hybrid', 'zh-Hant': '混合', 'zh-Hans': '混合', ja: 'ハイブリッド', ko: '하이브리드', th: 'ไฮบริด', vi: 'Lai' } },
+               { id: 'polyurethane', feature_key: 'polyurethane', category: 'material-composition', display_order: 7, is_active: true, translations: { en: 'Polyurethane', 'zh-Hant': '聚氨酯', 'zh-Hans': '聚氨酯', ja: 'ポリウレタン', ko: '폴리우레탄', th: 'โพลียูรีเทน', vi: 'Polyurethane' } },
+               { id: 'rubber-based', feature_key: 'rubber-based', category: 'material-composition', display_order: 8, is_active: true, translations: { en: 'Rubber Based', 'zh-Hant': '橡膠基', 'zh-Hans': '橡胶基', ja: 'ゴムベース', ko: '고무 기반', th: 'ยาง', vi: 'Cao su' } },
+               { id: 'silicone', feature_key: 'silicone', category: 'material-composition', display_order: 9, is_active: true, translations: { en: 'Silicone', 'zh-Hant': '矽膠', 'zh-Hans': '硅胶', ja: 'シリコーン', ko: '실리콘', th: 'ซิลิโคน', vi: 'Silicone' } }
+             ]
+           },
+           {
+             id: 'special-qualities',
+             name: 'Special Qualities',
+             features: [
+               { id: 'anti-microbial', feature_key: 'anti-microbial', category: 'special-qualities', display_order: 1, is_active: true, translations: { en: 'Anti Microbial', 'zh-Hant': '抗菌', 'zh-Hans': '抗菌', ja: '抗菌', ko: '항균', th: 'ต้านเชื้อ', vi: 'Kháng khuẩn' } },
+               { id: 'biodegradable', feature_key: 'biodegradable', category: 'special-qualities', display_order: 2, is_active: true, translations: { en: 'Biodegradable', 'zh-Hant': '生物降解', 'zh-Hans': '生物降解', ja: '生分解性', ko: '생분해성', th: 'ย่อยสลายได้', vi: 'Phân hủy sinh học' } },
+               { id: 'eco-friendly', feature_key: 'eco-friendly', category: 'special-qualities', display_order: 3, is_active: true, translations: { en: 'Eco Friendly', 'zh-Hant': '環保', 'zh-Hans': '环保', ja: 'エコフレンドリー', ko: '친환경', th: 'เป็นมิตรกับสิ่งแวดล้อม', vi: 'Thân thiện môi trường' } },
+               { id: 'fire-resistant', feature_key: 'fire-resistant', category: 'special-qualities', display_order: 4, is_active: true, translations: { en: 'Fire Resistant', 'zh-Hant': '防火', 'zh-Hans': '防火', ja: '耐火', ko: '내화', th: 'ทนไฟ', vi: 'Chống cháy' } },
+               { id: 'low-voc', feature_key: 'low-voc', category: 'special-qualities', display_order: 5, is_active: true, translations: { en: 'Low VOC', 'zh-Hant': '低VOC', 'zh-Hans': '低VOC', ja: '低VOC', ko: '저VOC', th: 'VOC ต่ำ', vi: 'VOC thấp' } },
+               { id: 'non-toxic', feature_key: 'non-toxic', category: 'special-qualities', display_order: 6, is_active: true, translations: { en: 'Non Toxic', 'zh-Hant': '無毒', 'zh-Hans': '无毒', ja: '無毒', ko: '무독성', th: 'ไม่เป็นพิษ', vi: 'Không độc hại' } },
+               { id: 'paintable', feature_key: 'paintable', category: 'special-qualities', display_order: 7, is_active: true, translations: { en: 'Paintable', 'zh-Hant': '可塗漆', 'zh-Hans': '可涂漆', ja: '塗装可能', ko: '도장 가능', th: 'ทาสีได้', vi: 'Có thể sơn' } },
+               { id: 'quick-setting', feature_key: 'quick-setting', category: 'special-qualities', display_order: 8, is_active: true, translations: { en: 'Quick Setting', 'zh-Hant': '快乾', 'zh-Hans': '快干', ja: '速乾', ko: '빠른 건조', th: 'แห้งเร็ว', vi: 'Khô nhanh' } },
+               { id: 'recyclable', feature_key: 'recyclable', category: 'special-qualities', display_order: 9, is_active: true, translations: { en: 'Recyclable', 'zh-Hant': '可回收', 'zh-Hans': '可回收', ja: 'リサイクル可能', ko: '재활용 가능', th: 'รีไซเคิลได้', vi: 'Có thể tái chế' } },
+               { id: 'self-leveling', feature_key: 'self-leveling', category: 'special-qualities', display_order: 10, is_active: true, translations: { en: 'Self Leveling', 'zh-Hant': '自流平', 'zh-Hans': '自流平', ja: 'セルフレベリング', ko: '셀프레벨링', th: 'ปรับระดับตัวเอง', vi: 'Tự san phẳng' } }
              ]
            }
          ];
@@ -113,19 +147,21 @@ export const FeaturesChecklist: React.FC<FeaturesChecklistProps> = ({
     })).filter(category => category.features.length > 0);
   }, [featureCategories, searchTerm]);
 
-  const toggleFeature = (featureId: string) => {
-    // Get the feature name in the current language
-    const feature = featureCategories
-      .flatMap(cat => cat.features)
-      .find(f => f.id === featureId);
+  const toggleFeature = (featureKey: string) => {
+    // Check if the feature is already selected (using normalized comparison)
+    const isCurrentlySelected = normalizedSelectedFeatures.includes(featureKey);
     
-    if (!feature) return;
-    
-    const featureName = getFeatureName(feature);
-    const newSelected = selectedFeatures.includes(featureName)
-      ? selectedFeatures.filter(name => name !== featureName)
-      : [...selectedFeatures, featureName];
-    onFeaturesChange(newSelected);
+    if (isCurrentlySelected) {
+      // Remove the feature - find and remove the original identifier
+      const newSelected = selectedFeatures.filter(key => {
+        const normalizedKey = normalizeToFeatureKey(key);
+        return normalizedKey !== featureKey;
+      });
+      onFeaturesChange(newSelected);
+    } else {
+      // Add the feature - always add the feature key
+      onFeaturesChange([...selectedFeatures, featureKey]);
+    }
   };
 
   const toggleCategory = (categoryId: string) => {
@@ -140,13 +176,40 @@ export const FeaturesChecklist: React.FC<FeaturesChecklistProps> = ({
     return feature.translations[language] || feature.translations.en || feature.feature_key;
   };
 
+  // Function to normalize feature identifiers to feature keys
+  const normalizeToFeatureKey = (featureIdentifier: string): string => {
+    // If it's already a feature key (contains hyphens), return as is
+    if (featureIdentifier.includes('-')) {
+      return featureIdentifier;
+    }
+    
+    // If it's a feature name, try to find the corresponding feature key
+    const allFeatures = featureCategories.flatMap(cat => cat.features);
+    const matchingFeature = allFeatures.find(f => 
+      f.translations.en === featureIdentifier || 
+      Object.values(f.translations).includes(featureIdentifier)
+    );
+    
+    return matchingFeature ? matchingFeature.feature_key : featureIdentifier;
+  };
+
+  // Normalize selectedFeatures to ensure they are all feature keys
+  const normalizedSelectedFeatures = useMemo(() => {
+    if (!Array.isArray(selectedFeatures)) return [];
+    return selectedFeatures.map(normalizeToFeatureKey);
+  }, [selectedFeatures, featureCategories]);
+
   const getCategoryName = (categoryId: string) => {
     const category = featureCategories.find(cat => cat.id === categoryId);
     return category?.name || categoryId;
   };
 
-  const removeFeature = (featureName: string) => {
-    const newSelected = selectedFeatures.filter(name => name !== featureName);
+  const removeFeature = (featureKey: string) => {
+    // Remove from the original selectedFeatures array
+    const newSelected = selectedFeatures.filter(key => {
+      const normalizedKey = normalizeToFeatureKey(key);
+      return normalizedKey !== featureKey;
+    });
     onFeaturesChange(newSelected);
   };
 
@@ -212,28 +275,39 @@ export const FeaturesChecklist: React.FC<FeaturesChecklistProps> = ({
       </div>
 
              {/* Selected Features Display */}
-       {selectedFeatures.length > 0 && (
+       {normalizedSelectedFeatures.length > 0 && (
          <div className="space-y-2">
            <label className="text-sm font-medium text-gray-700">
-             {t('admin.products.selectedFeatures')} ({selectedFeatures.length})
+             {t('admin.products.selectedFeatures')} ({normalizedSelectedFeatures.length})
            </label>
            <div className="flex flex-wrap gap-2">
-             {selectedFeatures.map(featureName => (
-               <Badge
-                 key={featureName}
-                 variant="secondary"
-                 className="flex items-center gap-1 px-2 py-1"
-               >
-                 {featureName}
-                 <button
-                   type="button"
-                   onClick={() => removeFeature(featureName)}
-                   className="ml-1 hover:text-red-500"
+             {normalizedSelectedFeatures.map(featureKey => {
+               // Find the feature to get its translated name
+               const feature = featureCategories
+                 .flatMap(cat => cat.features)
+                 .find(f => f.feature_key === featureKey);
+               
+               if (!feature) return null;
+               
+               const featureName = getFeatureName(feature);
+               
+               return (
+                 <Badge
+                   key={featureKey}
+                   variant="secondary"
+                   className="flex items-center gap-1 px-2 py-1"
                  >
-                   <X className="h-3 w-3" />
-                 </button>
-               </Badge>
-             ))}
+                   {featureName}
+                   <button
+                     type="button"
+                     onClick={() => removeFeature(featureKey)}
+                     className="ml-1 hover:text-red-500"
+                   >
+                     <X className="h-3 w-3" />
+                   </button>
+                 </Badge>
+               );
+             })}
            </div>
          </div>
        )}
@@ -253,24 +327,26 @@ export const FeaturesChecklist: React.FC<FeaturesChecklistProps> = ({
               </span>
             </button>
             
-            {expandedCategories.includes(category.id) && (
-              <div className="p-4 space-y-2">
-                {category.features.map(feature => (
-                                     <label
-                     key={feature.id}
-                     className="flex items-center space-x-3 cursor-pointer hover:bg-blue-50 p-2 rounded transition-colors"
-                   >
-                                         <input
-                       type="checkbox"
-                       checked={selectedFeatures.includes(getFeatureName(feature))}
-                       onChange={() => toggleFeature(feature.id)}
-                       className="h-4 w-4 text-blue-600 border-blue-300 rounded focus:ring-blue-500"
-                     />
-                    <span className="text-sm text-gray-700">
-                      {getFeatureName(feature)}
-                    </span>
-                  </label>
-                ))}
+                        {expandedCategories.includes(category.id) && (
+              <div className="p-4">
+                <div className="grid grid-cols-2 gap-2">
+                  {category.features.map(feature => (
+                    <label
+                      key={feature.id}
+                      className="flex items-center space-x-3 cursor-pointer hover:bg-blue-50 p-2 rounded transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={normalizedSelectedFeatures.includes(feature.feature_key)}
+                        onChange={() => toggleFeature(feature.feature_key)}
+                        className="h-4 w-4 text-blue-600 border-blue-300 rounded focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">
+                        {getFeatureName(feature)}
+                      </span>
+                    </label>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -288,18 +364,18 @@ export const FeaturesChecklist: React.FC<FeaturesChecklistProps> = ({
         >
           {t('admin.products.clearAll')}
         </Button>
-                 <Button
-           type="button"
-           variant="outline"
-           size="sm"
-           onClick={() => {
-             const allNames = featureCategories.flatMap(cat => cat.features).map(f => getFeatureName(f));
-             onFeaturesChange(allNames);
-           }}
-           className="text-xs"
-         >
-           {t('admin.products.selectAll')}
-         </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            const allIds = featureCategories.flatMap(cat => cat.features).map(f => f.feature_key);
+            onFeaturesChange(allIds);
+          }}
+          className="text-xs"
+        >
+          {t('admin.products.selectAll')}
+        </Button>
       </div>
     </div>
   );

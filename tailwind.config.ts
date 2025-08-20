@@ -18,6 +18,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Open Sans', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -25,10 +28,10 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'rgba(238,50,57,1)',
+					DEFAULT: '#9e1717',
 					foreground: 'hsl(var(--primary-foreground))',
-					hover: 'rgba(238,50,57,0.85)',
-					muted: 'rgba(238,50,57,0.15)'
+					hover: '#8a1414',
+					muted: '#f5e6e6'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',

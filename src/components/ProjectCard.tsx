@@ -42,9 +42,8 @@ const ProjectCard = ({ project, onViewGallery, onViewCaseStudy, className = '' }
   };
 
   const handleCardClick = () => {
-    // Navigate to project detail page
-    const projectUrl = project.slug ? `/projects/${project.slug}` : `/projects/${project.id}`;
-    navigate(projectUrl);
+    // Navigate to project detail page using project ID
+    navigate(`/projects/${project.id}`);
   };
 
   // Mapping of category values to translation keys

@@ -432,9 +432,9 @@ const Products = () => {
                                      <FeaturesChecklist
                      features={[]}
                      selectedFeatures={formData.features || []}
-                     onFeaturesChange={(featureNames) => {
-                       // featureNames are now the actual feature names in the selected language
-                       setFormData(prev => ({ ...prev, features: featureNames }));
+                     onFeaturesChange={(featureKeys) => {
+                       // featureKeys are now the feature keys (language-agnostic)
+                       setFormData(prev => ({ ...prev, features: featureKeys }));
                      }}
                      language={selectedLanguage}
                      placeholder="Search features..."

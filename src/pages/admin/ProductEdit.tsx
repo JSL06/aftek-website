@@ -37,7 +37,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { ArrowLeft, Type, FileText, Globe, Loader2 } from 'lucide-react';
+import { ArrowLeft, Type, FileText, Globe, Loader2, Upload, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -50,6 +50,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { useCategories } from '@/hooks/useCategories';
 import FeaturesChecklist from '@/components/FeaturesChecklist';
+import { projectService, MultilingualProject } from '@/services/projectService';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 // Language configuration
 const languages = [
@@ -73,12 +75,39 @@ export default function ProductEdit() {
      const [product, setProduct] = useState<UnifiedProduct | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [originalProduct, setOriginalProduct] = useState<UnifiedProduct | null>(null); // Store original state for comparison
+
+  // New state variables for related products and projects
+  const [relatedProductSearch, setRelatedProductSearch] = useState('');
+  const [projectSearch, setProjectSearch] = useState('');
+  const [showRelatedProductsModal, setShowRelatedProductsModal] = useState(false);
+  const [showProjectsModal, setShowProjectsModal] = useState(false);
+  const [allProducts, setAllProducts] = useState<UnifiedProduct[]>([]);
+  const [allProjects, setAllProjects] = useState<MultilingualProject[]>([]);
 
   useEffect(() => {
     if (productId) {
       loadProduct();
     }
   }, [productId]);
+
+  // Load all products and projects for selection modals
+  useEffect(() => {
+    const loadAllData = async () => {
+      try {
+        const [products, projects] = await Promise.all([
+          productService.getAllProducts(),
+          projectService.getProjects()
+        ]);
+        setAllProducts(products);
+        setAllProjects(projects);
+      } catch (error) {
+        console.error('Error loading products and projects:', error);
+      }
+    };
+    
+    loadAllData();
+  }, []);
 
   const loadProduct = async () => {
     try {
@@ -90,36 +119,59 @@ export default function ProductEdit() {
       console.log('ProductEdit: Names:', productData?.names);
       console.log('ProductEdit: Descriptions:', productData?.descriptions);
       console.log('ProductEdit: Features:', productData?.features);
+      console.log('ProductEdit: Specifications:', productData?.specifications);
+      console.log('ProductEdit: Projects Used:', productData?.projects_used, 'Type:', typeof productData?.projects_used, 'IsArray:', Array.isArray(productData?.projects_used));
+      console.log('ProductEdit: Related Products:', productData?.related_products, 'Type:', typeof productData?.related_products, 'IsArray:', Array.isArray(productData?.related_products));
       console.log('ProductEdit: Names object keys:', Object.keys(productData?.names || {}));
       console.log('ProductEdit: Descriptions object keys:', Object.keys(productData?.descriptions || {}));
       console.log('ProductEdit: Features type:', typeof productData?.features, 'Features value:', productData?.features);
       
       // Ensure names and descriptions are properly initialized
       if (productData) {
-                 const initializedProduct = {
-           ...productData,
-           // CRITICAL FIX: Ensure names and descriptions are always objects, never undefined
-           names: productData.names || {},
-           descriptions: productData.descriptions || {},
-           // Features are now centralized - use the main features array
-           features: productData.features || []
-         };
+        const initializedProduct = {
+          ...productData,
+          // CRITICAL FIX: Ensure names and descriptions are always objects, never undefined
+          names: productData.names || {},
+          descriptions: productData.descriptions || {},
+          // Features are now centralized - use the main features array
+          features: productData.features || [],
+          // CRITICAL FIX: Ensure required fields have default values
+          model: productData.model || '',
+          category: productData.category || '',
+          inStock: productData.inStock ?? false,
+          showInFeatured: productData.showInFeatured ?? false,
+          isActive: productData.isActive ?? true,
+          // New fields with default values - ensure they are always arrays
+          specifications: productData.specifications || {},
+          projects_used: Array.isArray(productData.projects_used) ? productData.projects_used : [],
+          related_products: Array.isArray(productData.related_products) ? productData.related_products : []
+        };
         
         // CRITICAL FIX: Log the exact structure being set
         console.log('ProductEdit: Final initialized product:', {
           id: initializedProduct.id,
+          model: initializedProduct.model,
+          category: initializedProduct.category,
           names: initializedProduct.names,
           descriptions: initializedProduct.descriptions,
           features: initializedProduct.features,
+          specifications: initializedProduct.specifications,
+          projects_used: initializedProduct.projects_used,
+          related_products: initializedProduct.related_products,
           namesType: typeof initializedProduct.names,
           descriptionsType: typeof initializedProduct.descriptions,
           featuresType: typeof initializedProduct.features,
           namesKeys: Object.keys(initializedProduct.names),
           descriptionsKeys: Object.keys(initializedProduct.descriptions),
-          featuresLength: Array.isArray(initializedProduct.features) ? initializedProduct.features.length : 'not array'
+          featuresLength: Array.isArray(initializedProduct.features) ? initializedProduct.features.length : 'not array',
+          projectsUsedType: typeof initializedProduct.projects_used,
+          projectsUsedIsArray: Array.isArray(initializedProduct.projects_used),
+          relatedProductsType: typeof initializedProduct.related_products,
+          relatedProductsIsArray: Array.isArray(initializedProduct.related_products)
         });
         
         setProduct(initializedProduct);
+        setOriginalProduct(initializedProduct); // Store the initial product state
       }
     } catch (error) {
       console.error('Error loading product:', error);
@@ -135,21 +187,105 @@ export default function ProductEdit() {
     try {
       setSaving(true);
       
+      // CRITICAL: Ensure required fields are properly initialized before validation
+      const productToValidate = {
+        ...product,
+        model: product.model || '',
+        category: product.category || '',
+        names: product.names || {},
+        descriptions: product.descriptions || {},
+        features: product.features || [],
+        specifications: product.specifications || {},
+        projects_used: Array.isArray(product.projects_used) ? product.projects_used : [],
+        related_products: Array.isArray(product.related_products) ? product.related_products : []
+      };
+      
       // CRITICAL: Comprehensive validation system - Products page is now fully protected
       const validationErrors = [];
       
-      // Basic field validation
-      if (!product.category || !product.category.trim()) {
+      // Debug logging for validation - log the entire product state
+      console.log('🔍 VALIDATION: Full product state before validation:', productToValidate);
+      console.log('🔍 VALIDATION: Original product state:', {
+        id: originalProduct?.id,
+        model: originalProduct?.model,
+        category: originalProduct?.category,
+        projects_used: originalProduct?.projects_used,
+        related_products: originalProduct?.related_products,
+        specifications: originalProduct?.specifications
+      });
+      console.log('🔍 VALIDATION: Current product state:', {
+        id: product.id,
+        model: product.model,
+        category: product.category,
+        projects_used: product.projects_used,
+        related_products: product.related_products,
+        specifications: product.specifications
+      });
+      console.log('🔍 VALIDATION: Model field details:', {
+        model: productToValidate.model,
+        modelType: typeof productToValidate.model,
+        modelExists: !!productToValidate.model,
+        modelTrimmed: productToValidate.model?.trim(),
+        modelTrimmedExists: !!(productToValidate.model?.trim())
+      });
+      
+      // Check if this is a partial update (only related fields changed)
+      const originalProjects = JSON.stringify(originalProduct?.projects_used || []);
+      const newProjects = JSON.stringify(productToValidate.projects_used || []);
+      const originalRelated = JSON.stringify(originalProduct?.related_products || []);
+      const newRelated = JSON.stringify(productToValidate.related_products || []);
+      const originalSpecs = JSON.stringify(originalProduct?.specifications || {});
+      const newSpecs = JSON.stringify(productToValidate.specifications || {});
+      
+      const isPartialUpdate = (
+        originalProjects !== newProjects ||
+        originalRelated !== newRelated ||
+        originalSpecs !== newSpecs
+      );
+      
+      console.log('🔍 VALIDATION: Partial update detection details:', {
+        originalProjects,
+        newProjects,
+        originalRelated,
+        newRelated,
+        originalSpecs,
+        newSpecs,
+        projectsChanged: originalProjects !== newProjects,
+        relatedProductsChanged: originalRelated !== newRelated,
+        specificationsChanged: originalSpecs !== newSpecs,
+        isPartialUpdate
+      });
+      
+      console.log('🔍 VALIDATION: Detailed comparison for related products:', {
+        originalRelatedArray: originalProduct?.related_products || [],
+        newRelatedArray: productToValidate.related_products || [],
+        originalRelatedString: originalRelated,
+        newRelatedString: newRelated,
+        comparison: originalRelated === newRelated ? 'EQUAL' : 'DIFFERENT'
+      });
+      
+      // Basic field validation - only required for full updates
+      if (!isPartialUpdate) {
+        console.log('🔍 VALIDATION: Full update detected - running all validations');
+        
+        if (!productToValidate.category || !productToValidate.category.trim()) {
         validationErrors.push('Category is required');
       }
       
-      if (!product.model || !product.model.trim()) {
+        if (!productToValidate.model || !productToValidate.model.trim()) {
         validationErrors.push('Model is required');
+          console.error('🔍 VALIDATION ERROR: Model field is missing or empty:', {
+            model: productToValidate.model,
+            modelType: typeof productToValidate.model,
+            modelExists: !!productToValidate.model,
+            modelTrimmed: productToValidate.model?.trim(),
+            modelTrimmedExists: !!(productToValidate.model?.trim())
+          });
       }
       
       // Multilingual content validation
-      const hasNames = Object.values(product.names || {}).some(name => name && name.trim());
-      const hasDescriptions = Object.values(product.descriptions || {}).some(desc => desc && desc.trim());
+        const hasNames = Object.values(productToValidate.names || {}).some(name => name && name.trim());
+        const hasDescriptions = Object.values(productToValidate.descriptions || {}).some(desc => desc && desc.trim());
       
       if (!hasNames) {
         validationErrors.push('At least one product name is required');
@@ -159,11 +295,31 @@ export default function ProductEdit() {
         validationErrors.push('At least one product description is required');
       }
       
-             // Features validation - now centralized
-       const hasFeatures = Array.isArray(product.features) && product.features.length > 0;
+        // Features validation - now centralized
+        const hasFeatures = Array.isArray(productToValidate.features) && productToValidate.features.length > 0;
       
       if (!hasFeatures) {
         validationErrors.push('At least one feature is required');
+        }
+      } else {
+        console.log('🔍 VALIDATION: Partial update detected - skipping basic field validation');
+        
+        // For partial updates, show warnings about incomplete basic fields but don't block save
+        const warnings = [];
+        
+        if (!productToValidate.category || !productToValidate.category.trim()) {
+          warnings.push('Category is empty (will not be updated)');
+        }
+        
+        if (!productToValidate.model || !productToValidate.model.trim()) {
+          warnings.push('Model is empty (will not be updated)');
+        }
+        
+        if (warnings.length > 0) {
+          console.log('🔍 VALIDATION: Warnings for partial update:', warnings);
+          // Show warnings but don't block save
+          toast.warning(`Partial update: ${warnings.join(', ')}`);
+        }
       }
       
       // Block save if validation fails
@@ -176,32 +332,48 @@ export default function ProductEdit() {
       // UNIFIED SAVE: Prepare ALL data together (categories, names, descriptions, everything)
       console.log('🔍 UNIFIED SAVE: Preparing all data for unified save operation');
       console.log('🔍 UNIFIED SAVE: Current product state:', {
-        id: product.id,
-        category: product.category,
-        model: product.model,
-        inStock: product.inStock,
-        showInFeatured: product.showInFeatured,
-        isActive: product.isActive,
-        features: product.features,
-        names: product.names,
-        descriptions: product.descriptions
+        id: productToValidate.id,
+        category: productToValidate.category,
+        model: productToValidate.model,
+        inStock: productToValidate.inStock,
+        showInFeatured: productToValidate.showInFeatured,
+        isActive: productToValidate.isActive,
+        features: productToValidate.features,
+        image: productToValidate.image,
+        specifications: productToValidate.specifications,
+        projects_used: productToValidate.projects_used,
+        related_products: productToValidate.related_products,
+        names: productToValidate.names,
+        descriptions: productToValidate.descriptions
       });
       
-             const updateData = {
-         // Basic fields (category, model, checkboxes)
-         category: product.category,
-         model: product.model,
-         inStock: product.inStock,
-         showInFeatured: product.showInFeatured,
-         isActive: product.isActive,
-         
-         // Centralized features (single array, affects all languages)
-         features: product.features || [],
-         
-         // Multilingual content (names and descriptions for all languages)
-         names: product.names || {},
-         descriptions: product.descriptions || {}
-       };
+      console.log('🔍 UNIFIED SAVE: Update type:', isPartialUpdate ? 'Partial Update' : 'Full Update');
+      
+      const updateData = {
+        // Basic fields (category, model, checkboxes) - only include if not partial update
+        ...(isPartialUpdate ? {} : {
+          category: productToValidate.category,
+          model: productToValidate.model,
+          inStock: productToValidate.inStock,
+          showInFeatured: productToValidate.showInFeatured,
+          isActive: productToValidate.isActive,
+          image: productToValidate.image,
+          features: productToValidate.features || []
+        }),
+        
+        // New fields for specifications, projects, and related products - always include
+        specifications: productToValidate.specifications || {},
+        projects_used: productToValidate.projects_used || [],
+        related_products: productToValidate.related_products || [],
+        
+        // Multilingual content (names and descriptions for all languages) - only include if not partial update
+        ...(isPartialUpdate ? {} : {
+          names: productToValidate.names || {},
+          descriptions: productToValidate.descriptions || {}
+        })
+      };
+      
+      console.log('🔍 UNIFIED SAVE: Fields to update:', Object.keys(updateData));
 
       console.log('📝 UNIFIED SAVE: Complete data being sent to service:', updateData);
       console.log('📝 UNIFIED SAVE: Names object:', updateData.names);
@@ -213,6 +385,7 @@ export default function ProductEdit() {
         inStock: updateData.inStock,
         showInFeatured: updateData.showInFeatured,
         isActive: updateData.isActive,
+        image: updateData.image,
         features: updateData.features
       });
       console.log('📝 UNIFIED SAVE: Basic fields type check:', {
@@ -223,14 +396,15 @@ export default function ProductEdit() {
       });
 
       // UNIFIED SAVE: Send everything to the service in one operation
-      const result = await productService.updateProduct(product.id, updateData);
+      const result = await productService.updateProduct(productToValidate.id, updateData);
       console.log('✅ UNIFIED SAVE: Service result:', result);
       
-      // Don't update local state with server result - it might overwrite our changes
-      // The local state already has the correct data from user edits
-      // This prevents the "edits disappearing" bug
-      
+      // Update the product state with the result and reset original state
+      if (result) {
+        setProduct(result);
+        setOriginalProduct({ ...result }); // Reset original state to new saved state
       toast.success(t('messages.saveSuccess'));
+      }
       
       // Dispatch custom event to refresh admin counts and frontend website
       console.log('🔄 UNIFIED SAVE: Dispatching productUpdated event to refresh frontend...');
@@ -267,35 +441,100 @@ export default function ProductEdit() {
   };
 
   const handleCancel = () => {
+    if (productId) {
+      loadProduct(); // Reload the product to reset any changes
+    } else {
+      setProduct(null);
+    }
+    setSaving(false);
     navigate('/admin/products');
+  };
+
+  const resetOriginalState = () => {
+    if (product) {
+      setOriginalProduct({ ...product });
+    }
   };
 
   const updateTranslation = (languageCode: string, field: 'name' | 'description', value: string) => {
     if (!product) return;
 
-    console.log(`🔄 UPDATE DEBUG: updateTranslation called - Language: ${languageCode}, Field: ${field}, Value: "${value}"`);
-    console.log(`🔄 UPDATE DEBUG: Current product state before update:`, {
-      names: product.names,
-      descriptions: product.descriptions
-    });
-
-    setProduct(prev => {
-      if (!prev) return prev;
-
-      if (field === 'name') {
-        const newNames = { ...prev.names, [languageCode]: value };
-        console.log(`🔄 UPDATE DEBUG: Updated names object:`, newNames);
-        const updatedProduct = { ...prev, names: newNames };
-        console.log(`🔄 UPDATE DEBUG: Product state after name update:`, updatedProduct);
-        return updatedProduct;
-      } else {
-        const newDescriptions = { ...prev.descriptions, [languageCode]: value };
-        console.log(`🔄 UPDATE DEBUG: Updated descriptions object:`, newDescriptions);
-        const updatedProduct = { ...prev, descriptions: newDescriptions };
-        console.log(`🔄 UPDATE DEBUG: Product state after description update:`, updatedProduct);
-        return updatedProduct;
+    setProduct(prev => ({
+      ...prev!,
+      [field === 'name' ? 'names' : 'descriptions']: {
+        ...prev![field === 'name' ? 'names' : 'descriptions'],
+        [languageCode]: value
       }
+    }));
+  };
+
+  // Functions for managing related products and projects
+  const removeRelatedProduct = (productId: string) => {
+    if (!product) return;
+    console.log('🔍 removeRelatedProduct called with productId:', productId);
+    console.log('🔍 Current product state before removing related product:', {
+      id: product.id,
+      related_products: product.related_products,
+      related_productsType: typeof product.related_products,
+      related_productsIsArray: Array.isArray(product.related_products)
     });
+    
+    const newRelatedProducts = (product.related_products || []).filter(id => id !== productId);
+    console.log('🔍 New related products array after removal:', newRelatedProducts);
+    
+    setProduct({
+      ...product,
+      related_products: newRelatedProducts
+    });
+    
+    console.log('🔍 Product state updated after removing related product');
+  };
+
+  const removeProject = (projectId: string) => {
+    if (!product) return;
+    setProduct({
+      ...product,
+      projects_used: (product.projects_used || []).filter(id => id !== projectId)
+    });
+  };
+
+  const addRelatedProduct = (productId: string) => {
+    if (!product) return;
+    console.log('🔍 addRelatedProduct called with productId:', productId);
+    console.log('🔍 Current product state before adding related product:', {
+      id: product.id,
+      related_products: product.related_products,
+      related_productsType: typeof product.related_products,
+      related_productsIsArray: Array.isArray(product.related_products)
+    });
+    
+    const currentRelated = Array.isArray(product.related_products) ? product.related_products : [];
+    console.log('🔍 Current related products array:', currentRelated);
+    
+    if (!currentRelated.includes(productId)) {
+      const newRelatedProducts = [...currentRelated, productId];
+      console.log('🔍 New related products array:', newRelatedProducts);
+      
+      setProduct({
+        ...product,
+        related_products: newRelatedProducts
+      });
+      
+      console.log('🔍 Product state updated with new related products');
+    } else {
+      console.log('🔍 Product already in related products list');
+    }
+  };
+
+  const addProject = (projectId: string) => {
+    if (!product) return;
+    const currentProjects = Array.isArray(product.projects_used) ? product.projects_used : [];
+    if (!currentProjects.includes(projectId)) {
+      setProduct({
+        ...product,
+        projects_used: [...currentProjects, projectId]
+      });
+    }
   };
 
   const updateBasicField = (field: string, value: any) => {
@@ -371,7 +610,7 @@ export default function ProductEdit() {
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         {/* Basic Info - Left Sidebar */}
         <div className="xl:col-span-1">
           <Card>
@@ -398,14 +637,81 @@ export default function ProductEdit() {
                 </Select>
               </div>
               
-                             <div>
-                 <label className="block text-sm font-medium mb-2">{t('basic.model')}</label>
-                 <Input
-                   value={product.model || ''}
-                   onChange={(e) => updateBasicField('model', e.target.value)}
-                   placeholder={t('basic.model')}
-                 />
-               </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">{t('basic.model')}</label>
+                <Input
+                  value={product.model || ''}
+                  onChange={(e) => updateBasicField('model', e.target.value)}
+                  placeholder={t('basic.model')}
+                />
+              </div>
+
+              {/* Product Image Upload */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Product Image</label>
+                <div className="space-y-3">
+                  {/* Current Image Display */}
+                  {product.image && (
+                    <div className="relative">
+                      <img
+                        src={product.image}
+                        alt="Current product image"
+                        className="w-full h-32 object-cover rounded-lg border"
+                      />
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2 h-6 w-6 p-0"
+                        onClick={() => updateBasicField('image', '')}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {/* Image Upload Input */}
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          try {
+                            // Upload to Supabase Storage
+                            const fileName = `product-${product.id}-${Date.now()}`;
+                            const { data, error } = await supabase.storage
+                              .from('product-images')
+                              .upload(fileName, file);
+                            
+                            if (error) throw error;
+                            
+                            // Get public URL
+                            const { data: { publicUrl } } = supabase.storage
+                              .from('product-images')
+                              .getPublicUrl(fileName);
+                            
+                            // Update product state
+                            updateBasicField('image', publicUrl);
+                            toast.success('Image uploaded successfully');
+                          } catch (error) {
+                            console.error('Error uploading image:', error);
+                            toast.error('Failed to upload image');
+                          }
+                        }
+                      }}
+                      className="flex-1"
+                    />
+                    <Button variant="outline" size="sm" className="px-3">
+                      <Upload className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  <p className="text-xs text-muted-foreground">
+                    Upload a new product image. Supported formats: JPG, PNG, GIF
+                  </p>
+                </div>
+              </div>
 
                {/* Product Features - Centralized Management */}
                <div>
@@ -413,16 +719,16 @@ export default function ProductEdit() {
                  <FeaturesChecklist
                    features={[]}
                    selectedFeatures={product.features || []}
-                   onFeaturesChange={(featureNames) => {
-                     console.log('🔍 FeaturesChecklist onChange called with:', featureNames);
+                   onFeaturesChange={(featureKeys) => {
+                     console.log('🔍 FeaturesChecklist onChange called with:', featureKeys);
                      console.log('🔍 Current product features before update:', product.features);
                      // Update features centrally - affects all languages
                      if (product) {
                        setProduct({
                          ...product,
-                         features: featureNames
+                         features: featureKeys
                        });
-                       console.log('🔍 Product state updated with new features:', featureNames);
+                       console.log('🔍 Product state updated with new features:', featureKeys);
                      }
                    }}
                    language={language} // Use current admin language for display
@@ -432,6 +738,100 @@ export default function ProductEdit() {
                  <p className="text-xs text-muted-foreground mt-2">
                    Features selected here will be available in all languages. The frontend will automatically translate them based on the user's language preference.
                  </p>
+               </div>
+
+               {/* Related Products Selector */}
+               <div>
+                 <label className="block text-sm font-medium mb-2">Related Products</label>
+                 <div className="space-y-2">
+                   <div className="flex items-center gap-2">
+                     <Input
+                       placeholder="Search products..."
+                       value={relatedProductSearch}
+                       onChange={(e) => setRelatedProductSearch(e.target.value)}
+                       className="flex-1"
+                     />
+                     <Button
+                       variant="outline"
+                       size="sm"
+                       onClick={() => setShowRelatedProductsModal(true)}
+                     >
+                       Select Products
+                     </Button>
+                   </div>
+                   
+                   {/* Selected Related Products */}
+                   {product.related_products && Array.isArray(product.related_products) && product.related_products.length > 0 && (
+                     <div className="space-y-2">
+                       <p className="text-sm text-muted-foreground">Selected products:</p>
+                       {product.related_products.map((productId, index) => {
+                         const relatedProduct = allProducts.find(p => p.id === productId);
+                         return (
+                           <div key={index} className="flex items-center justify-between bg-muted/50 p-2 rounded">
+                             <span className="text-sm">
+                               {relatedProduct ? relatedProduct.names?.[language] || relatedProduct.name : `Product ${productId}`}
+                             </span>
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               onClick={() => removeRelatedProduct(productId)}
+                               className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                             >
+                               ×
+                             </Button>
+                           </div>
+                         );
+                       })}
+                     </div>
+                   )}
+                 </div>
+               </div>
+
+               {/* Projects Used In - Past Cases & Projects */}
+               <div>
+                 <label className="block text-sm font-medium mb-2">過往案例與專案 (Past Cases & Projects)</label>
+                 <div className="space-y-2">
+                   <div className="flex items-center gap-2">
+                     <Input
+                       placeholder="Search projects..."
+                       value={projectSearch}
+                       onChange={(e) => setProjectSearch(e.target.value)}
+                       className="flex-1"
+                     />
+                     <Button
+                       variant="outline"
+                       size="sm"
+                       onClick={() => setShowProjectsModal(true)}
+                     >
+                       Select Projects
+                     </Button>
+                   </div>
+                   
+                   {/* Selected Projects */}
+                   {product.projects_used && Array.isArray(product.projects_used) && product.projects_used.length > 0 && (
+                     <div className="space-y-2">
+                       <p className="text-sm text-muted-foreground">Selected projects:</p>
+                       {product.projects_used.map((projectId, index) => {
+                         const project = allProjects.find(p => p.id === projectId);
+                         return (
+                           <div key={index} className="flex items-center justify-between bg-muted/50 p-2 rounded">
+                             <span className="text-sm">
+                               {project ? project.titles?.[language] || project.title : `Project ${projectId}`}
+                             </span>
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               onClick={() => removeProject(projectId)}
+                               className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                             >
+                               ×
+                             </Button>
+                           </div>
+                         );
+                       })}
+                     </div>
+                   )}
+                 </div>
                </div>
 
               <div className="space-y-4">
@@ -473,7 +873,7 @@ export default function ProductEdit() {
         </div>
 
         {/* Multilingual Content - Main Area */}
-        <div className="xl:col-span-3">
+        <div className="xl:col-span-1">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -535,6 +935,29 @@ export default function ProductEdit() {
                           />
                         </div>
 
+                        {/* Technical Specifications */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            <FileText className="h-4 w-4 inline mr-2" />
+                            技術規格 (Technical Specifications) ({lang.nativeName})
+                          </label>
+                          <SimpleRichTextEditor
+                            value={product.specifications?.[lang.code] || ''}
+                            onChange={(value) => {
+                              if (product) {
+                                setProduct({
+                                  ...product,
+                                  specifications: {
+                                    ...product.specifications,
+                                    [lang.code]: value
+                                  }
+                                });
+                              }
+                            }}
+                            placeholder="Enter technical specifications..."
+                            height="200px"
+                          />
+                                </div>
                         
                       </div>
                     </div>
@@ -545,6 +968,80 @@ export default function ProductEdit() {
           </Card>
         </div>
       </div>
+
+      {/* Related Products Selection Modal */}
+      <Dialog open={showRelatedProductsModal} onOpenChange={setShowRelatedProductsModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Select Related Products</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Search products..."
+              value={relatedProductSearch}
+              onChange={(e) => setRelatedProductSearch(e.target.value)}
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+              {allProducts
+                .filter(p => p.id !== product?.id) // Exclude current product
+                .filter(p => 
+                  !product?.related_products?.includes(p.id) && // Exclude already selected
+                  (p.names?.[language] || p.name).toLowerCase().includes(relatedProductSearch.toLowerCase())
+                )
+                .map(productItem => (
+                  <div
+                    key={productItem.id}
+                    className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                    onClick={() => {
+                      addRelatedProduct(productItem.id);
+                      setShowRelatedProductsModal(false);
+                    }}
+                  >
+                    <div className="font-medium">{productItem.names?.[language] || productItem.name}</div>
+                    <div className="text-sm text-muted-foreground">{productItem.category}</div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Projects Selection Modal */}
+      <Dialog open={showProjectsModal} onOpenChange={setShowProjectsModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Select Projects (Past Cases & Projects)</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Search projects..."
+              value={projectSearch}
+              onChange={(e) => setProjectSearch(e.target.value)}
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+              {allProjects
+                .filter(p => 
+                  !product?.projects_used?.includes(p.id) && // Exclude already selected
+                  (p.titles?.[language] || p.title).toLowerCase().includes(projectSearch.toLowerCase())
+                )
+                .map(project => (
+                  <div
+                    key={project.id}
+                    className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                    onClick={() => {
+                      addProject(project.id);
+                      setShowProjectsModal(false);
+                    }}
+                  >
+                    <div className="font-medium">{project.titles?.[language] || project.title}</div>
+                    <div className="text-sm text-muted-foreground">{project.category}</div>
+                    <div className="text-xs text-muted-foreground">{project.client}</div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

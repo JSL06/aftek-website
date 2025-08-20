@@ -341,15 +341,40 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div 
+      className="min-h-screen" 
+      style={{
+        backgroundImage: 'url(/src/assets/17580.jpg)',
+        backgroundSize: 'cover',
+        backgroundAttachment: 'fixed',
+        backgroundPosition: 'center'
+      }}
+    >
+      {/* Spacer to prevent header overlap */}
       <div style={{ height: '80px' }}></div>
-      <div className="container mx-auto p-8">
-        <div className="flex flex-col items-center mb-12">
-          <h1 className="uniform-page-title">{t('contact.title')}</h1>
-          <p className="text-lg text-muted-foreground text-center max-w-2xl mt-4">
+      
+      {/* Title Section with Special Background */}
+      <div 
+        className="relative py-16 mb-12"
+        style={{
+          backgroundImage: 'url(/src/assets/pexels-pixabay-159306.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="relative z-10 container mx-auto text-center">
+          <h1 className="uniform-page-title text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+            {t('contact.title')}
+          </h1>
+          <p className="text-lg text-white/90 text-center max-w-2xl mt-4" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
             Get in touch with our team for expert consultation and support
           </p>
         </div>
+      </div>
+      
+      <div className="container mx-auto p-8 max-w-7xl">
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 max-w-7xl mx-auto">
           {/* Smart Contact Form */}
@@ -665,6 +690,7 @@ const Contact: React.FC = () => {
             </Card>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

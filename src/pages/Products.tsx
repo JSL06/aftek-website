@@ -67,28 +67,55 @@ const Products: React.FC = () => {
   ];
 
   return (
-    <div className="container mx-auto p-8 mt-20">
-      <div className="flex flex-col items-center mb-4">
-        <h1 className="uniform-page-title">{t('products.title')}</h1>
-        <p className="text-lg text-muted-foreground text-center mt-4">
-          {t('products.subtitle')}
-        </p>
+    <div 
+      className="min-h-screen" 
+      style={{
+        backgroundImage: 'url(/src/assets/17580.jpg)',
+        backgroundSize: 'cover',
+        backgroundAttachment: 'fixed',
+        backgroundPosition: 'center'
+      }}
+    >
+      {/* Spacer to prevent header overlap */}
+      <div style={{ height: '80px' }}></div>
+      
+      {/* Title Section with Special Background */}
+      <div 
+        className="relative py-16 mb-12"
+        style={{
+          backgroundImage: 'url(/src/assets/pexels-pixabay-159306.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="relative z-10 container mx-auto text-center">
+          <h1 className="uniform-page-title text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+            {t('products.title')}
+          </h1>
+          <p className="text-lg text-white/90 text-center mt-4" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
+            {t('products.subtitle')}
+          </p>
+        </div>
       </div>
+      
+      <div className="container mx-auto p-8 max-w-6xl">
 
       {/* Filters */}
-      <div className="mb-6 p-6 border border-border/50 rounded-lg bg-transparent backdrop-blur-sm">
+      <div className="mb-6 p-6 border border-border rounded-lg bg-white/90 backdrop-blur-sm shadow-elegant">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <Input
               placeholder={t('products.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-background/50 border-border/50"
+              className="bg-white/50 border-border focus:border-primary focus:ring-primary/20"
             />
           </div>
           <div className="w-full sm:w-48">
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="bg-background/50 border-border/50">
+              <SelectTrigger className="bg-white/50 border-border focus:border-primary focus:ring-primary/20">
                 <SelectValue placeholder={t('products.filters.all')} />
               </SelectTrigger>
               <SelectContent>
@@ -144,6 +171,7 @@ const Products: React.FC = () => {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
       />
+      </div>
     </div>
   );
 };

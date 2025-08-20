@@ -29,6 +29,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/Products";
 import AdminProjects from "./pages/admin/Projects";
 import MultilingualCategoryManager from "./pages/admin/MultilingualCategoryManager";
+import FeaturesEditor from "./pages/admin/FeaturesEditor";
 import AdminArticles from "./pages/admin/Articles";
 import MediaManager from "./pages/admin/MediaManager";
 import FeaturedProductsManager from "./pages/admin/FeaturedProductsManager";
@@ -37,7 +38,7 @@ import GuideManager from "./pages/admin/GuideManager";
 import WebsiteTextEditor from './pages/admin/WebsiteTextEditor';
 import ProtectedPage from './components/ProtectedPage';
 import WebsiteTextManager from './pages/admin/WebsiteTextManager';
-import TranslationDashboard from './pages/admin/TranslationDashboard';
+
 import ProductEdit from './pages/admin/ProductEdit';
 import AdminLayout from './components/admin/AdminLayout';
 import Analytics from './pages/admin/Analytics';
@@ -64,7 +65,7 @@ const App = () => (
                 <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
                 <Route path="products" element={<ProtectedPage pageName="products"><Products /></ProtectedPage>} />
                 <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
-                <Route path="projects/:slug" element={<ProtectedPage pageName="projects"><ProjectDetail /></ProtectedPage>} />
+                <Route path="projects/:projectId" element={<ProtectedPage pageName="projects"><ProjectDetail /></ProtectedPage>} />
                 <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
                 <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
                 <Route path="guide" element={<ProtectedPage pageName="guide"><Guide /></ProtectedPage>} />
@@ -81,7 +82,7 @@ const App = () => (
                 <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
                 <Route path="products" element={<ProtectedPage pageName="products"><Products /></ProtectedPage>} />
                 <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
-                <Route path="projects/:slug" element={<ProtectedPage pageName="projects"><ProjectDetail /></ProtectedPage>} />
+                <Route path="projects/:projectId" element={<ProtectedPage pageName="projects"><ProjectDetail /></ProtectedPage>} />
                 <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
                 <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
                 <Route path="guide" element={<ProtectedPage pageName="guide"><Guide /></ProtectedPage>} />
@@ -98,7 +99,7 @@ const App = () => (
                 <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
                 <Route path="products" element={<ProtectedPage pageName="products"><Products /></ProtectedPage>} />
                 <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
-                <Route path="projects/:slug" element={<ProtectedPage pageName="projects"><ProjectDetail /></ProtectedPage>} />
+                <Route path="projects/:projectId" element={<ProtectedPage pageName="projects"><ProjectDetail /></ProtectedPage>} />
                 <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
                 <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
                 <Route path="guide" element={<ProtectedPage pageName="guide"><Guide /></ProtectedPage>} />
@@ -116,7 +117,7 @@ const App = () => (
                 <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
                 <Route path="products" element={<ProtectedPage pageName="products"><Products /></ProtectedPage>} />
                 <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
-                <Route path="projects/:slug" element={<ProtectedPage pageName="projects"><ProjectDetail /></ProtectedPage>} />
+                <Route path="projects/:projectId" element={<ProtectedPage pageName="projects"><ProjectDetail /></ProtectedPage>} />
                 <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
                 <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
                 <Route path="guide" element={<ProtectedPage pageName="guide"><Guide /></ProtectedPage>} />
@@ -141,7 +142,9 @@ const App = () => (
                 <Route path="products" element={<UnifiedProducts />} />
                 <Route path="products/edit/:productId" element={<ProductEdit />} />
                 <Route path="projects" element={<AdminProjects />} />
+                <Route path="projects/edit/:projectId" element={<AdminProjects />} />
                 <Route path="category-manager" element={<MultilingualCategoryManager />} />
+                <Route path="features-editor" element={<FeaturesEditor />} />
                 <Route path="unified-products" element={<UnifiedProducts />} />
                 <Route path="guide-manager" element={<GuideManager />} />
                 <Route path="featured-products" element={<FeaturedProductsManager />} />
@@ -150,7 +153,7 @@ const App = () => (
                 <Route path="website-text" element={<WebsiteTextEditor />} />
                 <Route path="website-text-editor" element={<WebsiteTextEditor />} />
                 <Route path="website-text-manager" element={<WebsiteTextManager />} />
-                <Route path="translation-dashboard" element={<TranslationDashboard />} />
+
                 <Route path="analytics" element={<Analytics />} />
                 <Route path="users" element={<Users />} />
                 <Route path="settings" element={<Settings />} />

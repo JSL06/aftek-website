@@ -1,40 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useAdminStore } from '@/stores/adminStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 import { 
   Menu, 
-  Search, 
+  X, 
   Bell, 
   Settings, 
   LogOut, 
-  ChevronLeft,
-  ChevronRight,
-  Sun,
-  Moon,
-  Monitor,
-  Command
+  User, 
+  Home, 
+  Package, 
+  FolderOpen, 
+  FileText, 
+  Users, 
+  BarChart3, 
+  Filter,
+  Monitor
 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
-import AdminSidebar from './AdminSidebar';
-import CommandPalette from './CommandPalette';
-import AdminLanguageSwitcher from './AdminLanguageSwitcher';
-import { useTheme } from 'next-themes';
+import { useTranslation } from '@/hooks/useTranslation';
+import { useAdminStore } from '@/stores/adminStore';
+import { useAdminCounts } from '@/hooks/useAdminCounts';
 import { useAdminLanguage } from '@/contexts/AdminLanguageContext';
+import AdminSidebar from './AdminSidebar';
+import AdminLanguageSwitcher from './AdminLanguageSwitcher';
+import CommandPalette from './CommandPalette';
+import { cn } from '@/lib/utils';
 
 const AdminLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { theme, setTheme } = useTheme();
   const { t } = useAdminLanguage();
   const {
     sidebar,
@@ -47,7 +51,6 @@ const AdminLayout: React.FC = () => {
   } = useAdminStore();
 
   const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
 
   // Update active section based on current route
   useEffect(() => {
@@ -80,13 +83,7 @@ const AdminLayout: React.FC = () => {
         setShowCommandPalette(true);
       }
       
-      // Cmd/Ctrl + / for search
-      if ((e.metaKey || e.ctrlKey) && e.key === '/') {
-        e.preventDefault();
-        // Focus search input
-        const searchInput = document.getElementById('global-search');
-        searchInput?.focus();
-      }
+
     };
 
     document.addEventListener('keydown', handleKeyDown);
@@ -118,7 +115,7 @@ const AdminLayout: React.FC = () => {
             onClick={toggleSidebar}
             className="mr-2 h-8 w-8 p-0"
           >
-            {sidebar.collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            {sidebar.collapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
           </Button>
 
           {/* Logo */}
@@ -129,52 +126,10 @@ const AdminLayout: React.FC = () => {
             <span className="font-semibold text-lg">Aftek Admin</span>
           </div>
 
-          {/* Global Search */}
-          <div className="flex-1 max-w-md mx-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="global-search"
-                placeholder={t('admin.search.placeholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-muted/50 border-0 focus:bg-background"
-              />
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-                  <span className="text-xs">{t('admin.search.shortcut')}</span>
-                </kbd>
-              </div>
-            </div>
-          </div>
+
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-2">
-            {/* Theme Toggle */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                  <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                  <span className="sr-only">{t('admin.theme.toggle')}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setTheme('light')}>
-                  <Sun className="mr-2 h-4 w-4" />
-                  <span>{t('admin.theme.light')}</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme('dark')}>
-                  <Moon className="mr-2 h-4 w-4" />
-                  <span>{t('admin.theme.dark')}</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme('system')}>
-                  <Monitor className="mr-2 h-4 w-4" />
-                  <span>{t('admin.theme.system')}</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
             {/* Language Switcher */}
             <AdminLanguageSwitcher />
 

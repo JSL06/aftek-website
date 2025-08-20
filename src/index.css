@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -226,61 +226,61 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Aftek Production Color System */
-    --background: 45 100% 97%; /* Soft Cream #FFF9F0 */
-    --foreground: 221 70% 15%; /* Dark Navy #1E3A8A */
+    /* New Aftek Design System */
+    --background: 0 0% 93%; /* Light Gray #eeeeee */
+    --foreground: 0 0% 20%; /* Dark Text */
 
     --card: 0 0% 100%;
-    --card-foreground: 221 70% 15%;
+    --card-foreground: 0 0% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 221 70% 15%;
+    --popover-foreground: 0 0% 20%;
 
-    /* Deep Burgundy Primary */
-    --primary: 238, 50, 57, 1; /* rgba(238,50,57,255) */
-    --primary-foreground: 45 67% 93%; /* Beige #F5E6D3 */
-    --primary-hover: 238, 50, 57, 0.85;
-    --primary-muted: 45 100% 97%;
+    /* Red Primary */
+    --primary: 0 70% 35%; /* Red #9e1717 */
+    --primary-foreground: 0 0% 100%; /* White */
+    --primary-hover: 0 70% 30%;
+    --primary-muted: 0 70% 95%;
 
-    /* Warm Gold Secondary */
-    --secondary: 38 50% 72%; /* Warm Gold #DFC08F */
-    --secondary-foreground: 221 70% 15%;
+    /* Light Gray Secondary */
+    --secondary: 0 0% 93%; /* Light Gray #eeeeee */
+    --secondary-foreground: 0 0% 20%;
 
-    /* Soft Cream Muted */
-    --muted: 45 100% 97%; /* Soft Cream #FFF9F0 */
-    --muted-foreground: 221 30% 45%;
+    /* Light Gray Muted */
+    --muted: 0 0% 93%; /* Light Gray #eeeeee */
+    --muted-foreground: 0 0% 40%;
 
-    /* Vibrant Red Accent */
-    --accent: 340 97% 50%; /* Vibrant Red #CB0034 */
-    --accent-foreground: 45 67% 93%;
+    /* Red Accent */
+    --accent: 0 70% 35%; /* Red #9e1717 */
+    --accent-foreground: 0 0% 100%;
 
-    /* Rich Red */
-    --red: 238, 50, 57, 1; /* rgba(238,50,57,255) */
-    --red-foreground: 45 67% 93%;
+    /* Red */
+    --red: 0 70% 35%; /* Red #9e1717 */
+    --red-foreground: 0 0% 100%;
 
-    /* Dark Navy */
-    --navy: 221 70% 15%; /* Dark Navy #1E3A8A */
-    --navy-foreground: 45 67% 93%;
+    /* Dark Text */
+    --navy: 0 0% 20%;
+    --navy-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 70% 35%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 0 100% 50%;
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 0 70% 35%;
 
-    /* Aftek Brand Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(351, 89%, 27%) 0%, hsl(349, 98%, 39%) 30%, hsl(340, 97%, 50%) 70%, hsl(221, 70%, 15%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(45, 100%, 97%) 0%, hsl(38, 50%, 85%) 50%, hsl(45, 67%, 93%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(45, 100%, 97%) 0%, hsl(38, 50%, 72%) 50%, hsl(45, 67%, 93%) 100%);
-    --gradient-glass: linear-gradient(135deg, hsla(45, 100%, 97%, 0.9) 0%, hsla(38, 50%, 72%, 0.6) 100%);
-    --gradient-elegant: linear-gradient(135deg, hsl(351, 89%, 27%) 0%, hsl(340, 97%, 50%) 100%);
+    /* New Gradients */
+    --gradient-hero: linear-gradient(135deg, #9e1717 0%, #b81f1f 50%, #d12727 100%);
+    --gradient-subtle: linear-gradient(180deg, #eeeeee 0%, #f5f5f5 50%, #fafafa 100%);
+    --gradient-accent: linear-gradient(135deg, #eeeeee 0%, #e0e0e0 50%, #d5d5d5 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(238, 238, 238, 0.9) 0%, rgba(158, 23, 23, 0.1) 100%);
+    --gradient-elegant: linear-gradient(135deg, #9e1717 0%, #b81f1f 100%);
 
     /* Refined Shadows */
-    --shadow-elegant: 0 20px 40px -8px hsl(0 100% 50% / 0.15), 0 8px 16px -4px hsl(0 0% 0% / 0.1);
-    --shadow-card: 0 8px 32px -4px hsl(0 0% 0% / 0.08), 0 4px 16px -2px hsl(0 0% 0% / 0.04);
-    --shadow-glow: 0 0 32px hsl(0 100% 50% / 0.2), 0 0 64px hsl(0 100% 50% / 0.1);
-    --shadow-inner: inset 0 2px 8px 0 hsl(0 0% 0% / 0.06);
+    --shadow-elegant: 0 20px 40px -8px rgba(158, 23, 23, 0.15), 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+    --shadow-card: 0 8px 32px -4px rgba(0, 0, 0, 0.08), 0 4px 16px -2px rgba(0, 0, 0, 0.04);
+    --shadow-glow: 0 0 32px rgba(158, 23, 23, 0.2), 0 0 64px rgba(158, 23, 23, 0.1);
+    --shadow-inner: inset 0 2px 8px 0 rgba(0, 0, 0, 0.06);
 
     /* Smooth Transitions */
     --transition-smooth: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
@@ -295,7 +295,7 @@ All colors MUST be HSL.
 
     --sidebar-primary: 240 5.9% 10%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-primary-foreground: 0 0% 100%;
 
     --sidebar-accent: 240 4.8% 95.9%;
 
@@ -352,6 +352,22 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Open Sans', sans-serif;
+    background-image: url('/src/assets/17580.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+  }
+  
+  /* Typography */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600; /* Semibold */
+  }
+  
+  p, span, div, a, button, input, textarea, select {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400; /* Regular */
   }
 }
 

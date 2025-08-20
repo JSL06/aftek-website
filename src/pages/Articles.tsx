@@ -101,17 +101,37 @@ const Articles = () => {
   const displayArticles = filteredArticles;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div 
+      className="min-h-screen" 
+      style={{
+        backgroundImage: 'url(/src/assets/17580.jpg)',
+        backgroundSize: 'cover',
+        backgroundAttachment: 'fixed',
+        backgroundPosition: 'center'
+      }}
+    >
       {/* Spacer to prevent header overlap */}
       <div style={{ height: '80px' }}></div>
-      <div className="container mx-auto p-8">
-        <div className="flex flex-col items-center mb-12">
-          <h1 className="uniform-page-title">{t('articles.title') || 'Articles'}</h1>
-          {/* Debug info */}
-          <div style={{fontSize: '12px', color: 'gray', marginTop: '10px'}}>
-            Debug: articles.title = "{t('articles.title')}" | Language: {currentLanguage}
-          </div>
+      
+      {/* Title Section with Special Background */}
+      <div 
+        className="relative py-16 mb-12"
+        style={{
+          backgroundImage: 'url(/src/assets/pexels-pixabay-159306.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="relative z-10 container mx-auto text-center">
+          <h1 className="uniform-page-title text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+            {t('articles.title') || 'Articles'}
+          </h1>
         </div>
+      </div>
+      
+      <div className="container mx-auto p-8 max-w-6xl">
         
         {/* Article Filter */}
         <ArticleFilter onFilterChange={handleFilterChange} />

@@ -109,12 +109,18 @@ const ArticleDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-32 bg-gradient-subtle">
-        <div className="container mx-auto px-6">
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground mt-4">Loading article...</p>
-          </div>
+      <div 
+        className="min-h-screen flex items-center justify-center" 
+        style={{
+          backgroundImage: 'url(/src/assets/17580.jpg)',
+          backgroundSize: 'cover',
+          backgroundAttachment: 'fixed',
+          backgroundPosition: 'center'
+        }}
+      >
+        <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-elegant p-12 border border-border text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground mt-4">Loading article...</p>
         </div>
       </div>
     );
@@ -122,18 +128,24 @@ const ArticleDetail = () => {
 
   if (error || !article) {
     return (
-      <div className="min-h-screen pt-32 bg-gradient-subtle">
-        <div className="container mx-auto px-6">
-          <div className="text-center py-12">
-            <h1 className="text-2xl font-bold text-foreground mb-4">Article Not Found</h1>
-            <p className="text-muted-foreground mb-6">{error || 'The article you are looking for does not exist.'}</p>
-            <Link to="/articles">
-              <Button>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Articles
-              </Button>
-            </Link>
-          </div>
+      <div 
+        className="min-h-screen flex items-center justify-center" 
+        style={{
+          backgroundImage: 'url(/src/assets/17580.jpg)',
+          backgroundSize: 'cover',
+          backgroundAttachment: 'fixed',
+          backgroundPosition: 'center'
+        }}
+      >
+        <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-elegant p-12 border border-border text-center max-w-md mx-4">
+          <h1 className="text-2xl font-bold text-foreground mb-4">Article Not Found</h1>
+          <p className="text-muted-foreground mb-6">{error || 'The article you are looking for does not exist.'}</p>
+          <Link to="/articles">
+            <Button>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Articles
+            </Button>
+          </Link>
         </div>
       </div>
     );
@@ -148,38 +160,60 @@ const ArticleDetail = () => {
   };
 
   return (
-    <div className="min-h-screen pt-32 bg-gradient-subtle">
-      <div className="container mx-auto px-6 mb-24">
-
-
-        {/* Article Header */}
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
-              {article.title}
-            </h1>
-            
-            <div className="flex flex-wrap items-center gap-4 mb-6 text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span>{article.author || 'Anonymous'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>{formatDate(article.published_at)}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Tag className="h-4 w-4" />
-                <span>{article.category}</span>
-              </div>
+    <div 
+      className="min-h-screen" 
+      style={{
+        backgroundImage: 'url(/src/assets/17580.jpg)',
+        backgroundSize: 'cover',
+        backgroundAttachment: 'fixed',
+        backgroundPosition: 'center'
+      }}
+    >
+      {/* Spacer to prevent header overlap */}
+      <div style={{ height: '80px' }}></div>
+      
+      {/* Title Section with Special Background */}
+      <div 
+        className="relative py-16 mb-12"
+        style={{
+          backgroundImage: 'url(/src/assets/pexels-pixabay-159306.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="relative z-10 container mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+            {article.title}
+          </h1>
+          
+          <div className="flex flex-wrap items-center justify-center gap-4 mb-6 text-white/90" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              <span>{article.author || 'Anonymous'}</span>
             </div>
-
-            {article.excerpt && (
-              <p className="text-xl text-muted-foreground leading-relaxed mb-8">
-                {article.excerpt}
-              </p>
-            )}
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <span>{formatDate(article.published_at)}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              <span>{article.category}</span>
+            </div>
           </div>
+
+          {article.excerpt && (
+            <p className="text-xl text-white/90 leading-relaxed mb-8 max-w-3xl mx-auto" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
+              {article.excerpt}
+            </p>
+          )}
+        </div>
+      </div>
+      
+      <div className="container mx-auto px-6 mb-24 max-w-4xl">
+        {/* Article Content */}
+        <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-elegant p-8 border border-border">
 
           {/* Article Image */}
           {article.image && (

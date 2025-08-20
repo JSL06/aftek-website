@@ -81,8 +81,9 @@ export const TranslationStatus: React.FC<TranslationStatusProps> = ({
             <TooltipProvider key={lang.code}>
               <Tooltip>
                 <TooltipTrigger>
-                  <div className={`p-1 rounded border ${getStatusColor(status)}`}>
+                  <div className={`p-1 rounded border ${getStatusColor(status)} flex items-center gap-1`}>
                     {getStatusIcon(status)}
+                    <span className="text-xs font-medium">{lang.code.toUpperCase()}</span>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>

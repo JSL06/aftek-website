@@ -30,6 +30,8 @@ export interface UnifiedProduct {
   translations?: Record<string, any>;
   names?: Record<string, any>;
   descriptions?: Record<string, any>;
+  specifications?: Record<string, any>; // Technical specifications (multilingual)
+  projects_used?: string[]; // Projects where this product was used
   isActive?: boolean;
   showInFeatured?: boolean;
   tags?: string[];
@@ -199,6 +201,10 @@ export const productService = {
           price: product.price || 0,
           inStock: product.inStock || product.in_stock || false,
           image: product.image || product.image_url || '',
+          // Ensure new fields are properly initialized
+          specifications: product.specifications || {},
+          projects_used: Array.isArray(product.projects_used) ? product.projects_used : (typeof product.projects_used === 'string' ? (() => { try { const parsed = JSON.parse(product.projects_used); console.log('Product service: Parsed projects_used from string:', parsed); return parsed; } catch { console.log('Product service: Failed to parse projects_used string, using empty array'); return []; } })() : []),
+          related_products: Array.isArray(product.related_products) ? product.related_products : (typeof product.related_products === 'string' ? (() => { try { const parsed = JSON.parse(product.related_products); console.log('Product service: Parsed related_products from string:', parsed); return parsed; } catch { console.log('Product service: Failed to parse related_products string, using empty array'); return []; } })() : []),
           names: productTranslations.names,
           descriptions: productTranslations.descriptions
         };
@@ -253,6 +259,9 @@ export const productService = {
       console.log('Product service: Raw product features:', product.features);
       console.log('Product service: Raw product features type:', typeof product.features);
       console.log('Product service: Raw product features isArray:', Array.isArray(product.features));
+      console.log('Product service: Raw product specifications:', product.specifications);
+      console.log('Product service: Raw product projects_used:', product.projects_used, 'Type:', typeof product.projects_used, 'IsArray:', Array.isArray(product.projects_used));
+      console.log('Product service: Raw product related_products:', product.related_products, 'Type:', typeof product.related_products, 'IsArray:', Array.isArray(product.related_products));
 
       // 2. Get translations for this product
       const { data: translations, error: translationError } = await supabase
@@ -349,6 +358,10 @@ export const productService = {
         price: product.price || 0,
         inStock: product.inStock || product.in_stock || false,
         image: product.image || product.image_url || '',
+        // Ensure new fields are properly initialized
+        specifications: product.specifications || {},
+        projects_used: Array.isArray(product.projects_used) ? product.projects_used : (typeof product.projects_used === 'string' ? (() => { try { const parsed = JSON.parse(product.projects_used); console.log('Product service: Parsed projects_used from string:', parsed); return parsed; } catch { console.log('Product service: Failed to parse projects_used string, using empty array'); return []; } })() : []),
+        related_products: Array.isArray(product.related_products) ? product.related_products : (typeof product.related_products === 'string' ? (() => { try { const parsed = JSON.parse(product.related_products); console.log('Product service: Parsed related_products from string:', parsed); return parsed; } catch { console.log('Product service: Failed to parse related_products string, using empty array'); return []; } })() : []),
         names,
         descriptions
       };
@@ -358,6 +371,16 @@ export const productService = {
         finalFeatures: unifiedProduct.features,
         featuresType: typeof unifiedProduct.features,
         featuresLength: Array.isArray(unifiedProduct.features) ? unifiedProduct.features.length : 'not array'
+      });
+
+      console.log('Product service: New fields debug:', {
+        specifications: unifiedProduct.specifications,
+        projects_used: unifiedProduct.projects_used,
+        projects_usedType: typeof unifiedProduct.projects_used,
+        projects_usedIsArray: Array.isArray(unifiedProduct.projects_used),
+        related_products: unifiedProduct.related_products,
+        related_productsType: typeof unifiedProduct.related_products,
+        related_productsIsArray: Array.isArray(unifiedProduct.related_products)
       });
 
       console.log('Product service: Successfully fetched product with translations:', unifiedProduct);

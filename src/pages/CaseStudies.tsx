@@ -23,6 +23,7 @@ const CaseStudies = () => {
       window.removeEventListener('languageChange', handleLanguageChange as EventListener);
     };
   }, []);
+
   const caseStudies = [
     {
       title: 'Marina Bay Financial Centre',
@@ -99,27 +100,45 @@ const CaseStudies = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background pt-16">
-      {/* Header */}
-      <section className="py-16 bg-gradient-hero text-white">
-        <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Case Studies
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 opacity-90">
-              Real-world applications showcasing Aftek's solutions across diverse construction projects
-            </p>
-          </div>
+    <div 
+      className="min-h-screen" 
+      style={{
+        backgroundImage: 'url(/src/assets/17580.jpg)',
+        backgroundSize: 'cover',
+        backgroundAttachment: 'fixed',
+        backgroundPosition: 'center'
+      }}
+    >
+      {/* Spacer to prevent header overlap */}
+      <div style={{ height: '80px' }}></div>
+      
+      {/* Title Section with Special Background */}
+      <div 
+        className="relative py-16 mb-12"
+        style={{
+          backgroundImage: 'url(/src/assets/pexels-pixabay-159306.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="relative z-10 container mx-auto text-center">
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+            Case Studies
+          </h1>
+          <p className="text-xl md:text-2xl text-white/90 mb-8" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
+            Real-world applications showcasing Aftek's solutions across diverse construction projects
+          </p>
         </div>
-      </section>
-
-      {/* Case Studies Grid */}
-      <section className="py-24 bg-background">
-        <div className="container mx-auto px-6">
+      </div>
+      
+      <div className="container mx-auto px-6 max-w-7xl">
+        {/* Case Studies Grid */}
+        <section className="py-24">
           <div className="space-y-16">
             {caseStudies.map((study, index) => (
-              <Card key={index} className="bg-card border-border shadow-card hover:shadow-elegant transition-all duration-300 overflow-hidden">
+              <Card key={index} className="bg-white/90 backdrop-blur-sm border border-border shadow-elegant hover:shadow-glow transition-all duration-300 overflow-hidden">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
                   {/* Image Section */}
                   <div className="h-80 lg:h-auto bg-gradient-accent flex items-center justify-center">
@@ -183,32 +202,32 @@ const CaseStudies = () => {
               </Card>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* CTA Section */}
-      <section className="py-16 bg-gradient-subtle">
-        <div className="container mx-auto px-6">
-          <div className="text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Ready to Start Your Project?
-            </h2>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Let our technical experts help you select the right solutions for your specific requirements.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-primary hover:bg-primary-hover">
-                <Users className="mr-2 h-5 w-5" />
-                Consult Our Experts
-              </Button>
-              <Button size="lg" variant="outline">
-                <FileText className="mr-2 h-5 w-5" />
-                Request Project Quote
-              </Button>
+        {/* CTA Section */}
+        <section className="py-16 bg-gradient-subtle">
+          <div className="container mx-auto px-6">
+            <div className="text-center">
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+                Ready to Start Your Project?
+              </h2>
+              <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+                Let our technical experts help you select the right solutions for your specific requirements.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button size="lg" className="bg-primary hover:bg-primary-hover">
+                  <Users className="mr-2 h-5 w-5" />
+                  Consult Our Experts
+                </Button>
+                <Button size="lg" variant="outline">
+                  <FileText className="mr-2 h-5 w-5" />
+                  Request Project Quote
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   );
 };

@@ -284,7 +284,7 @@ const NewContact: React.FC = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-[#1E3A8A] mb-4">{t('contact.title')}</h1>
+                          <h1 className="text-4xl font-bold text-foreground mb-4">{t('contact.title')}</h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             {t('contact.subtitle')}
           </p>
@@ -295,8 +295,8 @@ const NewContact: React.FC = () => {
           <div className="lg:col-span-2">
             <Card className="p-6 border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-2xl text-[#1E3A8A] flex items-center gap-2">
-                  <Sparkles className="w-6 h-6 text-[rgba(238,50,57,1)]" />
+                <CardTitle className="text-2xl text-foreground flex items-center gap-2">
+                  <Sparkles className="w-6 h-6 text-primary" />
                   Smart Contact Form
                 </CardTitle>
                 <p className="text-gray-600">
@@ -315,7 +315,7 @@ const NewContact: React.FC = () => {
                   <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Query Type Selector */}
                     <div>
-                      <label className="block text-sm font-medium text-[#1E3A8A] mb-3">
+                      <label className="block text-sm font-medium text-foreground mb-3">
                         What type of inquiry do you have?
                       </label>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -328,15 +328,15 @@ const NewContact: React.FC = () => {
                             key={type.id}
                             className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
                               formData.inquiryType === type.id
-                                ? 'border-[rgba(238,50,57,1)] bg-[rgba(238,50,57,0.1)]'
-                                : 'border-gray-200 hover:border-[rgba(238,50,57,0.5)] hover:bg-[rgba(238,50,57,0.05)]'
+                                                ? 'border-primary bg-primary-muted'
+                : 'border-gray-200 hover:border-primary/50 hover:bg-primary/5'
                             }`}
                             onClick={() => handleInputChange('inquiryType', type.id)}
                           >
                             <div className="flex items-center gap-3">
                               <type.icon className="w-5 h-5 text-[rgba(238,50,57,1)]" />
                               <div>
-                                <h3 className="font-medium text-[#1E3A8A]">{type.label}</h3>
+                                <h3 className="font-medium text-foreground">{type.label}</h3>
                                 <p className="text-sm text-gray-600">{type.desc}</p>
                               </div>
                             </div>
@@ -353,7 +353,7 @@ const NewContact: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {isFieldVisible('name') && (
                             <div>
-                              <label className="block text-sm font-medium text-[#1E3A8A] mb-2">
+                              <label className="block text-sm font-medium text-foreground mb-2">
                                 Full Name *
                               </label>
                               <Input
@@ -370,7 +370,7 @@ const NewContact: React.FC = () => {
 
                           {isFieldVisible('email') && (
                             <div>
-                              <label className="block text-sm font-medium text-[#1E3A8A] mb-2">
+                              <label className="block text-sm font-medium text-foreground mb-2">
                                 Email Address *
                               </label>
                               <Input
@@ -541,7 +541,7 @@ const NewContact: React.FC = () => {
                           </label>
                           <div
                             className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                              dragActive ? 'border-[rgba(238,50,57,1)] bg-[rgba(238,50,57,0.1)]' : 'border-gray-300 hover:border-[rgba(238,50,57,0.5)]'
+                              dragActive ? 'border-primary bg-primary-muted' : 'border-gray-300 hover:border-primary/50'
                             }`}
                             onDragEnter={handleDrag}
                             onDragLeave={handleDrag}
@@ -582,7 +582,7 @@ const NewContact: React.FC = () => {
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => removeFile(index)}
-                                    className="text-[rgba(238,50,57,1)] hover:bg-[rgba(238,50,57,0.1)]"
+                                    className="text-primary hover:bg-primary-muted"
                                   >
                                     Remove
                                   </Button>
@@ -600,7 +600,7 @@ const NewContact: React.FC = () => {
                           <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex items-center gap-2 bg-[rgba(238,50,57,1)] hover:bg-[rgba(238,50,57,0.85)]"
+                            className="flex items-center gap-2 bg-primary hover:bg-primary-hover"
                           >
                             {isSubmitting ? (
                               <>
@@ -629,7 +629,7 @@ const NewContact: React.FC = () => {
             <Card className="p-6 border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-[#1E3A8A]">
-                  <Clock className="w-5 h-5 text-[rgba(238,50,57,1)]" />
+                  <Clock className="w-5 h-5 text-primary" />
                   Office Hours
                 </CardTitle>
               </CardHeader>
@@ -656,8 +656,8 @@ const NewContact: React.FC = () => {
                   </span>
                 </div>
                 
-                <div className="bg-[rgba(238,50,57,0.1)] p-3 rounded-lg">
-                  <p className="text-sm text-[rgba(238,50,57,1)]">
+                <div className="bg-primary-muted p-3 rounded-lg">
+                  <p className="text-sm text-primary">
                     <strong>Response Time:</strong> {officeHours.responseTime}
                   </p>
                 </div>
@@ -670,24 +670,24 @@ const NewContact: React.FC = () => {
                 <CardTitle className="text-[#1E3A8A]">Quick Contact</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center gap-3 p-3 hover:bg-[rgba(238,50,57,0.05)] rounded-lg cursor-pointer transition-colors">
-                  <Phone className="w-5 h-5 text-[rgba(238,50,57,1)]" />
+                <div className="flex items-center gap-3 p-3 hover:bg-primary/5 rounded-lg cursor-pointer transition-colors">
+                  <Phone className="w-5 h-5 text-primary" />
                   <div>
                     <p className="font-medium text-[#1E3A8A]">Call Us</p>
                     <p className="text-sm text-gray-600">+1 (555) 123-4567</p>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-3 p-3 hover:bg-[rgba(238,50,57,0.05)] rounded-lg cursor-pointer transition-colors">
-                  <Mail className="w-5 h-5 text-[rgba(238,50,57,1)]" />
+                <div className="flex items-center gap-3 p-3 hover:bg-primary/5 rounded-lg cursor-pointer transition-colors">
+                  <Mail className="w-5 h-5 text-primary" />
                   <div>
                     <p className="font-medium text-[#1E3A8A]">Email Us</p>
                     <p className="text-sm text-gray-600">info@aftek.com</p>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-3 p-3 hover:bg-[rgba(238,50,57,0.05)] rounded-lg cursor-pointer transition-colors">
-                  <MapPin className="w-5 h-5 text-[rgba(238,50,57,1)]" />
+                <div className="flex items-center gap-3 p-3 hover:bg-primary/5 rounded-lg cursor-pointer transition-colors">
+                  <MapPin className="w-5 h-5 text-primary" />
                   <div>
                     <p className="font-medium text-[#1E3A8A]">Visit Us</p>
                     <p className="text-sm text-gray-600">123 Business Ave, Suite 100</p>
@@ -702,15 +702,15 @@ const NewContact: React.FC = () => {
                 <CardTitle className="text-[#1E3A8A]">Resources</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start border-[rgba(238,50,57,1)] text-[rgba(238,50,57,1)] hover:bg-[rgba(238,50,57,0.1)]">
+                <Button variant="outline" className="w-full justify-start border-primary text-primary hover:bg-primary-muted">
                   <Download className="w-4 h-4 mr-2" />
                   Product Catalog
                 </Button>
-                <Button variant="outline" className="w-full justify-start border-[rgba(238,50,57,1)] text-[rgba(238,50,57,1)] hover:bg-[rgba(238,50,57,0.1)]">
+                <Button variant="outline" className="w-full justify-start border-primary text-primary hover:bg-primary-muted">
                   <Download className="w-4 h-4 mr-2" />
                   Technical Specifications
                 </Button>
-                <Button variant="outline" className="w-full justify-start border-[rgba(238,50,57,1)] text-[rgba(238,50,57,1)] hover:bg-[rgba(238,50,57,0.1)]">
+                <Button variant="outline" className="w-full justify-start border-primary text-primary hover:bg-primary-muted">
                   <Download className="w-4 h-4 mr-2" />
                   Installation Guide
                 </Button>
