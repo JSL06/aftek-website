@@ -69,11 +69,8 @@ const About = () => {
     </span>
   );
 
-  // Determine font family based on language
-  let fontFamily = 'Palatino Linotype, Book Antiqua, Palatino, serif';
-  if (['zh-Hans', 'ja'].includes(currentLanguage)) {
-    fontFamily = 'Times New Roman, Times, serif';
-  }
+  // Determine font family based on language - Use Open Sans for all languages
+  let fontFamily = "'Open Sans', sans-serif";
 
   // Leadership team state
   const [leadership, setLeadership] = useState([]);

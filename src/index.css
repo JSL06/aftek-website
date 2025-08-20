@@ -359,7 +359,7 @@ All colors MUST be HSL.
     background-position: center;
   }
   
-  /* Typography */
+  /* Typography - Open Sans for ALL languages */
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Open Sans', sans-serif;
     font-weight: 600; /* Semibold */
@@ -369,25 +369,22 @@ All colors MUST be HSL.
     font-family: 'Open Sans', sans-serif;
     font-weight: 400; /* Regular */
   }
-}
-
-html, body {
-  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
-}
-
-/* Use Times New Roman for Japanese and Simplified Chinese text */
-:lang(ja), :lang(zh-Hans), :lang(zh-Hant) {
-  font-family: 'Times New Roman', Times, serif !important;
-}
-
-/* Ensure all text elements use Times New Roman for Japanese and Simplified Chinese */
-:lang(ja) *, :lang(zh-Hans) *, :lang(zh-Hant) * {
-  font-family: 'Times New Roman', Times, serif !important;
-}
-
-/* Additional specific styling for Traditional Chinese */
-html[lang="zh-Hant"], html[lang="zh-Hant"] * {
-  font-family: 'Times New Roman', Times, serif !important;
+  
+  /* Ensure Open Sans is used for all languages including Chinese */
+  :lang(ja), :lang(zh-Hans), :lang(zh-Hant) {
+    font-family: 'Open Sans', sans-serif !important;
+  }
+  
+  /* Ensure all text elements use Open Sans for all languages */
+  :lang(ja) *, :lang(zh-Hans) *, :lang(zh-Hant) * {
+    font-family: 'Open Sans', sans-serif !important;
+  }
+  
+  /* Additional specific styling for all Chinese variants */
+  html[lang="zh-Hans"], html[lang="zh-Hans"] *,
+  html[lang="zh-Hant"], html[lang="zh-Hant"] * {
+    font-family: 'Open Sans', sans-serif !important;
+  }
 }
 
 /* Responsive Uniform Page Title */
@@ -401,6 +398,8 @@ html[lang="zh-Hant"], html[lang="zh-Hant"] * {
   letter-spacing: 0.05em;
   border-bottom: 3px solid #A70022;
   padding-bottom: 0.5rem;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 600;
 }
 @media (max-width: 428px) {
   .uniform-page-title {
