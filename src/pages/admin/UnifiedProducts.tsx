@@ -111,10 +111,10 @@ const UnifiedProducts = () => {
         // Fallback to default categories if table doesn't exist yet
         setCategories([
           'Waterproofing',
-          'Sealants & Adhesives',
+          'Sealant & Adhesive',
           'Redi-Mix G&M',
-          'Flooring Systems',
-          'Others (Insulation, Coatings)'
+          'Flooring',
+          'Other Specialties'
         ]);
         return;
       }
@@ -126,10 +126,10 @@ const UnifiedProducts = () => {
       // Fallback to default categories
       setCategories([
         'Waterproofing',
-        'Sealants & Adhesives',
+        'Sealant & Adhesive',
         'Redi-Mix G&M',
-        'Flooring Systems',
-        'Others (Insulation, Coatings)'
+        'Flooring',
+        'Other Specialties'
       ]);
     }
   };

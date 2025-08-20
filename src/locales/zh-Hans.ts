@@ -329,10 +329,10 @@ const zhHans = {
 
   // Categories
   'category.waterproofing': '防水',
-  'category.sealants_adhesives': '密封剂与胶黏剂',
+  'category.sealants_adhesives': '密封胶与黏合剂',
   'category.redimix': 'Redi-Mix G&M',
-  'category.flooring': '地板系统',
-  'category.others': '其他（保温、涂料）',
+  'category.flooring': '地板',
+  'category.others': '其他专业',
   'category.architectural_coatings': '建筑涂料',
   'category.stucco': '灰泥',
   'category.sound_insulation': '隔音材料',

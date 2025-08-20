@@ -39,16 +39,14 @@ const getTranslatedCategory = (category: string, t: (key: string) => string): st
     'flooring': 'category.flooring',
     '地板系统': 'category.flooring',
     '地板系統': 'category.flooring',
-    'others (insulation, coatings)': 'category.others',
+    'other specialties': 'category.others',
     'others': 'category.others',
     'other': 'category.others',
     '其他（保温、涂料）': 'category.others',
     '其他（保溫、塗料）': 'category.others',
     '其他': 'category.others',
-    'insulation & coatings': 'category.others',
-    'insulation and coatings': 'category.others',
-    '保温与涂料': 'category.others',
-    '保溫與塗料': 'category.others',
+    '其他专业': 'category.others',
+    '其他專業': 'category.others',
     'architectural coatings': 'category.architectural_coatings',
     '建筑涂料': 'category.architectural_coatings',
     '建築塗料': 'category.architectural_coatings',
@@ -220,31 +218,31 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </div>
           )}
           
-          {/* Bottom section - Always at the same position */}
+          {/* Bottom section - Compact layout with small gap */}
           <div className="mt-auto">
-            {/* Stock Status and Category - Same row, smaller size */}
-            <div className="mb-2 flex items-center gap-2">
+            {/* Stock Status and Category - Compact row */}
+            <div className="mb-1 flex items-center gap-1">
               {product.inStock || product.in_stock ? (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
                   <CheckCircle className="h-2.5 w-2.5 mr-1" />
                   {t('products.inStock')}
                 </span>
               ) : (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
                   <XCircle className="h-2.5 w-2.5 mr-1" />
                   {t('products.outOfStock')}
                 </span>
               )}
               
-              {/* Category Badge - Same row as stock status */}
+              {/* Category Badge - Compact styling */}
               {product.category && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
                   {getTranslatedCategory(product.category, t)}
                 </span>
               )}
             </div>
             
-            {/* Action Button - Red theme styling */}
+            {/* Action Button - Compact spacing */}
             <Button 
               onClick={handleViewDetails}
               className="w-full bg-red-600 hover:bg-red-700 text-white transition-colors duration-200"

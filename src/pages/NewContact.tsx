@@ -102,7 +102,7 @@ const NewContact: React.FC = () => {
   const productSuggestions = [
     'Epoxy Floor Coatings',
     'Waterproofing Systems',
-    'Sealants & Adhesives',
+    'Sealant & Adhesive',
     'Industrial Flooring',
     'Acoustic Solutions'
   ];

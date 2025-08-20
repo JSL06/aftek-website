@@ -429,12 +429,12 @@ const en = {
 
   // Categories
   'category.waterproofing': 'Waterproofing',
-  'category.sealants_adhesives': 'Sealants & Adhesives',
+  'category.sealants_adhesives': 'Sealant & Adhesive',
   'category.redimix': 'Redi-Mix G&M',
-  'category.flooring': 'Flooring Systems',
+  'category.flooring': 'Flooring',
   'category.flooring_simple': 'Flooring',
-  'category.others': 'Others (Insulation, Coatings)',
-  'category.others_simple': 'Others',
+  'category.others': 'Other Specialties',
+  'category.others_simple': 'Other Specialties',
   'category.architectural_coatings': 'Architectural Coatings',
   'category.stucco': 'Stucco',
   'category.sound_insulation': 'Sound Insulation',

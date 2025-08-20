@@ -38,7 +38,7 @@ const placeholderProducts = [
   },
   {
     name: 'Flexible Construction Adhesive',
-    category: 'Sealants & Adhesives',
+    category: 'Sealant & Adhesive',
     description: 'Multi-purpose construction adhesive for bonding various building materials. Excellent flexibility and weather resistance.',
     features: ['Weather Resistant', 'Movement Accommodation', 'Structural Bonding', 'Fast Cure'],
     specifications: {
@@ -55,7 +55,7 @@ const placeholderProducts = [
   },
   {
     name: 'Silicone Sealant Plus',
-    category: 'Sealants & Adhesives',
+    category: 'Sealant & Adhesive',
     description: 'Premium silicone sealant for joints and gaps. Excellent weather resistance and movement capability.',
     features: ['Weather Seal', 'Movement Accommodation', 'UV Stable', 'Weather Resistant'],
     specifications: {
@@ -72,7 +72,7 @@ const placeholderProducts = [
   },
   {
     name: 'Epoxy Protective Coating',
-    category: 'Others (Insulation, Coatings)',
+    category: 'Other Specialties',
     description: 'Durable epoxy coating for industrial floors and surfaces. Chemical resistant and easy to clean.',
     features: ['Chemical Resistant', 'Epoxy Coatings', 'Anti-Slip', 'Load Bearing'],
     specifications: {
@@ -123,7 +123,7 @@ const placeholderProducts = [
   },
   {
     name: 'Industrial Flooring System',
-    category: 'Flooring Systems',
+    category: 'Flooring',
     description: 'Complete industrial flooring system with epoxy base and polyurethane topcoat. Ideal for heavy-duty applications.',
     features: ['Epoxy Coatings', 'Anti-Slip', 'Load Bearing', 'Chemical Resistant'],
     specifications: {

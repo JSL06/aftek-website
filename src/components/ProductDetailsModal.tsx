@@ -146,10 +146,6 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
               <div className="space-y-4">
                 <div>
                   <h1 className="text-3xl font-bold text-foreground mb-2">{product.name}</h1>
-                  {/* Description now renders HTML content including images */}
-                  <div className="text-lg leading-relaxed">
-                    {renderHtmlContent(product.description)}
-                  </div>
                 </div>
 
                 {/* Model and SKU */}
@@ -180,25 +176,38 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                     <Badge variant="outline">{product.category}</Badge>
                   </div>
                 )}
+
+                {/* Key Features - Moved to right side */}
+                {product.features && Array.isArray(product.features) && product.features.length > 0 && (
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+                      <Star className="h-4 w-4 text-primary" />
+                      Key Features
+                    </h3>
+                    <div className="space-y-2">
+                      {product.features.map((feature, index) => (
+                        <div key={index} className="flex items-start gap-2 p-2 bg-muted/50 rounded-lg">
+                          <span className="text-primary text-sm mt-0.5">•</span>
+                          <span className="text-sm text-foreground">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
             <Separator className="my-6" />
 
-            {/* Features Section */}
-            {product.features && Array.isArray(product.features) && product.features.length > 0 && (
+            {/* Product Description - Added back at the bottom */}
+            {product.description && (
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Star className="h-5 w-5 text-primary" />
-                  Key Features
+                  <Package className="h-5 w-5 text-primary" />
+                  Product Description
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {product.features.map((feature, index) => (
-                    <div key={index} className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg">
-                      <span className="text-primary text-lg mt-0.5">•</span>
-                      <span className="text-sm text-foreground">{feature}</span>
-                    </div>
-                  ))}
+                <div className="prose prose-sm max-w-none text-muted-foreground leading-relaxed">
+                  {renderHtmlContent(product.description)}
                 </div>
               </div>
             )}

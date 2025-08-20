@@ -373,12 +373,12 @@ const zhHant = {
 
   // Categories
   'category.waterproofing': '防水',
-  'category.sealants_adhesives': '密封劑與膠黏劑',
+  'category.sealants_adhesives': '密封膠與黏合劑',
   'category.redimix': 'Redi-Mix G&M',
-  'category.flooring': '地板系統',
+  'category.flooring': '地板',
   'category.flooring_simple': '地板',
-  'category.others': '其他（保溫、塗料）',
-  'category.others_simple': '其他',
+  'category.others': '其他專業',
+  'category.others_simple': '其他專業',
   'category.architectural_coatings': '建築塗料',
   'category.stucco': '灰泥',
   'category.sound_insulation': '隔音材料',

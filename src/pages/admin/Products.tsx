@@ -88,10 +88,10 @@ const Products = () => {
 
   const categories = [
     'Waterproofing',
-    'Sealants & Adhesives',
+    'Sealant & Adhesive',
     'Redi-Mix G&M',
-    'Flooring Systems',
-    'Others (Insulation, Coatings)'
+    'Flooring',
+    'Other Specialties'
   ];
 
   // Filter products based on current filters

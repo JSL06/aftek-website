@@ -301,10 +301,10 @@ const vi = {
 
   // Categories
   'category.waterproofing': 'Chống thấm',
-  'category.sealants_adhesives': 'Chất bịt kín & Keo dán',
+  'category.sealants_adhesives': 'Chất bịt kín & Chất kết dính',
   'category.redimix': 'Redi-Mix G&M',
-  'category.flooring': 'Hệ thống sàn',
-  'category.others': 'Khác (Cách nhiệt, Lớp phủ)',
+  'category.flooring': 'Sàn',
+  'category.others': 'Chuyên môn khác',
   'category.architectural_coatings': 'Lớp phủ kiến trúc',
   'category.stucco': 'Vữa trát',
   'category.sound_insulation': 'Vật liệu cách âm',

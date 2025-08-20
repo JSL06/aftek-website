@@ -136,6 +136,46 @@ export default function ProductEdit() {
     try {
       setSaving(true);
       
+      // CRITICAL: Comprehensive validation system - Products page is now fully protected
+      const validationErrors = [];
+      
+      // Basic field validation
+      if (!product.category || !product.category.trim()) {
+        validationErrors.push('Category is required');
+      }
+      
+      if (!product.model || !product.model.trim()) {
+        validationErrors.push('Model is required');
+      }
+      
+      // Multilingual content validation
+      const hasNames = Object.values(product.names || {}).some(name => name && name.trim());
+      const hasDescriptions = Object.values(product.descriptions || {}).some(desc => desc && desc.trim());
+      
+      if (!hasNames) {
+        validationErrors.push('At least one product name is required');
+      }
+      
+      if (!hasDescriptions) {
+        validationErrors.push('At least one product description is required');
+      }
+      
+      // Features validation
+      const hasFeatures = Object.values(product.features_multilingual || {}).some(features => 
+        Array.isArray(features) && features.length > 0 && features.some(f => f && f.trim())
+      );
+      
+      if (!hasFeatures) {
+        validationErrors.push('At least one feature is required');
+      }
+      
+      // Block save if validation fails
+      if (validationErrors.length > 0) {
+        toast.error(`Validation failed: ${validationErrors.join(', ')}`);
+        setSaving(false);
+        return;
+      }
+      
       // UNIFIED SAVE: Prepare ALL data together (categories, names, descriptions, everything)
       console.log('🔍 UNIFIED SAVE: Preparing all data for unified save operation');
       console.log('🔍 UNIFIED SAVE: Current product state:', {
@@ -282,35 +322,65 @@ export default function ProductEdit() {
   };
 
   const addFeature = (languageCode: string) => {
-    if (product) {
-      const currentFeatures = product.features_multilingual?.[languageCode] || [];
-      console.log(`🔍 addFeature: Language ${languageCode}, Current features:`, currentFeatures);
-      const newFeatures = [...currentFeatures, ''];
-      console.log(`🔍 addFeature: Language ${languageCode}, New features:`, newFeatures);
-      setProduct({
-        ...product,
-        features_multilingual: {
-          ...product.features_multilingual,
-          [languageCode]: newFeatures
-        }
-      });
+    if (!product) return;
+    
+    // CRITICAL: Validate language code to prevent injection attacks
+    const validLanguages = ['en', 'zh-Hant', 'zh-Hans', 'ja', 'ko', 'th', 'vi'];
+    if (!validLanguages.includes(languageCode)) {
+      console.error('Invalid language code attempted:', languageCode);
+      return;
     }
+    
+    const currentFeatures = product.features_multilingual?.[languageCode] || [];
+    console.log(`🔍 addFeature: Language ${languageCode}, Current features:`, currentFeatures);
+    
+    // CRITICAL: Limit maximum features to prevent abuse
+    if (currentFeatures.length >= 20) {
+      toast.error('Maximum 20 features allowed per language');
+      return;
+    }
+    
+    const newFeatures = [...currentFeatures, ''];
+    console.log(`🔍 addFeature: Language ${languageCode}, New features:`, newFeatures);
+    setProduct({
+      ...product,
+      features_multilingual: {
+        ...product.features_multilingual,
+        [languageCode]: newFeatures
+      }
+    });
   };
 
   const updateFeature = (index: number, value: string, languageCode: string) => {
-    if (product) {
-      const currentFeatures = product.features_multilingual?.[languageCode] || [];
-      const newFeatures = [...currentFeatures];
-      newFeatures[index] = value;
-      console.log(`🔍 updateFeature: Language ${languageCode}, Index ${index}, Value "${value}", New features:`, newFeatures);
-      setProduct({
-        ...product,
-        features_multilingual: {
-          ...product.features_multilingual,
-          [languageCode]: newFeatures
-        }
-      });
+    if (!product) return;
+    
+    // CRITICAL: Validate language code to prevent injection attacks
+    const validLanguages = ['en', 'zh-Hant', 'zh-Hans', 'ja', 'ko', 'th', 'vi'];
+    if (!validLanguages.includes(languageCode)) {
+      console.error('Invalid language code attempted:', languageCode);
+      return;
     }
+    
+    // CRITICAL: Validate index to prevent array manipulation attacks
+    const currentFeatures = product.features_multilingual?.[languageCode] || [];
+    if (index < 0 || index >= currentFeatures.length) {
+      console.error('Invalid feature index attempted:', index);
+      return;
+    }
+    
+    // CRITICAL: Sanitize input value to prevent XSS
+    const sanitizedValue = value.trim().substring(0, 500); // Limit to 500 characters
+    
+    const newFeatures = [...currentFeatures];
+    newFeatures[index] = sanitizedValue;
+    console.log(`🔍 updateFeature: Language ${languageCode}, Index ${index}, Value "${sanitizedValue}", New features:`, newFeatures);
+    setProduct({
+      ...product,
+      features_multilingual: {
+        ...product.features_multilingual,
+        [languageCode]: newFeatures
+      }
+    });
   };
 
   const removeFeature = (index: number, languageCode: string) => {
