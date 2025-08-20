@@ -1,5 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import bgMain from '@/assets/17580.jpg';
 import { useTranslation } from '@/hooks/useTranslation';
 
 const NotFound = () => {
@@ -33,7 +34,7 @@ const NotFound = () => {
     <div 
       className="min-h-screen flex items-center justify-center" 
       style={{
-        backgroundImage: 'url(/aftek-website/src/assets/17580.jpg)',
+        backgroundImage: `url(${bgMain})`,
         backgroundSize: 'cover',
         backgroundAttachment: 'fixed',
         backgroundPosition: 'center'

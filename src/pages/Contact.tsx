@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import bgMain from '@/assets/17580.jpg';
+import bgTitle from '@/assets/pexels-pixabay-159306.png';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -344,7 +346,7 @@ const Contact: React.FC = () => {
     <div 
       className="min-h-screen" 
       style={{
-        backgroundImage: 'url(/aftek-website/src/assets/17580.jpg)',
+        backgroundImage: `url(${bgMain})`,
         backgroundSize: 'cover',
         backgroundAttachment: 'fixed',
         backgroundPosition: 'center'
@@ -357,7 +359,7 @@ const Contact: React.FC = () => {
       <div 
         className="relative py-16 mb-12"
         style={{
-          backgroundImage: 'url(/aftek-website/src/assets/pexels-pixabay-159306.png)',
+          backgroundImage: `url(${bgTitle})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed'

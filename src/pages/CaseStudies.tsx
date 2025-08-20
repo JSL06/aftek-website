@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Building, MapPin, Calendar, Users, ArrowRight, FileText } from 'lucide-react';
 import { useEffect } from 'react';
+import bgMain from '@/assets/17580.jpg';
+import bgTitle from '@/assets/pexels-pixabay-159306.png';
 import { useTranslation } from '@/hooks/useTranslation';
 
 const CaseStudies = () => {
@@ -103,7 +105,7 @@ const CaseStudies = () => {
     <div 
       className="min-h-screen" 
       style={{
-        backgroundImage: 'url(/aftek-website/src/assets/17580.jpg)',
+        backgroundImage: `url(${bgMain})`,
         backgroundSize: 'cover',
         backgroundAttachment: 'fixed',
         backgroundPosition: 'center'
@@ -116,7 +118,7 @@ const CaseStudies = () => {
       <div 
         className="relative py-16 mb-12"
         style={{
-          backgroundImage: 'url(/aftek-website/src/assets/pexels-pixabay-159306.png)',
+          backgroundImage: `url(${bgTitle})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed'

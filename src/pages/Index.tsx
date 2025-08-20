@@ -5,7 +5,7 @@ const Index = () => {
     <div 
       className="min-h-screen bg-cover bg-center bg-fixed" 
       style={{
-        backgroundImage: 'url(/aftek-website/src/assets/17580.jpg)'
+        backgroundImage: `url(${require('@/assets/17580.jpg')})`
       }}
     >
       <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-elegant p-12 border border-border text-center max-w-md mx-4">

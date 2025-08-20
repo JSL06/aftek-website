@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from '@/hooks/useTranslation';
+import bgMain from '@/assets/17580.jpg';
+import bgTitle from '@/assets/pexels-pixabay-159306.png';
 import EnglishBrochure from '@/assets/Aftek_Company_Profile_English.pdf';
 import ThaiBrochure from '@/assets/AFTEK_Company_Profile_Thai.pdf';
 
@@ -123,9 +125,9 @@ const About = () => {
   return (
     <div 
       className="min-h-screen" 
-      style={{ 
+      style={{
         fontFamily,
-        backgroundImage: 'url(/aftek-website/src/assets/17580.jpg)',
+        backgroundImage: `url(${bgMain})`,
         backgroundSize: 'cover',
         backgroundAttachment: 'fixed',
         backgroundPosition: 'center'
@@ -138,7 +140,7 @@ const About = () => {
       <div 
         className="relative py-16 mb-12"
         style={{
-          backgroundImage: 'url(/aftek-website/src/assets/pexels-pixabay-159306.png)',
+          backgroundImage: `url(${bgTitle})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed'

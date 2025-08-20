@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from '@/hooks/useTranslation';
+import bgMain from '@/assets/17580.jpg';
+import bgTitle from '@/assets/pexels-pixabay-159306.png';
 
 interface MediaItem {
   id: string;
@@ -58,7 +60,7 @@ const Media = () => {
     <div 
       className="min-h-screen" 
       style={{
-        backgroundImage: 'url(/aftek-website/src/assets/17580.jpg)',
+        backgroundImage: `url(${bgMain})`,
         backgroundSize: 'cover',
         backgroundAttachment: 'fixed',
         backgroundPosition: 'center'
@@ -71,7 +73,7 @@ const Media = () => {
       <div 
         className="relative py-16 mb-12"
         style={{
-          backgroundImage: 'url(/aftek-website/src/assets/pexels-pixabay-159306.png)',
+          backgroundImage: `url(${bgTitle})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed'

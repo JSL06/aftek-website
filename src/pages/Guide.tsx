@@ -7,6 +7,8 @@ import { Building2, Home, Factory, MapPin, ArrowRight } from 'lucide-react';
 import ProductPanel from '@/components/product-guide/ProductPanel';
 import SolutionBuilder from '@/components/product-guide/SolutionBuilder';
 import { supabase } from '@/integrations/supabase/client';
+import bgMain from '@/assets/17580.jpg';
+import bgTitle from '@/assets/pexels-pixabay-159306.png';
 
 interface Hotspot {
   id: string;
@@ -210,7 +212,7 @@ const Guide = () => {
     <div 
       className="min-h-screen" 
       style={{
-        backgroundImage: 'url(/aftek-website/src/assets/17580.jpg)',
+        backgroundImage: `url(${bgMain})`,
         backgroundSize: 'cover',
         backgroundAttachment: 'fixed',
         backgroundPosition: 'center'
@@ -223,7 +225,7 @@ const Guide = () => {
       <div 
         className="relative py-16 mb-12"
         style={{
-          backgroundImage: 'url(/aftek-website/src/assets/pexels-pixabay-159306.png)',
+          backgroundImage: `url(${bgTitle})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed'
