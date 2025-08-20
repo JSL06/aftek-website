@@ -94,9 +94,6 @@ const Products: React.FC = () => {
           <h1 className="uniform-page-title text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
             {t('products.title')}
           </h1>
-          <p className="text-lg text-white/90 text-center mt-4" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
-            {t('products.subtitle')}
-          </p>
         </div>
       </div>
       

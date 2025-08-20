@@ -360,10 +360,10 @@ const NewContact: React.FC = () => {
                                 value={formData.name}
                                 onChange={(e) => handleInputChange('name', e.target.value)}
                                 placeholder="Enter your full name"
-                                className={`border-gray-200 focus:border-[rgba(238,50,57,1)] focus:ring-[rgba(238,50,57,0.2)] ${errors.name ? 'border-red-500' : ''}`}
+                                className={`border-gray-200 focus:border-[rgba(238,50,57,1)] focus:ring-[rgba(238,50,57,0.2)] ${errors.name ? 'border-[#9e1717]' : ''}`}
                               />
                               {errors.name && (
-                                <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                                <p className="text-[#9e1717] text-sm mt-1">{errors.name}</p>
                               )}
                             </div>
                           )}
@@ -378,10 +378,10 @@ const NewContact: React.FC = () => {
                                 value={formData.email}
                                 onChange={(e) => handleInputChange('email', e.target.value)}
                                 placeholder="your.email@company.com"
-                                className={`border-gray-200 focus:border-[rgba(238,50,57,1)] focus:ring-[rgba(238,50,57,0.2)] ${errors.email ? 'border-red-500' : ''}`}
+                                className={`border-gray-200 focus:border-[rgba(238,50,57,1)] focus:ring-[rgba(238,50,57,0.2)] ${errors.email ? 'border-[#9e1717]' : ''}`}
                               />
                               {errors.email && (
-                                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                                <p className="text-[#9e1717] text-sm mt-1">{errors.email}</p>
                               )}
                             </div>
                           )}
@@ -415,10 +415,10 @@ const NewContact: React.FC = () => {
                                 value={formData.phone}
                                 onChange={(e) => handleInputChange('phone', e.target.value)}
                                 placeholder="+1 (555) 123-4567"
-                                className={`border-gray-200 focus:border-[rgba(238,50,57,1)] focus:ring-[rgba(238,50,57,0.2)] ${errors.phone ? 'border-red-500' : ''}`}
+                                className={`border-gray-200 focus:border-[rgba(238,50,57,1)] focus:ring-[rgba(238,50,57,0.2)] ${errors.phone ? 'border-[#9e1717]' : ''}`}
                               />
                               {errors.phone && (
-                                <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                                <p className="text-[#9e1717] text-sm mt-1">{errors.phone}</p>
                               )}
                             </div>
                           )}
@@ -526,10 +526,10 @@ const NewContact: React.FC = () => {
                               onChange={(e) => handleInputChange('message', e.target.value)}
                               placeholder="Please provide details about your inquiry..."
                               rows={5}
-                              className={`border-gray-200 focus:border-[rgba(238,50,57,1)] focus:ring-[rgba(238,50,57,0.2)] ${errors.message ? 'border-red-500' : ''}`}
+                              className={`border-gray-200 focus:border-[rgba(238,50,57,1)] focus:ring-[rgba(238,50,57,0.2)] ${errors.message ? 'border-[#9e1717]' : ''}`}
                             />
                             {errors.message && (
-                              <p className="text-red-500 text-sm mt-1">{errors.message}</p>
+                              <p className="text-[#9e1717] text-sm mt-1">{errors.message}</p>
                             )}
                           </div>
                         )}
@@ -650,9 +650,9 @@ const NewContact: React.FC = () => {
                 <Separator />
                 
                 <div className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full ${officeHours.isOpen ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                  <div className={`w-3 h-3 rounded-full ${officeHours.isOpen ? 'bg-green-500' : 'bg-[#9e1717]'}`}></div>
                   <span className="text-sm font-medium text-[#1E3A8A]">
-                    {officeHours.isOpen ? 'Currently Open' : 'Currently Closed'}
+                    {officeHours.isOpen ? 'Open Now' : 'Closed'}
                   </span>
                 </div>
                 

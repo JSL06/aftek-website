@@ -427,10 +427,10 @@ const Contact: React.FC = () => {
                         placeholder="Enter your first name"
                         value={formData.firstName}
                         onChange={(e) => handleInputChange('firstName', e.target.value)}
-                        className={errors.firstName ? 'border-red-500' : ''}
+                        className={errors.firstName ? 'border-[#9e1717]' : ''}
                       />
                       {errors.firstName && (
-                        <p className="text-red-500 text-sm flex items-center">
+                        <p className="text-[#9e1717] text-sm flex items-center">
                           <AlertCircle className="h-4 w-4 mr-1" />
                           {errors.firstName}
                         </p>
@@ -444,10 +444,10 @@ const Contact: React.FC = () => {
                         placeholder="Enter your last name"
                         value={formData.lastName}
                         onChange={(e) => handleInputChange('lastName', e.target.value)}
-                        className={errors.lastName ? 'border-red-500' : ''}
+                        className={errors.lastName ? 'border-[#9e1717]' : ''}
                       />
                       {errors.lastName && (
-                        <p className="text-red-500 text-sm flex items-center">
+                        <p className="text-[#9e1717] text-sm flex items-center">
                           <AlertCircle className="h-4 w-4 mr-1" />
                           {errors.lastName}
                         </p>
@@ -463,10 +463,10 @@ const Contact: React.FC = () => {
                       placeholder="Enter your email address"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      className={errors.email ? 'border-red-500' : ''}
+                      className={errors.email ? 'border-[#9e1717]' : ''}
                     />
                     {errors.email && (
-                      <p className="text-red-500 text-sm flex items-center">
+                      <p className="text-[#9e1717] text-sm flex items-center">
                         <AlertCircle className="h-4 w-4 mr-1" />
                         {errors.email}
                       </p>
@@ -481,10 +481,10 @@ const Contact: React.FC = () => {
                         placeholder="Enter your phone number"
                         value={formData.phone}
                         onChange={(e) => handleInputChange('phone', e.target.value)}
-                        className={errors.phone ? 'border-red-500' : ''}
+                        className={errors.phone ? 'border-[#9e1717]' : ''}
                       />
                       {errors.phone && (
-                        <p className="text-red-500 text-sm flex items-center">
+                        <p className="text-[#9e1717] text-sm flex items-center">
                           <AlertCircle className="h-4 w-4 mr-1" />
                           {errors.phone}
                         </p>
@@ -513,10 +513,10 @@ const Contact: React.FC = () => {
                       rows={6}
                       value={formData.message}
                       onChange={(e) => handleInputChange('message', e.target.value)}
-                      className={errors.message ? 'border-red-500' : ''}
+                      className={errors.message ? 'border-[#9e1717]' : ''}
                     />
                     {errors.message && (
-                      <p className="text-red-500 text-sm flex items-center">
+                      <p className="text-[#9e1717] text-sm flex items-center">
                         <AlertCircle className="h-4 w-4 mr-1" />
                         {errors.message}
                       </p>

@@ -34,8 +34,8 @@ This editor supports all modern web standards and provides a seamless writing ex
 <h3>Formatting Options</h3>
 <p>You can use the toolbar to:</p>
 <ol>
-<li>Change <span style="color: #ff0000;">text colors</span></li>
-<li>Apply <span style="background-color: #ffff00;">background highlighting</span></li>
+<li>Change <span style={{color: '#9e1717'}}>text colors</span></li>
+<li>Apply <span style={{backgroundColor: '#ffff00'}}>background highlighting</span></li>
 <li>Align text left, center, right, or justify</li>
 <li>Create lists and indentation</li>
 <li>Insert links and images</li>

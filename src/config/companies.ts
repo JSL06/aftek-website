@@ -26,19 +26,22 @@ export const companies: { [key: string]: CompanyConfig } = {
   aftek: {
     id: 'aftek',
     name: 'Aftek',
-    displayName: 'Aftek Co., Ltd.',
+    displayName: 'Aftek',
     logo: '/aftek-logo.png',
-    logoAlt: 'Aftek Company Logo',
-    primaryColor: '#dc2626', // Red
+    primaryColor: '#9e1717', // Red
     secondaryColor: '#1f2937', // Dark gray
     accentColor: '#f59e0b', // Amber
     domain: 'aftek.example.com',
     route: '/aftek',
-    description: 'Professional construction materials and solutions provider across Asia-Pacific region.',
+    description: 'Professional construction chemicals and building materials',
     contactInfo: {
-      phone: '02-2799-6558',
       email: 'info@aftek.com.tw',
-      address: 'No. 123, Section 2, Xinyi Road, Da\'an District, Taipei City 106, Taiwan'
+      phone: '+886-2-8797-8990',
+      address: '10F, No. 37, Jiankang Rd., Zhonghe Dist., New Taipei City, Taiwan'
+    },
+    socialMedia: {
+      facebook: 'https://www.facebook.com/aftekchemicals',
+      linkedin: 'https://www.linkedin.com/company/aftek-chemicals'
     }
   },
   rla: {

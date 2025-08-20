@@ -90,7 +90,7 @@ const ModernWysiwygEditor: React.FC<ModernWysiwygEditorProps> = ({
   ];
 
   const colors = [
-    '#000000', '#ffffff', '#ff0000', '#00ff00', '#0000ff', '#ffff00',
+    '#000000', '#ffffff', '#9e1717', '#00ff00', '#0000ff', '#ffff00',
     '#ff00ff', '#00ffff', '#ffa500', '#800080', '#008000', '#800000',
     '#000080', '#808000', '#808080', '#c0c0c0', '#ffc0cb', '#ffd700'
   ];
