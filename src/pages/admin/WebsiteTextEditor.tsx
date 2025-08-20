@@ -2147,18 +2147,12 @@ function WebsiteTextEditor() {
       {/* Header */}
       <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground p-6">
         <div className="container mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <Link to="/admin/dashboard">
-              <Button variant="secondary" className="bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                返回仪表板
-              </Button>
-            </Link>
-            <Button onClick={handleSave} disabled={saving} size="sm" className="bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground">
-              <Save className="mr-2 h-4 w-4" />
-              {saving ? '保存中...' : '保存所有更改'}
+          <Link to="/admin/dashboard">
+            <Button variant="secondary" className="mb-4 bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              返回仪表板
             </Button>
-          </div>
+          </Link>
           
           <div>
             <h1 className="text-3xl font-bold">网站文本管理器</h1>
@@ -2169,33 +2163,45 @@ function WebsiteTextEditor() {
         </div>
       </div>
 
-
+      {/* Language Selection */}
+      <div className="bg-background border-b border-border">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Globe className="h-5 w-5 text-muted-foreground" />
+              <span className="text-sm font-medium text-muted-foreground">选择编辑语言:</span>
+            </div>
+            <div className="flex gap-2">
+              {LANGUAGES.map(lang => (
+                <Button
+                  key={lang.code}
+                  variant={selectedLanguage === lang.code ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedLanguage(lang.code)}
+                  className="flex items-center gap-2"
+                >
+                  <span>{lang.flag}</span>
+                  <span>{lang.nativeName}</span>
+                </Button>
+              ))}
+            </div>
+            <Button onClick={handleSave} disabled={saving} size="sm">
+              <Save className="mr-2 h-4 w-4" />
+              {saving ? '保存中...' : '保存所有更改'}
+            </Button>
+          </div>
+        </div>
+      </div>
 
       {/* Main Content */}
       <div className="container mx-auto p-8">
         {/* Progress Summary */}
         <Card className="mb-6">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Info className="h-5 w-5" />
-                翻译进度 - {LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName}
-              </CardTitle>
-              <div className="flex gap-2">
-                {LANGUAGES.map(lang => (
-                  <Button
-                    key={lang.code}
-                    variant={selectedLanguage === lang.code ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedLanguage(lang.code)}
-                    className="flex items-center gap-2"
-                  >
-                    <span>{lang.flag}</span>
-                    <span>{lang.nativeName}</span>
-                  </Button>
-                ))}
-              </div>
-            </div>
+            <CardTitle className="flex items-center gap-2">
+              <Info className="h-5 w-5" />
+              翻译进度 - {LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {(() => {

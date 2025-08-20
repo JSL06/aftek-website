@@ -177,18 +177,18 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                   </div>
                 )}
 
-                {/* Key Features - Force single column layout */}
+                {/* Key Features - Moved to right side */}
                 {product.features && Array.isArray(product.features) && product.features.length > 0 && (
-                  <div className="mt-6 w-full">
+                  <div className="mt-6">
                     <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
                       <Star className="h-4 w-4 text-primary" />
                       Key Features
                     </h3>
-                    <div className="space-y-2 w-full">
+                    <div className="space-y-2">
                       {product.features.map((feature, index) => (
-                        <div key={index} className="flex items-start gap-2 p-2 bg-muted/50 rounded-lg w-full min-w-0">
-                          <span className="text-primary text-sm mt-0.5 flex-shrink-0">•</span>
-                          <span className="text-sm text-foreground break-words min-w-0 flex-1">{feature}</span>
+                        <div key={index} className="flex items-start gap-2 p-2 bg-muted/50 rounded-lg">
+                          <span className="text-primary text-sm mt-0.5">•</span>
+                          <span className="text-sm text-foreground">{feature}</span>
                         </div>
                       ))}
                     </div>

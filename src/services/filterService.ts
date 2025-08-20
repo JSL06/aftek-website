@@ -113,26 +113,28 @@ export const filterService = {
     // Get features from the filter_options table
     try {
       const features = await this.getFilterOptionsByType('feature');
-      return features.map(f => f.value);
+      const featureValues = features.map(f => f.value);
+      // Sort features alphabetically for easier finding
+      return featureValues.sort((a, b) => a.localeCompare(b));
     } catch (error) {
       console.error('Error fetching features from database:', error);
-      // Fallback to default features if database query fails
+      // Fallback to default features if database query fails (alphabetically sorted)
       return [
-        'Energy Efficient',
-        'Sustainable Design',
-        'Smart Technology',
-        'Modular Construction',
-        'Green Building',
-        'LEED Certified',
+        'Accessibility',
         'BIM Implementation',
+        'Energy Efficient',
+        'Green Building',
+        'HVAC Systems',
+        'LEED Certified',
+        'Lighting Design',
+        'Modular Construction',
         'Prefabricated Components',
         'Renewable Energy',
-        'Water Conservation',
-        'Waste Management',
-        'Accessibility',
         'Security Systems',
-        'HVAC Systems',
-        'Lighting Design'
+        'Smart Technology',
+        'Sustainable Design',
+        'Waste Management',
+        'Water Conservation'
       ];
     }
   },

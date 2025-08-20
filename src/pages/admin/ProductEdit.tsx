@@ -49,6 +49,7 @@ import { useAdminLanguage } from '@/contexts/AdminLanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { useCategories } from '@/hooks/useCategories';
+import FeaturesChecklist from '@/components/FeaturesChecklist';
 
 // Language configuration
 const languages = [
@@ -69,7 +70,7 @@ export default function ProductEdit() {
   // Use dynamic categories from the database instead of hardcoded list
   const { categories: productCategories } = useCategories('en');
   
-  const [product, setProduct] = useState<UnifiedProduct & { features_multilingual?: Record<string, string[]> } | null>(null);
+     const [product, setProduct] = useState<UnifiedProduct | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -95,16 +96,14 @@ export default function ProductEdit() {
       
       // Ensure names and descriptions are properly initialized
       if (productData) {
-        const initializedProduct = {
-          ...productData,
-          // CRITICAL FIX: Ensure names and descriptions are always objects, never undefined
-          names: productData.names || {},
-          descriptions: productData.descriptions || {},
-          // Initialize multilingual features from translations
-          features_multilingual: productData.features_multilingual || {
-            en: productData.features || []
-          }
-        };
+                 const initializedProduct = {
+           ...productData,
+           // CRITICAL FIX: Ensure names and descriptions are always objects, never undefined
+           names: productData.names || {},
+           descriptions: productData.descriptions || {},
+           // Features are now centralized - use the main features array
+           features: productData.features || []
+         };
         
         // CRITICAL FIX: Log the exact structure being set
         console.log('ProductEdit: Final initialized product:', {
@@ -160,10 +159,8 @@ export default function ProductEdit() {
         validationErrors.push('At least one product description is required');
       }
       
-      // Features validation
-      const hasFeatures = Object.values(product.features_multilingual || {}).some(features => 
-        Array.isArray(features) && features.length > 0 && features.some(f => f && f.trim())
-      );
+             // Features validation - now centralized
+       const hasFeatures = Array.isArray(product.features) && product.features.length > 0;
       
       if (!hasFeatures) {
         validationErrors.push('At least one feature is required');
@@ -190,29 +187,33 @@ export default function ProductEdit() {
         descriptions: product.descriptions
       });
       
-      const updateData = {
-        // Basic fields (category, model, checkboxes)
-        category: product.category,
-        model: product.model,
-        inStock: product.inStock,
-        showInFeatured: product.showInFeatured,
-        isActive: product.isActive,
-        
-        // Multilingual content (names, descriptions, and features for all languages)
-        names: product.names || {},
-        descriptions: product.descriptions || {},
-        features_multilingual: product.features_multilingual || {}
-      };
+             const updateData = {
+         // Basic fields (category, model, checkboxes)
+         category: product.category,
+         model: product.model,
+         inStock: product.inStock,
+         showInFeatured: product.showInFeatured,
+         isActive: product.isActive,
+         
+         // Centralized features (single array, affects all languages)
+         features: product.features || [],
+         
+         // Multilingual content (names and descriptions for all languages)
+         names: product.names || {},
+         descriptions: product.descriptions || {}
+       };
 
       console.log('📝 UNIFIED SAVE: Complete data being sent to service:', updateData);
       console.log('📝 UNIFIED SAVE: Names object:', updateData.names);
       console.log('📝 UNIFIED SAVE: Descriptions object:', updateData.descriptions);
+      console.log('📝 UNIFIED SAVE: Features being sent:', updateData.features);
       console.log('📝 UNIFIED SAVE: Basic fields:', {
         category: updateData.category,
         model: updateData.model,
         inStock: updateData.inStock,
         showInFeatured: updateData.showInFeatured,
-        isActive: updateData.isActive
+        isActive: updateData.isActive,
+        features: updateData.features
       });
       console.log('📝 UNIFIED SAVE: Basic fields type check:', {
         categoryType: typeof updateData.category,
@@ -305,7 +306,8 @@ export default function ProductEdit() {
       model: product.model,
       inStock: product.inStock,
       showInFeatured: product.showInFeatured,
-      isActive: product.isActive
+      isActive: product.isActive,
+      features: product.features
     });
     
     setProduct(prev => {
@@ -315,88 +317,14 @@ export default function ProductEdit() {
         model: updated.model,
         inStock: updated.inStock,
         showInFeatured: updated.showInFeatured,
-        isActive: updated.isActive
+        isActive: updated.isActive,
+        features: updated.features
       });
       return updated;
     });
   };
 
-  const addFeature = (languageCode: string) => {
-    if (!product) return;
-    
-    // CRITICAL: Validate language code to prevent injection attacks
-    const validLanguages = ['en', 'zh-Hant', 'zh-Hans', 'ja', 'ko', 'th', 'vi'];
-    if (!validLanguages.includes(languageCode)) {
-      console.error('Invalid language code attempted:', languageCode);
-      return;
-    }
-    
-    const currentFeatures = product.features_multilingual?.[languageCode] || [];
-    console.log(`🔍 addFeature: Language ${languageCode}, Current features:`, currentFeatures);
-    
-    // CRITICAL: Limit maximum features to prevent abuse
-    if (currentFeatures.length >= 20) {
-      toast.error('Maximum 20 features allowed per language');
-      return;
-    }
-    
-    const newFeatures = [...currentFeatures, ''];
-    console.log(`🔍 addFeature: Language ${languageCode}, New features:`, newFeatures);
-    setProduct({
-      ...product,
-      features_multilingual: {
-        ...product.features_multilingual,
-        [languageCode]: newFeatures
-      }
-    });
-  };
 
-  const updateFeature = (index: number, value: string, languageCode: string) => {
-    if (!product) return;
-    
-    // CRITICAL: Validate language code to prevent injection attacks
-    const validLanguages = ['en', 'zh-Hant', 'zh-Hans', 'ja', 'ko', 'th', 'vi'];
-    if (!validLanguages.includes(languageCode)) {
-      console.error('Invalid language code attempted:', languageCode);
-      return;
-    }
-    
-    // CRITICAL: Validate index to prevent array manipulation attacks
-    const currentFeatures = product.features_multilingual?.[languageCode] || [];
-    if (index < 0 || index >= currentFeatures.length) {
-      console.error('Invalid feature index attempted:', index);
-      return;
-    }
-    
-    // CRITICAL: Sanitize input value to prevent XSS
-    const sanitizedValue = value.trim().substring(0, 500); // Limit to 500 characters
-    
-    const newFeatures = [...currentFeatures];
-    newFeatures[index] = sanitizedValue;
-    console.log(`🔍 updateFeature: Language ${languageCode}, Index ${index}, Value "${sanitizedValue}", New features:`, newFeatures);
-    setProduct({
-      ...product,
-      features_multilingual: {
-        ...product.features_multilingual,
-        [languageCode]: newFeatures
-      }
-    });
-  };
-
-  const removeFeature = (index: number, languageCode: string) => {
-    if (product) {
-      const currentFeatures = product.features_multilingual?.[languageCode] || [];
-      const newFeatures = currentFeatures.filter((_, i) => i !== index);
-      console.log(`🔍 removeFeature: Language ${languageCode}, Index ${index}, New features:`, newFeatures);
-      setProduct({
-        ...product,
-        features_multilingual: {
-          ...product.features_multilingual,
-          [languageCode]: newFeatures
-        }
-      });
-    }
-  };
 
   if (loading) {
     return (
@@ -453,7 +381,7 @@ export default function ProductEdit() {
                 {t('basic.title')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+                         <CardContent className="space-y-2">
               <div>
                 <label className="block text-sm font-medium mb-2">{t('basic.category')}</label>
                 <Select onValueChange={(value) => updateBasicField('category', value)} defaultValue={product.category || ''}>
@@ -470,16 +398,41 @@ export default function ProductEdit() {
                 </Select>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium mb-2">{t('basic.model')}</label>
-                <Input
-                  value={product.model || ''}
-                  onChange={(e) => updateBasicField('model', e.target.value)}
-                  placeholder={t('basic.model')}
-                />
-              </div>
+                             <div>
+                 <label className="block text-sm font-medium mb-2">{t('basic.model')}</label>
+                 <Input
+                   value={product.model || ''}
+                   onChange={(e) => updateBasicField('model', e.target.value)}
+                   placeholder={t('basic.model')}
+                 />
+               </div>
 
-
+               {/* Product Features - Centralized Management */}
+               <div>
+                 <label className="block text-sm font-medium mb-2">Product Features</label>
+                 <FeaturesChecklist
+                   features={[]}
+                   selectedFeatures={product.features || []}
+                   onFeaturesChange={(featureNames) => {
+                     console.log('🔍 FeaturesChecklist onChange called with:', featureNames);
+                     console.log('🔍 Current product features before update:', product.features);
+                     // Update features centrally - affects all languages
+                     if (product) {
+                       setProduct({
+                         ...product,
+                         features: featureNames
+                       });
+                       console.log('🔍 Product state updated with new features:', featureNames);
+                     }
+                   }}
+                   language={language} // Use current admin language for display
+                   placeholder="Search features..."
+                   className="mt-2"
+                 />
+                 <p className="text-xs text-muted-foreground mt-2">
+                   Features selected here will be available in all languages. The frontend will automatically translate them based on the user's language preference.
+                 </p>
+               </div>
 
               <div className="space-y-4">
                 <div className="flex items-center space-x-2">
@@ -582,46 +535,7 @@ export default function ProductEdit() {
                           />
                         </div>
 
-                        {/* Product Features */}
-                        <div>
-                          <label className="block text-sm font-medium mb-2">
-                            <span className="inline-flex items-center gap-2">
-                              <span className="w-4 h-4 bg-primary rounded-full"></span>
-                              Product Features ({lang.nativeName})
-                            </span>
-                          </label>
-                          <div className="space-y-2">
-                            {Array.isArray(product.features_multilingual?.[lang.code]) && product.features_multilingual![lang.code].length > 0 ? (
-                              product.features_multilingual![lang.code].map((feature, index) => (
-                                <div key={index} className="flex gap-2">
-                                  <Input
-                                    value={feature}
-                                    onChange={(e) => updateFeature(index, e.target.value, lang.code)}
-                                    placeholder="Enter feature"
-                                  />
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => removeFeature(index, lang.code)}
-                                    className="px-2"
-                                  >
-                                    ×
-                                  </Button>
-                                </div>
-                              ))
-                            ) : null}
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => addFeature(lang.code)}
-                              className="w-full"
-                            >
-                              + Add Feature
-                            </Button>
-                          </div>
-                        </div>
+                        
                       </div>
                     </div>
                   </TabsContent>

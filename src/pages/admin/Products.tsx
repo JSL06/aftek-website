@@ -18,45 +18,14 @@ import LanguageSelector, { Language, LANGUAGES } from '@/components/LanguageSele
 import MultilingualFormField from '@/components/MultilingualFormField';
 import TranslationStatus from '@/components/TranslationStatus';
 import QuickTranslationCopy from '@/components/QuickTranslationCopy';
+import FeaturesChecklist from '@/components/FeaturesChecklist';
+import { filterService } from '@/services/filterService';
 
 interface Product extends UnifiedProduct {
   // Legacy compatibility - all properties now come from UnifiedProduct
 }
 
-const FEATURE_OPTIONS = [
-  // Application Environment
-  'Indoor Use',
-  'Outdoor Use',
-  'Underwater',
-  'High Traffic Areas',
-  'Chemical Exposure',
-  
-  // Properties
-  'Waterproof',
-  'UV Resistant',
-  'Flexible',
-  'Fast Cure',
-  'High Strength',
-  'Low Odor',
-  'Chemical Resistant',
-  'Temperature Resistant',
-  
-  // Base Type
-  'Polyurethane',
-  'Silicone',
-  'Acrylic',
-  'Epoxy',
-  'Hybrid',
-  'Cement Based',
-  
-  // Special Features
-  'Eco Friendly',
-  'Fire Resistant',
-  'Anti Microbial',
-  'Self Leveling',
-  'Quick Setting',
-  'Paintable'
-];
+// Features are now loaded from the database via FeaturesChecklist component
 
 const Products = () => {
   const { currentLanguage, t } = useTranslation();
@@ -460,20 +429,17 @@ const Products = () => {
 
                 <div>
                   <Label>Features</Label>
-                  <select
-                    multiple
-                    className="border rounded p-2 w-full"
-                    value={formData.features}
-                    onChange={e => {
-                      const selected = Array.from(e.target.selectedOptions, option => option.value);
-                      setFormData(prev => ({ ...prev, features: selected }));
-                    }}
-                  >
-                    {FEATURE_OPTIONS.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
-                  <p className="text-xs text-muted-foreground mt-1">Hold Ctrl (Windows) or Cmd (Mac) to select multiple features.</p>
+                                     <FeaturesChecklist
+                     features={[]}
+                     selectedFeatures={formData.features || []}
+                     onFeaturesChange={(featureNames) => {
+                       // featureNames are now the actual feature names in the selected language
+                       setFormData(prev => ({ ...prev, features: featureNames }));
+                     }}
+                     language={selectedLanguage}
+                     placeholder="Search features..."
+                     className="mt-2"
+                   />
                 </div>
               </div>
 

@@ -18,6 +18,7 @@ import LanguageSelector, { Language, LANGUAGES } from '@/components/LanguageSele
 import MultilingualFormField from '@/components/MultilingualFormField';
 import TranslationStatus from '@/components/TranslationStatus';
 import { useTranslation } from '@/hooks/useTranslation';
+import FeaturesChecklist from '@/components/FeaturesChecklist';
 
 const AdminProjects = () => {
   const { t } = useTranslation();
@@ -28,7 +29,6 @@ const AdminProjects = () => {
   const [saving, setSaving] = useState(false);
   const [availableProducts, setAvailableProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
-  const [features, setFeatures] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     location: '',
@@ -254,26 +254,7 @@ const AdminProjects = () => {
     }
   };
 
-  const addFeature = () => {
-    setFormData(prev => ({
-      ...prev,
-      features: [...(prev.features || []), '']
-    }));
-  };
 
-  const updateFeature = (index: number, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      features: (prev.features || []).map((f, i) => i === index ? value : f)
-    }));
-  };
-
-  const removeFeature = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      features: (prev.features || []).filter((_, i) => i !== index)
-    }));
-  };
 
   // Products Used Management
   const addProductUsed = () => {
@@ -301,14 +282,12 @@ const AdminProjects = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [products, categoriesData, featuresData] = await Promise.all([
+        const [products, categoriesData] = await Promise.all([
           productService.getAllProducts(),
-          filterService.getCategories(),
-          filterService.getFeatures()
+          filterService.getCategories()
         ]);
         setAvailableProducts(products);
         setCategories(categoriesData);
-        setFeatures(featuresData);
       } catch (error) {
         console.error('Error loading data:', error);
       }
@@ -506,37 +485,21 @@ const AdminProjects = () => {
                 />
               </div>
 
-              {/* Features */}
-              <div>
-                <Label>Features & Technologies</Label>
-                <div className="mt-2 space-y-2">
-                  {(formData.features || []).map((feature, index) => (
-                    <div key={index} className="flex gap-2">
-                      <select
-                        value={feature}
-                        onChange={(e) => updateFeature(index, e.target.value)}
-                        className="flex-1 px-3 py-2 border border-input rounded-md bg-background"
-                      >
-                        <option value="">Select feature</option>
-                        {features.map(option => (
-                          <option key={option} value={option}>{option}</option>
-                        ))}
-                      </select>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeFeature(index)}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  ))}
-                  <Button type="button" variant="outline" onClick={addFeature}>
-                    Add Feature
-                  </Button>
-                </div>
-              </div>
+                             {/* Features */}
+               <div>
+                 <Label>Features & Technologies</Label>
+                 <FeaturesChecklist
+                   features={[]}
+                   selectedFeatures={formData.features || []}
+                   onFeaturesChange={(featureNames) => {
+                     // featureNames are now the actual feature names in the selected language
+                     setFormData(prev => ({ ...prev, features: featureNames }));
+                   }}
+                   language={selectedLanguage}
+                   placeholder="Search features..."
+                   className="mt-2"
+                 />
+               </div>
 
               {/* Products Used */}
               <div>

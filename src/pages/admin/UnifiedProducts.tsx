@@ -28,21 +28,9 @@ import MultilingualFormField from '@/components/MultilingualFormField';
 import TranslationStatus from '@/components/TranslationStatus';
 import { useTranslation } from '@/hooks/useTranslation';
 import ImageUpload from '@/components/ui/ImageUpload';
+import FeaturesChecklist from '@/components/FeaturesChecklist';
 
-const FEATURE_OPTIONS = [
-  // Application Environment
-  'Indoor Use', 'Outdoor Use', 'Underwater', 'High Traffic Areas', 'Chemical Exposure',
-  
-  // Performance Properties
-  'Waterproof', 'UV Resistant', 'Flexible', 'Fast Cure', 'High Strength', 'Low Odor',
-  'Chemical Resistant', 'Temperature Resistant',
-  
-  // Base Type
-  'Polyurethane', 'Silicone', 'Acrylic', 'Epoxy', 'Hybrid', 'Cement Based',
-  
-  // Special Features
-  'Eco Friendly', 'Fire Resistant', 'Anti Microbial', 'Self Leveling', 'Quick Setting', 'Paintable'
-];
+// Features are now loaded from the database via FeaturesChecklist component
 
 const UnifiedProducts = () => {
   // Categories will be loaded from the database
@@ -462,33 +450,17 @@ const UnifiedProducts = () => {
 
                                               <div>
                    <Label id="features-label">{t('admin.products.features')}</Label>
-                   <div className="border rounded-lg p-4 max-h-32 overflow-y-auto" role="group" aria-labelledby="features-label">
-                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                       {FEATURE_OPTIONS.map(feature => (
-                         <div key={feature} className="flex items-center space-x-2 text-sm">
-                           <input
-                             type="checkbox"
-                             id={`feature-${feature.replace(/\s+/g, '-').toLowerCase()}`}
-                             name="features"
-                             value={feature}
-                             checked={formData.features?.includes(feature) || false}
-                             onChange={(e) => {
-                               const features = formData.features || [];
-                               if (e.target.checked) {
-                                 setFormData(prev => ({ ...prev, features: [...features, feature] }));
-                               } else {
-                                 setFormData(prev => ({ ...prev, features: features.filter(f => f !== feature) }));
-                               }
-                             }}
-                           />
-                           <label htmlFor={`feature-${feature.replace(/\s+/g, '-').toLowerCase()}`}>{feature}</label>
-                         </div>
-                       ))}
-                     </div>
-                   </div>
-                   <p className="text-xs text-muted-foreground mt-1">
-                     Selected: {formData.features?.length || 0} {t('admin.products.features').toLowerCase()}
-                   </p>
+                   <FeaturesChecklist
+                     features={[]}
+                     selectedFeatures={formData.features || []}
+                     onFeaturesChange={(featureIds) => {
+                       // featureIds are now the actual feature IDs from the database
+                       setFormData(prev => ({ ...prev, features: featureIds }));
+                     }}
+                     language={selectedLanguage}
+                     placeholder={t('admin.products.searchFeatures')}
+                     className="mt-2"
+                   />
                  </div>
 
                                               <div>
