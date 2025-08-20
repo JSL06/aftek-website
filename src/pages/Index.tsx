@@ -3,12 +3,9 @@
 const Index = () => {
   return (
     <div 
-      className="min-h-screen flex items-center justify-center" 
+      className="min-h-screen bg-cover bg-center bg-fixed" 
       style={{
-        backgroundImage: 'url(/src/assets/17580.jpg)',
-        backgroundSize: 'cover',
-        backgroundAttachment: 'fixed',
-        backgroundPosition: 'center'
+        backgroundImage: 'url(/aftek-website/src/assets/17580.jpg)'
       }}
     >
       <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-elegant p-12 border border-border text-center max-w-md mx-4">

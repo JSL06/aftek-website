@@ -33,7 +33,7 @@ const NotFound = () => {
     <div 
       className="min-h-screen flex items-center justify-center" 
       style={{
-        backgroundImage: 'url(/src/assets/17580.jpg)',
+        backgroundImage: 'url(/aftek-website/src/assets/17580.jpg)',
         backgroundSize: 'cover',
         backgroundAttachment: 'fixed',
         backgroundPosition: 'center'

@@ -58,7 +58,7 @@ const Media = () => {
     <div 
       className="min-h-screen" 
       style={{
-        backgroundImage: 'url(/src/assets/17580.jpg)',
+        backgroundImage: 'url(/aftek-website/src/assets/17580.jpg)',
         backgroundSize: 'cover',
         backgroundAttachment: 'fixed',
         backgroundPosition: 'center'
@@ -71,7 +71,7 @@ const Media = () => {
       <div 
         className="relative py-16 mb-12"
         style={{
-          backgroundImage: 'url(/src/assets/pexels-pixabay-159306.png)',
+          backgroundImage: 'url(/aftek-website/src/assets/pexels-pixabay-159306.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed'

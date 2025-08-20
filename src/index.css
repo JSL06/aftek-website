@@ -353,7 +353,7 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
     font-family: 'Open Sans', sans-serif;
-    background-image: url('/src/assets/17580.jpg');
+    background-image: url('/aftek-website/src/assets/17580.jpg');
     background-size: cover;
     background-attachment: fixed;
     background-position: center;

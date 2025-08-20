@@ -210,7 +210,7 @@ const Guide = () => {
     <div 
       className="min-h-screen" 
       style={{
-        backgroundImage: 'url(/src/assets/17580.jpg)',
+        backgroundImage: 'url(/aftek-website/src/assets/17580.jpg)',
         backgroundSize: 'cover',
         backgroundAttachment: 'fixed',
         backgroundPosition: 'center'
@@ -223,7 +223,7 @@ const Guide = () => {
       <div 
         className="relative py-16 mb-12"
         style={{
-          backgroundImage: 'url(/src/assets/pexels-pixabay-159306.png)',
+          backgroundImage: 'url(/aftek-website/src/assets/pexels-pixabay-159306.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed'
@@ -231,12 +231,9 @@ const Guide = () => {
       >
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="relative z-10 container mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+          <h1 className="uniform-page-title text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
             {t('exploded.title')}
           </h1>
-          <p className="text-xl text-white/90 max-w-3xl mx-auto" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
-            {t('exploded.description')}
-          </p>
         </div>
       </div>
       
