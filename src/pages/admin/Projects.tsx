@@ -46,6 +46,10 @@ export default function AdminProjects() {
   const [originalProject, setOriginalProject] = useState<MultilingualProject | null>(null);
   const [availableProducts, setAvailableProducts] = useState<any[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
+  // List view state when no projectId is provided
+  const [projects, setProjects] = useState<MultilingualProject[]>([]);
+  const [listLoading, setListLoading] = useState<boolean>(false);
+  const [listError, setListError] = useState<string | null>(null);
 
   // Load project when projectId changes
   useEffect(() => {
@@ -112,8 +116,23 @@ export default function AdminProjects() {
       
       return () => clearTimeout(timeout);
     } else {
-      console.log('🔍 No projectId provided');
-      setLoading(false);
+      console.log('🔍 No projectId provided - loading projects list');
+      // Load list of projects for the index page
+      const loadList = async () => {
+        try {
+          setListLoading(true);
+          setListError(null);
+          const list = await projectService.getAdminProjects('en');
+          setProjects(list);
+        } catch (err: any) {
+          console.error('🔍 Error loading projects list:', err);
+          setListError(err?.message || 'Failed to load projects');
+        } finally {
+          setListLoading(false);
+          setLoading(false);
+        }
+      };
+      loadList();
     }
   }, [projectId]);
 
@@ -329,8 +348,8 @@ export default function AdminProjects() {
                 </Button>
               </div>
             </div>
-          )}
-        </div>
+              )}
+            </div>
       </div>
     );
   }
@@ -350,6 +369,44 @@ export default function AdminProjects() {
             </Button>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  // Index page: show list when no projectId
+  if (!projectId) {
+    return (
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Projects</h1>
+              </div>
+        {listLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin" />
+          </div>
+        ) : listError ? (
+          <div className="p-4 border rounded text-red-700 bg-red-50">{listError}</div>
+        ) : projects.length === 0 ? (
+          <div className="p-6 border rounded text-muted-foreground">No projects found.</div>
+        ) : (
+          <div className="grid gap-4">
+            {projects.map(p => (
+              <Card key={p.id}>
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="min-w-0">
+                    <div className="text-lg font-semibold truncate">{p.titles?.['en'] || p.title}</div>
+                    <div className="text-sm text-muted-foreground truncate">
+                      {p.category} {p.completion_date ? `• ${p.completion_date}` : ''}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" onClick={() => navigate(`/admin/projects/edit/${p.id}`)}>Edit</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -482,8 +539,8 @@ export default function AdminProjects() {
               </>
             )}
           </Button>
-        </div>
-      </div>
+                </div>
+              </div>
 
       {/* Main Content */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
