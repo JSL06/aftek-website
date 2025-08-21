@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HashRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { LanguageProvider } from "./contexts/LanguageContext";
@@ -49,16 +49,19 @@ import Settings from './pages/admin/Settings';
 
 const queryClient = new QueryClient();
 
+// Get basename for GitHub Pages
+const basename = import.meta.env.PROD ? '/aftek-website' : '';
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <LanguageProvider>
         <Toaster />
         <Sonner />
-        <HashRouter>
+        <BrowserRouter basename={basename}>
           <CompanyProvider>
             <Routes>
-              {/* Main Routes - Simplified for HashRouter */}
+              {/* Default Routes (Aftek) */}
               <Route path="/" element={<Layout />}>
                 <Route index element={<ProtectedPage pageName="home"><Home /></ProtectedPage>} />
                 <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
@@ -111,7 +114,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </CompanyProvider>
-        </HashRouter>
+        </BrowserRouter>
       </LanguageProvider>
     </TooltipProvider>
   </QueryClientProvider>

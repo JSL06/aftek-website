@@ -3,8 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 export default defineConfig({
-  // Remove base path since we're using HashRouter
-  // base: process.env.NODE_ENV === 'production' ? '/aftek-website/' : '/',
+  base: process.env.NODE_ENV === 'production' ? '/aftek-website/' : '/',
   plugins: [react()],
   resolve: {
     alias: {
