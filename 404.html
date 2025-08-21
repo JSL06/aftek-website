@@ -26,6 +26,21 @@
         
         // If no path or empty, just go to base
         window.location.replace('/aftek-website/');
+      } else if (l.hostname === 'jsl06.github.io') {
+        // We're on GitHub Pages but at wrong path (missing /aftek-website/)
+        // Extract the path and redirect to the correct base
+        var path = l.pathname;
+        if (path && path !== '/') {
+          // Clean up the path and redirect to the correct base
+          var cleanPath = path.replace(/\/+/g, '/').replace(/^\/+|\/+$/g, '');
+          if (cleanPath) {
+            window.location.replace('/aftek-website/#' + cleanPath);
+            return;
+          }
+        }
+        
+        // If no path or empty, go to the correct base
+        window.location.replace('/aftek-website/');
       } else {
         // Not on GitHub Pages, redirect to root
         window.location.replace('/');
