@@ -4,25 +4,33 @@
   <meta charset="utf-8">
   <title>Aftek - Redirecting...</title>
   <script type="text/javascript">
-    // GitHub Pages SPA redirect for /aftek-website/ base path
-    // https://github.com/rafgraph/spa-github-pages
-    var pathSegmentsToKeep = 2; // Keep /aftek-website/ as base
-    var l = window.location;
-    
-    // Check if we're on GitHub Pages with /aftek-website/ base
-    if (l.pathname.startsWith('/aftek-website/')) {
-      // We're on GitHub Pages, use the redirect logic
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-        l.hash
-      );
-    } else {
-      // Local development or other hosting, redirect to root
-      l.replace(l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + '/');
-    }
+    // Simple redirect for HashRouter
+    // Since we're using HashRouter, we just need to redirect to the base
+    (function() {
+      var l = window.location;
+      
+      // Check if we're on GitHub Pages with /aftek-website/ base
+      if (l.pathname.startsWith('/aftek-website/')) {
+        // Extract the path after /aftek-website/
+        var pathAfterBase = l.pathname.substring('/aftek-website/'.length);
+        
+        // If there's a path, redirect to the base with a hash
+        if (pathAfterBase && pathAfterBase !== '') {
+          // Clean up the path and redirect with hash
+          var cleanPath = pathAfterBase.replace(/\/+/g, '/').replace(/^\/+|\/+$/g, '');
+          if (cleanPath) {
+            window.location.replace('/aftek-website/#' + cleanPath);
+            return;
+          }
+        }
+        
+        // If no path or empty, just go to base
+        window.location.replace('/aftek-website/');
+      } else {
+        // Not on GitHub Pages, redirect to root
+        window.location.replace('/');
+      }
+    })();
   </script>
 </head>
 <body>
