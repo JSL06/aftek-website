@@ -49,9 +49,6 @@ import Settings from './pages/admin/Settings';
 
 const queryClient = new QueryClient();
 
-// Remove basename since HashRouter doesn't need it
-// const basename = import.meta.env.PROD ? '/aftek-website' : '';
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -61,59 +58,7 @@ const App = () => (
         <HashRouter>
           <CompanyProvider>
             <Routes>
-              {/* Company-specific Routes */}
-              <Route path="/aftek" element={<Layout />}>
-                <Route index element={<ProtectedPage pageName="home"><Home /></ProtectedPage>} />
-                <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
-                <Route path="products" element={<ProtectedPage pageName="products"><Products /></ProtectedPage>} />
-                <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
-                <Route path="projects/:projectId" element={<ProtectedPage pageName="projects"><ProjectDetail /></ProtectedPage>} />
-                <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
-                <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
-                <Route path="guide" element={<ProtectedPage pageName="guide"><Guide /></ProtectedPage>} />
-                <Route path="contact" element={<ProtectedPage pageName="contact"><NewContact /></ProtectedPage>} />
-                <Route path="products/flex-pro-pu" element={<ProtectedPage pageName="products"><FlexProPU /></ProtectedPage>} />
-                <Route path="products/:productId" element={<ProtectedPage pageName="products"><ProductDetail /></ProtectedPage>} />
-                <Route path="case-studies" element={<ProtectedPage pageName="projects"><CaseStudies /></ProtectedPage>} />
-                <Route path="resources" element={<ProtectedPage pageName="articles"><Resources /></ProtectedPage>} />
-                <Route path="media" element={<ProtectedPage pageName="articles"><Media /></ProtectedPage>} />
-              </Route>
-
-              <Route path="/rla" element={<Layout />}>
-                <Route index element={<ProtectedPage pageName="home"><Home /></ProtectedPage>} />
-                <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
-                <Route path="products" element={<ProtectedPage pageName="products"><Products /></ProtectedPage>} />
-                <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
-                <Route path="projects/:projectId" element={<ProtectedPage pageName="projects"><ProjectDetail /></ProtectedPage>} />
-                <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
-                <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
-                <Route path="guide" element={<ProtectedPage pageName="guide"><Guide /></ProtectedPage>} />
-                <Route path="contact" element={<ProtectedPage pageName="contact"><NewContact /></ProtectedPage>} />
-                <Route path="products/flex-pro-pu" element={<ProtectedPage pageName="products"><FlexProPU /></ProtectedPage>} />
-                <Route path="products/:productId" element={<ProtectedPage pageName="products"><ProductDetail /></ProtectedPage>} />
-                <Route path="case-studies" element={<ProtectedPage pageName="projects"><CaseStudies /></ProtectedPage>} />
-                <Route path="resources" element={<ProtectedPage pageName="articles"><Resources /></ProtectedPage>} />
-                <Route path="media" element={<ProtectedPage pageName="articles"><Media /></ProtectedPage>} />
-              </Route>
-
-              <Route path="/itls" element={<Layout />}>
-                <Route index element={<ProtectedPage pageName="home"><About /></ProtectedPage>} />
-                <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
-                <Route path="products" element={<ProtectedPage pageName="products"><Products /></ProtectedPage>} />
-                <Route path="projects" element={<ProtectedPage pageName="projects"><Projects /></ProtectedPage>} />
-                <Route path="projects/:projectId" element={<ProtectedPage pageName="projects"><ProjectDetail /></ProtectedPage>} />
-                <Route path="articles" element={<ProtectedPage pageName="articles"><Articles /></ProtectedPage>} />
-                <Route path="articles/:slug" element={<ProtectedPage pageName="articles"><ArticleDetail /></ProtectedPage>} />
-                <Route path="guide" element={<ProtectedPage pageName="guide"><Guide /></ProtectedPage>} />
-                <Route path="contact" element={<ProtectedPage pageName="contact"><NewContact /></ProtectedPage>} />
-                <Route path="products/flex-pro-pu" element={<ProtectedPage pageName="products"><FlexProPU /></ProtectedPage>} />
-                <Route path="products/:productId" element={<ProtectedPage pageName="products"><ProductDetail /></ProtectedPage>} />
-                <Route path="case-studies" element={<ProtectedPage pageName="projects"><CaseStudies /></ProtectedPage>} />
-                <Route path="resources" element={<ProtectedPage pageName="articles"><Resources /></ProtectedPage>} />
-                <Route path="media" element={<ProtectedPage pageName="articles"><Media /></ProtectedPage>} />
-              </Route>
-
-              {/* Default Routes (Aftek) */}
+              {/* Main Routes - Simplified for HashRouter */}
               <Route path="/" element={<Layout />}>
                 <Route index element={<ProtectedPage pageName="home"><Home /></ProtectedPage>} />
                 <Route path="about" element={<ProtectedPage pageName="about"><About /></ProtectedPage>} />
@@ -131,7 +76,7 @@ const App = () => (
                 <Route path="media" element={<ProtectedPage pageName="articles"><Media /></ProtectedPage>} />
               </Route>
               
-              {/* Admin Routes (Shared across all companies) */}
+              {/* Admin Routes */}
               <Route path="/admin" element={
                 <AdminLanguageProvider>
                   <AdminStoreProvider>
@@ -157,12 +102,12 @@ const App = () => (
                 <Route path="website-text-editor" element={<WebsiteTextEditor />} />
                 <Route path="website-text-manager" element={<WebsiteTextManager />} />
                 <Route path="background-image-manager" element={<BackgroundImageManager />} />
-
                 <Route path="analytics" element={<Analytics />} />
                 <Route path="users" element={<Users />} />
                 <Route path="settings" element={<Settings />} />
               </Route>
               
+              {/* Catch-all route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </CompanyProvider>
