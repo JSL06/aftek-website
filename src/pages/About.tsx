@@ -208,10 +208,10 @@ const About = () => {
                   <div className="text-xl font-bold mb-1 text-primary" style={{ fontFamily }}>{leader.name}</div>
                   <div className="text-base font-semibold mb-2" style={{ fontFamily }}>{leader.title}</div>
                   <div className="text-base text-muted-foreground" style={{ fontFamily }}>{leader.bio}</div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
         )}
       {/* Map and Contact Section */}
       <div className="flex flex-col md:flex-row gap-8 mb-16 items-stretch container mx-auto max-w-4xl">
@@ -244,7 +244,7 @@ const About = () => {
         </div>
       </div>
       {/* Red Call-to-Action Section */}
-      <div className="w-full py-16 bg-gradient-hero" style={{ color: 'white', fontFamily }}>
+      <div className="w-full py-16 bg-gradient-hero rounded-xl mx-4 my-8" style={{ color: 'white', fontFamily }}>
         <div className="container mx-auto max-w-4xl text-center">
           <h2 className="text-2xl font-bold mb-2" style={{ fontFamily }}>{RED_SECTION.title}</h2>
           <div className="mb-6 text-lg" style={{ fontFamily }}>{RED_SECTION.desc}</div>
@@ -262,9 +262,9 @@ const About = () => {
                 {btn.label}
               </a>
             ))}
-            </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
