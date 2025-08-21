@@ -361,7 +361,7 @@ const ProjectDetail: React.FC = () => {
                 <div className="space-y-6">
                   {getLocalizedText('challenges', project.challenges) && (
                     <div>
-                      <h3 className="text-lg font-semibold mb-2 text-orange-600">Challenges</h3>
+                      <h3 className="text-lg font-semibold mb-2">Challenges</h3>
                       <p className="text-muted-foreground leading-relaxed">
                         {getLocalizedText('challenges', project.challenges)}
                       </p>
@@ -370,7 +370,7 @@ const ProjectDetail: React.FC = () => {
 
                   {getLocalizedText('solutions', project.solutions) && (
               <div>
-                      <h3 className="text-lg font-semibold mb-2 text-blue-600">Solutions</h3>
+                      <h3 className="text-lg font-semibold mb-2">Solutions</h3>
                       <p className="text-muted-foreground leading-relaxed">
                         {getLocalizedText('solutions', project.solutions)}
                       </p>
@@ -379,7 +379,7 @@ const ProjectDetail: React.FC = () => {
 
                   {getLocalizedText('results', project.results) && (
               <div>
-                      <h3 className="text-lg font-semibold mb-2 text-green-600">Results</h3>
+                      <h3 className="text-lg font-semibold mb-2">Results</h3>
                       <p className="text-muted-foreground leading-relaxed">
                         {getLocalizedText('results', project.results)}
                       </p>

@@ -230,6 +230,82 @@ export class FeaturesService {
       throw error;
     }
   }
+
+  /**
+   * Translate feature keys to display names for a specific language
+   * This is useful for displaying features in product details
+   */
+  static async translateFeatureKeys(featureKeys: string[], language: string = 'en'): Promise<string[]> {
+    try {
+      if (!featureKeys || featureKeys.length === 0) {
+        return [];
+      }
+
+      // Get all features with translations
+      const allFeatures = await this.getAllFeatures();
+      
+      // Create a map of feature_key -> translated display_name
+      const featureKeyToDisplay: Record<string, string> = {};
+      allFeatures.forEach(feature => {
+        const displayName = feature.translations[language] || feature.translations['en'] || feature.feature_key;
+        featureKeyToDisplay[feature.feature_key] = displayName;
+      });
+
+      // Translate the feature keys to display names
+      return featureKeys.map(key => featureKeyToDisplay[key] || key);
+    } catch (error) {
+      console.error('Error in translateFeatureKeys:', error);
+      // Return original keys if translation fails
+      return featureKeys;
+    }
+  }
+
+  /**
+   * Get a single feature by its key with translations
+   */
+  static async getFeatureByKey(featureKey: string): Promise<FeatureWithTranslations | null> {
+    try {
+      const { data: feature, error: featuresError } = await supabase
+        .from('master_features')
+        .select('*')
+        .eq('feature_key', featureKey)
+        .eq('is_active', true)
+        .single();
+
+      if (featuresError || !feature) {
+        return null;
+      }
+
+      // Fetch translations for this feature
+      const { data: translations, error: translationsError } = await supabase
+        .from('feature_translations')
+        .select('*')
+        .eq('feature_id', feature.id);
+
+      if (translationsError) {
+        console.error('Error fetching feature translations:', translationsError);
+        return null;
+      }
+
+      // Combine feature with translations
+      const translationsMap: Record<string, string> = {};
+      translations?.forEach(translation => {
+        translationsMap[translation.language_code] = translation.display_name;
+      });
+
+      return {
+        id: feature.id,
+        feature_key: feature.feature_key,
+        category: feature.category,
+        display_order: feature.display_order,
+        is_active: feature.is_active,
+        translations: translationsMap
+      };
+    } catch (error) {
+      console.error('Error in getFeatureByKey:', error);
+      return null;
+    }
+  }
 }
 
 export default FeaturesService;

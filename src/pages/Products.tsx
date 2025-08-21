@@ -33,6 +33,19 @@ const Products: React.FC = () => {
     return () => window.removeEventListener('productUpdated', handleProductUpdate);
   }, [refreshProducts]);
 
+  // Refresh selected product when language changes
+  useEffect(() => {
+    if (selectedProduct) {
+      console.log('🌐 Language changed, refreshing selected product with new translations...');
+      // Find the updated product with new language
+      const updatedProduct = products.find(p => p.id === selectedProduct.id);
+      if (updatedProduct) {
+        setSelectedProduct(updatedProduct);
+        console.log('✅ Selected product updated with new language');
+      }
+    }
+  }, [currentLanguage, products, selectedProduct]);
+
   // Filter products based on search and category
   const filteredProducts = products.filter(product => {
     const matchesSearch = !searchTerm || 
@@ -169,6 +182,7 @@ const Products: React.FC = () => {
         product={selectedProduct}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+        currentLanguage={currentLanguage}
       />
       </div>
     </div>

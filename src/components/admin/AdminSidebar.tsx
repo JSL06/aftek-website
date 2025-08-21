@@ -18,7 +18,8 @@ import {
   Plus,
   ChevronDown,
   ChevronRight,
-  Filter
+  Filter,
+  ImageIcon
 } from 'lucide-react';
 import {
   Collapsible,
@@ -213,6 +214,12 @@ const AdminSidebar: React.FC = () => {
           title: t('sidebar.guideContent'),
           icon: FileText,
           href: '/admin/guide-manager'
+        },
+        {
+          id: 'backgrounds',
+          title: 'Background Manager',
+          icon: ImageIcon,
+          href: '/admin/background-image-manager'
         }
       ]
     },
@@ -245,56 +252,6 @@ const AdminSidebar: React.FC = () => {
         <nav className="flex-1 space-y-1 p-2">
           {sidebarItems.map(renderSidebarItem)}
         </nav>
-
-        {/* Quick Actions */}
-        {!sidebar.collapsed && (
-          <div className="border-t p-2">
-            <div className="space-y-1">
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full justify-start"
-                onClick={() => {/* TODO: Open content creation modal */}}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                {t('sidebar.createContent')}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full justify-start"
-                onClick={() => {/* TODO: Open media upload modal */}}
-              >
-                <Image className="mr-2 h-4 w-4" />
-                {t('sidebar.uploadMedia')}
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Collapsed Quick Actions */}
-        {sidebar.collapsed && (
-          <div className="border-t p-2">
-            <div className="space-y-1">
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full h-8 p-0"
-                onClick={() => {/* TODO: Open content creation modal */}}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full h-8 p-0"
-                onClick={() => {/* TODO: Open media upload modal */}}
-              >
-                <Image className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
     </aside>
   );

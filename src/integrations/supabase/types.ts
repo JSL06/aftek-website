@@ -34,6 +34,79 @@ export type Database = {
           updated_at?: string | null;
         };
       };
+      media_files: {
+        Row: {
+          id: string;
+          filename: string;
+          original_filename: string;
+          file_path: string;
+          file_size: number;
+          mime_type: string;
+          width: number | null;
+          height: number | null;
+          description: string | null;
+          page_id: string | null;
+          is_public: boolean;
+          uploaded_by: string | null;
+          created_at: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          filename: string;
+          original_filename: string;
+          file_path: string;
+          file_size: number;
+          mime_type: string;
+          width?: number | null;
+          height?: number | null;
+          description?: string | null;
+          page_id?: string | null;
+          is_public?: boolean;
+          uploaded_by?: string | null;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          filename?: string;
+          original_filename?: string;
+          file_path?: string;
+          file_size?: number;
+          mime_type?: string;
+          width?: number | null;
+          height?: number | null;
+          description?: string | null;
+          page_id?: string | null;
+          is_public?: boolean;
+          uploaded_by?: string | null;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+      };
+      media_categories: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          created_at: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+      };
     }
     Views: {
       [_ in never]: never

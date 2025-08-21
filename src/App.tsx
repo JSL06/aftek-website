@@ -32,6 +32,7 @@ import MultilingualCategoryManager from "./pages/admin/MultilingualCategoryManag
 import FeaturesEditor from "./pages/admin/FeaturesEditor";
 import AdminArticles from "./pages/admin/Articles";
 import MediaManager from "./pages/admin/MediaManager";
+import BackgroundImageManager from "./pages/admin/BackgroundImageManager";
 import FeaturedProductsManager from "./pages/admin/FeaturedProductsManager";
 import UnifiedProducts from "./pages/admin/UnifiedProducts";
 import GuideManager from "./pages/admin/GuideManager";
@@ -150,9 +151,11 @@ const App = () => (
                 <Route path="featured-products" element={<FeaturedProductsManager />} />
                 <Route path="articles" element={<AdminArticles />} />
                 <Route path="media" element={<MediaManager />} />
+                <Route path="media/:mediaId" element={<MediaManager />} />
                 <Route path="website-text" element={<WebsiteTextEditor />} />
                 <Route path="website-text-editor" element={<WebsiteTextEditor />} />
                 <Route path="website-text-manager" element={<WebsiteTextManager />} />
+                <Route path="background-image-manager" element={<BackgroundImageManager />} />
 
                 <Route path="analytics" element={<Analytics />} />
                 <Route path="users" element={<Users />} />

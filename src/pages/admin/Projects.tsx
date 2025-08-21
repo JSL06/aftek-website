@@ -1,1157 +1,890 @@
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, Building2, Edit, Trash2, Plus, MapPin, Calendar, Save, Upload, Star, Globe } from 'lucide-react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
-import { useAdminProjects } from '@/hooks/useProjects';
-import { Project } from '@/services/projectService';
-import { productService } from '@/services/productService';
-import { filterService } from '@/services/filterService';
-import { supabase } from '@/integrations/supabase/client';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import LanguageSelector, { Language, LANGUAGES } from '@/components/LanguageSelector';
-import MultilingualFormField from '@/components/MultilingualFormField';
-import TranslationStatus from '@/components/TranslationStatus';
+import { ArrowLeft, Type, FileText, Globe, Loader2, Upload, Image as ImageIcon, Building2, Calendar, MapPin, User, DollarSign, Clock, Star, Trash2, Save } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { projectService, MultilingualProject } from '@/services/projectService';
+import { productService } from '@/services/productService';
+import ModernRichTextEditor from '@/components/ModernRichTextEditor';
 import { useTranslation } from '@/hooks/useTranslation';
+import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
+import { useCategories } from '@/hooks/useCategories';
 import FeaturesChecklist from '@/components/FeaturesChecklist';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-const AdminProjects = () => {
-  const { t } = useTranslation();
-  const { projectId } = useParams();
+// Language configuration
+const languages = [
+  { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸' },
+  { code: 'zh-Hant', name: 'Traditional Chinese', nativeName: '繁體中文', flag: '🇹🇼' },
+  { code: 'zh-Hans', name: 'Simplified Chinese', nativeName: '简体中文', flag: '🇨🇳' },
+  { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' },
+  { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
+  { code: 'th', name: 'Thai', nativeName: 'ไทย', flag: '🇹🇭' },
+  { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', flag: '🇻🇳' }
+];
+
+export default function AdminProjects() {
+  const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
-  const { projects, loading, addProject, updateProject, deleteProject, refetch } = useAdminProjects();
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [showForm, setShowForm] = useState(false);
+  const { t } = useTranslation();
+  
+  console.log('🔍 AdminProjects component rendered with projectId:', projectId);
+  
+  // Use dynamic categories from the database instead of hardcoded list
+  const { categories: projectCategories } = useCategories('en');
+  
+  console.log('🔍 Categories loaded:', projectCategories);
+  
+  const [project, setProject] = useState<MultilingualProject | null>(null);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [originalProject, setOriginalProject] = useState<MultilingualProject | null>(null);
   const [availableProducts, setAvailableProducts] = useState<any[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [formData, setFormData] = useState({
-    title: '',
-    location: '',
-    category: '',
-    client: '',
-    completion_date: '',
-    project_type: '',
-    image: '',
-    gallery_images: [] as string[],
-    features: [] as string[],
-    products_used: [] as string[],
-    project_value: '',
-    duration: '',
-    description: '',
-    challenges: '',
-    solutions: '',
-    results: '',
-    isActive: true,
-    showInFeatured: false,
-    displayOrder: 99,
-    // Multilingual content
-    translations: {} as Record<string, any>
-  });
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Load initial data
+  // Load project when projectId changes
   useEffect(() => {
-    const loadData = async () => {
+    if (projectId) {
+      console.log('🔍 useEffect triggered with projectId:', projectId);
+      
+      const loadProjectWithTimeout = async () => {
+        try {
+          console.log('🔍 Loading project with ID:', projectId);
+          setLoading(true);
+          setLoadError(null);
+          
+          // Test database connection first
+          console.log('🔍 Testing database connection...');
+          const { data: testData, error: testError } = await supabase
+            .from('projects')
+            .select('id')
+            .limit(1);
+          
+          if (testError) {
+            console.error('🔍 Database connection error:', testError);
+            setLoadError('Database connection failed: ' + testError.message);
+            setLoading(false);
+            return;
+          }
+          
+          console.log('🔍 Database connection successful, test data:', testData);
+          
+          console.log('🔍 About to call projectService.getProject...');
+          const projectData = await projectService.getProject(projectId);
+          console.log('🔍 Project data received:', projectData);
+          
+          if (projectData) {
+            console.log('🔍 Setting project state with data:', projectData.title);
+            setProject(projectData);
+            setOriginalProject(projectData);
+            console.log('🔍 Project state updated successfully');
+          } else {
+            console.error('🔍 No project data returned');
+            setLoadError('Project not found - the project ID may not exist in the database');
+            toast.error('Project not found');
+          }
+        } catch (error) {
+          console.error('🔍 Error loading project:', error);
+          const errorMessage = error.message || 'Unknown error';
+          setLoadError('Failed to load project: ' + errorMessage);
+          toast.error('Failed to load project: ' + errorMessage);
+        } finally {
+          console.log('🔍 Setting loading to false');
+          setLoading(false);
+        }
+      };
+      
+      loadProjectWithTimeout();
+      
+      // Add timeout to prevent infinite loading
+      const timeout = setTimeout(() => {
+        if (loading) {
+          console.log('🔍 Loading timeout reached');
+          setLoadError('Loading timeout - please check your connection and try again');
+          setLoading(false);
+        }
+      }, 5000); // 5 second timeout for faster feedback
+      
+      return () => clearTimeout(timeout);
+    } else {
+      console.log('🔍 No projectId provided');
+      setLoading(false);
+    }
+  }, [projectId]);
+
+  // Load all products for selection
+  useEffect(() => {
+    const loadProducts = async () => {
       try {
-        const [products, categoriesData] = await Promise.all([
-          productService.getAllProducts(),
-          filterService.getCategories()
-        ]);
+        const products = await productService.getAllProducts();
         setAvailableProducts(products);
-        setCategories(categoriesData);
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error('Error loading products:', error);
       }
     };
-    loadData();
+    loadProducts();
   }, []);
 
-  // Auto-open edit form when projectId is in URL
-  useEffect(() => {
-    if (projectId && projects.length > 0) {
-      const project = projects.find(p => p.id === projectId);
-      if (project) {
-        handleEdit(project);
-      }
+
+
+  const updateBasicField = (field: string, value: any) => {
+    if (project) {
+      setProject({
+        ...project,
+        [field]: value
+      });
     }
-  }, [projectId, projects]);
-
-  const handleEdit = (project: Project) => {
-    setEditingProject(project);
-    
-    // Update URL to include project ID for refresh persistence
-    navigate(`/admin/projects/edit/${project.id}`);
-    
-    // Prepare translations data - load from existing multilingual fields
-    const translations: Record<string, any> = {};
-    LANGUAGES.forEach(lang => {
-      translations[lang.code] = {
-        // Use existing multilingual data if available, otherwise fallback to main fields
-        title: project.titles?.[lang.code] || (lang.code === 'en' ? project.title : ''),
-        description: project.descriptions?.[lang.code] || (lang.code === 'en' ? project.description : ''),
-        challenges: project.challenges_multilingual?.[lang.code] || (lang.code === 'en' ? project.challenges : ''),
-        solutions: project.solutions_multilingual?.[lang.code] || (lang.code === 'en' ? project.solutions : ''),
-        results: project.results_multilingual?.[lang.code] || (lang.code === 'en' ? project.results : ''),
-        location: project.locations_multilingual?.[lang.code] || project.location || '',
-        category: project.categories_multilingual?.[lang.code] || project.category || '',
-        client: project.clients_multilingual?.[lang.code] || project.client || '',
-        completion_date: project.completion_dates_multilingual?.[lang.code] || project.completion_date || '',
-        duration: project.durations_multilingual?.[lang.code] || project.duration || '',
-        project_value: project.project_values_multilingual?.[lang.code] || project.project_value || '',
-        project_type: project.project_types_multilingual?.[lang.code] || project.project_type || ''
-      };
-    });
-
-    // Set form data with the loaded translations
-    setFormData({
-      title: project.title || '',
-      location: project.location || '',
-      category: project.category || '',
-      client: project.client || '',
-      completion_date: project.completion_date || '',
-      project_type: project.project_type || '',
-      image: project.image || '',
-      gallery_images: project.gallery_images || [], // Load gallery images
-      features: project.features || [], // Use the feature keys directly
-      products_used: project.products_used || [],
-      project_value: project.project_value || '',
-      duration: project.duration || '',
-      description: project.description || '',
-      challenges: project.challenges || '',
-      solutions: project.solutions || '',
-      results: project.results || '',
-      isActive: project.isActive,
-      showInFeatured: project.showInFeatured,
-      displayOrder: project.displayOrder,
-      translations
-    });
-    setShowForm(true);
   };
 
-  const handleCancel = () => {
-    setShowForm(false);
-    setEditingProject(null);
-    setFormData({
-      title: '',
-      location: '',
-      category: '',
-      client: '',
-      completion_date: '',
-      project_type: '',
-      image: '',
-      gallery_images: [],
-      features: [],
-      products_used: [],
-      project_value: '',
-      duration: '',
-      description: '',
-      challenges: '',
-      solutions: '',
-      results: '',
-      isActive: true,
-      showInFeatured: false,
-      displayOrder: 99,
-      translations: {}
-    });
-    // Reset URL back to projects list
-    navigate('/admin/projects');
-  };
-
-  const handleAddNew = () => {
-    setEditingProject(null);
-    setShowForm(true);
-    setFormData({
-      title: '',
-      location: '',
-      category: '',
-      client: '',
-      completion_date: '',
-      project_type: '',
-      image: '',
-      gallery_images: [],
-      features: [],
-      products_used: [],
-      project_value: '',
-      duration: '',
-      description: '',
-      challenges: '',
-      solutions: '',
-      results: '',
-      isActive: true,
-      showInFeatured: false,
-      displayOrder: 99,
-      translations: {}
-    });
-    // Update URL to show we're adding a new project
-    navigate('/admin/projects');
-  };
-
-  const handleTranslationChange = (language: Language, fieldName: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      translations: {
-        ...prev.translations,
-        [language]: {
-          ...prev.translations[language],
-          [fieldName]: value
-        }
-      }
-    }));
-  };
-
-  const handleSave = async () => {
-    if (!editingProject) return;
-    
-    try {
-      setSaving(true);
-      
-      // Features are now stored as feature keys (language-agnostic)
-      // We'll store them directly without conversion
-      
-      // Debug: Log what we're about to save
-      console.log('Projects.tsx: About to save project data:', {
-        id: editingProject.id,
-        translations: formData.translations,
-        features: formData.features, // These are now feature keys
-        basicFields: {
-          title: formData.title,
-          description: formData.description,
-        location: formData.location,
-        category: formData.category,
-        client: formData.client,
-        completion_date: formData.completion_date,
-        project_type: formData.project_type,
-        project_value: formData.project_value,
-        duration: formData.duration,
-          challenges: formData.challenges,
-          solutions: formData.solutions,
-          results: formData.results,
-          features: formData.features, // Store the feature keys directly
-        isActive: formData.isActive,
-        showInFeatured: formData.showInFeatured,
-          displayOrder: formData.displayOrder
-        }
-      });
-      
-      // Multilingual content - extract from formData.translations
-      const titles: Record<string, string> = {};
-      const descriptions: Record<string, string> = {};
-      const challenges_multilingual: Record<string, string> = {};
-      const solutions_multilingual: Record<string, string> = {};
-      const results_multilingual: Record<string, string> = {};
-      const locations_multilingual: Record<string, string> = {};
-      const clients_multilingual: Record<string, string> = {};
-      const categories_multilingual: Record<string, string> = {};
-      const completion_dates_multilingual: Record<string, string> = {};
-      const project_types_multilingual: Record<string, string> = {};
-      const project_values_multilingual: Record<string, string> = {};
-      const durations_multilingual: Record<string, string> = {};
-      
-      // Map form translations to the correct structure
-      LANGUAGES.forEach(lang => {
-        const langData = formData.translations[lang.code];
-        if (langData) {
-          // Only add to multilingual objects if the value exists and is not empty
-          if (langData.title && langData.title.trim()) {
-            titles[lang.code] = langData.title.trim();
-          }
-          if (langData.description && langData.description.trim()) {
-            descriptions[lang.code] = langData.description.trim();
-          }
-          if (langData.challenges && langData.challenges.trim()) {
-            challenges_multilingual[lang.code] = langData.challenges.trim();
-          }
-          if (langData.solutions && langData.solutions.trim()) {
-            solutions_multilingual[lang.code] = langData.solutions.trim();
-          }
-          if (langData.results && langData.results.trim()) {
-            results_multilingual[lang.code] = langData.results.trim();
-          }
-          if (langData.location && langData.location.trim()) {
-            locations_multilingual[lang.code] = langData.location.trim();
-          }
-          if (langData.client && langData.client.trim()) {
-            clients_multilingual[lang.code] = langData.client.trim();
-          }
-          if (langData.category && langData.category.trim()) {
-            categories_multilingual[lang.code] = langData.category.trim();
-          }
-          if (langData.completion_date && langData.completion_date.trim()) {
-            completion_dates_multilingual[lang.code] = langData.completion_date.trim();
-          }
-          if (langData.project_type && langData.project_type.trim()) {
-            project_types_multilingual[lang.code] = langData.project_type.trim();
-          }
-          if (langData.project_value && langData.project_value.trim()) {
-            project_values_multilingual[lang.code] = langData.project_value.trim();
-          }
-          if (langData.duration && langData.duration.trim()) {
-            durations_multilingual[lang.code] = langData.duration.trim();
-          }
-        }
-      });
-      
-      // Validate that we have at least one title
-      if (Object.keys(titles).length === 0 && !formData.title) {
-        toast.error('Please provide a title for at least one language.');
-        setSaving(false);
-        return;
-      }
-      
-      // Set the main title to the first available title or fallback to English
-      const mainTitle = Object.values(titles)[0] || formData.title;
-      
-      const projectData = {
-        // Basic fields - use the main title and description
-        title: mainTitle,
-        description: Object.values(descriptions)[0] || formData.description,
-        location: Object.values(locations_multilingual)[0] || formData.location,
-        category: Object.values(categories_multilingual)[0] || formData.category,
-        client: Object.values(clients_multilingual)[0] || formData.client,
-        completion_date: Object.values(completion_dates_multilingual)[0] || formData.completion_date,
-        project_type: Object.values(project_types_multilingual)[0] || formData.project_type,
-        project_value: Object.values(project_values_multilingual)[0] || formData.project_value,
-        duration: Object.values(durations_multilingual)[0] || formData.duration,
-        challenges: Object.values(challenges_multilingual)[0] || formData.challenges,
-        solutions: Object.values(solutions_multilingual)[0] || formData.solutions,
-        results: Object.values(results_multilingual)[0] || formData.results,
-        features: formData.features, // Store the feature keys directly
-        gallery_images: formData.gallery_images, // Store gallery images
-        isActive: formData.isActive,
-        showInFeatured: formData.showInFeatured,
-        displayOrder: formData.displayOrder,
-        
-        // Multilingual content - all language variations
-        titles,
-        descriptions,
-        challenges_multilingual,
-        solutions_multilingual,
-        results_multilingual,
-        locations_multilingual,
-        clients_multilingual,
-        categories_multilingual,
-        completion_dates_multilingual,
-        project_types_multilingual,
-        project_values_multilingual,
-        durations_multilingual
+  const updateTranslation = (languageCode: string, field: string, value: string) => {
+    if (project) {
+      const fieldMap: Record<string, keyof MultilingualProject> = {
+        'title': 'titles',
+        'description': 'descriptions',
+        'challenges': 'challenges_multilingual',
+        'solutions': 'solutions_multilingual',
+        'results': 'results_multilingual',
+        'location': 'locations_multilingual',
+        'client': 'clients_multilingual',
+        'category': 'categories_multilingual',
+        'completion_date': 'completion_dates_multilingual',
+        'project_type': 'project_types_multilingual',
+        'project_value': 'project_values_multilingual',
+        'duration': 'durations_multilingual'
       };
       
-      console.log('Projects.tsx: Final project data to save:', projectData);
-      
-      const updatedProject = await updateProject(editingProject.id, projectData);
-      
-      toast.success('Project updated successfully!');
-      
-      // Update URL to reflect the edited project
-      navigate(`/admin/projects/edit/${updatedProject.id}`);
-      
-      setShowForm(false);
-      setEditingProject(null);
-    } catch (error) {
-      console.error('Error saving project:', error);
-      
-      // Check if this is a constraint violation (most common issue)
-      if (error.message && error.message.includes('Title is required but was not provided')) {
-        toast.error('Cannot save: Title is required for all languages. Please ensure the title field has a value.');
-      } else if (error.message && error.message.includes('Database constraint violation')) {
-        toast.error('Database constraint violation: ' + error.message.split('Database constraint violation: ')[1]);
-      } else if (error.message && error.message.includes('Database schema not ready')) {
-        toast.error('Database needs to be updated first. Please run UPDATE_PROJECTS_MULTILINGUAL.sql in Supabase.');
-      } else if (error.message && error.message.includes('UPDATE_PROJECTS_MULTILINGUAL.sql')) {
-        toast.error('Database schema not ready. Please run UPDATE_PROJECTS_MULTILINGUAL.sql in Supabase first.');
-      } else if (error.message && error.message.includes('column') && error.message.includes('does not exist')) {
-        toast.error('Database schema missing required columns. Run UPDATE_PROJECTS_MULTILINGUAL.sql in Supabase.');
-      } else {
-      toast.error('Error saving project: ' + (error.message || error));
+      const multilingualField = fieldMap[field];
+      if (multilingualField) {
+        const currentValue = project[multilingualField] as Record<string, string> || {};
+        setProject({
+          ...project,
+          [multilingualField]: {
+            ...currentValue,
+            [languageCode]: value
+          }
+        });
       }
-    }
-    setSaving(false);
-  };
-
-  const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
-    
-    try {
-      await deleteProject(id);
-      toast.success('Project deleted successfully!');
-    } catch (error) {
-      console.error('Error deleting project:', error);
-      toast.error('Error deleting project: ' + (error.message || error));
     }
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-
+    if (file && project) {
     try {
-      // Sanitize file name
-      const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-      const filePath = `projects/${Date.now()}_${sanitizedFileName}`;
-      
+        const fileName = `project-${project.id}-${Date.now()}`;
       const { data, error } = await supabase.storage
         .from('project-images')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
+          .upload(fileName, file);
 
-      if (error) {
-        toast.error('Error uploading image: ' + error.message);
-        return;
-      }
+        if (error) throw error;
 
-      // Get public URL
-      const { data: publicUrlData } = supabase.storage
+        const { data: { publicUrl } } = supabase.storage
         .from('project-images')
-        .getPublicUrl(filePath);
+          .getPublicUrl(fileName);
       
-      setFormData(prev => ({ ...prev, image: publicUrlData.publicUrl }));
-      toast.success('Image uploaded successfully!');
+        updateBasicField('image', publicUrl);
+        toast.success('Image uploaded successfully');
     } catch (error) {
-      console.error('Upload error:', error);
+        console.error('Error uploading image:', error);
       toast.error('Failed to upload image');
+      }
     }
   };
 
   const handleGalleryImagesUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    try {
-      const filePromises = Array.from(files).map(async (file) => {
-        const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-        const filePath = `projects/${Date.now()}_${sanitizedFileName}`;
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0 && project) {
+      try {
+        const uploadedUrls: string[] = [];
+        
+        for (const file of files) {
+          const fileName = `project-gallery-${project.id}-${Date.now()}-${Math.random()}`;
         const { data, error } = await supabase.storage
           .from('project-images')
-          .upload(filePath, file, {
-            cacheControl: '3600',
-            upsert: false
-          });
-        if (error) {
-          toast.error(`Error uploading image ${file.name}: ${error.message}`);
-          return null;
-        }
-        const { data: publicUrlData } = supabase.storage
+            .upload(fileName, file);
+          
+          if (error) throw error;
+          
+          const { data: { publicUrl } } = supabase.storage
           .from('project-images')
-          .getPublicUrl(filePath);
-        return publicUrlData.publicUrl;
-      });
-
-      const uploadedUrls = await Promise.all(filePromises);
-      const newGalleryImages = [...(formData.gallery_images || []), ...uploadedUrls.filter(url => url !== null)];
-      setFormData(prev => ({ ...prev, gallery_images: newGalleryImages }));
-      toast.success('Gallery images uploaded successfully!');
+            .getPublicUrl(fileName);
+          
+          uploadedUrls.push(publicUrl);
+        }
+        
+        const currentGallery = project.gallery_images || [];
+        updateBasicField('gallery_images', [...currentGallery, ...uploadedUrls]);
+        toast.success(`${uploadedUrls.length} images uploaded successfully`);
     } catch (error) {
-      console.error('Gallery upload error:', error);
+        console.error('Error uploading gallery images:', error);
       toast.error('Failed to upload gallery images');
+      }
     }
   };
 
-  const removeGalleryImage = (indexToRemove: number) => {
-    setFormData(prev => ({
-      ...prev,
-      gallery_images: (prev.gallery_images || []).filter((_, index) => index !== indexToRemove)
-    }));
+  const removeGalleryImage = (index: number) => {
+    if (project && project.gallery_images) {
+      const newGallery = [...project.gallery_images];
+      newGallery.splice(index, 1);
+      updateBasicField('gallery_images', newGallery);
+    }
   };
 
-  // Products Used Management
+  const reorderGalleryImage = (fromIndex: number, toIndex: number) => {
+    if (project && project.gallery_images) {
+      const newGallery = [...project.gallery_images];
+      const [movedImage] = newGallery.splice(fromIndex, 1);
+      newGallery.splice(toIndex, 0, movedImage);
+      updateBasicField('gallery_images', newGallery);
+    }
+  };
+
   const addProductUsed = () => {
-    setFormData(prev => ({
-      ...prev,
-      products_used: [...(prev.products_used || []), '']
-    }));
-  };
-
-  const updateProductUsed = (index: number, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      products_used: (prev.products_used || []).map((p, i) => i === index ? value : p)
-    }));
+    if (project) {
+      const currentProducts = project.products_used || [];
+      updateBasicField('products_used', [...currentProducts, '']);
+    }
   };
 
   const removeProductUsed = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      products_used: (prev.products_used || []).filter((_, i) => i !== index)
-    }));
+    if (project && project.products_used) {
+      const newProducts = [...project.products_used];
+      newProducts.splice(index, 1);
+      updateBasicField('products_used', newProducts);
+    }
   };
 
-  // All hooks must be called before any conditional returns
-  // Render logic starts here
-  if (showForm) {
+  const updateProductUsed = (index: number, value: string) => {
+    if (project && project.products_used) {
+      const newProducts = [...project.products_used];
+      newProducts[index] = value;
+      updateBasicField('products_used', newProducts);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!project) return;
+    
+    try {
+      setSaving(true);
+      
+      // Prepare data for saving - the project object already has all the multilingual fields
+      await projectService.updateProject(project.id, project);
+      toast.success('Project saved successfully');
+      
+      // Reload project to get updated data
+      window.location.reload();
+    } catch (error) {
+      console.error('Error saving project:', error);
+      toast.error('Failed to save project');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!project) return;
+    
+    if (confirm(`Are you sure you want to delete "${project.title}"?`)) {
+      try {
+        await projectService.deleteProject(project.id);
+        toast.success('Project deleted successfully');
+        navigate('/admin/projects');
+      } catch (error) {
+        console.error('Error deleting project:', error);
+        toast.error('Failed to delete project');
+      }
+    }
+  };
+
+  if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="bg-gradient-hero text-primary-foreground p-6">
-          <div className="container mx-auto">
-            {/* Breadcrumb Navigation */}
-            <div className="flex items-center space-x-2 text-sm text-primary-foreground/80 mb-2">
-                             <Link 
-                 to="/admin/projects" 
-                 className="hover:text-primary-foreground transition-colors"
-               >
-                 {t('nav.projects')}
-               </Link>
-              {editingProject && (
-                <>
-                  <span>/</span>
-                  <span className="text-primary-foreground">Edit: {editingProject.title}</span>
-                </>
-              )}
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-lg text-muted-foreground">Loading project...</p>
+          <p className="text-sm text-muted-foreground mt-2">This may take a moment...</p>
+          {loadError && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg max-w-md mx-auto">
+              <p className="text-red-800 text-sm font-medium">Error: {loadError}</p>
+              <div className="mt-3 flex gap-2 justify-center">
+                <Button 
+                  onClick={() => window.location.reload()} 
+                  size="sm"
+                  variant="outline"
+                >
+                  Retry
+                </Button>
+                <Button 
+                  onClick={() => navigate('/admin/projects')} 
+                  size="sm"
+                  variant="outline"
+                >
+                  Back to Projects
+                </Button>
+              </div>
             </div>
-            
-                         <Button
-               onClick={handleCancel}
-               variant="secondary"
-               className="mb-4 bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground"
-             >
-               <ArrowLeft className="mr-2 h-4 w-4" />
-               {t('admin.projects.backToProjects')}
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-red-800 mb-2">Error Loading Project</h2>
+          <p className="text-muted-foreground mb-4">{loadError}</p>
+          <div className="flex gap-2 justify-center">
+                          <Button onClick={() => window.location.reload()}>
+                Retry
              </Button>
-             <h1 className="text-2xl font-bold">
-               {editingProject ? t('admin.projects.editProject') : t('admin.projects.addProject')}
-             </h1>
+            <Button variant="outline" onClick={() => navigate('/admin/projects')}>
+              Back to Projects
+            </Button>
           </div>
         </div>
+      </div>
+    );
+  }
 
-        <div className="container mx-auto p-8">
-          <Card className="max-w-6xl mx-auto">
-            <CardHeader>
-                             <CardTitle>
-                 {editingProject ? `${t('admin.projects.editProject')}: ${editingProject.title}` : t('admin.projects.addProject')}
-               </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Language Selector */}
-              <div className="bg-background border-b border-border pb-4 mb-6">
-                <LanguageSelector
-                  selectedLanguage={selectedLanguage}
-                  onLanguageChange={setSelectedLanguage}
-                />
+  if (!project) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-red-800 mb-2">Project Not Found</h2>
+          <p className="text-muted-foreground mb-4">The project you're looking for doesn't exist or has been deleted.</p>
+          <Button onClick={() => navigate('/admin/projects')}>
+            Back to Projects
+          </Button>
+              </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" onClick={() => navigate('/admin/projects')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Projects
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">
+              {projectId ? t('admin.projects.editProject') : t('admin.projects.addProject')}
+            </h1>
+            {projectId && (
+              <p className="text-muted-foreground">ID: {project.id}</p>
+            )}
+          </div>
               </div>
 
-              {/* Translation Status - Broad Language Indicators */}
-              <div className="bg-muted p-4 rounded-lg">
-                <TranslationStatus
-                  translations={formData.translations}
-                  requiredFields={['title', 'description']}
-                  variant="minimal"
-                  showLabels={false}
-                />
-              </div>
-
-              {/* Language-specific editing */}
-              <div className="bg-muted p-4 rounded-lg">
-                                 <h3 className="font-semibold mb-3">
-                   {t('admin.projects.currentSelection')}: {LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName}
-                 </h3>
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="outline" 
+            onClick={async () => {
+              try {
+                console.log('🔍 Testing database connection...');
+                // Check database schema
+                const { data, error } = await supabase
+                  .from('projects')
+                  .select('id, title')
+                  .limit(1);
                 
-                <div className="space-y-6">
-                  <MultilingualFormField
-                    label={t('admin.projects.projectTitle')}
-                    fieldName="title"
-                    type="text"
-                    translations={formData.translations}
-                    onTranslationChange={handleTranslationChange}
-                    currentLanguage={selectedLanguage}
-                    required={true}
-                  />
+                console.log('🔍 Database test result:', { data, error });
+                
+                if (error) {
+                  toast.error('Database error: ' + error.message);
+                } else {
+                  toast.success(`Database connection OK. Found ${data?.length || 0} projects.`);
+                  if (data && data.length > 0) {
+                    console.log('🔍 Sample project:', data[0]);
+                  }
+                }
+              } catch (err) {
+                console.error('🔍 Database test error:', err);
+                toast.error('Database check failed: ' + err.message);
+              }
+            }}
+          >
+            Check DB
+              </Button>
+          {projectId && (
+            <>
+              <Button 
+                variant="outline" 
+                onClick={async () => {
+                  try {
+                    console.log('🔍 Testing direct project fetch for ID:', projectId);
+                    const { data, error } = await supabase
+                      .from('projects')
+                      .select('*')
+                      .eq('id', projectId)
+                      .single();
+                    
+                    console.log('🔍 Direct project fetch result:', { data, error });
+                    
+                    if (error) {
+                      toast.error('Direct fetch error: ' + error.message);
+                    } else {
+                      toast.success('Direct fetch successful: ' + data.title);
+                    }
+                  } catch (err) {
+                    console.error('🔍 Direct fetch error:', err);
+                    toast.error('Direct fetch failed: ' + err.message);
+                  }
+                }}
+              >
+                Test Direct
+              </Button>
+              <Button variant="destructive" onClick={handleDelete}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+            </>
+          )}
+          <Button 
+            variant="outline" 
+            onClick={async () => {
+              try {
+                const { data, error } = await supabase.from('projects').select('id, title').limit(1);
+                if (error) {
+                  toast.error('DB Error: ' + error.message);
+                } else {
+                  toast.success(`DB OK. Found ${data?.length || 0} projects.`);
+                }
+              } catch (err) {
+                toast.error('DB check failed');
+              }
+            }}
+            className="mr-2"
+          >
+            Check DB
+          </Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                {t('admin.projects.saving')}
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                {t('admin.projects.save')}
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
 
-                  <MultilingualFormField
-                    label={t('admin.projects.description')}
-                    fieldName="description"
-                    type="textarea"
-                    translations={formData.translations}
-                    onTranslationChange={handleTranslationChange}
-                    currentLanguage={selectedLanguage}
-                    required={true}
-                  />
-
-                                     <MultilingualFormField
-                     label={t('admin.projects.challenges')}
-                     fieldName="challenges"
-                     type="textarea"
-                     translations={formData.translations}
-                     onTranslationChange={handleTranslationChange}
-                     currentLanguage={selectedLanguage}
-                     required={false}
-                   />
-
-                   <MultilingualFormField
-                     label={t('admin.projects.solutions')}
-                     fieldName="solutions"
-                     type="textarea"
-                     translations={formData.translations}
-                     onTranslationChange={handleTranslationChange}
-                     currentLanguage={selectedLanguage}
-                     required={false}
-                   />
-
-                   <MultilingualFormField
-                     label={t('admin.projects.results')}
-                     fieldName="results"
-                     type="textarea"
-                     translations={formData.translations}
-                     onTranslationChange={handleTranslationChange}
-                     currentLanguage={selectedLanguage}
-                     required={false}
-                   />
-                </div>
-              </div>
-
-                             {/* Common fields */}
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Main Content */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        {/* Basic Info - Left Sidebar */}
+        <div className="xl:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                Basic Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Project Category */}
                  <div>
-                   <Label htmlFor="category">{t('admin.projects.category')} ({LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName}) *</Label>
-                   <MultilingualFormField
-                     label=""
-                     fieldName="category"
-                     type="text"
-                     translations={formData.translations}
-                     onTranslationChange={handleTranslationChange}
-                     currentLanguage={selectedLanguage}
-                     placeholder="Select category"
-                     className="mt-1"
-                   />
-                   <div className="mt-2">
-                   <select
-                     value={formData.category}
-                     onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                       className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm"
-                   >
-                     <option value="">{t('admin.projects.selectCategory')}</option>
-                     {categories.map(category => (
-                       <option key={category} value={category}>{category}</option>
-                     ))}
-                   </select>
-                   </div>
-                 </div>
+                <label className="block text-sm font-medium mb-2">Project Category</label>
+                <Select onValueChange={(value) => updateBasicField('category', value)} defaultValue={project.category || ''}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projectCategories.map(category => (
+                      <SelectItem key={category.id} value={category.name}>
+                        {category.names?.['en'] || category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                </div>
 
-                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Project Type */}
                  <div>
-                   <Label htmlFor="location">{t('admin.projects.location')} ({LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName})</Label>
-                   <MultilingualFormField
-                     label=""
-                     fieldName="location"
-                     type="text"
-                     translations={formData.translations}
-                     onTranslationChange={handleTranslationChange}
-                     currentLanguage={selectedLanguage}
-                     placeholder="City, Country"
-                     className="mt-1"
+                <label className="block text-sm font-medium mb-2">Project Type</label>
+                <Input
+                  value={project.project_type || ''}
+                  onChange={(e) => updateBasicField('project_type', e.target.value)}
+                  placeholder="e.g., Commercial Construction, Residential, Industrial"
                    />
                  </div>
+
+              {/* Project Value */}
                  <div>
-                   <Label htmlFor="client">{t('admin.projects.client')} ({LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName})</Label>
-                   <MultilingualFormField
-                     label=""
-                     fieldName="client"
-                     type="text"
-                     translations={formData.translations}
-                     onTranslationChange={handleTranslationChange}
-                     currentLanguage={selectedLanguage}
-                     placeholder="Client name"
-                     className="mt-1"
-                   />
-                 </div>
+                <label className="block text-sm font-medium mb-2">Project Value</label>
+                <Input
+                  value={project.project_value || ''}
+                  onChange={(e) => updateBasicField('project_value', e.target.value)}
+                  placeholder="e.g., $1.5M USD"
+                />
                </div>
 
-                             {/* Project Details */}
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Duration */}
                  <div>
-                   <Label htmlFor="completion_date">{t('admin.projects.completionDate')} ({LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName})</Label>
-                   <MultilingualFormField
-                     label=""
-                     fieldName="completion_date"
-                     type="text"
-                     translations={formData.translations}
-                     onTranslationChange={handleTranslationChange}
-                     currentLanguage={selectedLanguage}
-                     placeholder="2023"
-                     className="mt-1"
-                   />
-                 </div>
-                 <div>
-                   <Label htmlFor="duration">{t('admin.projects.duration')} ({LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName})</Label>
-                   <MultilingualFormField
-                     label=""
-                     fieldName="duration"
-                     type="text"
-                     translations={formData.translations}
-                     onTranslationChange={handleTranslationChange}
-                     currentLanguage={selectedLanguage}
-                     placeholder="24 months"
-                     className="mt-1"
-                   />
-                 </div>
-                 <div>
-                   <Label htmlFor="project_value">{t('admin.projects.projectValue')} ({LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName})</Label>
-                   <MultilingualFormField
-                     label=""
-                     fieldName="project_value"
-                     type="text"
-                     translations={formData.translations}
-                     onTranslationChange={handleTranslationChange}
-                     currentLanguage={selectedLanguage}
-                     placeholder="$1.5M USD"
-                     className="mt-1"
-                   />
-                 </div>
+                <label className="block text-sm font-medium mb-2">Duration</label>
+                <Input
+                  value={project.duration || ''}
+                  onChange={(e) => updateBasicField('duration', e.target.value)}
+                  placeholder="e.g., 12 months"
+                />
                </div>
 
+              {/* Completion Date */}
                              <div>
-                                    <Label htmlFor="project_type">{t('admin.projects.projectType')} ({LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName})</Label>
-                 <MultilingualFormField
-                   label=""
-                   fieldName="project_type"
-                   type="text"
-                   translations={formData.translations}
-                   onTranslationChange={handleTranslationChange}
-                   currentLanguage={selectedLanguage}
-                   placeholder="e.g., Commercial Construction"
-                   className="mt-1"
+                <label className="block text-sm font-medium mb-2">Completion Date</label>
+                <Input
+                  type="date"
+                  value={project.completion_date || ''}
+                  onChange={(e) => updateBasicField('completion_date', e.target.value)}
                  />
                </div>
 
-              {/* Features */}
+              {/* Project Features */}
                              <div>
-                 <Label>{t('admin.projects.featuresTechnologies')}</Label>
+                <label className="block text-sm font-medium mb-2">Project Features & Technologies</label>
                 <FeaturesChecklist
                   features={[]}
-                  selectedFeatures={formData.features || []}
+                  selectedFeatures={project.features || []}
                   onFeaturesChange={(featureKeys) => {
-                    // featureKeys are now the feature keys (language-agnostic)
-                    setFormData(prev => ({ ...prev, features: featureKeys }));
+                    updateBasicField('features', featureKeys);
                   }}
-                  language={selectedLanguage}
+                  language="en"
                   placeholder="Search features..."
                   className="mt-2"
                 />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Features selected here will be available in all languages.
+                </p>
               </div>
 
               {/* Products Used */}
                              <div>
-                 <Label>{t('admin.projects.productsUsed')}</Label>
-                <div className="mt-2 space-y-2">
-                  {(formData.products_used || []).map((product, index) => (
+                <label className="block text-sm font-medium mb-2">Products Used</label>
+                <div className="space-y-3">
+                  {(project.products_used || []).map((productId, index) => (
                     <div key={index} className="flex gap-2">
-                      <select
-                        value={product}
-                        onChange={(e) => updateProductUsed(index, e.target.value)}
-                        className="flex-1 px-3 py-2 border border-input rounded-md bg-background"
+                      <Select
+                        value={productId}
+                        onValueChange={(value) => updateProductUsed(index, value)}
                       >
-                                                 <option value="">{t('admin.projects.selectProduct')}</option>
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Select product" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">No product</SelectItem>
                         {availableProducts.map(availableProduct => (
-                          <option key={availableProduct.id} value={availableProduct.name}>
-                            {availableProduct.name}
-                          </option>
-                        ))}
-                      </select>
+                            <SelectItem key={availableProduct.id} value={availableProduct.id}>
+                              {availableProduct.names?.['en'] || availableProduct.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => removeProductUsed(index)}
                       >
-                                                 {t('admin.projects.remove')}
+                        Remove
                       </Button>
                     </div>
                   ))}
-                                     <Button type="button" variant="outline" onClick={addProductUsed}>
-                     {t('admin.projects.addProduct')}
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={addProductUsed}
+                    className="w-full"
+                  >
+                    Add Product
                    </Button>
                 </div>
               </div>
 
-              {/* Image Upload */}
+              {/* Project Image */}
                              <div>
-                 <Label htmlFor="image">{t('admin.projects.projectImage')}</Label>
+                <label className="block text-sm font-medium mb-2">Main Project Image</label>
+                <div className="space-y-3">
+                  {project.image && (
+                    <div className="relative">
+                      <img
+                        src={project.image}
+                        alt="Current project image"
+                        className="w-full h-32 object-cover rounded-lg border"
+                      />
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2 h-6 w-6 p-0"
+                        onClick={() => updateBasicField('image', '')}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center gap-2">
                 <Input
-                  id="image"
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}
-                  className="mt-1"
-                />
-                {formData.image && (
-                  <div className="mt-2">
-                    <img 
-                      src={formData.image} 
-                      alt="Project" 
-                      className="max-w-xs h-32 object-cover rounded-md"
+                      className="flex-1"
                     />
+                    <Button variant="outline" size="sm" className="px-3">
+                      <Upload className="h-4 w-4" />
+                    </Button>
                   </div>
-                )}
+                  
+                  <p className="text-xs text-muted-foreground">
+                    Upload the main project image. Supported formats: JPG, PNG, GIF
+                  </p>
+                </div>
               </div>
 
-              {/* Gallery Images Upload */}
+              {/* Gallery Images */}
                              <div>
-                 <Label htmlFor="gallery_images">{t('admin.projects.galleryImages')}</Label>
+                <label className="block text-sm font-medium mb-2">Gallery Images</label>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
                 <Input
-                  id="gallery_images"
                   type="file"
                   accept="image/*"
                   multiple
                   onChange={handleGalleryImagesUpload}
-                  className="mt-1"
-                />
-                                 <p className="text-xs text-muted-foreground mt-1">
-                   {t('admin.projects.uploadMultipleImages')}
-                 </p>
-                
-                {/* Display existing gallery images */}
-                {formData.gallery_images && formData.gallery_images.length > 0 && (
-                  <div className="mt-4">
-                                         <Label className="text-sm font-medium">{t('admin.projects.currentGalleryImages')}:</Label>
-                    <div className="grid grid-cols-3 gap-2 mt-2">
-                      {formData.gallery_images.map((imageUrl, index) => (
+                      className="flex-1"
+                    />
+                    <Button variant="outline" size="sm" className="px-3">
+                      <Upload className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  {project.gallery_images && project.gallery_images.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Current gallery images (drag to reorder):</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {project.gallery_images.map((image, index) => (
                         <div key={index} className="relative group">
                           <img
-                            src={imageUrl}
-                            alt={`Gallery image ${index + 1}`}
-                            className="w-full h-24 object-cover rounded-md"
-                          />
-                          <button
+                              src={image} 
+                              alt={`Gallery ${index + 1}`} 
+                              className="w-full h-24 object-cover rounded-lg border"
+                            />
+                            <div className="absolute top-1 left-1 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                              {index + 1}
+                            </div>
+                            <Button
                             type="button"
+                              variant="destructive"
+                              size="sm"
+                              className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
                             onClick={() => removeGalleryImage(index)}
-                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
                           >
                             ×
-                          </button>
+                            </Button>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
+                  
+                  <p className="text-xs text-muted-foreground">
+                    Upload multiple images to create a project gallery. Drag images to reorder them.
+                  </p>
+                </div>
               </div>
 
-              {/* Settings */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Project Settings */}
+              <div className="space-y-4 pt-4 border-t">
                 <div className="flex items-center space-x-2">
-                  <Switch
+                  <input
+                    type="checkbox"
                     id="isActive"
-                    checked={formData.isActive}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
+                    checked={project.isActive !== false}
+                    onChange={(e) => updateBasicField('isActive', e.target.checked)}
+                    className="rounded"
                   />
-                                     <Label htmlFor="isActive">{t('admin.projects.active')} ({t('admin.projects.showOnWebsite')})</Label>
+                  <label htmlFor="isActive" className="text-sm font-medium">Active Project</label>
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <Switch
+                  <input
+                    type="checkbox"
                     id="showInFeatured"
-                    checked={formData.showInFeatured}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, showInFeatured: checked }))}
+                    checked={project.showInFeatured || false}
+                    onChange={(e) => updateBasicField('showInFeatured', e.target.checked)}
+                    className="rounded"
                   />
-                  <Label htmlFor="showInFeatured">{t('admin.projects.featured')}</Label>
+                  <label htmlFor="showInFeatured" className="text-sm font-medium">Show in Featured</label>
                 </div>
 
                 <div>
-                                     <Label htmlFor="displayOrder">{t('admin.projects.displayOrder')}</Label>
+                  <label htmlFor="displayOrder" className="block text-sm font-medium mb-2">Display Order</label>
                   <Input
                     id="displayOrder"
                     type="number"
-                    value={formData.displayOrder}
-                    onChange={(e) => setFormData(prev => ({ ...prev, displayOrder: parseInt(e.target.value) || 99 }))}
-                    className="mt-1"
-                    min="1"
+                    value={project.displayOrder || 99}
+                    onChange={(e) => updateBasicField('displayOrder', parseInt(e.target.value) || 0)}
                   />
+                  <p className="text-xs text-muted-foreground mt-1">Lower numbers appear first in lists</p>
                 </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-4 pt-6">
-                <Button onClick={handleSave} disabled={saving} className="flex-1">
-                  {saving ? (
-                    <>
-                      <Save className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      {t('admin.projects.save')}
-                    </>
-                  )}
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={handleCancel}
-                  disabled={saving}
-                  className="flex-1"
-                >
-                  {t('admin.products.cancel')}
-                </Button>
               </div>
             </CardContent>
           </Card>
         </div>
-      </div>
-    );
-  }
 
-  // Main projects list view
-  return (
-    <div className="min-h-screen bg-background pt-24">
-      {/* Show loading state if we have a projectId but projects haven't loaded yet */}
-      {projectId && loading ? (
-        <div className="container mx-auto p-8">
-          <div className="flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
-                             <p className="text-lg text-muted-foreground">{t('admin.projects.loadingProject')}</p>
+        {/* Multilingual Content - Main Area */}
+        <div className="xl:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                Multilingual Content
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="en" className="w-full">
+                {/* Language Tabs - Horizontal Layout */}
+                <TabsList className="grid w-full grid-cols-7 h-12 mb-6">
+                  {languages.map(lang => (
+                    <TabsTrigger 
+                      key={lang.code} 
+                      value={lang.code} 
+                      className="flex flex-col items-center gap-1 p-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                    >
+                      <span className="text-lg">{lang.flag}</span>
+                      <span className="text-xs font-medium">{lang.code.toUpperCase()}</span>
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+
+                {/* Language Content */}
+                {languages.map(lang => (
+                  <TabsContent key={lang.code} value={lang.code} className="space-y-6">
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <span>{lang.flag}</span>
+                        {lang.nativeName} - {lang.name}
+                      </h3>
+                      
+                      <div className="space-y-4">
+                        {/* Project Title */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            <Type className="h-4 w-4 inline mr-2" />
+                            Project Title ({lang.nativeName})
+                          </label>
+                                                     <Input
+                             value={project.titles?.[lang.code] || ''}
+                             onChange={(e) => updateTranslation(lang.code, 'title', e.target.value)}
+                             placeholder="Enter project title..."
+                             className="text-lg font-medium"
+                           />
             </div>
-          </div>
-        </div>
-      ) : (
-        <>
-          {/* Show error if projectId is invalid (project not found) */}
-          {projectId && !loading && projects.length > 0 && (() => {
-            const project = projects.find(p => p.id === projectId);
-            if (!project) {
-              return (
-                <div className="container mx-auto p-8">
-                  <div className="max-w-md mx-auto text-center">
-                                         <div className="bg-red-50 border border-red-200 rounded-md p-6">
-                       <h2 className="text-xl font-semibold text-red-800 mb-2">{t('admin.projects.projectNotFound')}</h2>
-                       <p className="text-red-600 mb-4">
-                         {t('admin.projects.projectNotFoundDescription')}
-                       </p>
-                       <Button onClick={() => navigate('/admin/projects')}>
-                         {t('admin.projects.backToProjects')}
-                       </Button>
-                     </div>
-                  </div>
-                </div>
-              );
-            }
-            return null;
-          })()}
 
-          {/* Main content */}
-      <div className="bg-gradient-hero text-primary-foreground p-6">
-        <div className="container mx-auto">
-              {/* Breadcrumb Navigation */}
-              <div className="flex items-center space-x-2 text-sm text-primary-foreground/80 mb-2">
-                <Link 
-                  to="/admin/dashboard" 
-                  className="hover:text-primary-foreground transition-colors"
-                >
-                  Dashboard
-                </Link>
-                <span>/</span>
-                <span className="text-primary-foreground">Projects</span>
+                                                 {/* Project Description */}
+                         <div>
+                           <label className="block text-sm font-medium mb-2">
+                             <FileText className="h-4 w-4 inline mr-2" />
+                             Project Description ({lang.nativeName})
+                           </label>
+                           <ModernRichTextEditor
+                             value={project.descriptions?.[lang.code] || ''}
+                             onChange={(value) => updateTranslation(lang.code, 'description', value)}
+                             placeholder="Enter project description..."
+                             height="200px"
+                           />
               </div>
               
-          <Link to="/admin/dashboard">
-            <Button variant="secondary" className="mb-4 bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Dashboard
-            </Button>
-          </Link>
-              <h1 className="text-2xl font-bold">
-                {projectId ? `Edit Project` : t('admin.projects.title')}
-              </h1>
-        </div>
+                         {/* Location */}
+                         <div>
+                           <label className="block text-sm font-medium mb-2">
+                             <MapPin className="h-4 w-4 inline mr-2" />
+                             Location ({lang.nativeName})
+                           </label>
+                           <Input
+                             value={project.locations_multilingual?.[lang.code] || ''}
+                             onChange={(e) => updateTranslation(lang.code, 'location', e.target.value)}
+                             placeholder="City, Country"
+                           />
       </div>
 
-      {/* Language Selection */}
-      <div className="bg-background border-b border-border">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Globe className="h-5 w-5 text-muted-foreground" />
-              <span className="text-sm font-medium text-muted-foreground">选择编辑语言:</span>
-            </div>
-            <div className="flex gap-2">
-              {LANGUAGES.map(lang => (
-                <Button
-                  key={lang.code}
-                  variant={selectedLanguage === lang.code ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedLanguage(lang.code as Language)}
-                  className="flex items-center gap-2"
-                >
-                  <span>{lang.flag}</span>
-                  <span>{lang.nativeName}</span>
-                </Button>
-              ))}
-            </div>
-          </div>
-        </div>
+                         {/* Client */}
+                         <div>
+                           <label className="block text-sm font-medium mb-2">
+                             <User className="h-4 w-4 inline mr-2" />
+                             Client ({lang.nativeName})
+                           </label>
+                           <Input
+                             value={project.clients_multilingual?.[lang.code] || ''}
+                             onChange={(e) => updateTranslation(lang.code, 'client', e.target.value)}
+                             placeholder="Client name"
+                           />
       </div>
 
-      <div className="container mx-auto p-8">
-        <div className="flex justify-between items-center mb-6">
+                         {/* Project Challenges */}
           <div>
-                         <h1 className="text-3xl font-bold">{t('admin.projects.title')}</h1>
-             <p className="text-muted-foreground">{t('admin.projects.pageDescription')}</p>
+                           <label className="block text-sm font-medium mb-2">
+                             <FileText className="h-4 w-4 inline mr-2" />
+                             Project Challenges ({lang.nativeName})
+                           </label>
+                           <ModernRichTextEditor
+                             value={project.challenges_multilingual?.[lang.code] || ''}
+                             onChange={(value) => updateTranslation(lang.code, 'challenges', value)}
+                             placeholder="Describe the challenges faced in this project..."
+                             height="150px"
+                           />
           </div>
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={async () => {
-                    try {
-                      // Check each column individually to provide detailed feedback
-                      const columnsToCheck = ['category', 'completion_date', 'project_type', 'project_value', 'duration'];
-                      const results = await Promise.all(
-                        columnsToCheck.map(async (column) => {
-                          try {
-                            const { error } = await supabase
-                              .from('project_translations')
-                              .select(column)
-                              .limit(1);
-                            return { column, exists: !error, error: error?.message };
-                          } catch (err) {
-                            return { column, exists: false, error: err.message };
-                          }
-                        })
-                      );
-                      
-                      const missingColumns = results.filter(r => !r.exists);
-                      
-                      if (missingColumns.length === 0) {
-                        toast.success('✅ Database schema is ready! All new multilingual fields available.');
-                      } else {
-                        const missingList = missingColumns.map(r => r.column).join(', ');
-                        toast.error(`❌ Database schema not ready. Missing columns: ${missingList}`);
-                        toast.error('Run UPDATE_PROJECTS_MULTILINGUAL.sql in Supabase to fix this.');
-                      }
-                    } catch (err) {
-                      toast.error('Schema check failed: ' + (err.message || 'Unknown error'));
-                    }
-                  }}
-                >
-                  Check Schema
-                </Button>
-                     <Button onClick={handleAddNew}>
-             <Plus className="mr-2 h-4 w-4" />
-                   {t('admin.projects.addProject')}
-           </Button>
+
+                         {/* Solutions */}
+                         <div>
+                           <label className="block text-sm font-medium mb-2">
+                             <FileText className="h-4 w-4 inline mr-2" />
+                             Solutions ({lang.nativeName})
+                           </label>
+                           <ModernRichTextEditor
+                             value={project.solutions_multilingual?.[lang.code] || ''}
+                             onChange={(value) => updateTranslation(lang.code, 'solutions', value)}
+                             placeholder="Describe the solutions implemented..."
+                             height="150px"
+                           />
               </div>
-        </div>
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                         <p className="text-muted-foreground mt-4">{t('admin.projects.loading')}</p>
-          </div>
-        ) : (
-          <div className="grid gap-6">
-            {projects
-              .sort((a, b) => a.displayOrder - b.displayOrder)
-              .map((project) => (
-              <Card key={project.id} className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-16 h-16 bg-muted rounded-lg overflow-hidden flex-shrink-0">
-                        {project.image ? (
-                          <img 
-                            src={project.image} 
-                            alt={project.title}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Building2 className="h-8 w-8 text-muted-foreground" />
+
+                         {/* Results */}
+                         <div>
+                           <label className="block text-sm font-medium mb-2">
+                             <FileText className="h-4 w-4 inline mr-2" />
+                             Project Results ({lang.nativeName})
+                           </label>
+                           <ModernRichTextEditor
+                             value={project.results_multilingual?.[lang.code] || ''}
+                             onChange={(value) => updateTranslation(lang.code, 'results', value)}
+                             placeholder="Describe the results and outcomes..."
+                             height="150px"
+                           />
                           </div>
-                        )}
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <h3 className="text-lg font-semibold">{project.title}</h3>
-                          <Badge variant={project.isActive ? "default" : "secondary"}>
-                            {project.isActive ? "Active" : "Inactive"}
-                          </Badge>
-                          <Badge variant="outline">{project.category}</Badge>
-                          {project.showInFeatured && (
-                            <Badge className="bg-yellow-500">
-                              <Star className="h-3 w-3 mr-1" />
-                              Featured
-                            </Badge>
-                          )}
-                          <Badge variant="outline">Order: {project.displayOrder}</Badge>
                         </div>
-                        <div className="flex items-center space-x-4 mb-2 text-sm text-muted-foreground">
-                          <div className="flex items-center">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            {project.location}
-                          </div>
-                          <div className="flex items-center">
-                            <Calendar className="h-4 w-4 mr-1" />
-                                <span>{project.completion_date}</span>
-                          </div>
-                          {project.client && (
-                            <div className="flex items-center">
-                              <Building2 className="h-4 w-4 mr-1" />
-                                  <span>{project.client}</span>
-                            </div>
-                          )}
-                        </div>
-                        <p className="text-muted-foreground text-sm mb-2 line-clamp-2">{project.description}</p>
-                        {project.features && project.features.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mb-2">
-                            {project.features.slice(0, 3).map((feature, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
-                                {feature}
-                              </Badge>
-                            ))}
-                            {project.features.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{project.features.length - 3} more
-                              </Badge>
-                            )}
-                          </div>
-                        )}
-                        {project.project_value && (
-                          <p className="text-xs text-primary font-medium">Value: {project.project_value}</p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleEdit(project)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleDelete(project.id, project.title)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
+                  </TabsContent>
+                ))}
+              </Tabs>
                 </CardContent>
               </Card>
-            ))}
-            
-            {projects.length === 0 && (
-              <div className="text-center py-12">
-                <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                                 <p className="text-muted-foreground">{t('admin.projects.noProjectsFound')}</p>
-                 <Button onClick={handleAddNew} className="mt-4">
-                   <Plus className="mr-2 h-4 w-4" />
-                   {t('admin.projects.addFirstProject')}
-                 </Button>
               </div>
-            )}
           </div>
-        )}
-      </div>
-        </>
-      )}
     </div>
   );
-};
-
-export default AdminProjects; 
+} 

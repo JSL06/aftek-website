@@ -11,8 +11,38 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useCategories } from '@/hooks/useCategories';
 import { projectService, MultilingualProject } from '@/services/projectService';
+import FeaturesService from '@/services/featuresService';
 
 const ProductDetail = () => {
+  // Custom CSS for specifications content width
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .specifications-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+      }
+      .specifications-content * {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+      }
+      .specifications-content p,
+      .specifications-content div,
+      .specifications-content span {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   const { productId } = useParams();
   const { t, currentLanguage } = useTranslation();
   const navigate = useNavigate();
@@ -21,6 +51,7 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [allProducts, setAllProducts] = useState<UnifiedProduct[]>([]);
   const [allProjects, setAllProjects] = useState<MultilingualProject[]>([]);
+  const [translatedFeatures, setTranslatedFeatures] = useState<string[]>([]);
   
   // Listen for language changes and force reload to ensure all translations are loaded
   useEffect(() => {
@@ -93,16 +124,43 @@ const ProductDetail = () => {
       console.log('🔍 ProductDetail: Product data loaded:', {
         id: product.id,
         name: product.name,
+        names: product.names,
+        description: product.description,
+        descriptions: product.descriptions,
+        currentLanguage: currentLanguage,
         related_products: product.related_products,
         related_productsType: typeof product.related_products,
         related_productsIsArray: Array.isArray(product.related_products),
         projects_used: product.projects_used,
         projects_usedType: typeof product.projects_used,
         projects_usedIsArray: Array.isArray(product.projects_used),
-        specifications: product.specifications
+        specifications: product.specifications,
+        features: product.features
       });
     }
-  }, [product]);
+  }, [product, currentLanguage]);
+
+  // Translate features when product or language changes
+  useEffect(() => {
+    const translateFeatures = async () => {
+      if (product?.features && Array.isArray(product.features) && product.features.length > 0) {
+        try {
+          console.log('🔍 Translating features for language:', currentLanguage);
+          console.log('🔍 Raw features:', product.features);
+          const translated = await FeaturesService.translateFeatureKeys(product.features, currentLanguage);
+          console.log('🔍 Translated features:', translated);
+          setTranslatedFeatures(translated);
+        } catch (error) {
+          console.error('Error translating features:', error);
+          setTranslatedFeatures(product.features);
+        }
+      } else {
+        setTranslatedFeatures([]);
+      }
+    };
+
+    translateFeatures();
+  }, [product?.features, currentLanguage]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -111,13 +169,14 @@ const ProductDetail = () => {
         return;
       }
 
+      console.log('🔄 ProductDetail: Fetching product with language:', currentLanguage);
       setLoading(true);
       try {
-        // Try to get product by ID first, then by slug
-        let productData = await productService.getProduct(productId);
+        // Try to get product by ID first, then by slug - WITH CORRECT LANGUAGE
+        let productData = await productService.getProduct(productId, currentLanguage);
         if (!productData) {
           // If not found by ID, try to find by slug from all products
-          const allProducts = await productService.getAllProducts();
+          const allProducts = await productService.getAllProducts(currentLanguage);
           productData = allProducts.find(p => p.slug === productId);
         }
         
@@ -126,10 +185,20 @@ const ProductDetail = () => {
           return;
         }
 
+        console.log('✅ ProductDetail: Product data loaded:', {
+          id: productData.id,
+          name: productData.name,
+          hasNames: !!productData.names,
+          namesKeys: Object.keys(productData.names || {}),
+          hasDescriptions: !!productData.descriptions,
+          descriptionsKeys: Object.keys(productData.descriptions || {}),
+          currentLanguage: currentLanguage
+        });
+
         setProduct(productData);
         
         // Get related products - prioritize manually selected ones, then fallback to category-based
-        const allProducts = await productService.getAllProducts();
+        const allProducts = await productService.getAllProducts(currentLanguage);
         let related: UnifiedProduct[] = [];
         
         // First, try to get manually selected related products
@@ -159,7 +228,7 @@ const ProductDetail = () => {
     };
 
     fetchProduct();
-  }, [productId, navigate]);
+  }, [productId, navigate, currentLanguage]);
 
   if (loading) {
     return (
@@ -216,7 +285,7 @@ const ProductDetail = () => {
               {product.image && product.image !== '/placeholder.svg' ? (
                 <img 
                   src={product.image} 
-                  alt={product.name}
+                                        alt={product.names?.[currentLanguage] || product.name}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -233,7 +302,9 @@ const ProductDetail = () => {
             <div>
               {/* Product Title and Rating */}
               <div className="flex items-start justify-between mb-4">
-                <h1 className="text-4xl font-bold text-foreground pr-4">{product.name}</h1>
+                                  <h1 className="text-4xl font-bold text-foreground pr-4">
+                    {product.names?.[currentLanguage] || product.name}
+                  </h1>
                 {/* Rating temporarily removed - property doesn't exist on UnifiedProduct */}
                 {/* {product.rating && (
                   <div className="flex items-center">
@@ -264,11 +335,11 @@ const ProductDetail = () => {
               </div>
 
               {/* Features - Show first and prominently */}
-              {product.features && product.features.length > 0 && (
+              {translatedFeatures && translatedFeatures.length > 0 && (
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold mb-3">{t('productDetail.keyFeatures')}</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {product.features.map((feature: string, idx: number) => (
+                    {translatedFeatures.map((feature: string, idx: number) => (
                       <div key={idx} className="flex items-center">
                         <Check className="h-4 w-4 text-green-600 mr-2 flex-shrink-0" />
                         <span className="text-sm">{feature}</span>
@@ -283,7 +354,7 @@ const ProductDetail = () => {
                 <h3 className="text-lg font-semibold mb-3">{t('productDetail.productDescription')}</h3>
                 <div 
                   className="text-muted-foreground leading-relaxed prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: product.description }}
+                  dangerouslySetInnerHTML={{ __html: product.descriptions?.[currentLanguage] || product.description || '' }}
                 />
               </div>
 
@@ -311,9 +382,9 @@ const ProductDetail = () => {
 
 
         {/* Additional Information Tabs */}
-        <div className="mt-16">
-          <Card>
-            <CardContent className="p-8">
+        <div className="mt-16 w-full">
+          <Card className="w-full">
+            <CardContent className="p-8 w-full">
               <Tabs defaultValue="specifications" className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="specifications">{t('productDetail.specifications')}</TabsTrigger>
@@ -321,27 +392,35 @@ const ProductDetail = () => {
                   <TabsTrigger value="related">{t('productDetail.relatedProducts')}</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="specifications" className="mt-6">
-                  <div>
+                <TabsContent value="specifications" className="mt-6 w-full">
+                  <div className="w-full">
                     <h3 className="text-xl font-semibold mb-4">{t('productDetail.technicalSpecifications')}</h3>
                     {product.specifications && Object.keys(product.specifications).length > 0 ? (
-                      <div>
+                      <div className="w-full">
                         {product.specifications[currentLanguage] ? (
                           <div 
-                            className="prose prose-sm max-w-none"
+                            className="w-full specifications-content"
+                            style={{ 
+                              width: '100%', 
+                              maxWidth: '100%',
+                              minWidth: '100%',
+                              display: 'block'
+                            }}
                             dangerouslySetInnerHTML={{ __html: product.specifications[currentLanguage] as string }}
                           />
                         ) : (
-                          <div className="bg-muted/50 rounded-lg p-6 text-center">
+                          <div className="bg-muted/50 rounded-lg p-6 text-center w-full">
                             <Package className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
                             <p className="text-muted-foreground">
-                              {t('productDetail.specificationsText').replace('{productName}', product.name)}
+                              {t('productDetail.specificationsText').replace('{productName}', product.names?.[currentLanguage] || product.name)}
                             </p>
                           </div>
                         )}
+                        
+
                       </div>
                     ) : (
-                      <div className="bg-muted/50 rounded-lg p-6 text-center">
+                      <div className="bg-muted/50 rounded-lg p-6 text-center w-full">
                         <Package className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
                         <p className="text-muted-foreground">
                           {t('productDetail.specificationsText').replace('{productName}', product.name)}
@@ -351,8 +430,8 @@ const ProductDetail = () => {
                   </div>
                 </TabsContent>
                 
-                <TabsContent value="examples" className="mt-6">
-                  <div>
+                <TabsContent value="examples" className="mt-6 w-full">
+                  <div className="w-full">
                     <h3 className="text-xl font-semibold mb-4">{t('productDetail.pastExamples')}</h3>
                     {product.projects_used && Array.isArray(product.projects_used) && product.projects_used.length > 0 ? (
                       <div className="space-y-4">
@@ -372,7 +451,9 @@ const ProductDetail = () => {
                                     />
                                   )}
                                   <div className="flex-1">
-                                    <h4 className="font-semibold text-lg">{project.title}</h4>
+                                    <h4 className="font-semibold text-lg">
+                                      {project.titles?.[currentLanguage] || project.title}
+                                    </h4>
                                     <p className="text-sm text-muted-foreground">{project.category}</p>
                                     <p className="text-xs text-muted-foreground">{project.client}</p>
                                     <Button
@@ -394,7 +475,7 @@ const ProductDetail = () => {
                       <div className="text-center py-8">
                         <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
                         <p className="text-muted-foreground mb-6">
-                          {t('productDetail.examplesDescription').replace('{productName}', product.name)}
+                                                        {t('productDetail.examplesDescription').replace('{productName}', product.names?.[currentLanguage] || product.name)}
                         </p>
                         <Button 
                           onClick={() => navigate('/projects')}
@@ -408,8 +489,8 @@ const ProductDetail = () => {
                   </div>
                 </TabsContent>
                 
-                <TabsContent value="related" className="mt-6">
-                  <div>
+                <TabsContent value="related" className="mt-6 w-full">
+                  <div className="w-full">
                     <h3 className="text-xl font-semibold mb-4">{t('productDetail.relatedProducts')}</h3>
                     {product.related_products && Array.isArray(product.related_products) && product.related_products.length > 0 ? (
                       <div className="space-y-4">
@@ -424,12 +505,14 @@ const ProductDetail = () => {
                                   {relatedProduct.image && (
                                     <img
                                       src={relatedProduct.image}
-                                      alt={relatedProduct.name}
+                                      alt={relatedProduct.names?.[currentLanguage] || relatedProduct.name}
                                       className="w-16 h-16 object-cover rounded"
                                     />
                                   )}
                                   <div className="flex-1">
-                                    <h4 className="font-semibold text-lg">{relatedProduct.name}</h4>
+                                    <h4 className="font-semibold text-lg">
+                                      {relatedProduct.names?.[currentLanguage] || relatedProduct.name}
+                                    </h4>
                                     <p className="text-sm text-muted-foreground">{relatedProduct.category}</p>
                                     <Button
                                       variant="outline"
@@ -450,7 +533,7 @@ const ProductDetail = () => {
                       <div className="text-center py-8">
                         <Package className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
                         <p className="text-muted-foreground mb-6">
-                          {t('productDetail.noRelatedProducts').replace('{productName}', product.name)}
+                          {t('productDetail.noRelatedProducts').replace('{productName}', product.names?.[currentLanguage] || product.name)}
                         </p>
                         <Button 
                           onClick={() => navigate('/products')}

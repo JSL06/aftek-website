@@ -19,7 +19,7 @@
  * - Language switching works perfectly
  * 
  * 🚫 DO NOT MODIFY:
- * - SimpleRichTextEditor component
+ * - ModernRichTextEditor component
  * - updateTranslation function
  * - Input field onChange handlers
  * - Any text editor logic
@@ -44,7 +44,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { productService, UnifiedProduct } from '@/services/productService';
-import SimpleRichTextEditor from '@/components/SimpleRichTextEditor';
+import ModernRichTextEditor from '@/components/ModernRichTextEditor';
 import { useAdminLanguage } from '@/contexts/AdminLanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
@@ -379,6 +379,9 @@ export default function ProductEdit() {
       console.log('📝 UNIFIED SAVE: Names object:', updateData.names);
       console.log('📝 UNIFIED SAVE: Descriptions object:', updateData.descriptions);
       console.log('📝 UNIFIED SAVE: Features being sent:', updateData.features);
+      console.log('📝 UNIFIED SAVE: Related products being sent:', updateData.related_products);
+      console.log('📝 UNIFIED SAVE: Related products type:', typeof updateData.related_products);
+      console.log('📝 UNIFIED SAVE: Related products is array:', Array.isArray(updateData.related_products));
       console.log('📝 UNIFIED SAVE: Basic fields:', {
         category: updateData.category,
         model: updateData.model,
@@ -927,7 +930,7 @@ export default function ProductEdit() {
                             <FileText className="h-4 w-4 inline mr-2" />
                             {t('multilingual.productDescription')} ({lang.nativeName})
                           </label>
-                          <SimpleRichTextEditor
+                          <ModernRichTextEditor
                             value={product.descriptions?.[lang.code] || ''}
                             onChange={(value) => updateTranslation(lang.code, 'description', value)}
                             placeholder={t('multilingual.enterDescription')}
@@ -941,7 +944,7 @@ export default function ProductEdit() {
                             <FileText className="h-4 w-4 inline mr-2" />
                             技術規格 (Technical Specifications) ({lang.nativeName})
                           </label>
-                          <SimpleRichTextEditor
+                          <ModernRichTextEditor
                             value={product.specifications?.[lang.code] || ''}
                             onChange={(value) => {
                               if (product) {

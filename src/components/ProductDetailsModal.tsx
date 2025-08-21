@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X, Package, CheckCircle, XCircle, Star, Tag, Link, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { UnifiedProduct } from '@/services/productService';
+import { UnifiedProduct, productService } from '@/services/productService';
 import { cn } from '@/lib/utils';
+import FeaturesService from '@/services/featuresService';
 
 // Helper function to extract plain text from HTML content
 const stripHtml = (html: string): string => {
@@ -30,13 +31,74 @@ interface ProductDetailsModalProps {
   product: UnifiedProduct | null;
   isOpen: boolean;
   onClose: () => void;
+  currentLanguage?: string; // Add language prop
 }
 
 export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
   product,
   isOpen,
-  onClose
+  onClose,
+  currentLanguage = 'en' // Default to English
 }) => {
+  const [relatedProductsData, setRelatedProductsData] = useState<UnifiedProduct[]>([]);
+  const [loadingRelated, setLoadingRelated] = useState(false);
+  const [translatedFeatures, setTranslatedFeatures] = useState<string[]>([]);
+
+  // Load related products data when product changes
+  useEffect(() => {
+    const loadRelatedProducts = async () => {
+      if (!product?.related_products || !Array.isArray(product.related_products) || product.related_products.length === 0) {
+        setRelatedProductsData([]);
+        return;
+      }
+
+      try {
+        setLoadingRelated(true);
+        console.log('🔍 Loading related products for IDs:', product.related_products);
+        
+        // Fetch all products and filter by IDs - WITH CORRECT LANGUAGE
+        const allProducts = await productService.getAllProducts(currentLanguage);
+        const relatedProducts = allProducts.filter(p => product.related_products.includes(p.id));
+        
+        console.log('🔍 Found related products:', relatedProducts.map(p => ({ id: p.id, name: p.name })));
+        setRelatedProductsData(relatedProducts);
+      } catch (error) {
+        console.error('Error loading related products:', error);
+        setRelatedProductsData([]);
+      } finally {
+        setLoadingRelated(false);
+      }
+    };
+
+    if (isOpen && product) {
+      loadRelatedProducts();
+    }
+  }, [product, isOpen]);
+
+  // Translate features when product or language changes
+  useEffect(() => {
+    const translateFeatures = async () => {
+      if (product?.features && Array.isArray(product.features) && product.features.length > 0) {
+        try {
+          console.log('🔍 Modal: Translating features for language:', currentLanguage);
+          console.log('🔍 Modal: Raw features:', product.features);
+          const translated = await FeaturesService.translateFeatureKeys(product.features, currentLanguage);
+          console.log('🔍 Modal: Translated features:', translated);
+          setTranslatedFeatures(translated);
+        } catch (error) {
+          console.error('Error translating features in modal:', error);
+          setTranslatedFeatures(product.features);
+        }
+      } else {
+        setTranslatedFeatures([]);
+      }
+    };
+
+    if (isOpen && product) {
+      translateFeatures();
+    }
+  }, [product?.features, currentLanguage, isOpen, product]);
+
   // Close modal on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -81,9 +143,9 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-4xl max-h-[90vh] bg-background rounded-lg shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-4xl h-[90vh] bg-background rounded-lg shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border bg-muted/30">
+        <div className="flex items-center justify-between p-6 border-b border-border bg-muted/30 flex-shrink-0">
           <div className="flex items-center gap-3">
             <Package className="h-6 w-6 text-primary" />
             <h2 className="text-2xl font-bold text-foreground">Product Details</h2>
@@ -98,9 +160,8 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
           </Button>
         </div>
 
-        {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
-          <div className="p-6">
+        {/* Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto p-6">
             {/* Product Image and Basic Info */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
               {/* Image Section */}
@@ -145,7 +206,9 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
               {/* Basic Info Section */}
               <div className="space-y-4">
                 <div>
-                  <h1 className="text-3xl font-bold text-foreground mb-2">{product.name}</h1>
+                  <h1 className="text-3xl font-bold text-foreground mb-2">
+                    {product.names?.[currentLanguage] || product.name}
+                  </h1>
                 </div>
 
                 {/* Model and SKU */}
@@ -178,14 +241,14 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                 )}
 
                 {/* Key Features - Moved to right side */}
-                {product.features && Array.isArray(product.features) && product.features.length > 0 && (
+                {translatedFeatures && translatedFeatures.length > 0 && (
                   <div className="mt-6">
                     <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
                       <Star className="h-4 w-4 text-primary" />
                       Key Features
                     </h3>
                     <div className="space-y-2">
-                      {product.features.map((feature, index) => (
+                      {translatedFeatures.map((feature, index) => (
                         <div key={index} className="flex items-start gap-2 p-2 bg-muted/50 rounded-lg">
                           <span className="text-primary text-sm mt-0.5">•</span>
                           <span className="text-sm text-foreground">{feature}</span>
@@ -200,14 +263,14 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
             <Separator className="my-6" />
 
             {/* Product Description - Added back at the bottom */}
-            {product.description && (
+            {(product.descriptions?.[currentLanguage] || product.description) && (
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
                   <Package className="h-5 w-5 text-primary" />
                   Product Description
                 </h3>
                 <div className="prose prose-sm max-w-none text-muted-foreground leading-relaxed">
-                  {renderHtmlContent(product.description)}
+                  {renderHtmlContent(product.descriptions?.[currentLanguage] || product.description || '')}
                 </div>
               </div>
             )}
@@ -230,47 +293,46 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
               </div>
             )}
 
-            {/* Applications Section */}
-            {product.applications && Array.isArray(product.applications) && product.applications.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Link className="h-5 w-5 text-primary" />
-                  Applications
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {product.applications.map((app, index) => (
-                    <div key={index} className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg">
-                      <span className="text-primary text-lg mt-0.5">•</span>
-                      <span className="text-sm text-foreground">{app}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Applications Section - Removed as property doesn't exist in UnifiedProduct interface */}
 
             {/* Related Products Section */}
-            {product.relatedProducts && Array.isArray(product.relatedProducts) && product.relatedProducts.length > 0 && (
+            {product.related_products && Array.isArray(product.related_products) && product.related_products.length > 0 && (
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
                   <Link className="h-5 w-5 text-primary" />
                   Related Products
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {product.relatedProducts.map((relatedProduct, index) => (
-                    <div key={index} className="p-3 bg-muted/50 rounded-lg">
-                      <span className="text-sm text-foreground font-medium">{relatedProduct}</span>
-                    </div>
-                  ))}
-                </div>
+                {loadingRelated ? (
+                  <div className="text-center py-4">
+                    <span className="text-sm text-muted-foreground">Loading related products...</span>
+                  </div>
+                ) : relatedProductsData.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {relatedProductsData.map((relatedProduct) => (
+                      <div key={relatedProduct.id} className="p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors cursor-pointer">
+                        <div className="font-medium text-sm text-foreground mb-1">
+                          {relatedProduct.names?.[currentLanguage] || relatedProduct.name}
+                        </div>
+                        {relatedProduct.category && (
+                          <div className="text-xs text-muted-foreground">
+                            {relatedProduct.category}
+                        </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <span className="text-sm text-muted-foreground">No related products found</span>
+                  </div>
+                )}
               </div>
             )}
 
+        </div> {/* Close content div */}
 
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-border bg-muted/30">
+        {/* Footer - Fixed at bottom */}
+        <div className="flex items-center justify-end gap-3 p-6 border-t border-border bg-muted/30 flex-shrink-0">
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>

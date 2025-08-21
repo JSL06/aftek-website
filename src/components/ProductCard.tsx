@@ -1,12 +1,13 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Eye, Package, CheckCircle, XCircle } from 'lucide-react';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useTranslation } from '@/hooks/useTranslation';
 
 import { UnifiedProduct } from '@/services/productService';
+import FeaturesService from '@/services/featuresService';
 
 // Helper function to extract plain text from HTML content
 const stripHtml = (html: string): string => {
@@ -118,7 +119,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   variant = 'default'
 }) => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
+  const [translatedFeatures, setTranslatedFeatures] = useState<string[]>([]);
   
   const handleViewDetails = () => {
     if (onViewDetails) {
@@ -129,6 +131,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       navigate(productUrl);
     }
   };
+
+  // Translate features when product changes
+  useEffect(() => {
+    const translateFeatures = async () => {
+      if (product?.features && Array.isArray(product.features) && product.features.length > 0) {
+        try {
+          const translated = await FeaturesService.translateFeatureKeys(product.features, currentLanguage);
+          setTranslatedFeatures(translated);
+        } catch (error) {
+          console.error('Error translating features in ProductCard:', error);
+          setTranslatedFeatures(product.features);
+        }
+      } else {
+        setTranslatedFeatures([]);
+      }
+    };
+
+    translateFeatures();
+  }, [product?.features, currentLanguage]);
 
   const isCompact = variant === 'compact';
   const isDetailed = variant === 'detailed';
@@ -179,19 +200,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </h3>
           
           {/* Product Features - Show first 3 features prominently */}
-          {(() => {
-            console.log(`🔍 ProductCard ${product.id}: Features debug:`, {
-              features: product.features,
-              featuresType: typeof product.features,
-              isArray: Array.isArray(product.features),
-              length: Array.isArray(product.features) ? product.features.length : 'not array'
-            });
-            return null;
-          })()}
-          {Array.isArray(product.features) && product.features.length > 0 ? (
+          {translatedFeatures && translatedFeatures.length > 0 ? (
             <div className="mb-2 flex-grow">
               <div className="space-y-1">
-                {product.features.slice(0, 3).map((feature, index) => (
+                {translatedFeatures.slice(0, 3).map((feature, index) => (
                   <div key={index} className="flex items-center">
                     <div className="w-2 h-2 bg-primary rounded-full mr-2 flex-shrink-0"></div>
                     <span className="text-sm text-muted-foreground line-clamp-1">
@@ -199,9 +211,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                     </span>
                   </div>
                 ))}
-                {product.features.length > 3 && (
+                {translatedFeatures.length > 3 && (
                   <div className="text-xs text-muted-foreground/70 pl-4">
-                    +{product.features.length - 3} more features
+                    +{translatedFeatures.length - 3} more features
                   </div>
                 )}
               </div>

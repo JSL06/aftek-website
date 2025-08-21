@@ -2,24 +2,12 @@ import { useState, useEffect } from 'react';
 import bgMain from '@/assets/17580.jpg';
 import bgTitle from '@/assets/pexels-pixabay-159306.png';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { FilterSection, FilterCategory, FilterButton } from '@/components/ui/filter-section';
-import ProjectCard from '@/components/ProjectCard';
 import ProjectFilter, { ProjectFilters } from '@/components/ProjectFilter';
 import { useProjects } from '@/hooks/useProjects';
 import { Project } from '@/services/projectService';
-import { 
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
 import { useTranslation } from '@/hooks/useTranslation';
 
 const Projects = () => {
@@ -49,11 +37,9 @@ const Projects = () => {
     features: [], 
     completionYear: []
   });
-  const [currentPage, setCurrentPage] = useState(1);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showGallery, setShowGallery] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const PROJECTS_PER_PAGE = 6;
 
   // Update filtered projects when projects or filters change
   useEffect(() => {
@@ -99,14 +85,10 @@ const Projects = () => {
     }
 
     setFilteredProjects(filtered);
-    setCurrentPage(1); // Reset to first page when filters change
   }, [projects, filters]);
 
-  // Handle pagination
-  const totalPages = Math.ceil(filteredProjects.length / PROJECTS_PER_PAGE);
-  const startIndex = (currentPage - 1) * PROJECTS_PER_PAGE;
-  const endIndex = startIndex + PROJECTS_PER_PAGE;
-  const currentProjects = filteredProjects.slice(startIndex, endIndex);
+  // Use all filtered projects since we're showing them in detail view
+  const currentProjects = filteredProjects;
 
   const handleViewGallery = (project: Project) => {
     setSelectedProject(project);
@@ -140,13 +122,6 @@ const Projects = () => {
       images.push(...project.gallery);
     }
     return images;
-  };
-
-  const handleViewCaseStudy = (project: Project) => {
-    // Handle case study view - could open PDF or navigate to case study page
-    if (project.case_study_pdf) {
-      window.open(project.case_study_pdf, '_blank');
-    }
   };
 
   return (
@@ -219,68 +194,133 @@ const Projects = () => {
           </div>
         )}
 
-        {/* Projects Grid */}
+        {/* Flat Project Layout - Essential Info Only */}
         {!loading && currentProjects.length > 0 && (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {currentProjects.map((project) => (
-                <ProjectCard
+          <div className="space-y-4">
+            {currentProjects.map((project) => (
+                                                                           <button
                   key={project.id}
-                  project={project}
-                  onViewGallery={handleViewGallery}
-                  onViewCaseStudy={handleViewCaseStudy}
-                />
-              ))}
-            </div>
+                  onClick={() => window.open(`/projects/${project.id}`, '_blank')}
+                  className="w-full bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02] cursor-pointer overflow-hidden text-left"
+                >
+                 {/* Project Card with Full Left Image */}
+                                   <div className="flex h-48">
+                    {/* Left: Full Height Project Image Gallery */}
+                    <div className="w-1/3 flex-shrink-0 relative overflow-hidden">
+                      {(() => {
+                        // Get images from gallery_images or create mock images for demonstration
+                        const images = project.gallery_images && project.gallery_images.length > 0 
+                          ? project.gallery_images 
+                          : project.image 
+                            ? [project.image] 
+                            : [bgMain, bgTitle]; // Fallback to mock images
+                        
+                        return (
+                          <div className="w-full h-full">
+                            <img
+                              src={images[0]}
+                              alt={project.title || "Project"}
+                              className="w-full h-full object-cover"
+                            />
+                            {images.length > 1 && (
+                              <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                                <div className="text-center text-white">
+                                  <div className="text-xs font-medium">+{images.length - 1} more</div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex justify-center mt-12">
-                <Pagination>
-                  <PaginationContent>
-                    {currentPage > 1 && (
-                      <PaginationItem>
-                        <PaginationPrevious 
-                          href="#" 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setCurrentPage(currentPage - 1);
-                          }}
-                        />
-                      </PaginationItem>
-                    )}
-                    
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <PaginationItem key={page}>
-                        <PaginationLink
-                          href="#"
-                          isActive={currentPage === page}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setCurrentPage(page);
-                          }}
-                        >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ))}
-                    
-                    {currentPage < totalPages && (
-                      <PaginationItem>
-                        <PaginationNext 
-                          href="#" 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setCurrentPage(currentPage + 1);
-                          }}
-                        />
-                      </PaginationItem>
-                    )}
-                  </PaginationContent>
-                </Pagination>
-              </div>
-            )}
-          </>
+                                                           {/* Right: Project Info */}
+                   <div className="flex-1 px-8 py-4 flex justify-between">
+                     {/* Project Info */}
+                     <div className="flex-1 min-w-0 pt-4">
+                       {/* Project Title */}
+                       <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                         {project.title || "eng"}
+                       </h3>
+                       
+                       {/* Description */}
+                       <p className="text-sm text-gray-600 mb-6 line-clamp-2">
+                         {project.description}
+                       </p>
+                       
+                       {/* Categories */}
+                       <div className="flex flex-wrap gap-1">
+                         {project.categories && project.categories.length > 0 ? (
+                           project.categories.map((category, index) => (
+                             <span
+                               key={index}
+                               className="px-2 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium"
+                             >
+                               {category}
+                             </span>
+                           ))
+                         ) : (
+                           <span className="px-2 py-1 bg-gray-50 text-gray-500 rounded-full text-xs font-medium">
+                             No categories
+                           </span>
+                         )}
+                       </div>
+                       
+                       {/* Gallery Controls */}
+                       {(() => {
+                         // Get images from gallery_images or create mock images for demonstration
+                         const images = project.gallery_images && project.gallery_images.length > 0 
+                           ? project.gallery_images 
+                           : project.image 
+                             ? [project.image] 
+                             : [bgMain, bgTitle]; // Fallback to mock images
+                         
+                         // Only show controls if there are multiple images
+                         return images.length > 1 ? (
+                           <div className="mt-4 flex items-center">
+                             <div className="flex space-x-1">
+                               {images.map((_, index) => (
+                                 <button
+                                   key={index}
+                                   className="w-12 h-2 bg-gray-300 hover:bg-gray-400 rounded-full transition-all duration-200"
+                                   aria-label={`Go to image ${index + 1}`}
+                                   onClick={(e) => {
+                                     e.preventDefault();
+                                     e.stopPropagation();
+                                     // TODO: Implement image switching logic
+                                     console.log(`Switch to image ${index}`);
+                                   }}
+                                 />
+                               ))}
+                             </div>
+                           </div>
+                         ) : null;
+                       })()}
+                     </div>
+
+                     {/* Date Display */}
+                     <div className="text-right ml-4 flex items-center">
+                       <div className="text-lg font-semibold text-gray-900">
+                         {(() => {
+                           try {
+                             if (project.completion_date) {
+                               const date = new Date(project.completion_date);
+                               if (!isNaN(date.getTime())) {
+                                 return date.toISOString().split('T')[0];
+                               }
+                             }
+                             return 'yyyy-mm-dd';
+                           } catch (error) {
+                             return 'yyyy-mm-dd';
+                           }
+                         })()}
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+               </button>
+            ))}
+          </div>
         )}
       </div>
 
@@ -345,26 +385,84 @@ const Projects = () => {
                       </div>
                     )}
                     
-                    {/* Project Details */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="font-medium mb-1">Description:</p>
-                        <p className="text-muted-foreground">{selectedProject.description}</p>
-                      </div>
-                      
-                      {selectedProject.products_used && selectedProject.products_used.length > 0 && (
-                        <div>
-                          <p className="font-medium mb-2">Products Used:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {selectedProject.products_used.map((product, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs">
-                                {product}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                                         {/* Project Details */}
+                     <div className="space-y-4">
+                       {/* Description */}
+                       <div>
+                         <p className="font-medium mb-2">Description:</p>
+                         <p className="text-muted-foreground">{selectedProject.description}</p>
+                       </div>
+                       
+                       {/* Project Information Grid */}
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         {/* Left Column */}
+                         <div className="space-y-3">
+                           <div>
+                             <p className="font-medium mb-1 text-sm">Client:</p>
+                             <p className="text-muted-foreground text-sm">{selectedProject.client || "eng"}</p>
+                           </div>
+                           
+                           <div>
+                             <p className="font-medium mb-1 text-sm">Duration:</p>
+                             <p className="text-muted-foreground text-sm">{selectedProject.duration || "eng"}</p>
+                           </div>
+                           
+                                                       <div>
+                              <p className="font-medium mb-1 text-sm">Completion Date:</p>
+                              <Input
+                                type="date"
+                                className="text-sm"
+                                defaultValue={(() => {
+                                  try {
+                                    if (selectedProject.completion_date) {
+                                      const date = new Date(selectedProject.completion_date);
+                                      if (!isNaN(date.getTime())) {
+                                        return date.toISOString().split('T')[0];
+                                      }
+                                    }
+                                    return '';
+                                  } catch (error) {
+                                    return '';
+                                  }
+                                })()}
+                                onChange={(e) => {
+                                  // Handle date change here if you want to save it
+                                  console.log('Date changed:', e.target.value);
+                                }}
+                              />
+                            </div>
+                         </div>
+                         
+                         {/* Right Column */}
+                         <div className="space-y-3">
+                           {selectedProject.products_used && selectedProject.products_used.length > 0 && (
+                             <div>
+                               <p className="font-medium mb-2 text-sm">Products Used:</p>
+                               <div className="flex flex-wrap gap-1">
+                                 {selectedProject.products_used.map((product, index) => (
+                                   <span key={index} className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                                     {product}
+                                   </span>
+                                 ))}
+                               </div>
+                             </div>
+                           )}
+                           
+                           {selectedProject.features && selectedProject.features.length > 0 && (
+                             <div>
+                               <p className="font-medium mb-2 text-sm">Features:</p>
+                               <div className="flex flex-wrap gap-1">
+                                 {selectedProject.features.map((feature, index) => (
+                                   <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                                     {feature}
+                                   </span>
+                                 ))}
+                               </div>
+                             </div>
+                           )}
+                         </div>
+                       </div>
+                     </div>
                     
                     {/* Thumbnail Gallery */}
                     {images.length > 1 && (
@@ -372,10 +470,9 @@ const Projects = () => {
                         {images.map((image, index) => (
                           <button
                             key={index}
-                            className={cn(
-                              "flex-shrink-0 w-20 h-16 rounded border-2 overflow-hidden",
-                              currentImageIndex === index ? "border-primary" : "border-muted"
-                            )}
+                            className={`flex-shrink-0 w-20 h-16 rounded border-2 overflow-hidden ${
+                              currentImageIndex === index ? "border-red-500" : "border-gray-300"
+                            }`}
                             onClick={() => setCurrentImageIndex(index)}
                           >
                             <img

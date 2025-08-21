@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
-import ArticleFilter, { ArticleFilters } from '@/components/ArticleFilter';
 import { Link } from 'react-router-dom';
 import bgMain from '@/assets/17580.jpg';
 import bgTitle from '@/assets/pexels-pixabay-159306.png';
@@ -16,11 +18,123 @@ interface Article {
   author: string;
   published_at: string;
   image: string;
+  images?: string[]; // Array of image URLs for carousel
   isactive: boolean;
   is_published: boolean;
   displayorder: number;
   slug: string;
 }
+
+interface ArticleFilters {
+  search: string;
+  category: string[];
+}
+
+// Article Card Component with Image Carousel
+const ArticleCard: React.FC<{ article: Article }> = ({ article }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // Get images array - fallback to single image if images array not available
+  const getArticleImages = (article: Article): string[] => {
+    if (article.images && article.images.length > 0) {
+      return article.images;
+    }
+    // For demonstration, create mock images based on article
+    // In production, you'd get this from your database
+    const mockImages = [
+      bgTitle, // Using existing image as fallback
+    ];
+    
+    // Add more images for some articles for demo purposes
+    if (article.id.includes('1') || article.id.includes('3')) {
+      mockImages.push(bgMain);
+    }
+    if (article.id.includes('2') || article.id.includes('4')) {
+      mockImages.push(bgTitle, bgMain);
+    }
+    
+    return mockImages;
+  };
+
+  const images = getArticleImages(article);
+  const hasMultipleImages = images.length > 1;
+
+  const handleDotClick = (index: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex(index);
+  };
+
+  return (
+    <Link to={`/articles/${article.slug && article.slug !== 'null' ? article.slug : article.id}`} className="block group">
+      <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 group bg-white hover:bg-gray-50 overflow-hidden rounded-xl cursor-pointer h-full">
+        <CardContent className="p-0 h-full flex flex-col">
+          {/* Image Carousel Section */}
+          <div className="relative h-48 overflow-hidden">
+            {/* Current Image */}
+            <div 
+              className="w-full h-full bg-cover bg-center transition-all duration-500 group-hover:scale-105"
+              style={{
+                backgroundImage: `url(${images[currentImageIndex] || bgTitle})`
+              }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-black/40"></div>
+              <div className="absolute inset-0 opacity-20">
+                <div className="w-full h-full bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.15)_1px,transparent_0)] bg-[length:20px_20px]"></div>
+              </div>
+            </div>
+            
+            {/* Category Badge */}
+            <span className="absolute top-4 left-4 text-white/80 text-xs font-medium px-2 py-1 bg-white/20 rounded-full backdrop-blur-sm z-10">
+              {article.category}
+            </span>
+
+            {/* Image Navigation Dots */}
+            {hasMultipleImages && (
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
+                {images.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={(e) => handleDotClick(index, e)}
+                    className={`w-8 h-1 rounded-full transition-all duration-300 hover:opacity-80 ${
+                      currentImageIndex === index 
+                        ? 'bg-red-500' 
+                        : 'bg-white/50'
+                    }`}
+                    aria-label={`View image ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Date */}
+            <div className="absolute bottom-4 right-4 text-white/80 text-xs font-medium z-10">
+              {new Date(article.published_at).toLocaleDateString()}
+            </div>
+          </div>
+
+          {/* Content Section */}
+          <div className="p-6 flex-1 flex flex-col">
+            <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-red-600 transition-colors duration-300 line-clamp-2">
+              {article.title}
+            </h3>
+            <p className="text-gray-600 mb-4 text-sm leading-relaxed line-clamp-3 flex-1">
+              {article.excerpt}
+            </p>
+            <div className="flex items-center justify-between text-xs text-gray-500 mt-auto pt-4 border-t border-gray-100">
+              <span className="font-medium">{article.author}</span>
+              <div className="flex space-x-2">
+                <span className="px-2 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium">
+                  {article.category}
+                </span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+};
 
 const Articles = () => {
   const { t, currentLanguage } = useTranslation();
@@ -96,9 +210,7 @@ const Articles = () => {
     setFilteredArticles(filtered);
   }, [articles, filters, currentLanguage]);
 
-  const handleFilterChange = (newFilters: ArticleFilters) => {
-    setFilters(newFilters);
-  };
+
 
   const displayArticles = filteredArticles;
 
@@ -135,53 +247,83 @@ const Articles = () => {
       
       <div className="container mx-auto p-8 max-w-6xl">
         
-        {/* Article Filter */}
-        <ArticleFilter onFilterChange={handleFilterChange} />
+        {/* Filters */}
+        <div className="mb-6 p-6 border border-border rounded-lg bg-white/90 backdrop-blur-sm shadow-elegant">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <Input
+                placeholder="Search articles..."
+                value={filters.search}
+                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                className="bg-white/50 border-border focus:border-primary focus:ring-primary/20"
+              />
+            </div>
+            <div className="w-full sm:w-48">
+              <Select 
+                value={filters.category.length > 0 ? filters.category[0] : 'all'} 
+                onValueChange={(value) => setFilters(prev => ({ ...prev, category: value === 'all' ? [] : [value] }))}
+              >
+                <SelectTrigger className="bg-white/50 border-border focus:border-primary focus:ring-primary/20">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="news">News</SelectItem>
+                  <SelectItem value="case-studies">Case Studies</SelectItem>
+                  <SelectItem value="technical">Technical</SelectItem>
+                  <SelectItem value="industry">Industry</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
 
+        {/* Articles Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {loading ? (
-            <p>Loading articles...</p>
-          ) : displayArticles.map((article) => (
-            <Link key={article.id} to={`/articles/${article.slug && article.slug !== 'null' ? article.slug : article.id}`} className="block">
-              <Card className="border-0 shadow-card hover:shadow-elegant transition-smooth group bg-white hover:bg-gray-50 overflow-hidden rounded-xl cursor-pointer">
-                <CardContent className="p-0">
-                  <div className="h-56 bg-gradient-accent flex items-center justify-center group-hover:scale-105 transition-smooth relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-elegant opacity-20"></div>
-                    {/* You can add an image here if you want */}
-                    <span className="absolute bottom-4 left-4 text-white/60 text-sm font-medium z-10">
-                      {article.image}
-                    </span>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-smooth">
-                      {article.title}
-                    </h3>
-                    <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
-                      {article.excerpt}
-                    </p>
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      <span className="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full font-medium hover:bg-primary/20 transition-smooth">
-                        {article.category}
-                      </span>
-                      <span className="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full font-medium hover:bg-primary/20 transition-smooth">
-                        {article.author}
-                      </span>
-                      <span className="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full font-medium hover:bg-primary/20 transition-smooth">
-                        {article.published_at}
-                      </span>
-                    </div>
-                    {/* You can add a 'Read More' button or modal here if you want */}
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 col-span-full">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} className="animate-pulse">
+                  <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                </div>
+              ))}
+            </div>
+          ) : displayArticles.length > 0 ? (
+            displayArticles.map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))
+          ) : (
+            <div className="col-span-full text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <svg className="w-16 h-16 mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">No articles found</h3>
+              <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
+              <Button 
+                onClick={() => setFilters({ search: '', category: [] })} 
+                variant="outline"
+                className="bg-white/50 border-gray-200 hover:bg-white hover:border-red-300 hover:text-red-600"
+              >
+                Clear Filters
+              </Button>
+            </div>
+          )}
         </div>
-        <div className="text-center mb-8">
-          <p className="text-muted-foreground">
-            Showing {displayArticles.length} of {articles.length} articles
-          </p>
-        </div>
+        {/* Results Summary */}
+        {!loading && (
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-gray-200 shadow-sm">
+              <span className="text-sm font-medium text-gray-700">
+                Showing <span className="text-red-600 font-semibold">{displayArticles.length}</span> of <span className="text-red-600 font-semibold">{articles.length}</span> articles
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
