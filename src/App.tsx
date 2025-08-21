@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { LanguageProvider } from "./contexts/LanguageContext";
@@ -49,8 +49,8 @@ import Settings from './pages/admin/Settings';
 
 const queryClient = new QueryClient();
 
-// Get basename for GitHub Pages
-const basename = import.meta.env.PROD ? '/aftek-website' : '';
+// Remove basename since HashRouter doesn't need it
+// const basename = import.meta.env.PROD ? '/aftek-website' : '';
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -58,7 +58,7 @@ const App = () => (
       <LanguageProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter basename={basename}>
+        <HashRouter>
           <CompanyProvider>
             <Routes>
               {/* Company-specific Routes */}
@@ -166,7 +166,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </CompanyProvider>
-        </BrowserRouter>
+        </HashRouter>
       </LanguageProvider>
     </TooltipProvider>
   </QueryClientProvider>
