@@ -8,6 +8,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 
 import { UnifiedProduct } from '@/services/productService';
 import FeaturesService from '@/services/featuresService';
+import { supabase } from '@/integrations/supabase/client';
 
 // Helper function to extract plain text from HTML content
 const stripHtml = (html: string): string => {
@@ -17,92 +18,49 @@ const stripHtml = (html: string): string => {
   return tmp.textContent || tmp.innerText || '';
 };
 
-// Helper function to get translated category name
-const getTranslatedCategory = (category: string, t: (key: string) => string): string => {
-  // Debug: Log the category being processed
-  console.log('Processing category:', category);
-  
-  // Normalize the category string (trim, lowercase for comparison)
-  const normalizedCategory = category?.trim().toLowerCase();
-  
-  // Map database categories to translation keys
-  const categoryMap: Record<string, string> = {
-    // Database categories (what comes from the database)
-    'waterproofing': 'category.waterproofing',
-    '防水': 'category.waterproofing',
-    'sealants & adhesives': 'category.sealants_adhesives',
-    'sealants and adhesives': 'category.sealants_adhesives',
-    '密封剂与胶黏剂': 'category.sealants_adhesives',
-    '密封劑與膠黏劑': 'category.sealants_adhesives',
-    'redi-mix g&m': 'category.redimix',
-    'redi-mix': 'category.redimix',
-    'flooring systems': 'category.flooring',
-    'flooring': 'category.flooring',
-    '地板系统': 'category.flooring',
-    '地板系統': 'category.flooring',
-    'other specialties': 'category.others',
-    'others': 'category.others',
-    'other': 'category.others',
-    '其他（保温、涂料）': 'category.others',
-    '其他（保溫、塗料）': 'category.others',
-    '其他': 'category.others',
-    '其他专业': 'category.others',
-    '其他專業': 'category.others',
-    'architectural coatings': 'category.architectural_coatings',
-    '建筑涂料': 'category.architectural_coatings',
-    '建築塗料': 'category.architectural_coatings',
-    'stucco': 'category.stucco',
-    '灰泥': 'category.stucco',
-    'sound insulation': 'category.sound_insulation',
-    '隔音材料': 'category.sound_insulation',
-    'textured paints': 'category.textured_paints',
-    '纹理涂料': 'category.textured_paints',
-    '紋理塗料': 'category.textured_paints',
-    'butyl tape': 'category.butyl_tape',
-    '丁基胶带': 'category.butyl_tape',
-    '丁基膠帶': 'category.butyl_tape',
-    'construction chemicals': 'category.construction_chemicals',
-    '建筑化学品': 'category.construction_chemicals',
-    '建築化學品': 'category.construction_chemicals',
-    'building materials': 'category.building_materials',
-    '建筑材料': 'category.building_materials',
-    '建築材料': 'category.building_materials',
-    'industrial coatings': 'category.industrial_coatings',
-    '工业涂料': 'category.industrial_coatings',
-    '工業塗料': 'category.industrial_coatings',
-    'maintenance products': 'category.maintenance_products',
-    '维护产品': 'category.maintenance_products',
-    '維護產品': 'category.maintenance_products'
-  };
-  
-  // Try exact match first
-  let translationKey = categoryMap[category];
-  
-  // If no exact match, try normalized match
-  if (!translationKey && normalizedCategory) {
-    translationKey = categoryMap[normalizedCategory];
-  }
-  
-  // If still no match, try partial matching
-  if (!translationKey) {
-    for (const [key, value] of Object.entries(categoryMap)) {
-      if (normalizedCategory?.includes(key.toLowerCase()) || key.toLowerCase().includes(normalizedCategory || '')) {
-        translationKey = value;
-        break;
-      }
+// Helper function to get translated category name from database
+const getTranslatedCategory = async (category: string, currentLanguage: string): Promise<string> => {
+  try {
+    // If category is already in the target language, return it as is
+    if (currentLanguage === 'en') {
+      return category;
     }
+
+    // Simplified query: first get the category, then get its translation
+    const { data: categoryData, error: categoryError } = await supabase
+      .from('product_categories')
+      .select('id, name')
+      .eq('name', category)
+      .single();
+
+    if (categoryError || !categoryData) {
+      console.log('Category not found:', category);
+      return category; // Fallback to original category
+    }
+
+    // Now get the translation for this category and language
+    const { data: translationData, error: translationError } = await supabase
+      .from('category_translations')
+      .select('display_name, description')
+      .eq('category_id', categoryData.id)
+      .eq('language_code', currentLanguage)
+      .single();
+
+    if (translationError || !translationData) {
+      console.log('No translation found for category:', category, 'in language:', currentLanguage);
+      return category; // Fallback to original category
+    }
+
+    if (translationData.display_name) {
+      console.log(`Found database translation for ${category}: ${translationData.display_name}`);
+      return translationData.display_name;
+    }
+
+    return category; // Fallback to original category
+  } catch (error) {
+    console.error('Error fetching category translation:', error);
+    return category; // Fallback to original category
   }
-  
-  if (translationKey) {
-    const translated = t(translationKey);
-    console.log(`Found translation key: ${translationKey}, translated to: ${translated}`);
-    // If translation returns the key itself, use the original category
-    return translated !== translationKey ? translated : category;
-  }
-  
-  // Debug: Log when no translation is found
-  console.log('No translation found for category:', category);
-  return category;
 };
 
 interface ProductCardProps {
@@ -121,6 +79,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const navigate = useNavigate();
   const { t, currentLanguage } = useTranslation();
   const [translatedFeatures, setTranslatedFeatures] = useState<string[]>([]);
+  const [translatedCategory, setTranslatedCategory] = useState<string>(product.category || '');
   
   const handleViewDetails = () => {
     if (onViewDetails) {
@@ -132,15 +91,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     }
   };
 
-  // Translate features when product changes
+  // Translate features when language changes
   useEffect(() => {
     const translateFeatures = async () => {
-      if (product?.features && Array.isArray(product.features) && product.features.length > 0) {
+      if (product.features && product.features.length > 0) {
         try {
           const translated = await FeaturesService.translateFeatureKeys(product.features, currentLanguage);
           setTranslatedFeatures(translated);
         } catch (error) {
-          console.error('Error translating features in ProductCard:', error);
+          console.error('Error translating features:', error);
           setTranslatedFeatures(product.features);
         }
       } else {
@@ -150,6 +109,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
     translateFeatures();
   }, [product?.features, currentLanguage]);
+
+  // Translate category when language changes
+  useEffect(() => {
+    const translateCategory = async () => {
+      if (product.category) {
+        try {
+          const translated = await getTranslatedCategory(product.category, currentLanguage);
+          setTranslatedCategory(translated);
+        } catch (error) {
+          console.error('Error translating category:', error);
+          setTranslatedCategory(product.category);
+        }
+      }
+    };
+
+    translateCategory();
+  }, [product?.category, currentLanguage]);
 
   const isCompact = variant === 'compact';
   const isDetailed = variant === 'detailed';
@@ -249,7 +225,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               {/* Category Badge - Same row as stock status */}
               {product.category && (
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
-                  {getTranslatedCategory(product.category, t)}
+                  {translatedCategory}
                 </span>
               )}
             </div>

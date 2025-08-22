@@ -662,6 +662,46 @@ const zhHans = {
   'admin.login.demoCredentials': '演示凭据：admin / aftek2024',
   'admin.login.invalidCredentials': '无效的凭据。请使用 admin/aftek2024',
 
+  // Product Details Modal
+  'productDetails.title': '产品详情',
+  'productDetails.model': '型号',
+  'productDetails.category': '类别',
+  'productDetails.keyFeatures': '主要特点',
+  'productDetails.productDescription': '产品描述',
+  'productDetails.relatedProducts': '相关产品',
+  'productDetails.close': '关闭',
+  'productDetails.viewFullPage': '查看完整页面',
+  'productDetails.inStock': '有库存',
+  'productDetails.outOfStock': '缺货',
+  'productDetails.loadingRelated': '加载相关产品中...',
+  'productDetails.noRelatedProducts': '未找到相关产品',
+
+  // Product Detail Page
+  'productDetail.backToProducts': '返回产品页面',
+  'productDetail.inStock': '有库存',
+  'productDetail.outOfStock': '缺货',
+  'productDetail.keyFeatures': '主要特点',
+  'productDetail.productDescription': '产品描述',
+  'productDetail.interestedInProduct': '对这个产品感兴趣？',
+  'productDetail.contactForInfo': '联系我们了解价格、库存和技术规格。',
+  'productDetail.contactUs': '联系我们',
+  'productDetail.specifications': '规格',
+  'productDetail.examples': '范例',
+  'productDetail.relatedProducts': '相关产品',
+  'productDetail.technicalSpecifications': '技术规格',
+  'productDetail.specificationsText': '{productName} 没有可用的规格',
+  'productDetail.pastExamples': '过往范例',
+  'productDetail.examplesDescription': '{productName} 没有可用的范例',
+  'productDetail.viewProjects': '查看项目',
+  'productDetail.noProjects': '没有可用的项目',
+  'productDetail.noRelatedProducts': '{productName} 没有相关产品',
+  'productDetail.browseProducts': '浏览产品',
+  'productDetail.productApplication': '产品应用',
+  'productDetail.productFeature': '产品特点',
+  'productDetail.projects': '项目',
+  'productDetail.noApplications': '没有可用的应用',
+  'productDetail.noFeatures': '没有可用的特点'
+
 };
 
 export default zhHans; 

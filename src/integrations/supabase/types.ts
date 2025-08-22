@@ -107,6 +107,169 @@ export type Database = {
           updated_at?: string | null;
         };
       };
+      page_backgrounds: {
+        Row: {
+          id: string;
+          page_identifier: string;
+          page_name: string;
+          background_image_id: string | null;
+          background_image_url: string | null;
+          background_position: string;
+          background_size: string;
+          background_repeat: string;
+          background_attachment: string;
+          overlay_color: string | null;
+          overlay_opacity: number;
+          created_at: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          page_identifier: string;
+          page_name: string;
+          background_image_id?: string | null;
+          background_image_url?: string | null;
+          background_position?: string;
+          background_size?: string;
+          background_repeat?: string;
+          background_attachment?: string;
+          overlay_color?: string | null;
+          overlay_opacity?: number;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          page_identifier?: string;
+          page_name?: string;
+          background_image_id?: string | null;
+          background_image_url?: string | null;
+          background_position?: string;
+          background_size?: string;
+          background_repeat?: string;
+          background_attachment?: string;
+          overlay_color?: string | null;
+          overlay_opacity?: number;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+      };
+      product_categories: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          display_order: number;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          display_order?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string | null;
+          display_order?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+      };
+      category_translations: {
+        Row: {
+          id: string;
+          category_id: string;
+          language_code: string;
+          display_name: string;
+          description: string | null;
+          created_at: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          category_id: string;
+          language_code: string;
+          display_name: string;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          category_id?: string;
+          language_code?: string;
+          display_name?: string;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+      };
+      master_features: {
+        Row: {
+          id: string;
+          feature_key: string;
+          category: string;
+          display_order: number;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          feature_key: string;
+          category: string;
+          display_order?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          feature_key?: string;
+          category?: string;
+          display_order?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+      };
+      feature_translations: {
+        Row: {
+          id: string;
+          feature_id: string;
+          language_code: string;
+          display_name: string;
+          description: string | null;
+          created_at: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          feature_id: string;
+          language_code: string;
+          display_name: string;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          feature_id?: string;
+          language_code?: string;
+          display_name?: string;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+      };
     }
     Views: {
       [_ in never]: never

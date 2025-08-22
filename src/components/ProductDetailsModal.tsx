@@ -6,6 +6,9 @@ import { Separator } from '@/components/ui/separator';
 import { UnifiedProduct, productService } from '@/services/productService';
 import { cn } from '@/lib/utils';
 import FeaturesService from '@/services/featuresService';
+import { useTranslation } from '@/hooks/useTranslation';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 // Helper function to extract plain text from HTML content
 const stripHtml = (html: string): string => {
@@ -40,9 +43,57 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
   onClose,
   currentLanguage = 'en' // Default to English
 }) => {
+  const { t } = useTranslation();
   const [relatedProductsData, setRelatedProductsData] = useState<UnifiedProduct[]>([]);
   const [loadingRelated, setLoadingRelated] = useState(false);
   const [translatedFeatures, setTranslatedFeatures] = useState<string[]>([]);
+  const [translatedCategory, setTranslatedCategory] = useState<string>('');
+  const navigate = useNavigate();
+
+  // Helper function to get translated category name from database
+  const getTranslatedCategory = async (category: string, language: string): Promise<string> => {
+    try {
+      // If category is already in the target language, return it as is
+      if (language === 'en') {
+        return category;
+      }
+
+      // Simplified query: first get the category, then get its translation
+      const { data: categoryData, error: categoryError } = await supabase
+        .from('product_categories')
+        .select('id, name')
+        .eq('name', category)
+        .single();
+
+      if (categoryError || !categoryData) {
+        console.log('Category not found:', category);
+        return category; // Fallback to original category
+      }
+
+      // Now get the translation for this category and language
+      const { data: translationData, error: translationError } = await supabase
+        .from('category_translations')
+        .select('display_name, description')
+        .eq('category_id', categoryData.id)
+        .eq('language_code', language)
+        .single();
+
+      if (translationError || !translationData) {
+        console.log('No translation found for category:', category, 'in language:', language);
+        return category; // Fallback to original category
+      }
+
+      if (translationData.display_name) {
+        console.log(`Found database translation for ${category}: ${translationData.display_name}`);
+        return translationData.display_name;
+      }
+
+      return category; // Fallback to original category
+    } catch (error) {
+      console.error('Error fetching category translation:', error);
+      return category; // Fallback to original category
+    }
+  };
 
   // Load related products data when product changes
   useEffect(() => {
@@ -99,6 +150,27 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
     }
   }, [product?.features, currentLanguage, isOpen, product]);
 
+  // Load translated category when product or language changes
+  useEffect(() => {
+    const loadTranslatedCategory = async () => {
+      if (product?.category && currentLanguage !== 'en') {
+        try {
+          const translated = await getTranslatedCategory(product.category, currentLanguage);
+          setTranslatedCategory(translated);
+        } catch (error) {
+          console.error('Error translating category in modal:', error);
+          setTranslatedCategory(product.category);
+        }
+      } else {
+        setTranslatedCategory(product?.category || '');
+      }
+    };
+
+    if (isOpen && product) {
+      loadTranslatedCategory();
+    }
+  }, [product?.category, currentLanguage, isOpen]);
+
   // Close modal on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -148,7 +220,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
         <div className="flex items-center justify-between p-6 border-b border-border bg-muted/30 flex-shrink-0">
           <div className="flex items-center gap-3">
             <Package className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold text-foreground">Product Details</h2>
+            <h2 className="text-2xl font-bold text-foreground">{t('productDetails.title')}</h2>
           </div>
           <Button
             variant="ghost"
@@ -184,12 +256,12 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                     {product.inStock || product.in_stock ? (
                       <>
                         <CheckCircle className="h-5 w-5 text-green-600" />
-                        <span className="text-sm font-medium text-green-600">In Stock</span>
+                        <span className="text-sm font-medium text-green-600">{t('productDetails.inStock')}</span>
                       </>
                     ) : (
                       <>
                         <XCircle className="h-5 w-5 text-red-600" />
-                        <span className="text-sm font-medium text-red-600">Out of Stock</span>
+                        <span className="text-sm font-medium text-red-600">{t('productDetails.outOfStock')}</span>
                       </>
                     )}
                   </div>
@@ -217,7 +289,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                     <div className="flex items-center gap-2">
                       <Package className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm text-muted-foreground">
-                        <span className="font-medium">Model:</span> {product.model}
+                        <span className="font-medium">{t('productDetails.model')}:</span> {product.model}
                       </span>
                     </div>
                   )}
@@ -236,7 +308,9 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                 {product.category && (
                   <div className="flex items-center gap-2">
                     <Tag className="h-4 w-4 text-muted-foreground" />
-                    <Badge variant="outline">{product.category}</Badge>
+                    <Badge variant="outline">
+                      {translatedCategory || product.category}
+                    </Badge>
                   </div>
                 )}
 
@@ -245,7 +319,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                   <div className="mt-6">
                     <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
                       <Star className="h-4 w-4 text-primary" />
-                      Key Features
+                      {t('productDetails.keyFeatures')}
                     </h3>
                     <div className="space-y-2">
                       {translatedFeatures.map((feature, index) => (
@@ -267,7 +341,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
                   <Package className="h-5 w-5 text-primary" />
-                  Product Description
+                  {t('productDetails.productDescription')}
                 </h3>
                 <div className="prose prose-sm max-w-none text-muted-foreground leading-relaxed">
                   {renderHtmlContent(product.descriptions?.[currentLanguage] || product.description || '')}
@@ -300,11 +374,11 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
                   <Link className="h-5 w-5 text-primary" />
-                  Related Products
+                  {t('productDetails.relatedProducts')}
                 </h3>
                 {loadingRelated ? (
                   <div className="text-center py-4">
-                    <span className="text-sm text-muted-foreground">Loading related products...</span>
+                    <span className="text-sm text-muted-foreground">{t('productDetails.loadingRelated')}</span>
                   </div>
                 ) : relatedProductsData.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -323,7 +397,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                   </div>
                 ) : (
                   <div className="text-center py-4">
-                    <span className="text-sm text-muted-foreground">No related products found</span>
+                    <span className="text-sm text-muted-foreground">{t('productDetails.noRelatedProducts')}</span>
                   </div>
                 )}
               </div>
@@ -334,17 +408,21 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
         {/* Footer - Fixed at bottom */}
         <div className="flex items-center justify-end gap-3 p-6 border-t border-border bg-muted/30 flex-shrink-0">
           <Button variant="outline" onClick={onClose}>
-            Close
+            {t('productDetails.close')}
           </Button>
           <Button 
             onClick={() => {
-              // Navigate to full product page
-              const productUrl = product.slug ? `/products/${product.slug}` : `/products/${product.id}`;
-              window.open(productUrl, '_blank');
+              // Use HashRouter-compatible navigation
+              const productUrl = `/products/${product.id}`;
+              console.log('🔗 Navigating to product URL:', productUrl);
+              
+              // Method 1: Direct hash manipulation (most reliable with HashRouter)
+              window.location.hash = productUrl;
+              onClose();
             }}
             className="bg-primary hover:bg-primary/90"
           >
-            View Full Page
+            {t('productDetails.viewFullPage')}
           </Button>
         </div>
       </div>

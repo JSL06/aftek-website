@@ -23,7 +23,7 @@ import {
   Globe,
   Building2,
   Palette,
-  Database,
+  Database as DatabaseIcon,
   Shield,
   Bell,
   Mail,

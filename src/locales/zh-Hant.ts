@@ -897,6 +897,49 @@ const zhHant = {
   'admin.login.demoCredentials': '演示憑證：admin / aftek2024',
   'admin.login.invalidCredentials': '無效的憑證。請使用 admin/aftek2024',
 
+  // Product Details Modal translations
+  productDetails: {
+    title: "產品詳情",
+    model: "型號",
+    keyFeatures: "主要特點",
+    productDescription: "產品描述",
+    relatedProducts: "相關產品",
+    close: "關閉",
+    viewFullPage: "查看完整頁面",
+    inStock: "有庫存",
+    outOfStock: "缺貨",
+    loadingRelated: "載入相關產品中...",
+    noRelatedProducts: "未找到相關產品"
+  },
+
+  // Product Detail Page translations
+  productDetail: {
+    backToProducts: "返回產品頁面",
+    inStock: "有庫存",
+    outOfStock: "缺貨",
+    keyFeatures: "主要特點",
+    productDescription: "產品描述",
+    interestedInProduct: "對這個產品感興趣？",
+    contactForInfo: "聯繫我們了解價格、庫存和技術規格。",
+    contactUs: "聯繫我們",
+    specifications: "規格",
+    examples: "範例",
+    relatedProducts: "相關產品",
+    technicalSpecifications: "技術規格",
+    specificationsText: "{productName} 沒有可用的規格",
+    pastExamples: "過往範例",
+    examplesDescription: "{productName} 沒有可用的範例",
+    viewProjects: "查看專案",
+    noProjects: "沒有可用的專案",
+    noRelatedProducts: "{productName} 沒有相關產品",
+    browseProducts: "瀏覽產品",
+    productApplication: "產品應用",
+    productFeature: "產品特點",
+    projects: "專案",
+    noApplications: "沒有可用的應用",
+    noFeatures: "沒有可用的特點"
+  },
+
 };
 
 export default zhHant; 

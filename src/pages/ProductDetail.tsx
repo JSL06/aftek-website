@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { useCategories } from '@/hooks/useCategories';
 import { projectService, MultilingualProject } from '@/services/projectService';
 import FeaturesService from '@/services/featuresService';
+import { supabase } from '@/integrations/supabase/client';
 
 const ProductDetail = () => {
   // Custom CSS for specifications content width
@@ -52,7 +53,53 @@ const ProductDetail = () => {
   const [allProducts, setAllProducts] = useState<UnifiedProduct[]>([]);
   const [allProjects, setAllProjects] = useState<MultilingualProject[]>([]);
   const [translatedFeatures, setTranslatedFeatures] = useState<string[]>([]);
-  
+  const [translatedCategory, setTranslatedCategory] = useState<string>('');
+
+  // Helper function to get translated category name from database
+  const getTranslatedCategory = async (category: string, language: string): Promise<string> => {
+    try {
+      // If category is already in the target language, return it as is
+      if (language === 'en') {
+        return category;
+      }
+
+      // Simplified query: first get the category, then get its translation
+      const { data: categoryData, error: categoryError } = await supabase
+        .from('product_categories')
+        .select('id, name')
+        .eq('name', category)
+        .single();
+
+      if (categoryError || !categoryData) {
+        console.log('Category not found:', category);
+        return category; // Fallback to original category
+      }
+
+      // Now get the translation for this category and language
+      const { data: translationData, error: translationError } = await supabase
+        .from('category_translations')
+        .select('display_name, description')
+        .eq('category_id', categoryData.id)
+        .eq('language_code', language)
+        .single();
+
+      if (translationError || !translationData) {
+        console.log('No translation found for category:', category, 'in language:', language);
+        return category; // Fallback to original category
+      }
+
+      if (translationData.display_name) {
+        console.log(`Found database translation for ${category}: ${translationData.display_name}`);
+        return translationData.display_name;
+      }
+
+      return category; // Fallback to original category
+    } catch (error) {
+      console.error('Error fetching category translation:', error);
+      return category; // Fallback to original category
+    }
+  };
+
   // Listen for language changes and force reload to ensure all translations are loaded
   useEffect(() => {
     const handleLanguageChange = (event: CustomEvent) => {
@@ -117,6 +164,27 @@ const ProductDetail = () => {
 
     loadAllProjects();
   }, []);
+
+  // Load translated category when product or language changes
+  useEffect(() => {
+    const loadTranslatedCategory = async () => {
+      if (product?.category && currentLanguage !== 'en') {
+        try {
+          const translated = await getTranslatedCategory(product.category, currentLanguage);
+          setTranslatedCategory(translated);
+        } catch (error) {
+          console.error('Error translating category in ProductDetail:', error);
+          setTranslatedCategory(product.category);
+        }
+      } else {
+        setTranslatedCategory(product?.category || '');
+      }
+    };
+
+    if (product) {
+      loadTranslatedCategory();
+    }
+  }, [product?.category, currentLanguage]);
 
   // Debug logging for product data
   useEffect(() => {
@@ -230,6 +298,37 @@ const ProductDetail = () => {
     fetchProduct();
   }, [productId, navigate, currentLanguage]);
 
+  // Comprehensive debugging
+  useEffect(() => {
+    console.log('🔍 ProductDetail: Current language:', currentLanguage);
+    console.log('🔍 ProductDetail: Translation function exists:', typeof t);
+    console.log('🔍 ProductDetail: Translation function keys:', Object.keys(t));
+    console.log('🔍 ProductDetail: Trying to translate productDetail.backToProducts');
+    console.log('🔍 ProductDetail: Result:', t('productDetail.backToProducts'));
+    console.log('🔍 ProductDetail: Raw translation object:', t);
+  }, [currentLanguage, t]);
+
+  // Hardcoded button text that WILL work
+  const getButtonText = () => {
+    switch (currentLanguage) {
+      case 'zh-Hant':
+        return '返回產品頁面';
+      case 'zh-Hans':
+        return '返回产品页面';
+      case 'ja':
+        return '製品ページに戻る';
+      case 'ko':
+        return '제품 페이지로 돌아가기';
+      case 'th':
+        return 'กลับไปยังหน้าผลิตภัณฑ์';
+      case 'vi':
+        return 'Quay lại trang sản phẩm';
+      case 'en':
+      default:
+        return 'Back to Products';
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen pt-32 bg-gradient-subtle">
@@ -265,8 +364,7 @@ const ProductDetail = () => {
     <div className="min-h-screen pt-32 bg-gradient-subtle">
       <div className="container mx-auto px-6 mb-8">
 
-
-        {/* Back Button */}
+        {/* Back Button - HARDCODED TEXT */}
         <div className="mb-8">
           <Button
             variant="ghost"
@@ -274,7 +372,7 @@ const ProductDetail = () => {
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Products
+            {getButtonText()}
           </Button>
         </div>
 
@@ -315,11 +413,13 @@ const ProductDetail = () => {
               </div>
 
               {/* Category */}
-              <div className="mb-6">
-                <Badge variant="secondary" className="text-sm">
-                  {product.category}
-                </Badge>
-              </div>
+              {product.category && (
+                <div className="mb-6">
+                  <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 text-sm">
+                    {translatedCategory || product.category}
+                  </div>
+                </div>
+              )}
 
               {/* Stock Status */}
               <div className="mb-6">
@@ -358,23 +458,10 @@ const ProductDetail = () => {
                 />
               </div>
 
-              {/* Contact Information */}
-              <div className="space-y-4 pt-6 border-t">
-                <div className="bg-muted/50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold mb-2">{t('productDetail.interestedInProduct')}</h3>
-                  <p className="text-muted-foreground mb-4">
-                    {t('productDetail.contactForInfo')}
-                  </p>
-                  <Button 
-                    size="lg" 
-                    className="w-full"
-                    onClick={() => navigate('/contact')}
-                  >
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    {t('productDetail.contactUs')}
-                  </Button>
-                </div>
-              </div>
+              {/* Contact Information - REMOVED from here, moved to tabs */}
+              {/* <div className="space-y-4 pt-6 border-t">
+                ... contact section removed ...
+              </div> */}
             </div>
           </div>
         </div>
@@ -544,6 +631,24 @@ const ProductDetail = () => {
                         </Button>
                       </div>
                     )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="contact" className="mt-6 w-full">
+                  <div className="w-full">
+                    <h3 className="text-xl font-semibold mb-4">Contact Information</h3>
+                    <div className="bg-muted/50 rounded-lg p-6">
+                      <h3 className="text-lg font-semibold mb-2">Interested in this product?</h3>
+                      <p className="text-muted-foreground mb-4">Contact us for pricing, availability, and technical specifications.</p>
+                      <Button 
+                        size="lg" 
+                        className="w-full"
+                        onClick={() => navigate('/contact')}
+                      >
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        Contact Us
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
               </Tabs>

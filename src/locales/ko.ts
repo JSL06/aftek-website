@@ -634,6 +634,48 @@ const ko = {
   'admin.login.demoCredentials': '데모 인증 정보: admin / aftek2024',
   'admin.login.invalidCredentials': '잘못된 인증 정보. admin/aftek2024를 사용하세요',
 
+  // Product Details Modal
+  'productDetails.title': '제품 상세',
+  'productDetails.model': '모델',
+  'productDetails.category': '카테고리',
+  'productDetails.keyFeatures': '주요 특징',
+  'productDetails.productDescription': '제품 설명',
+  'productDetails.relatedProducts': '관련 제품',
+  'productDetails.close': '닫기',
+  'productDetails.viewFullPage': '전체 페이지 보기',
+  'productDetails.inStock': '재고 있음',
+  'productDetails.outOfStock': '재고 없음',
+  'productDetails.loadingRelated': '관련 제품 로딩 중...',
+  'productDetails.noRelatedProducts': '관련 제품을 찾을 수 없습니다',
+
+  // Product Detail Page translations
+  productDetail: {
+    backToProducts: "제품 페이지로 돌아가기",
+    inStock: "재고 있음",
+    outOfStock: "재고 없음",
+    keyFeatures: "주요 특징",
+    productDescription: "제품 설명",
+    interestedInProduct: "이 제품에 관심이 있으신가요?",
+    contactForInfo: "가격, 재고, 기술 사양에 대해 문의해 주세요.",
+    contactUs: "문의하기",
+    specifications: "사양",
+    examples: "예시",
+    relatedProducts: "관련 제품",
+    technicalSpecifications: "기술 사양",
+    specificationsText: "{productName}에 대한 사양을 사용할 수 없습니다",
+    pastExamples: "과거 예시",
+    examplesDescription: "{productName}에 대한 예시를 사용할 수 없습니다",
+    viewProjects: "프로젝트 보기",
+    noProjects: "사용 가능한 프로젝트가 없습니다",
+    noRelatedProducts: "{productName}에 대한 관련 제품이 없습니다",
+    browseProducts: "제품 둘러보기",
+    productApplication: "제품 응용",
+    productFeature: "제품 특징",
+    projects: "프로젝트",
+    noApplications: "사용 가능한 응용이 없습니다",
+    noFeatures: "사용 가능한 특징이 없습니다"
+  },
+
 };
 
 export default ko; 

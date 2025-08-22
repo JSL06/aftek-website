@@ -4,7 +4,7 @@ export interface CategoryTranslation {
   id: string;
   category_id: string;
   language_code: string;
-  name: string;
+  display_name: string;
   description?: string;
   created_at?: string;
   updated_at?: string;
@@ -64,7 +64,7 @@ export class CategoryService {
         const descriptions: Record<string, string> = {};
 
         categoryTranslations.forEach(translation => {
-          names[translation.language_code] = translation.name;
+          names[translation.language_code] = translation.display_name;
           if (translation.description) {
             descriptions[translation.language_code] = translation.description;
           }
@@ -107,7 +107,7 @@ export class CategoryService {
       const descriptions: Record<string, string> = {};
 
       translations?.forEach(translation => {
-        names[translation.language_code] = translation.name;
+        names[translation.language_code] = translation.display_name;
         if (translation.description) {
           descriptions[translation.language_code] = translation.description;
         }
@@ -143,18 +143,28 @@ export class CategoryService {
       if (categoryError) throw categoryError;
 
       // Create translations
-      const translationPromises = Object.entries(translations).map(([languageCode, data]) =>
-        supabase
+      const translationPromises = Object.entries(translations).map(([languageCode, data]) => {
+        // Add safety check for language_code
+        if (!languageCode) {
+          console.error('Language code is undefined for translation:', data);
+          return Promise.resolve(); // Skip this translation
+        }
+        
+        return supabase
           .from('category_translations')
           .insert({
             category_id: category.id,
-            language_code,
-            name: data.name,
+            language_code: languageCode,
+            display_name: data.name,
             description: data.description || null
-          })
-      );
+          });
+      });
 
-      await Promise.all(translationPromises);
+      // Filter out any undefined promises and execute the rest
+      const validPromises = translationPromises.filter(p => p !== undefined);
+      if (validPromises.length > 0) {
+        await Promise.all(validPromises);
+      }
 
       // Return the complete category
       return this.getCategory(category.id) as Promise<MultilingualCategory>;
@@ -179,20 +189,30 @@ export class CategoryService {
 
       // Update translations
       if (Object.keys(translations).length > 0) {
-        const translationPromises = Object.entries(translations).map(([languageCode, data]) =>
-          supabase
+        const translationPromises = Object.entries(translations).map(([languageCode, data]) => {
+          // Add safety check for language_code
+          if (!languageCode) {
+            console.error('Language code is undefined for translation:', data);
+            return Promise.resolve(); // Skip this translation
+          }
+          
+          return supabase
             .from('category_translations')
             .upsert({
               category_id: id,
-              language_code,
-              name: data.name,
+              language_code: languageCode,
+              display_name: data.name,
               description: data.description || null
             }, {
               onConflict: 'category_id,language_code'
-            })
-        );
+            });
+        });
 
-        await Promise.all(translationPromises);
+        // Filter out any undefined promises and execute the rest
+        const validPromises = translationPromises.filter(p => p !== undefined);
+        if (validPromises.length > 0) {
+          await Promise.all(validPromises);
+        }
       }
 
       // Return the updated category

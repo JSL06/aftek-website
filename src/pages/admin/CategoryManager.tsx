@@ -272,9 +272,14 @@ const CategoryManager = () => {
   };
 
   const startEditing = (category: ProductCategory) => {
+    console.log('🔄 Starting edit for category:', category);
     setEditingId(category.id);
     setEditingData({ 
-      name: category.name, 
+      name: category.name || '', 
+      description: category.description || '' 
+    });
+    console.log('📝 Set editing data:', { 
+      name: category.name || '', 
       description: category.description || '' 
     });
   };

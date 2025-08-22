@@ -197,13 +197,13 @@ const th = {
 
   // Products Page
   'products.title': 'ผลิตภัณฑ์',
-  'products.subtitle': 'สารเคมีก่อสร้างและวัสดุก่อสร้างระดับมืออาชีพ',
+  'products.subtitle': 'สารเคมีและวัสดุก่อสร้างที่เชี่ยวชาญ',
   'products.filters.all': 'ทุกหมวดหมู่',
   'products.filters.waterproofing': 'กันน้ำ',
-  'products.filters.sealants': 'ซีแลนต์และกาวยาแนว',
+  'products.filters.sealants': 'ซีแลนท์และกาว',
   'products.filters.flooring': 'ระบบพื้น',
   'products.filters.grout': 'Redi-Mix G&M',
-  'products.filters.insulation': 'ฉนวนและเคลือบผิว',
+  'products.filters.insulation': 'ฉนวนและสารเคลือบ',
   'products.search.placeholder': 'ค้นหาผลิตภัณฑ์...',
   'products.searchPlaceholder': 'ค้นหาผลิตภัณฑ์...',
   'products.viewDetails': 'ดูรายละเอียด',
@@ -211,8 +211,8 @@ const th = {
   'products.features': 'คุณสมบัติหลัก',
   'products.applications': 'การใช้งาน',
   'products.downloads': 'ดาวน์โหลด',
-  'products.showing': 'แสดง {count} จาก {total} ผลิตภัณฑ์',
-  'products.filtered': 'กรองจาก',
+  'products.showing': 'แสดงผลิตภัณฑ์ {count} รายการ จากทั้งหมด {total} รายการ',
+  'products.filtered': 'จาก',
   'products.total': 'ทั้งหมด',
   'products.page': 'หน้า',
   'products.of': 'จาก',
@@ -220,7 +220,7 @@ const th = {
   'products.clearFilters': 'ล้างตัวกรอง',
   'products.searchButton': 'ค้นหา',
   'products.clearButton': 'ล้าง',
-  'products.inStock': 'มีสินค้า',
+  'products.inStock': 'มีสินค้าในคลัง',
   'products.outOfStock': 'สินค้าหมด',
 
   // Projects Page
@@ -633,6 +633,45 @@ const th = {
   'guide.building.industrial': 'สิ่งอำนวยความสะดวกทางอุตสาหกรรม',
   'guide.building.infrastructure': 'โครงการโครงสร้างพื้นฐาน',
 
+  // Product Details Modal
+  'productDetails.title': 'รายละเอียดผลิตภัณฑ์',
+  'productDetails.model': 'รุ่น',
+  'productDetails.category': 'หมวดหมู่',
+  'productDetails.keyFeatures': 'คุณสมบัติหลัก',
+  'productDetails.productDescription': 'คำอธิบายผลิตภัณฑ์',
+  'productDetails.relatedProducts': 'ผลิตภัณฑ์ที่เกี่ยวข้อง',
+  'productDetails.close': 'ปิด',
+  'productDetails.viewFullPage': 'ดูหน้าเต็ม',
+  'productDetails.inStock': 'มีสินค้าในคลัง',
+  'productDetails.outOfStock': 'สินค้าหมด',
+  'productDetails.loadingRelated': 'กำลังโหลดผลิตภัณฑ์ที่เกี่ยวข้อง...',
+  'productDetails.noRelatedProducts': 'ไม่พบผลิตภัณฑ์ที่เกี่ยวข้อง',
+
+  // Product Detail Page
+  'productDetail.backToProducts': 'กลับไปยังหน้าผลิตภัณฑ์',
+  'productDetail.inStock': 'มีสินค้า',
+  'productDetail.outOfStock': 'สินค้าหมด',
+  'productDetail.keyFeatures': 'คุณสมบัติหลัก',
+  'productDetail.productDescription': 'คำอธิบายผลิตภัณฑ์',
+  'productDetail.interestedInProduct': 'สนใจผลิตภัณฑ์นี้หรือไม่?',
+  'productDetail.contactForInfo': 'ติดต่อเราเพื่อสอบถามราคา ความพร้อมใช้งาน และข้อมูลจำเพาะทางเทคนิค',
+  'productDetail.contactUs': 'ติดต่อเรา',
+  'productDetail.specifications': 'ข้อมูลจำเพาะ',
+  'productDetail.examples': 'ตัวอย่าง',
+  'productDetail.relatedProducts': 'ผลิตภัณฑ์ที่เกี่ยวข้อง',
+  'productDetail.technicalSpecifications': 'ข้อมูลจำเพาะทางเทคนิค',
+  'productDetail.specificationsText': 'ไม่มีข้อมูลจำเพาะสำหรับ {productName}',
+  'productDetail.pastExamples': 'ตัวอย่างในอดีต',
+  'productDetail.examplesDescription': 'ไม่มีตัวอย่างสำหรับ {productName}',
+  'productDetail.viewProjects': 'ดูโครงการ',
+  'productDetail.noProjects': 'ไม่มีโครงการที่ใช้งานได้',
+  'productDetail.noRelatedProducts': 'ไม่มีผลิตภัณฑ์ที่เกี่ยวข้องสำหรับ {productName}',
+  'productDetail.browseProducts': 'ดูผลิตภัณฑ์',
+  'productDetail.productApplication': 'การใช้งานผลิตภัณฑ์',
+  'productDetail.productFeature': 'คุณสมบัติผลิตภัณฑ์',
+  'productDetail.projects': 'โครงการ',
+  'productDetail.noApplications': 'ไม่มีการใช้งานที่ใช้งานได้',
+  'productDetail.noFeatures': 'ไม่มีคุณสมบัติที่ใช้งานได้'
 };
 
 export default th; 

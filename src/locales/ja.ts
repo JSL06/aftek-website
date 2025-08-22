@@ -765,6 +765,20 @@ const ja = {
   'admin.login.demoCredentials': 'デモ認証情報：admin / aftek2024',
   'admin.login.invalidCredentials': '無効な認証情報。admin/aftek2024を使用してください',
 
+  // Product Details Modal
+  'productDetails.title': '製品詳細',
+  'productDetails.model': 'モデル',
+  'productDetails.category': 'カテゴリー',
+  'productDetails.keyFeatures': '主要特徴',
+  'productDetails.productDescription': '製品説明',
+  'productDetails.relatedProducts': '関連製品',
+  'productDetails.close': '閉じる',
+  'productDetails.viewFullPage': '完全ページを表示',
+  'productDetails.inStock': '在庫あり',
+  'productDetails.outOfStock': '在庫切れ',
+  'productDetails.loadingRelated': '関連製品を読み込み中...',
+  'productDetails.noRelatedProducts': '関連製品が見つかりません',
+
 };
 
 export default ja; 

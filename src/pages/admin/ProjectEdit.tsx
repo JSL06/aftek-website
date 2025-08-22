@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { ArrowLeft, Type, FileText, Globe, Loader2, Upload } from 'lucide-react';
+import { ArrowLeft, Type, FileText, Globe, Loader2, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -297,38 +297,51 @@ export default function ProjectEdit() {
                 <p className="text-xs text-muted-foreground mt-2">Selected features apply to all languages.</p>
               </div>
 
-              {/* Products Used */}
-              <div>
-                <label className="block text-sm font-medium mb-2">Products Used</label>
-                <div className="space-y-3">
-                  {(project.products_used || []).map((productId, index) => (
-                    <div key={index} className="flex gap-2">
-                      <Select value={productId} onValueChange={(value) => {
-                        const next = [...(project.products_used || [])];
-                        next[index] = value;
-                        updateBasicField('products_used', next);
-                      }}>
-                        <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Select product" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">No product</SelectItem>
-                          {allProducts.map(p => (
-                            <SelectItem key={p.id} value={p.id}>
-                              {p.names?.['en'] || p.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Button type="button" variant="outline" size="sm" onClick={() => {
-                        const next = [...(project.products_used || [])];
-                        next.splice(index, 1);
-                        updateBasicField('products_used', next);
-                      }}>Remove</Button>
-                    </div>
-                  ))}
-                  <Button type="button" variant="outline" onClick={() => updateBasicField('products_used', [...(project.products_used || []), ''])} className="w-full">Add Product</Button>
-                </div>
+              {/* Products Used Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Products Used</h3>
+                {project.products_used.map((productId, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Select
+                      value={productId || ''}
+                      onValueChange={(value) => {
+                        const newProducts = [...project.products_used];
+                        newProducts[index] = value;
+                        updateBasicField('products_used', newProducts);
+                      }}
+                    >
+                      <SelectTrigger className="flex-1">
+                        <SelectValue placeholder="Select a product" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No product</SelectItem>
+                        {allProducts.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.names?.[language] || p.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        const newProducts = project.products_used.filter((_, i) => i !== index);
+                        updateBasicField('products_used', newProducts);
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    updateBasicField('products_used', [...project.products_used, '']);
+                  }}
+                >
+                  Add Product
+                </Button>
               </div>
 
               {/* Main Image */}

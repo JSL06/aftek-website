@@ -847,6 +847,48 @@ const en = {
   'admin.login.demoCredentials': 'Demo credentials: admin / aftek2024',
   'admin.login.invalidCredentials': 'Invalid credentials. Please use admin/aftek2024',
 
+  // Product Details Modal translations
+  productDetails: {
+    title: "Product Details",
+    model: "Model",
+    keyFeatures: "Key Features",
+    productDescription: "Product Description",
+    relatedProducts: "Related Products",
+    close: "Close",
+    viewFullPage: "View Full Page",
+    inStock: "In Stock",
+    outOfStock: "Out of Stock",
+    loadingRelated: "Loading related products...",
+    noRelatedProducts: "No related products found"
+  },
+
+  // Product Detail Page translations
+  productDetail: {
+    backToProducts: "Back to Products",
+    inStock: "In Stock",
+    outOfStock: "Out of Stock",
+    keyFeatures: "Key Features",
+    productDescription: "Product Description",
+    interestedInProduct: "Interested in this product?",
+    contactForInfo: "Contact us for pricing, availability, and technical specifications.",
+    contactUs: "Contact Us",
+    specifications: "Specifications",
+    examples: "Examples",
+    relatedProducts: "Related Products",
+    technicalSpecifications: "Technical Specifications",
+    specificationsText: "No specifications available for {productName}",
+    pastExamples: "Past Examples",
+    examplesDescription: "No examples available for {productName}",
+    viewProjects: "View Projects",
+    noProjects: "No projects available",
+    noRelatedProducts: "No related products available for {productName}",
+    browseProducts: "Browse Products",
+    productApplication: "Product Application",
+    productFeature: "Product Features",
+    projects: "Projects",
+    noApplications: "No applications available",
+    noFeatures: "No features available"
+  },
 };
 
 export default en; 

@@ -12,7 +12,7 @@ import { Plus, Edit, Trash2, Save, ArrowLeft, Image as ImageIcon, Video, Upload,
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { mediaService, MediaUploadOptions, UploadProgress } from '@/services/mediaService';
 import { Database } from '@/integrations/supabase/types';
-import BackgroundImageManager from '@/components/admin/BackgroundImageManager';
+import BackgroundImageManager from './BackgroundImageManager';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAdminLanguage } from '@/contexts/AdminLanguageContext';

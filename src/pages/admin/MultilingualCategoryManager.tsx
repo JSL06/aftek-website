@@ -82,6 +82,7 @@ const MultilingualCategoryManager = () => {
       // Prepare translations
       const translations: Record<string, { name: string; description?: string }> = {};
       LANGUAGES.forEach(lang => {
+        console.log('Processing language for add:', lang.code, 'Data:', newCategory[lang.code]);
         if (newCategory[lang.code]?.name?.trim()) {
           translations[lang.code] = {
             name: newCategory[lang.code].name.trim(),
@@ -89,6 +90,8 @@ const MultilingualCategoryManager = () => {
           };
         }
       });
+
+      console.log('Final translations object for add:', translations);
 
       // Create category with translations
       const newCategoryData = await categoryService.createCategory(categoryData, translations);
@@ -115,9 +118,20 @@ const MultilingualCategoryManager = () => {
         return;
       }
 
-      // Prepare translations
+      // Validate editingData structure
+      console.log('Editing data structure:', editingData);
+      console.log('Editing data keys:', Object.keys(editingData));
+      
+      // Ensure editingData has the expected structure
+      if (!editingData || typeof editingData !== 'object') {
+        toast.error('Invalid editing data structure');
+        return;
+      }
+
+      // Prepare translations with debugging
       const translations: Record<string, { name: string; description?: string }> = {};
       LANGUAGES.forEach(lang => {
+        console.log('Processing language:', lang.code, 'Data:', editingData[lang.code]);
         if (editingData[lang.code]?.name?.trim()) {
           translations[lang.code] = {
             name: editingData[lang.code].name.trim(),
@@ -125,6 +139,22 @@ const MultilingualCategoryManager = () => {
           };
         }
       });
+
+      console.log('Final translations object:', translations);
+
+      // Validate translations object before sending to service
+      if (Object.keys(translations).length === 0) {
+        toast.error('No valid translations found');
+        return;
+      }
+
+      // Ensure all language codes are valid strings
+      const invalidLanguages = Object.keys(translations).filter(key => !key || typeof key !== 'string');
+      if (invalidLanguages.length > 0) {
+        console.error('Invalid language codes found:', invalidLanguages);
+        toast.error('Invalid language codes detected');
+        return;
+      }
 
       // Update category with translations
       const updatedCategory = await categoryService.updateCategory(id, {}, translations);
@@ -176,17 +206,23 @@ const MultilingualCategoryManager = () => {
   };
 
   const startEditing = (category: MultilingualCategory) => {
+    console.log('Starting edit for category:', category);
+    console.log('Category names:', category.names);
+    console.log('Category descriptions:', category.descriptions);
+    
     setEditingId(category.id);
     
     // Initialize editing data with existing translations
     const initialData: Record<string, { name: string; description: string }> = {};
     LANGUAGES.forEach(lang => {
+      console.log('Setting up language:', lang.code, 'Name:', category.names[lang.code], 'Description:', category.descriptions[lang.code]);
       initialData[lang.code] = {
         name: category.names[lang.code] || '',
         description: category.descriptions[lang.code] || ''
       };
     });
     
+    console.log('Final initial data:', initialData);
     setEditingData(initialData);
   };
 

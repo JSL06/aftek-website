@@ -634,6 +634,48 @@ const vi = {
   'admin.login.demoCredentials': 'Thông tin đăng nhập demo: admin / aftek2024',
   'admin.login.invalidCredentials': 'Thông tin đăng nhập không hợp lệ. Vui lòng sử dụng admin/aftek2024',
 
+  // Product Details Modal
+  'productDetails.title': 'Chi tiết sản phẩm',
+  'productDetails.model': 'Mẫu',
+  'productDetails.category': 'Danh mục',
+  'productDetails.keyFeatures': 'Tính năng chính',
+  'productDetails.productDescription': 'Mô tả sản phẩm',
+  'productDetails.relatedProducts': 'Sản phẩm liên quan',
+  'productDetails.close': 'Đóng',
+  'productDetails.viewFullPage': 'Xem trang đầy đủ',
+  'productDetails.inStock': 'Còn hàng',
+  'productDetails.outOfStock': 'Hết hàng',
+  'productDetails.loadingRelated': 'Đang tải sản phẩm liên quan...',
+  'productDetails.noRelatedProducts': 'Không tìm thấy sản phẩm liên quan',
+
+  // Product Detail Page translations
+  productDetail: {
+    backToProducts: "Quay lại trang sản phẩm",
+    inStock: "Còn hàng",
+    outOfStock: "Hết hàng",
+    keyFeatures: "Tính năng chính",
+    productDescription: "Mô tả sản phẩm",
+    interestedInProduct: "Quan tâm đến sản phẩm này?",
+    contactForInfo: "Liên hệ với chúng tôi để biết giá, tình trạng có sẵn và thông số kỹ thuật.",
+    contactUs: "Liên hệ với chúng tôi",
+    specifications: "Thông số kỹ thuật",
+    examples: "Ví dụ",
+    relatedProducts: "Sản phẩm liên quan",
+    technicalSpecifications: "Thông số kỹ thuật",
+    specificationsText: "Không có thông số kỹ thuật cho {productName}",
+    pastExamples: "Ví dụ trong quá khứ",
+    examplesDescription: "Không có ví dụ cho {productName}",
+    viewProjects: "Xem dự án",
+    noProjects: "Không có dự án nào khả dụng",
+    noRelatedProducts: "Không có sản phẩm liên quan cho {productName}",
+    browseProducts: "Duyệt sản phẩm",
+    productApplication: "Ứng dụng sản phẩm",
+    productFeature: "Tính năng sản phẩm",
+    projects: "Dự án",
+    noApplications: "Không có ứng dụng nào khả dụng",
+    noFeatures: "Không có tính năng nào khả dụng"
+  },
+
 };
 
 export default vi; 
