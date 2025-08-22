@@ -1,3 +1,4 @@
+// Test comment - deployment system check - WORKING VERSION
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight, Play, Star, Users, Award, Target, Building2, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
