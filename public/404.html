@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <title>Aftek - Redirecting...</title>
   <script type="text/javascript">
-    // Simple and reliable GitHub Pages SPA redirect
+    // Enhanced GitHub Pages SPA redirect for all routes
     (function() {
       var l = window.location;
       
-      // Always redirect to the correct base with the current path
+      // Get the current path
       var currentPath = l.pathname;
       
       // Remove leading slash and clean up the path
@@ -16,12 +16,41 @@
         currentPath = currentPath.substring(1);
       }
       
-      // If we have a path, redirect to the correct base with hash
+      // Handle different route patterns
       if (currentPath && currentPath !== '') {
         // Clean up the path (remove multiple slashes, etc.)
         var cleanPath = currentPath.replace(/\/+/g, '/').replace(/^\/+|\/+$/g, '');
+        
         if (cleanPath) {
-          // Redirect to the correct GitHub Pages base with hash routing
+          // Check if it's a project detail route
+          if (cleanPath.startsWith('projects/') && cleanPath.includes('-')) {
+            // This is likely a project detail route with UUID
+            var projectId = cleanPath.split('/')[1];
+            if (projectId && projectId.length > 20) { // UUID-like
+              window.location.replace('/aftek-website/#/projects/' + projectId);
+              return;
+            }
+          }
+          
+          // Check if it's a product detail route
+          if (cleanPath.startsWith('products/') && cleanPath.includes('-')) {
+            var productId = cleanPath.split('/')[1];
+            if (productId && productId.length > 20) { // UUID-like
+              window.location.replace('/aftek-website/#/products/' + productId);
+              return;
+            }
+          }
+          
+          // Check if it's an article detail route
+          if (cleanPath.startsWith('articles/')) {
+            var articleSlug = cleanPath.split('/')[1];
+            if (articleSlug) {
+              window.location.replace('/aftek-website/#/articles/' + articleSlug);
+              return;
+            }
+          }
+          
+          // For other routes, redirect to the correct base with hash
           window.location.replace('/aftek-website/#' + cleanPath);
           return;
         }
