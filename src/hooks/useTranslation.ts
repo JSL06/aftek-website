@@ -20,7 +20,7 @@ interface Translation {
 }
 
 interface Translations {
-  [key: string]: string | string[];
+  [key: string]: string | string[] | { [key: string]: string | string[] };
 }
 
 // Local translations object
@@ -239,11 +239,28 @@ export const useTranslation = () => {
       return '';
     }
     
-    const getValue = (value: string | string[] | undefined): string => {
+    const getValue = (value: string | string[] | { [key: string]: string | string[] } | undefined): string => {
       if (Array.isArray(value)) {
         return value.join(', ');
       }
+      if (typeof value === 'object' && value !== null) {
+        // If it's a nested object, return the key as fallback
+        return key;
+      }
       return value || key;
+    };
+
+    // Helper function to get nested value from object using dot notation
+    const getNestedValue = (obj: any, path: string): string | string[] | undefined => {
+      const value = path.split('.').reduce((current, key) => {
+        return current && current[key] !== undefined ? current[key] : undefined;
+      }, obj);
+      
+      // Only return string or string[] values, not nested objects
+      if (typeof value === 'string' || Array.isArray(value)) {
+        return value;
+      }
+      return undefined;
     };
 
     // Debug: Log translation requests for specific keys
@@ -256,12 +273,12 @@ export const useTranslation = () => {
     // For Traditional Chinese, prioritize local translations to prevent database interference
     if (currentLanguage === 'zh-Hant') {
       const localTrans = localTranslations[currentLanguage];
-      const localValue = localTrans?.[key];
-      if (localValue) {
+      const localValue = getNestedValue(localTrans, key);
+      if (localValue !== undefined) {
         if (key.startsWith('home.explore.')) {
           console.log(`useTranslation: Using local Traditional Chinese translation for ${key}:`, localValue);
         }
-        return getValue(localValue);
+        return getValue(localValue as string | string[]);
       }
     }
 
@@ -269,9 +286,9 @@ export const useTranslation = () => {
     const alwaysLocalKeys = ['home.about.desc', 'home.mission.content'];
     if (alwaysLocalKeys.includes(key)) {
       const localTrans = localTranslations[currentLanguage];
-      const localValue = localTrans?.[key];
-      if (localValue) {
-        return getValue(localValue);
+      const localValue = getNestedValue(localTrans, key);
+      if (localValue !== undefined) {
+        return getValue(localValue as string | string[]);
       }
     }
 
@@ -289,19 +306,19 @@ export const useTranslation = () => {
 
     // Then check local translations as fallback
     const localTrans = localTranslations[currentLanguage];
-    const localValue = localTrans?.[key];
-    if (localValue) {
+    const localValue = getNestedValue(localTrans, key);
+    if (localValue !== undefined) {
       if (key.startsWith('home.explore.')) {
         console.log(`useTranslation: Found local translation for ${key}:`, localValue);
       }
-      return getValue(localValue);
+      return getValue(localValue as string | string[]);
     }
 
     // Check English as final fallback for admin keys
     if (key.startsWith('admin.')) {
-      const enValue = localTranslations['en']?.[key];
-      if (enValue) {
-        return getValue(enValue);
+      const enValue = getNestedValue(localTranslations['en'], key);
+      if (enValue !== undefined) {
+        return getValue(enValue as string | string[]);
       }
     }
 

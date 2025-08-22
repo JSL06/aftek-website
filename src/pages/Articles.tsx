@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import bgMain from '@/assets/17580.jpg';
 import bgTitle from '@/assets/pexels-pixabay-159306.png';
 
@@ -33,6 +33,7 @@ interface ArticleFilters {
 // Article Card Component with Image Carousel
 const ArticleCard: React.FC<{ article: Article }> = ({ article }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const navigate = useNavigate();
   
   // Get images array - fallback to single image if images array not available
   const getArticleImages = (article: Article): string[] => {
@@ -65,8 +66,23 @@ const ArticleCard: React.FC<{ article: Article }> = ({ article }) => {
     setCurrentImageIndex(index);
   };
 
+  // Ensure we have a valid slug or ID for navigation
+  const getArticleUrl = (article: Article): string => {
+    if (article.slug && article.slug !== 'null' && article.slug.trim() !== '') {
+      return `/articles/${article.slug}`;
+    }
+    // Fallback to ID if slug is not available
+    return `/articles/${article.id}`;
+  };
+
+  const handleArticleClick = () => {
+    const url = getArticleUrl(article);
+    console.log('Navigating to article:', url);
+    navigate(url);
+  };
+
   return (
-    <Link to={`/articles/${article.slug && article.slug !== 'null' ? article.slug : article.id}`} className="block group">
+    <div onClick={handleArticleClick} className="block group cursor-pointer">
       <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 group bg-white hover:bg-gray-50 overflow-hidden rounded-xl cursor-pointer h-full">
         <CardContent className="p-0 h-full flex flex-col">
           {/* Image Carousel Section */}
@@ -132,7 +148,7 @@ const ArticleCard: React.FC<{ article: Article }> = ({ article }) => {
           </div>
         </CardContent>
       </Card>
-    </Link>
+    </div>
   );
 };
 

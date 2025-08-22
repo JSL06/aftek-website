@@ -32,6 +32,11 @@ const ArticleDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
+  // Debug logging
+  console.log('ArticleDetail component loaded with slug:', slug);
+  console.log('Current URL:', window.location.href);
+  console.log('Current hash:', window.location.hash);
+  
   // Listen for language changes and force reload to ensure all translations are loaded
   useEffect(() => {
     const handleLanguageChange = (event: CustomEvent) => {
@@ -49,6 +54,7 @@ const ArticleDetail = () => {
   }, []);
 
   useEffect(() => {
+    console.log('ArticleDetail useEffect triggered with slug:', slug);
     const fetchArticle = async () => {
       if (!slug || slug === 'null') {
         setError('Invalid article URL');

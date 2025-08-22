@@ -621,6 +621,7 @@ const en = {
   'admin.products.showInactive': 'Show Inactive Products',
   'admin.products.name': 'Product Name',
   'admin.products.description': 'Product Description',
+  'admin.products.technicalSpecifications': 'Technical Specifications',
   'admin.products.category': 'Category',
   'admin.products.price': 'Price',
   'admin.products.model': 'Model',

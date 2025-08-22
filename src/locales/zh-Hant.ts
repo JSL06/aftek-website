@@ -614,6 +614,7 @@ const zhHant = {
   'admin.products.showInactive': '顯示非啟用產品',
   'admin.products.name': '產品名稱',
   'admin.products.description': '產品描述',
+  'admin.products.technicalSpecifications': '技術規格',
   'admin.products.category': '類別',
   'admin.products.price': '價格',
   'admin.products.model': '型號',

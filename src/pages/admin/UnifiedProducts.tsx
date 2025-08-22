@@ -58,6 +58,7 @@ const UnifiedProducts = () => {
     isActive: true,
     image: '/placeholder.svg',
     tags: [],
+    specifications: {},
     translations: {}
   });
 
@@ -163,6 +164,7 @@ const UnifiedProducts = () => {
       isActive: true,
       image: '/placeholder.svg',
       tags: [],
+      specifications: {},
       translations: {}
     });
     setShowForm(true);
@@ -241,6 +243,7 @@ const UnifiedProducts = () => {
         isActive: formData.isActive,
         image: formData.image,
         tags: formData.tags,
+        specifications: {},
         names: {}
       };
 
@@ -256,6 +259,11 @@ const UnifiedProducts = () => {
           // Store descriptions in the descriptions field, not names
           if (!productData.descriptions) productData.descriptions = {};
           productData.descriptions![lang.code] = langData.description;
+        }
+        if (langData?.specifications) {
+          // Store specifications in the specifications field
+          if (!productData.specifications) productData.specifications = {};
+          productData.specifications![lang.code] = langData.specifications;
         }
       });
 
@@ -421,7 +429,20 @@ const UnifiedProducts = () => {
                     onTranslationChange={handleTranslationChange}
                     currentLanguage={selectedLanguage}
                     required={true}
-                                        />
+                  />
+                </div>
+
+                {/* Technical Specifications */}
+                <div className="mt-6">
+                  <MultilingualFormField
+                    label={t('admin.products.technicalSpecifications') || 'Technical Specifications'}
+                    fieldName="specifications"
+                    type="rich-text"
+                    translations={formData.translations}
+                    onTranslationChange={handleTranslationChange}
+                    currentLanguage={selectedLanguage}
+                    required={false}
+                  />
                 </div>
               </div>
 
