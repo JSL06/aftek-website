@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { 
-  Settings, 
+  Settings as SettingsIcon, 
   Globe, 
   Database, 
   Mail, 
@@ -106,7 +106,7 @@ const Settings: React.FC = () => {
             <span>Notifications</span>
           </TabsTrigger>
           <TabsTrigger value="advanced" className="flex items-center space-x-2">
-            <Settings className="h-4 w-4" />
+            <SettingsIcon className="h-4 w-4" />
             <span>Advanced</span>
           </TabsTrigger>
         </TabsList>

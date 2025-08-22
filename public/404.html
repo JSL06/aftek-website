@@ -4,44 +4,31 @@
   <meta charset="utf-8">
   <title>Aftek - Redirecting...</title>
   <script type="text/javascript">
-    // GitHub Pages SPA redirect with base path support
+    // Simple and reliable GitHub Pages SPA redirect
     (function() {
       var l = window.location;
       
-      // Check if we're on GitHub Pages with /aftek-website/ base
-      if (l.hostname === 'jsl06.github.io') {
-        var currentPath = l.pathname;
-        
-        // If the path doesn't start with /aftek-website/, redirect to it
-        if (!currentPath.startsWith('/aftek-website/')) {
-          // Extract the path and redirect to the correct base
-          var cleanPath = currentPath.replace(/\/+/g, '/').replace(/^\/+|\/+$/g, '');
-          if (cleanPath && cleanPath !== '') {
-            window.location.replace('/aftek-website/#' + cleanPath);
-          } else {
-            window.location.replace('/aftek-website/');
-          }
+      // Always redirect to the correct base with the current path
+      var currentPath = l.pathname;
+      
+      // Remove leading slash and clean up the path
+      if (currentPath.startsWith('/')) {
+        currentPath = currentPath.substring(1);
+      }
+      
+      // If we have a path, redirect to the correct base with hash
+      if (currentPath && currentPath !== '') {
+        // Clean up the path (remove multiple slashes, etc.)
+        var cleanPath = currentPath.replace(/\/+/g, '/').replace(/^\/+|\/+$/g, '');
+        if (cleanPath) {
+          // Redirect to the correct GitHub Pages base with hash routing
+          window.location.replace('/aftek-website/#' + cleanPath);
           return;
         }
-        
-        // If we're already at /aftek-website/ but with a path, convert to hash
-        if (currentPath.startsWith('/aftek-website/')) {
-          var pathAfterBase = currentPath.substring('/aftek-website/'.length);
-          if (pathAfterBase && pathAfterBase !== '') {
-            var cleanPath = pathAfterBase.replace(/\/+/g, '/').replace(/^\/+|\/+$/g, '');
-            if (cleanPath) {
-              window.location.replace('/aftek-website/#' + cleanPath);
-              return;
-            }
-          }
-        }
-        
-        // Default: go to base
-        window.location.replace('/aftek-website/');
-      } else {
-        // Local development, redirect to root
-        window.location.replace('/');
       }
+      
+      // If no path or empty, just go to the base
+      window.location.replace('/aftek-website/');
     })();
   </script>
 </head>

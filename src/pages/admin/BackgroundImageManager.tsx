@@ -8,7 +8,27 @@ import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
-import { ArrowLeft, Image as ImageIcon, Settings, Eye, Download, Trash2, Upload, Plus } from 'lucide-react';
+import { 
+  Upload, 
+  Trash2, 
+  Edit, 
+  Eye, 
+  Download, 
+  Settings as SettingsIcon, 
+  Plus, 
+  X, 
+  Check, 
+  AlertCircle,
+  Info,
+  Globe,
+  Building2,
+  Palette,
+  Database,
+  Shield,
+  Bell,
+  Mail,
+  HelpCircle
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { mediaService, BackgroundImageConfig } from '@/services/mediaService';
 import { Database } from '@/integrations/supabase/types';
@@ -319,7 +339,7 @@ const BackgroundImageManager: React.FC<BackgroundImageManagerProps> = ({ onBack 
                           variant="outline"
                           onClick={() => handleEditPage(page)}
                         >
-                          <Settings className="h-4 w-4" />
+                          <SettingsIcon className="h-4 w-4" />
                         </Button>
                         <Button
                           size="sm"

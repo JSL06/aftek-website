@@ -12,20 +12,27 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { 
-  Menu, 
-  X, 
-  Bell, 
-  Settings, 
-  LogOut, 
-  User, 
-  Home, 
+  LayoutDashboard, 
   Package, 
   FolderOpen, 
   FileText, 
+  Image, 
   Users, 
-  BarChart3, 
-  Filter,
-  Monitor
+  Settings as SettingsIcon, 
+  LogOut, 
+  Menu, 
+  X,
+  ChevronDown,
+  Globe,
+  Building2,
+  BarChart3,
+  Palette,
+  Database,
+  Shield,
+  Bell,
+  Mail,
+  HelpCircle,
+  Info
 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAdminStore } from '@/stores/adminStore';
@@ -207,7 +214,7 @@ const AdminLayout: React.FC = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => navigate('/admin/settings')}>
-                  <Settings className="mr-2 h-4 w-4" />
+                  <SettingsIcon className="mr-2 h-4 w-4" />
                   <span>{t('admin.user.settings')}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
