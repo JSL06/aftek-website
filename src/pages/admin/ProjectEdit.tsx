@@ -28,7 +28,7 @@ const languages = [
 export default function ProjectEdit() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
-  const { t, language } = useAdminLanguage();
+  const { t, language: adminLanguage } = useAdminLanguage();
 
   const { categories } = useCategories('en');
 
@@ -36,6 +36,7 @@ export default function ProjectEdit() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [allProducts, setAllProducts] = useState<UnifiedProduct[]>([]);
+  const [currentLanguage, setCurrentLanguage] = useState('en'); // Track current tab language
 
   useEffect(() => {
     const load = async () => {
@@ -46,30 +47,47 @@ export default function ProjectEdit() {
           return;
         }
         const [p, products] = await Promise.all([
-          projectService.getProject(projectId, 'en'),
+          projectService.getProject(projectId),
           productService.getAllProducts()
         ]);
         if (!p) {
           setProject(null);
         } else {
-          // Ensure objects/arrays are initialized
+          // Convert Project to MultilingualProject structure
           setProject({
-            ...p,
-            titles: p.titles || {},
-            descriptions: p.descriptions || {},
-            challenges_multilingual: p.challenges_multilingual || {},
-            solutions_multilingual: p.solutions_multilingual || {},
-            results_multilingual: p.results_multilingual || {},
-            locations_multilingual: p.locations_multilingual || {},
-            clients_multilingual: p.clients_multilingual || {},
-            categories_multilingual: p.categories_multilingual || {},
-            completion_dates_multilingual: p.completion_dates_multilingual || {},
-            project_types_multilingual: p.project_types_multilingual || {},
-            project_values_multilingual: p.project_values_multilingual || {},
-            durations_multilingual: p.durations_multilingual || {},
+            id: p.id,
+            title: p.title,
+            description: p.description,
+            location: p.location,
+            category: p.category,
+            client: p.client,
+            completion_date: p.completion_date,
+            project_type: p.project_type,
+            project_value: p.project_value || '',
+            duration: p.duration,
+            challenges: p.challenges || '',
+            solutions: p.solutions || '',
+            results: p.results || '',
             features: p.features || [],
             products_used: Array.isArray(p.products_used) ? p.products_used : [],
-            gallery_images: Array.isArray(p.gallery_images) ? p.gallery_images : []
+            image: p.image,
+            gallery_images: Array.isArray(p.gallery) ? p.gallery : [],
+            isActive: p.isActive,
+            showInFeatured: p.showInFeatured,
+            displayOrder: p.displayOrder,
+            // Initialize multilingual fields
+            titles: {},
+            descriptions: {},
+            challenges_multilingual: {},
+            solutions_multilingual: {},
+            results_multilingual: {},
+            locations_multilingual: {},
+            categories_multilingual: {},
+            clients_multilingual: {},
+            completion_dates_multilingual: {},
+            project_types_multilingual: {},
+            project_values_multilingual: {},
+            durations_multilingual: {}
           });
         }
         setAllProducts(products);
@@ -162,7 +180,7 @@ export default function ProjectEdit() {
         duration: project.duration,
         completion_date: project.completion_date,
         image: project.image,
-        gallery: project.gallery,
+        gallery: project.gallery_images,
         gallery_images: project.gallery_images,
         features: project.features || [],
         products_used: project.products_used || [],
@@ -183,7 +201,14 @@ export default function ProjectEdit() {
         durations_multilingual: project.durations_multilingual || {}
       } as any;
       const result = await projectService.updateProject(project.id, updateData);
-      setProject(result);
+      if (result) {
+        // Convert the result back to MultilingualProject format
+        setProject({
+          ...project,
+          ...result,
+          gallery_images: result.gallery || result.gallery_images || []
+        });
+      }
       toast.success(t('messages.saveSuccess'));
     } catch (e: any) {
       console.error(e);
@@ -293,7 +318,7 @@ export default function ProjectEdit() {
               {/* Features */}
               <div>
                 <label className="block text-sm font-medium mb-2">Project Features</label>
-                <FeaturesChecklist features={[]} selectedFeatures={project.features || []} onFeaturesChange={(f) => updateBasicField('features', f)} language={language} placeholder="Search features..." className="mt-2" />
+                <FeaturesChecklist features={[]} selectedFeatures={project.features || []} onFeaturesChange={(f) => updateBasicField('features', f)} language={adminLanguage} placeholder="Search features..." className="mt-2" />
                 <p className="text-xs text-muted-foreground mt-2">Selected features apply to all languages.</p>
               </div>
 
@@ -317,7 +342,7 @@ export default function ProjectEdit() {
                         <SelectItem value="none">No product</SelectItem>
                         {allProducts.map((p) => (
                           <SelectItem key={p.id} value={p.id}>
-                            {p.names?.[language] || p.name}
+                            {p.names?.[adminLanguage] || p.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -412,7 +437,7 @@ export default function ProjectEdit() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="en" className="w-full">
+              <Tabs defaultValue="en" className="w-full" onValueChange={setCurrentLanguage}>
                 <TabsList className="grid w-full grid-cols-7 h-12 mb-6">
                   {languages.map(lang => (
                     <TabsTrigger key={lang.code} value={lang.code} className="flex flex-col items-center gap-1 p-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
@@ -436,7 +461,12 @@ export default function ProjectEdit() {
                             <Type className="h-4 w-4 inline mr-2" />
                             Project Title ({lang.nativeName})
                           </label>
-                          <Input value={project.titles?.[lang.code] || ''} onChange={(e) => updateTranslation(lang.code, 'title', e.target.value)} placeholder="Enter project title" className="text-lg font-medium" />
+                          <Input 
+                            value={project.titles?.[lang.code] || ''} 
+                            onChange={(e) => updateTranslation(lang.code, 'title', e.target.value)} 
+                            placeholder="Enter project title" 
+                            className="text-lg font-medium" 
+                          />
                         </div>
                         {/* Description */}
                         <div>
@@ -444,32 +474,100 @@ export default function ProjectEdit() {
                             <FileText className="h-4 w-4 inline mr-2" />
                             Project Description ({lang.nativeName})
                           </label>
-                          <ModernRichTextEditor value={project.descriptions?.[lang.code] || ''} onChange={(v) => updateTranslation(lang.code, 'description', v)} placeholder="Enter description..." height="220px" />
+                          <ModernRichTextEditor 
+                            value={project.descriptions?.[lang.code] || ''} 
+                            onChange={(v) => updateTranslation(lang.code, 'description', v)} 
+                            placeholder="Enter description..." 
+                            height="220px" 
+                          />
                         </div>
                         {/* Location */}
                         <div>
                           <label className="block text-sm font-medium mb-2">Location ({lang.nativeName})</label>
-                          <Input value={project.locations_multilingual?.[lang.code] || ''} onChange={(e) => updateTranslation(lang.code, 'location', e.target.value)} placeholder="City, Country" />
+                          <Input 
+                            value={project.locations_multilingual?.[lang.code] || ''} 
+                            onChange={(e) => updateTranslation(lang.code, 'location', e.target.value)} 
+                            placeholder="City, Country" 
+                          />
                         </div>
                         {/* Client */}
                         <div>
                           <label className="block text-sm font-medium mb-2">Client ({lang.nativeName})</label>
-                          <Input value={project.clients_multilingual?.[lang.code] || ''} onChange={(e) => updateTranslation(lang.code, 'client', e.target.value)} placeholder="Client" />
+                          <Input 
+                            value={project.clients_multilingual?.[lang.code] || ''} 
+                            onChange={(e) => updateTranslation(lang.code, 'client', e.target.value)} 
+                            placeholder="Client" 
+                          />
+                        </div>
+
+                        {/* Category */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Category ({lang.nativeName})</label>
+                          <Input 
+                            value={project.categories_multilingual?.[lang.code] || ''} 
+                            onChange={(e) => updateTranslation(lang.code, 'category', e.target.value)} 
+                            placeholder="Category" 
+                          />
                         </div>
                         {/* Challenges */}
                         <div>
                           <label className="block text-sm font-medium mb-2">Challenges ({lang.nativeName})</label>
-                          <ModernRichTextEditor value={project.challenges_multilingual?.[lang.code] || ''} onChange={(v) => updateTranslation(lang.code, 'challenges', v)} height="160px" placeholder="Describe challenges..." />
+                          <ModernRichTextEditor 
+                            value={project.challenges_multilingual?.[lang.code] || ''} 
+                            onChange={(v) => updateTranslation(lang.code, 'challenges', v)} 
+                            height="160px" 
+                            placeholder="Describe challenges..." 
+                          />
                         </div>
                         {/* Solutions */}
                         <div>
                           <label className="block text-sm font-medium mb-2">Solutions ({lang.nativeName})</label>
-                          <ModernRichTextEditor value={project.solutions_multilingual?.[lang.code] || ''} onChange={(v) => updateTranslation(lang.code, 'solutions', v)} height="160px" placeholder="Describe solutions..." />
+                          <ModernRichTextEditor 
+                            value={project.solutions_multilingual?.[lang.code] || ''} 
+                            onChange={(v) => updateTranslation(lang.code, 'solutions', v)} 
+                            height="160px" 
+                            placeholder="Describe solutions..." 
+                          />
                         </div>
                         {/* Results */}
                         <div>
                           <label className="block text-sm font-medium mb-2">Results ({lang.nativeName})</label>
-                          <ModernRichTextEditor value={project.results_multilingual?.[lang.code] || ''} onChange={(v) => updateTranslation(lang.code, 'results', v)} height="160px" placeholder="Describe results..." />
+                          <ModernRichTextEditor 
+                            value={project.results_multilingual?.[lang.code] || ''} 
+                            onChange={(v) => updateTranslation(lang.code, 'results', v)} 
+                            height="160px" 
+                            placeholder="Describe results..." 
+                          />
+                        </div>
+
+                        {/* Project Type */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Project Type ({lang.nativeName})</label>
+                          <Input 
+                            value={project.project_types_multilingual?.[lang.code] || ''} 
+                            onChange={(e) => updateTranslation(lang.code, 'project_type', e.target.value)} 
+                            placeholder="e.g., Commercial, Residential" 
+                          />
+                        </div>
+
+                        {/* Project Value */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Project Value ({lang.nativeName})</label>
+                          <Input 
+                            value={project.project_values_multilingual?.[lang.code] || ''} 
+                            onChange={(e) => updateTranslation(lang.code, 'project_value', e.target.value)} 
+                            placeholder="e.g., $1.5M" 
+                          />
+                        </div>
+
+                        {/* Duration */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Duration ({lang.nativeName})</label>
+                          <Input 
+                            value={project.durations_multilingual?.[lang.code] || ''} 
+                            onChange={(e) => updateTranslation(lang.code, 'duration', e.target.value)} 
+                            placeholder="e.g., 12 months" 
+                          />
                         </div>
                       </div>
                     </div>

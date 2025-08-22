@@ -161,44 +161,6 @@ const ProjectCard = ({ project, onViewGallery, onViewCaseStudy, className = '' }
             </p>
           )}
           
-          {/* Features/Technologies */}
-          {project.features && project.features.length > 0 && (
-            <div className="mb-5">
-              <p className="text-xs font-medium text-muted-foreground mb-2">Features:</p>
-              <div className="flex flex-wrap gap-2">
-                {project.features.slice(0, 3).map((feature, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {feature}
-                  </Badge>
-                ))}
-                {project.features.length > 3 && (
-                  <Badge variant="outline" className="text-xs">
-                    +{project.features.length - 3} more
-                  </Badge>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Products Used */}
-          {project.products_used && project.products_used.length > 0 && (
-            <div className="mb-5">
-              <p className="text-xs font-medium text-muted-foreground mb-2">Products Used:</p>
-              <div className="flex flex-wrap gap-2">
-                {project.products_used.slice(0, 2).map((product, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
-                    {product}
-                  </Badge>
-                ))}
-                {project.products_used.length > 2 && (
-                  <Badge variant="secondary" className="text-xs">
-                    +{project.products_used.length - 2} more
-                  </Badge>
-                )}
-              </div>
-            </div>
-          )}
-          
           {/* Duration */}
           {project.duration && (
             <div className="text-xs text-muted-foreground mb-5">

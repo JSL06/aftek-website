@@ -229,24 +229,21 @@ const ProjectFilter = ({ projects, filters, onFiltersChange, className = '' }: P
             })}
           </div>
         </div>
-
-        {/* Completion Year Filter */}
+        
+        {/* Features Filter */}
         <div>
-          <h4 className="text-sm font-medium text-foreground mb-3">Completion Year</h4>
+          <h4 className="text-sm font-medium text-foreground mb-3">{t('filter.features')}</h4>
           <div className="flex flex-wrap gap-2">
-            {completionYears.map(year => (
+            {features.map(feature => (
               <FilterButton
-                key={year}
-                label={year}
-                isSelected={filters.completionYear.includes(year)}
-                onClick={() => handleYearToggle(year)}
+                key={feature}
+                label={feature}
+                isSelected={filters.features.includes(feature)}
+                onClick={() => handleFeatureToggle(feature)}
               />
             ))}
           </div>
         </div>
-        
-        {/* Spacing Block */}
-        <div className="h-4"></div>
       </div>
     </div>
   );

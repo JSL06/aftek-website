@@ -336,14 +336,14 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
 
             <Separator className="my-6" />
 
-            {/* Product Description - Added back at the bottom */}
+            {/* Product Description */}
             {(product.descriptions?.[currentLanguage] || product.description) && (
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
                   <Package className="h-5 w-5 text-primary" />
                   {t('productDetails.productDescription')}
                 </h3>
-                <div className="prose prose-sm max-w-none text-muted-foreground leading-relaxed">
+                <div className="text-muted-foreground leading-relaxed">
                   {renderHtmlContent(product.descriptions?.[currentLanguage] || product.description || '')}
                 </div>
               </div>
@@ -356,7 +356,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                   <Package className="h-5 w-5 text-primary" />
                   Specifications
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 -mx-6 px-6">
                   {product.specifications.map((spec, index) => (
                     <div key={index} className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg">
                       <span className="text-primary text-lg mt-0.5">•</span>
@@ -368,40 +368,6 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
             )}
 
             {/* Applications Section - Removed as property doesn't exist in UnifiedProduct interface */}
-
-            {/* Related Products Section */}
-            {product.related_products && Array.isArray(product.related_products) && product.related_products.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Link className="h-5 w-5 text-primary" />
-                  {t('productDetails.relatedProducts')}
-                </h3>
-                {loadingRelated ? (
-                  <div className="text-center py-4">
-                    <span className="text-sm text-muted-foreground">{t('productDetails.loadingRelated')}</span>
-                  </div>
-                ) : relatedProductsData.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {relatedProductsData.map((relatedProduct) => (
-                      <div key={relatedProduct.id} className="p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors cursor-pointer">
-                        <div className="font-medium text-sm text-foreground mb-1">
-                          {relatedProduct.names?.[currentLanguage] || relatedProduct.name}
-                        </div>
-                        {relatedProduct.category && (
-                          <div className="text-xs text-muted-foreground">
-                            {relatedProduct.category}
-                        </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-4">
-                    <span className="text-sm text-muted-foreground">{t('productDetails.noRelatedProducts')}</span>
-                  </div>
-                )}
-              </div>
-            )}
 
         </div> {/* Close content div */}
 

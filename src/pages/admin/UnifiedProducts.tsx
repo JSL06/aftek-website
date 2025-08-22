@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Edit, Trash2, Save, ArrowLeft, Package, Star, Eye, RefreshCw, Database } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, ArrowLeft, Package, Star, Eye, RefreshCw, Database, Building2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { productService, UnifiedProduct } from '@/services/productService';
 import { toast } from 'sonner';
@@ -29,6 +29,7 @@ import TranslationStatus from '@/components/TranslationStatus';
 import { useTranslation } from '@/hooks/useTranslation';
 import ImageUpload from '@/components/ui/ImageUpload';
 import FeaturesChecklist from '@/components/FeaturesChecklist';
+import { projectService } from '@/services/projectService';
 
 // Features are now loaded from the database via FeaturesChecklist component
 
@@ -37,8 +38,9 @@ const UnifiedProducts = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>('en');
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>('zh-Hant');
   const [products, setProducts] = useState<UnifiedProduct[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<UnifiedProduct[]>([]);
   const [editingProduct, setEditingProduct] = useState<UnifiedProduct | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -59,6 +61,8 @@ const UnifiedProducts = () => {
     image: '/placeholder.svg',
     tags: [],
     specifications: {},
+    projects_used: [],
+    related_products: [],
     translations: {}
   });
 
@@ -66,6 +70,7 @@ const UnifiedProducts = () => {
   useEffect(() => {
     loadProducts();
     loadCategories();
+    loadProjects();
   }, []);
 
   // Filter products when search/filter criteria change
@@ -123,6 +128,15 @@ const UnifiedProducts = () => {
     }
   };
 
+  const loadProjects = async () => {
+    try {
+      const allProjects = await projectService.getProjects();
+      setProjects(allProjects);
+    } catch (error) {
+      console.error('Error loading projects:', error);
+    }
+  };
+
   const filterProducts = () => {
     let filtered = [...products];
 
@@ -165,6 +179,8 @@ const UnifiedProducts = () => {
       image: '/placeholder.svg',
       tags: [],
       specifications: {},
+      projects_used: [],
+      related_products: [],
       translations: {}
     });
     setShowForm(true);
@@ -244,6 +260,8 @@ const UnifiedProducts = () => {
         image: formData.image,
         tags: formData.tags,
         specifications: {},
+        projects_used: formData.projects_used || [],
+        related_products: formData.related_products || [],
         names: {}
       };
 
@@ -587,6 +605,86 @@ const UnifiedProducts = () => {
                  </div>
                </div>
 
+               {/* Related Projects */}
+               <div>
+                 <Label id="related-projects-label">{t('admin.products.relatedProjects')}</Label>
+                 <div className="space-y-4" role="group" aria-labelledby="related-projects-label">
+                   <div className="flex gap-2 mb-4">
+                     <Button
+                       type="button"
+                       variant="outline"
+                       size="sm"
+                       onClick={() => {
+                         // Auto-suggest projects with similar category
+                         const suggestions = projects
+                           .filter(p => p.id !== formData.id && p.isActive)
+                           .filter(p => p.category === formData.category)
+                           .slice(0, 5)
+                           .map(p => p.id);
+                         
+                         setFormData(prev => ({
+                           ...prev,
+                           projects_used: [...new Set([...(prev.projects_used || []), ...suggestions])]
+                         }));
+                       }}
+                     >
+                       <Building2 className="h-4 w-4 mr-2" />
+                       Auto-Suggest by Category
+                     </Button>
+                     <Button
+                       type="button"
+                       variant="outline"
+                       size="sm"
+                       onClick={() => setFormData(prev => ({ ...prev, projects_used: [] }))}
+                     >
+                       Clear All
+                     </Button>
+                   </div>
+                   
+                   <div className="border rounded-lg p-4 max-h-48 overflow-y-auto">
+                     <div className="space-y-2">
+                       {projects
+                         .filter(p => p.id !== formData.id && p.isActive)
+                         .map(project => (
+                           <div key={project.id} className="flex items-center space-x-2 text-sm p-2 hover:bg-muted rounded">
+                             <input
+                               type="checkbox"
+                               id={`related-project-${project.id}`}
+                               name="projects_used"
+                               value={project.id}
+                               checked={formData.projects_used?.includes(project.id) || false}
+                               onChange={(e) => {
+                                 const relatedProjects = formData.projects_used || [];
+                                 if (e.target.checked) {
+                                   setFormData(prev => ({
+                                     ...prev,
+                                     projects_used: [...relatedProjects, project.id]
+                                   }));
+                                 } else {
+                                   setFormData(prev => ({
+                                     ...prev,
+                                     projects_used: relatedProjects.filter(id => id !== project.id)
+                                   }));
+                                 }
+                               }}
+                             />
+                             <label htmlFor={`related-project-${project.id}`} className="flex-1">
+                               <span className="font-medium">{project.title}</span>
+                               <span className="text-muted-foreground ml-2">({project.category})</span>
+                               <Badge variant="secondary" className="text-xs ml-2">
+                                 {project.client}
+                               </Badge>
+                             </label>
+                           </div>
+                         ))}
+                     </div>
+                   </div>
+                   <p className="text-xs text-muted-foreground">
+                     Selected: {formData.projects_used?.length || 0} related projects
+                   </p>
+                 </div>
+               </div>
+
                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                  <div className="flex items-center space-x-2">
                    <Switch
@@ -799,13 +897,13 @@ const UnifiedProducts = () => {
                         id={`featured-${product.id}`}
                         name={`featured-${product.id}`}
                         checked={product.showInFeatured}
-                        onCheckedChange={() => toggleFeaturedStatus(product.id, product.showInFeatured)}
+                        onCheckedChange={() => productService.updateProduct(product.id, { showInFeatured: !product.showInFeatured }).then(loadProducts)}
                       />
                       <span className="text-sm font-medium">{t('admin.products.featured')}</span>
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mt-4">
                     <Button size="sm" variant="outline" onClick={() => handleEdit(product)} className="flex-1">
                       <Edit className="h-4 w-4 mr-1" />
                       {t('admin.products.edit')}
@@ -866,4 +964,4 @@ const UnifiedProducts = () => {
   );
 };
 
-export default UnifiedProducts; 
+export default UnifiedProducts;
