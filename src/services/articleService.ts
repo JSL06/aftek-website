@@ -239,9 +239,22 @@ class ArticleService {
         slug = this.generateSlug(article.titles.en);
       }
 
-      const articleData = {
-        ...article,
-        slug
+      // Only send fields that exist in the database
+      const articleData: any = {
+        slug,
+        featured_image: article.featured_image,
+        read_time: article.read_time,
+        published_at: article.published_at,
+        is_published: article.is_published,
+        titles: article.titles,
+        contents: article.contents,
+        excerpts: article.excerpts,
+        authors_multilingual: article.authors_multilingual,
+        categories_multilingual: article.categories_multilingual,
+        content_blocks: article.content_blocks,
+        related_products: article.related_products,
+        related_links: article.related_links,
+        custom_buttons: article.custom_buttons
       };
 
       const { data, error } = await supabase
@@ -266,9 +279,34 @@ class ArticleService {
 
   async updateArticle(id: string, updates: Partial<Article>): Promise<Article | null> {
     try {
+      // Only send fields that exist in the database
+      const validUpdates: any = {};
+      
+      // Basic fields
+      if (updates.slug !== undefined) validUpdates.slug = updates.slug;
+      if (updates.featured_image !== undefined) validUpdates.featured_image = updates.featured_image;
+      if (updates.read_time !== undefined) validUpdates.read_time = updates.read_time;
+      if (updates.published_at !== undefined) validUpdates.published_at = updates.published_at;
+      if (updates.is_published !== undefined) validUpdates.is_published = updates.is_published;
+      
+      // Multilingual fields
+      if (updates.titles !== undefined) validUpdates.titles = updates.titles;
+      if (updates.contents !== undefined) validUpdates.contents = updates.contents;
+      if (updates.excerpts !== undefined) validUpdates.excerpts = updates.excerpts;
+      if (updates.authors_multilingual !== undefined) validUpdates.authors_multilingual = updates.authors_multilingual;
+      if (updates.categories_multilingual !== undefined) validUpdates.categories_multilingual = updates.categories_multilingual;
+      
+      // Content blocks
+      if (updates.content_blocks !== undefined) validUpdates.content_blocks = updates.content_blocks;
+      
+      // Related content fields
+      if (updates.related_products !== undefined) validUpdates.related_products = updates.related_products;
+      if (updates.related_links !== undefined) validUpdates.related_links = updates.related_links;
+      if (updates.custom_buttons !== undefined) validUpdates.custom_buttons = updates.custom_buttons;
+      
       const { data, error } = await supabase
         .from('articles')
-        .update(updates)
+        .update(validUpdates)
         .eq('id', id)
         .select()
         .single();

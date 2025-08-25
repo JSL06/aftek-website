@@ -23,8 +23,14 @@ import {
   Save,
   Plus,
   Columns,
-  Grid3X3
+  Grid3X3,
+  Package,
+  ExternalLink,
+  X,
+  Search,
+  Edit
 } from 'lucide-react';
+import { productService, UnifiedProduct } from '@/services/productService';
 
 export interface ContentBlock {
   id: string;
@@ -53,6 +59,13 @@ interface InlineArticleEditorProps {
   onSave?: () => void;
   onPreview?: () => void;
   readOnly?: boolean;
+  // Related content props
+  relatedProducts?: string[];
+  onRelatedProductsChange?: (products: string[]) => void;
+  relatedLinks?: Array<{ title: string; url: string; description?: string }>;
+  onRelatedLinksChange?: (links: Array<{ title: string; url: string; description?: string }>) => void;
+  customButtons?: Array<{ text: string; url: string; variant?: 'default' | 'outline' | 'secondary' | 'destructive' }>;
+  onCustomButtonsChange?: (buttons: Array<{ text: string; url: string; variant?: 'default' | 'outline' | 'secondary' | 'destructive' }>) => void;
 }
 
 const fontSizeOptions = [
@@ -89,7 +102,13 @@ export default function InlineArticleEditor({
   onContentChange, 
   onSave, 
   onPreview,
-  readOnly = false
+  readOnly = false,
+  relatedProducts = [],
+  onRelatedProductsChange,
+  relatedLinks = [],
+  onRelatedLinksChange,
+  customButtons = [],
+  onCustomButtonsChange
 }: InlineArticleEditorProps) {
   const [content, setContent] = useState<ContentBlock[]>(initialContent);
   const [selectedBlock, setSelectedBlock] = useState<string | null>(null);
@@ -98,6 +117,11 @@ export default function InlineArticleEditor({
   const [dragStartIndex, setDragStartIndex] = useState(-1);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
+  
+  // Product selection state
+  const [products, setProducts] = useState<UnifiedProduct[]>([]);
+  const [showProductSelector, setShowProductSelector] = useState(false);
+  const [productSearch, setProductSearch] = useState('');
 
   // Initialize with default content if empty
   useEffect(() => {
@@ -119,6 +143,22 @@ export default function InlineArticleEditor({
       onContentChange([defaultBlock]);
     }
   }, []);
+
+  // Fetch products for selection
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const allProducts = await productService.getAllProducts();
+        setProducts(allProducts);
+      } catch (error) {
+        console.error('Error loading products:', error);
+      }
+    };
+    
+    if (!readOnly) {
+      loadProducts();
+    }
+  }, [readOnly]);
 
   const createNewBlock = useCallback((type: ContentBlock['type'], afterId?: string) => {
     const newBlock: ContentBlock = {
@@ -801,7 +841,7 @@ export default function InlineArticleEditor({
       {!readOnly && renderToolbar()}
       
       <div className="p-6 max-w-6xl mx-auto">
-        {/* Quick Add Buttons - Hidden in read-only mode */}
+                {/* Quick Add Buttons - Hidden in read-only mode */}
         {!readOnly && (
           <div className="flex items-center gap-2 mb-6 p-4 bg-gray-50 rounded-lg">
           <span className="text-sm font-medium text-gray-700">Quick Add:</span>
@@ -841,16 +881,36 @@ export default function InlineArticleEditor({
             <Type className="h-4 w-4" />
             List
           </Button>
-                      <Button
-              variant="outline"
-              size="sm"
-              onClick={() => createNewBlock('row')}
-              className="flex items-center gap-2"
-            >
-              <Columns className="h-4 w-4" />
-              Multi-column Row
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => createNewBlock('row')}
+            className="flex items-center gap-2"
+          >
+            <Columns className="h-4 w-4" />
+            Multi-column Row
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const buttonText = prompt('Enter button text:');
+              const buttonUrl = prompt('Enter button URL:');
+              if (buttonText && buttonUrl) {
+                const newButtons = [...(customButtons || []), {
+                  text: buttonText.trim(),
+                  url: buttonUrl.trim(),
+                  variant: 'default' as const
+                }];
+                onCustomButtonsChange?.(newButtons);
+              }
+            }}
+            className="flex items-center gap-2"
+          >
+            <ExternalLink className="h-4 w-4" />
+            Custom Button
+          </Button>
+        </div>
         )}
 
         {/* Content Editor */}
@@ -891,6 +951,179 @@ export default function InlineArticleEditor({
         >
           {content.map((block, index) => renderBlock(block, index))}
           
+          {/* Related Products Display */}
+          {relatedProducts && relatedProducts.length > 0 && (
+            <div className="mt-8 p-4 bg-blue-50 rounded-lg">
+              <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                Related Products
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {relatedProducts.map((productName, index) => (
+                  <div key={index} className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border">
+                    <span className="text-sm font-medium">{productName}</span>
+                    {!readOnly && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const newName = prompt('Edit product name:', productName);
+                          if (newName && newName.trim() && newName !== productName) {
+                            const newProducts = [...relatedProducts];
+                            newProducts[index] = newName.trim();
+                            onRelatedProductsChange?.(newProducts);
+                          }
+                        }}
+                        className="h-5 w-5 p-0 hover:bg-blue-100"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    )}
+                    {!readOnly && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const newProducts = relatedProducts.filter((_, i) => i !== index);
+                          onRelatedProductsChange?.(newProducts);
+                        }}
+                        className="h-5 w-5 p-0 hover:bg-red-100 text-red-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Related Links Display */}
+          {relatedLinks && relatedLinks.length > 0 && (
+            <div className="mt-8 p-4 bg-green-50 rounded-lg">
+              <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Link className="h-5 w-5" />
+                Related Links
+              </h4>
+              <div className="space-y-2">
+                {relatedLinks.map((link, index) => (
+                  <div key={index} className="flex items-center gap-3 bg-white p-3 rounded-lg border">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium">{link.title}</div>
+                      <div className="text-xs text-gray-500">{link.url}</div>
+                      {link.description && (
+                        <div className="text-xs text-gray-600 mt-1">{link.description}</div>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(link.url, '_blank')}
+                      className="cursor-pointer"
+                    >
+                      Visit Link
+                    </Button>
+                    {!readOnly && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const newTitle = prompt('Edit link title:', link.title);
+                          const newUrl = prompt('Edit link URL:', link.url);
+                          const newDesc = prompt('Edit link description:', link.description || '');
+                          if (newTitle && newUrl) {
+                            const newLinks = [...relatedLinks];
+                            newLinks[index] = { 
+                              title: newTitle.trim(), 
+                              url: newUrl.trim(), 
+                              description: newDesc || undefined 
+                            };
+                            onRelatedLinksChange?.(newLinks);
+                          }
+                        }}
+                        className="h-6 w-6 p-0 hover:bg-blue-100"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    )}
+                    {!readOnly && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const newLinks = relatedLinks.filter((_, i) => i !== index);
+                          onRelatedLinksChange?.(newLinks);
+                        }}
+                        className="h-6 w-6 p-0 hover:bg-red-100 text-red-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Custom Buttons Display */}
+          {customButtons && customButtons.length > 0 && (
+            <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+              <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <ExternalLink className="h-5 w-5" />
+                Custom Buttons
+              </h4>
+              <div className="flex flex-wrap gap-3">
+                {customButtons.map((button, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <Button 
+                      variant={button.variant || 'default'} 
+                      size="sm"
+                      onClick={() => window.open(button.url, '_blank')}
+                      className="cursor-pointer"
+                    >
+                      {button.text}
+                    </Button>
+                    {!readOnly && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const newText = prompt('Edit button text:', button.text);
+                          const newUrl = prompt('Edit button URL:', button.url);
+                          if (newText && newUrl) {
+                            const newButtons = [...customButtons];
+                            newButtons[index] = { 
+                              text: newText.trim(), 
+                              url: newUrl.trim(), 
+                              variant: button.variant 
+                            };
+                            onCustomButtonsChange?.(newButtons);
+                          }
+                        }}
+                        className="h-6 w-6 p-0 hover:bg-blue-100"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    )}
+                    {!readOnly && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const newButtons = customButtons.filter((_, i) => i !== index);
+                          onCustomButtonsChange?.(newButtons);
+                        }}
+                        className="h-6 w-6 p-0 hover:bg-red-100 text-red-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
           {/* Add new block button */}
           <div className="text-center mt-8">
             <Button
@@ -903,6 +1136,199 @@ export default function InlineArticleEditor({
             </Button>
           </div>
         </div>
+
+        {/* Related Content Sections */}
+        {!readOnly && (
+          <div className="mt-8 space-y-6">
+            {/* Related Products */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                Related Products
+              </h3>
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {relatedProducts?.map((productName, index) => (
+                    <div key={index} className="flex items-center gap-2 bg-muted px-3 py-2 rounded-lg hover:bg-muted/80 transition-colors">
+                      <span className="text-sm cursor-pointer hover:text-blue-600" 
+                            onClick={() => {
+                              const newName = prompt('Edit product name:', productName);
+                              if (newName && newName.trim() && newName !== productName) {
+                                const newProducts = [...(relatedProducts || [])];
+                                newProducts[index] = newName.trim();
+                                onRelatedProductsChange?.(newProducts);
+                              }
+                            }}>
+                        {productName}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const newProducts = relatedProducts?.filter((_, i) => i !== index) || [];
+                          onRelatedProductsChange?.(newProducts);
+                        }}
+                        className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Product Selector */}
+                <div className="space-y-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowProductSelector(!showProductSelector)}
+                    className="w-full"
+                  >
+                    <Search className="h-4 w-4 mr-2" />
+                    {showProductSelector ? 'Hide Product Selector' : 'Show Product Selector'}
+                  </Button>
+                  
+                  {showProductSelector && (
+                    <div className="border rounded-lg p-4 bg-gray-50">
+                      <Input
+                        placeholder="Search products..."
+                        value={productSearch}
+                        onChange={(e) => setProductSearch(e.target.value)}
+                        className="mb-3"
+                      />
+                      <div className="max-h-60 overflow-y-auto space-y-2">
+                        {products
+                          .filter(product => 
+                            product.name.toLowerCase().includes(productSearch.toLowerCase()) ||
+                            product.category.toLowerCase().includes(productSearch.toLowerCase())
+                          )
+                          .map(product => (
+                            <div
+                              key={product.id}
+                              className="flex items-center gap-3 p-2 bg-white rounded border hover:bg-gray-50 cursor-pointer"
+                              onClick={() => {
+                                if (!relatedProducts?.includes(product.name)) {
+                                  const newProducts = [...(relatedProducts || []), product.name];
+                                  onRelatedProductsChange?.(newProducts);
+                                }
+                              }}
+                            >
+                              {product.image_url && (
+                                <img 
+                                  src={product.image_url} 
+                                  alt={product.name}
+                                  className="w-8 h-8 object-cover rounded"
+                                />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-medium truncate">{product.name}</div>
+                                <div className="text-xs text-gray-500 truncate">{product.category}</div>
+                              </div>
+                              {relatedProducts?.includes(product.name) && (
+                                <Badge variant="secondary" className="text-xs">
+                                  Added
+                                </Badge>
+                              )}
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Related Links */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Link className="h-5 w-5" />
+                Related Links
+              </h3>
+              <div className="space-y-4">
+                {relatedLinks?.map((link, index) => (
+                  <div key={index} className="flex items-center gap-3 p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate cursor-pointer hover:text-blue-600" 
+                           onClick={() => {
+                             const newTitle = prompt('Edit link title:', link.title);
+                             if (newTitle && newTitle.trim() && newTitle !== link.title) {
+                               const newLinks = [...(relatedLinks || [])];
+                               newLinks[index] = { ...link, title: newTitle.trim() };
+                               onRelatedLinksChange?.(newLinks);
+                             }
+                           }}>
+                        {link.title}
+                      </div>
+                      <div className="text-xs text-gray-500 truncate cursor-pointer hover:text-blue-600" 
+                           onClick={() => {
+                             const newUrl = prompt('Edit link URL:', link.url);
+                             if (newUrl && newUrl.trim() && newUrl !== link.url) {
+                               const newLinks = [...(relatedLinks || [])];
+                               newLinks[index] = { ...link, url: newUrl.trim() };
+                               onRelatedLinksChange?.(newLinks);
+                             }
+                           }}>
+                        {link.url}
+                      </div>
+                      {link.description && (
+                        <div className="text-xs text-gray-600 mt-1 cursor-pointer hover:text-blue-600" 
+                             onClick={() => {
+                               const newDesc = prompt('Edit link description:', link.description);
+                               if (newDesc !== link.description) {
+                                 const newLinks = [...(relatedLinks || [])];
+                                 newLinks[index] = { ...link, description: newDesc || undefined };
+                                 onRelatedLinksChange?.(newLinks);
+                               }
+                             }}>
+                          {link.description}
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const newLinks = relatedLinks?.filter((_, i) => i !== index) || [];
+                        onRelatedLinksChange?.(newLinks);
+                      }}
+                      className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+                <div className="space-y-3">
+                  <Input placeholder="Link title..." className="h-10" id={`link-title-${Date.now()}`} />
+                  <Input placeholder="URL..." className="h-10" id={`link-url-${Date.now()}`} />
+                  <Input placeholder="Description (optional)..." className="h-10" id={`link-desc-${Date.now()}`} />
+                  <Button 
+                    onClick={() => {
+                      const titleInput = document.getElementById(`link-title-${Date.now()}`) as HTMLInputElement;
+                      const urlInput = document.getElementById(`link-url-${Date.now()}`) as HTMLInputElement;
+                      const descInput = document.getElementById(`link-desc-${Date.now()}`) as HTMLInputElement;
+                      
+                      if (titleInput?.value && urlInput?.value) {
+                        const newLinks = [...(relatedLinks || []), {
+                          title: titleInput.value,
+                          url: urlInput.value,
+                          description: descInput?.value || undefined
+                        }];
+                        onRelatedLinksChange?.(newLinks);
+                        titleInput.value = '';
+                        urlInput.value = '';
+                        descInput.value = '';
+                      }
+                    }} 
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 mr-2" /> Add Link
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+
+          </div>
+        )}
 
         {/* Hidden file input for image uploads - Hidden in read-only mode */}
         {!readOnly && (
