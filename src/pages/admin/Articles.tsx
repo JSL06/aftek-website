@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,6 +26,7 @@ const articleTemplates = [
 
 export default function AdminArticles() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const { language: currentLanguage } = useAdminLanguage();
   
@@ -58,16 +59,21 @@ export default function AdminArticles() {
   useEffect(() => {
     loadArticles();
     loadTags();
+  }, []);
+
+  // Watch for URL changes to handle edit mode
+  useEffect(() => {
+    const editId = searchParams.get('edit');
     
-    // Check if we're editing an existing article
-    const urlParams = new URLSearchParams(window.location.search);
-    const editId = urlParams.get('edit');
     if (editId) {
       setArticleId(editId);
       setIsEditing(true);
       loadArticle(editId);
+    } else {
+      setIsEditing(false);
+      setArticleId(null);
     }
-  }, []);
+  }, [searchParams]);
 
   const loadArticles = async () => {
     setIsLoading(true);
@@ -181,7 +187,10 @@ export default function AdminArticles() {
           description: isEditing ? "Article updated successfully" : "Article created successfully"
         });
         
-        if (!isEditing) {
+        if (isEditing) {
+          // Go back to articles list after editing
+          setSearchParams({});
+        } else {
           // Reset form for new article
           setArticle({
             slug: '',
@@ -406,7 +415,7 @@ export default function AdminArticles() {
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Edit Article</h1>
-          <Button onClick={() => setIsEditing(false)} variant="outline">
+          <Button onClick={() => setSearchParams({})} variant="outline">
             Back to Articles
           </Button>
         </div>
@@ -570,7 +579,7 @@ export default function AdminArticles() {
 
         {/* Save Button */}
         <div className="flex justify-end space-x-4">
-          <Button onClick={() => setIsEditing(false)} variant="outline">
+          <Button onClick={() => setSearchParams({})} variant="outline">
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={isSaving}>
@@ -633,7 +642,7 @@ export default function AdminArticles() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => article.id && navigate(`/admin/articles?edit=${article.id}`)}
+                      onClick={() => article.id && setSearchParams({ edit: article.id })}
                       disabled={!article.id}
                     >
                       <Edit className="w-4 h-4" />
