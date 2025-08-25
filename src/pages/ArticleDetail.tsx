@@ -28,6 +28,9 @@ const ArticleDetail = () => {
       try {
         const data = await articleService.getArticle(slug);
         if (data && data.is_published) {
+          console.log('Article loaded:', data);
+          console.log('Current language:', currentLanguage);
+          console.log('Content blocks:', data.content_blocks);
           setArticle(data);
         } else {
           setError('Article not found or not published');
@@ -90,19 +93,41 @@ const ArticleDetail = () => {
 
   // Helper function to render content blocks
   const renderContentBlock = (block: any) => {
+    // Get localized content for the current language
+    const getLocalizedBlockContent = (block: any) => {
+      console.log('Rendering block:', block);
+      console.log('Current language:', currentLanguage);
+      console.log('Block content_multilingual:', block.content_multilingual);
+      
+      if (block.content_multilingual && block.content_multilingual[currentLanguage]) {
+        console.log('Using localized content for', currentLanguage, ':', block.content_multilingual[currentLanguage]);
+        return block.content_multilingual[currentLanguage];
+      }
+      // Fallback to English
+      if (block.content_multilingual && block.content_multilingual['en']) {
+        console.log('Using English fallback:', block.content_multilingual['en']);
+        return block.content_multilingual['en'];
+      }
+      // Fallback to original content
+      console.log('Using original content:', block.content);
+      return block.content;
+    };
+
+        const localizedContent = getLocalizedBlockContent(block);
+    
     switch (block.type) {
       case 'heading':
         const HeadingTag = `h${block.fontSize === 'h1' ? '1' : block.fontSize === 'h2' ? '2' : '3'}` as keyof JSX.IntrinsicElements;
         return (
           <HeadingTag className={`font-${block.fontWeight} ${block.fontStyle === 'italic' ? 'italic' : ''} ${block.textDecoration === 'underline' ? 'underline' : ''}`}>
-            {block.content}
+            {localizedContent}
           </HeadingTag>
         );
       
       case 'paragraph':
         return (
           <p className={`font-${block.fontWeight} ${block.fontStyle === 'italic' ? 'italic' : ''} ${block.textDecoration === 'underline' ? 'underline' : ''}`}>
-            {block.content}
+            {localizedContent}
           </p>
         );
       
@@ -121,7 +146,7 @@ const ArticleDetail = () => {
         );
       
       case 'list':
-        const lines = block.content.split('\n');
+        const lines = localizedContent.split('\n');
         const title = lines[0];
         const items = lines.slice(1).filter(line => line.trim());
         
@@ -140,7 +165,7 @@ const ArticleDetail = () => {
         return (
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center">
-              <h4 className="font-semibold mb-2">{block.content}</h4>
+              <h4 className="font-semibold mb-2">{localizedContent}</h4>
               <p className="text-gray-600">Left column content</p>
             </div>
             <div className="text-center">
@@ -151,7 +176,7 @@ const ArticleDetail = () => {
         );
       
       default:
-        return <p className="text-gray-700">{block.content}</p>;
+        return <p className="text-gray-700">{localizedContent}</p>;
     }
   };
 
@@ -265,16 +290,14 @@ const ArticleDetail = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="relative bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
-        <div className="absolute inset-0">
-          {article.featured_image && (
-            <img 
-              src={article.featured_image} 
-              alt={getLocalizedText(article, 'titles', 'Article')}
-              className="w-full h-full object-cover opacity-20"
-            />
-          )}
-        </div>
+      <div className="relative text-white" style={{
+        background: article.featured_image 
+          ? `linear-gradient(rgba(37, 99, 235, 0.8), rgba(79, 70, 229, 0.8)), url(${article.featured_image})`
+          : 'linear-gradient(to right, rgb(37, 99, 235), rgb(79, 70, 229))'
+      }}>
+        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{
+          backgroundImage: article.featured_image ? `url(${article.featured_image})` : 'none'
+        }}></div>
         <div className="relative container mx-auto px-4 py-20">
           {/* Back Button - Positioned at top left */}
           <div className="absolute top-4 left-4 z-10">
