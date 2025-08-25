@@ -244,6 +244,16 @@ export default function InlineArticleEditor({
     setContent(newContent);
   }, [content]);
 
+  const handleTextChange = useCallback((blockId: string, newContent: string) => {
+    const newContentArray = content.map(block => 
+      block.id === blockId 
+        ? { ...block, content: newContent }
+        : block
+    );
+    setContent(newContentArray);
+    onContentChange(newContentArray);
+  }, [content, onContentChange]);
+
   const handleImageUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>, blockId: string) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -459,9 +469,19 @@ export default function InlineArticleEditor({
             onDragOver={!readOnly ? handleDragOver : undefined}
             onDrop={!readOnly ? (e) => handleDrop(e, index) : undefined}
           >
-            <h2 className={textClasses}>
-              {block.content}
-            </h2>
+            {!readOnly && block.isSelected ? (
+              <Input
+                value={block.content}
+                onChange={(e) => handleTextChange(block.id, e.target.value)}
+                className={`${textClasses} border-2 border-blue-500 focus:border-blue-600`}
+                placeholder="Enter heading..."
+                autoFocus
+              />
+            ) : (
+              <h2 className={textClasses}>
+                {block.content || 'Click to edit heading...'}
+              </h2>
+            )}
           </div>
         );
 
@@ -477,9 +497,19 @@ export default function InlineArticleEditor({
             onDragOver={!readOnly ? handleDragOver : undefined}
             onDrop={!readOnly ? (e) => handleDrop(e, index) : undefined}
           >
-            <p className={textClasses}>
-              {block.content}
-            </p>
+            {!readOnly && block.isSelected ? (
+              <Input
+                value={block.content}
+                onChange={(e) => handleTextChange(block.id, e.target.value)}
+                className={`${textClasses} border-2 border-blue-500 focus:border-blue-600`}
+                placeholder="Enter text content..."
+                autoFocus
+              />
+            ) : (
+              <p className={textClasses}>
+                {block.content || 'Click to edit text...'}
+              </p>
+            )}
           </div>
         );
 

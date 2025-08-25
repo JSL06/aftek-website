@@ -26,12 +26,11 @@ const languages = [
   { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', flag: '🇻🇳' }
 ];
 
-const articleTemplates = [
-  { id: 'news', name: 'News', description: 'Company news and announcements', icon: '📰' },
-  { id: 'technical', name: 'Technical', description: 'Technical articles and guides', icon: '🔧' },
-  { id: 'case-study', name: 'Case Study', description: 'Project case studies and success stories', icon: '📊' },
-  { id: 'industry', name: 'Industry', description: 'Industry insights and trends', icon: '🏭' },
-  { id: 'product', name: 'Product', description: 'Product information and updates', icon: '📦' }
+// Project categories (same as projects page)
+const projectCategories = [
+  'Infrastructure', 'Industrial', 'High-Tech', 'Commercial', 'Residential', 
+  'Healthcare', 'Education', 'Transportation', 'Energy', 'Water Treatment', 
+  'Manufacturing', 'General'
 ];
 
 export default function AdminArticles() {
@@ -61,7 +60,7 @@ export default function AdminArticles() {
     content_blocks: []
   });
   
-  const [selectedTemplate, setSelectedTemplate] = useState('news');
+  const [selectedCategory, setSelectedCategory] = useState('General');
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
@@ -71,6 +70,8 @@ export default function AdminArticles() {
   const [relatedProducts, setRelatedProducts] = useState<string[]>([]);
   const [relatedLinks, setRelatedLinks] = useState<Array<{ title: string; url: string; description?: string }>>([]);
   const [customButtons, setCustomButtons] = useState<Array<{ text: string; url: string; variant?: 'default' | 'outline' | 'secondary' | 'destructive' }>>([]);
+  
+
 
   useEffect(() => {
     loadArticles();
@@ -136,14 +137,9 @@ export default function AdminArticles() {
         setRelatedLinks(data.related_links || []);
         setCustomButtons(data.custom_buttons || []);
         
-        // Set template based on category
-        const category = data.categories_multilingual?.en || '';
-        const template = articleTemplates.find(t => 
-          t.name.toLowerCase() === category.toLowerCase()
-        );
-        if (template) {
-          setSelectedTemplate(template.id);
-        }
+        // Set category from multilingual data
+        const category = data.categories_multilingual?.en || 'General';
+        setSelectedCategory(category);
       }
     } catch (error) {
       console.error('Error loading article:', error);
@@ -176,7 +172,7 @@ export default function AdminArticles() {
         content_blocks: contentBlocks,
         categories_multilingual: {
           ...article.categories_multilingual,
-          en: selectedTemplate
+          en: selectedCategory
         },
         related_products: relatedProducts,
         related_links: relatedLinks,
@@ -232,7 +228,7 @@ export default function AdminArticles() {
           setContentBlocks([]);
           setSelectedTags([]);
           setUploadedImages([]);
-          setSelectedTemplate('news');
+          setSelectedCategory('General');
         }
         
         await loadArticles();
@@ -389,7 +385,7 @@ export default function AdminArticles() {
       featured_image: '',
       content_blocks: testBlocks
     });
-    setSelectedTemplate('technical');
+    setSelectedCategory('Technical');
     setSelectedTags(['Technical', 'Test', 'Components']);
     
     // Set test data for new related content fields
@@ -548,15 +544,15 @@ export default function AdminArticles() {
               <h2 className="text-xl font-semibold mb-6">Article Settings</h2>
               <div className="space-y-6">
                 <div>
-                  <Label htmlFor="template" className="text-sm font-medium mb-3 block">Article Template</Label>
-                  <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                  <Label htmlFor="category" className="text-sm font-medium mb-3 block">Article Category</Label>
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                     <SelectTrigger className="h-12">
-                      <SelectValue placeholder="Select template" />
+                      <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {articleTemplates.map(template => (
-                        <SelectItem key={template.id} value={template.id}>
-                          {template.icon} {template.name}
+                      {projectCategories.map(category => (
+                        <SelectItem key={category} value={category}>
+                          {category}
                         </SelectItem>
                       ))}
                     </SelectContent>

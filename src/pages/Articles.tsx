@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Link, useNavigate } from 'react-router-dom';
-import { Calendar, Clock, User, Eye, ArrowRight, FileText, Newspaper, TrendingUp, Lightbulb, BookOpen, BarChart3, Globe, Zap } from 'lucide-react';
+import { Calendar, Clock, User, Eye, ArrowRight, FileText, TrendingUp, BookOpen, BarChart3, Zap, Building, Home, Heart, Truck, Droplets, Settings } from 'lucide-react';
 import bgMain from '@/assets/17580.jpg';
 import bgTitle from '@/assets/pexels-pixabay-159306.png';
 import articleService, { Article, ArticleTag } from '@/services/articleService';
@@ -14,53 +14,13 @@ import articleService, { Article, ArticleTag } from '@/services/articleService';
 interface ArticleFilters {
   search: string;
   category: string[];
-  template: string;
 }
 
-// Article Template Types
-const articleTemplates = [
-  { 
-    id: 'news', 
-    name: 'News Article', 
-    icon: Newspaper,
-    description: 'Standard news format with headline, lead, and body',
-    className: 'bg-blue-50 border-blue-200 text-blue-800'
-  },
-  { 
-    id: 'feature', 
-    name: 'Feature Story', 
-    icon: FileText,
-    description: 'In-depth feature with detailed analysis',
-    className: 'bg-purple-50 border-purple-200 text-purple-800'
-  },
-  { 
-    id: 'technical', 
-    name: 'Technical Article', 
-    icon: Lightbulb,
-    description: 'Technical content with diagrams and explanations',
-    className: 'bg-green-50 border-green-200 text-green-800'
-  },
-  { 
-    id: 'case-study', 
-    name: 'Case Study', 
-    icon: BookOpen,
-    description: 'Real-world examples and success stories',
-    className: 'bg-orange-50 border-orange-200 text-orange-800'
-  },
-  { 
-    id: 'analysis', 
-    name: 'Market Analysis', 
-    icon: BarChart3,
-    description: 'Data-driven market insights and trends',
-    className: 'bg-red-50 border-red-200 text-red-800'
-  },
-  { 
-    id: 'opinion', 
-    name: 'Opinion Piece', 
-    icon: Globe,
-    description: 'Expert opinions and industry perspectives',
-    className: 'bg-indigo-50 border-indigo-200 text-indigo-800'
-  }
+// Project categories (same as projects page)
+const projectCategories = [
+  'Infrastructure', 'Industrial', 'High-Tech', 'Commercial', 'Residential', 
+  'Healthcare', 'Education', 'Transportation', 'Energy', 'Water Treatment', 
+  'Manufacturing', 'General'
 ];
 
 // Article Card Component with Template-based Design
@@ -80,15 +40,26 @@ const ArticleCard: React.FC<{ article: Article }> = ({ article }) => {
     return fallback;
   };
 
-  const getTemplateInfo = (category: string) => {
-    return articleTemplates.find(template => 
-      template.id === category.toLowerCase() || 
-      template.name.toLowerCase().includes(category.toLowerCase())
-    ) || articleTemplates[0];
+  const getCategoryIcon = (category: string) => {
+    const iconMap: Record<string, any> = {
+      'Infrastructure': BarChart3,
+      'Industrial': TrendingUp,
+      'High-Tech': Zap,
+      'Commercial': Building,
+      'Residential': Home,
+      'Healthcare': Heart,
+      'Education': BookOpen,
+      'Transportation': Truck,
+      'Energy': Zap,
+      'Water Treatment': Droplets,
+      'Manufacturing': Settings,
+      'General': FileText
+    };
+    return iconMap[category] || FileText;
   };
 
-  const templateInfo = getTemplateInfo(article.categories_multilingual?.en || 'news');
-  const IconComponent = templateInfo.icon;
+  const category = article.categories_multilingual?.en || 'General';
+  const IconComponent = getCategoryIcon(category);
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
@@ -101,9 +72,9 @@ const ArticleCard: React.FC<{ article: Article }> = ({ article }) => {
           />
         )}
         <div className="absolute top-4 left-4">
-          <Badge className={`${templateInfo.className} border`}>
+          <Badge className="bg-blue-50 border-blue-200 text-blue-800 border">
             <IconComponent className="w-4 h-4 mr-2" />
-            {templateInfo.name}
+            {category}
           </Badge>
         </div>
       </div>
@@ -174,8 +145,7 @@ export default function Articles() {
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<ArticleFilters>({
     search: '',
-    category: ['all'],
-    template: 'all'
+    category: ['all']
   });
 
   useEffect(() => {
@@ -219,13 +189,7 @@ export default function Articles() {
       );
     }
 
-    // Apply template filter
-    if (filters.template && filters.template !== 'all') {
-      filtered = filtered.filter(article => 
-        article.categories_multilingual?.[currentLanguage] === filters.template ||
-        article.categories_multilingual?.['en'] === filters.template
-      );
-    }
+
 
     setFilteredArticles(filtered);
   }, [articles, filters, currentLanguage]);
@@ -238,15 +202,12 @@ export default function Articles() {
     setFilters(prev => ({ ...prev, category: value }));
   };
 
-  const handleTemplateChange = (value: string) => {
-    setFilters(prev => ({ ...prev, template: value }));
-  };
+
 
   const clearFilters = () => {
     setFilters({
       search: '',
-      category: ['all'],
-      template: 'all'
+      category: ['all']
     });
   };
 
@@ -264,32 +225,40 @@ export default function Articles() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
-        <div className="absolute inset-0">
-          <img 
-            src={bgTitle} 
-            alt="Background" 
-            className="w-full h-full object-cover opacity-20"
-          />
-        </div>
-        <div className="relative container mx-auto px-4 py-20">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              {t('articles.title')}
-            </h1>
-            <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
-              {t('articles.subtitle')}
-            </p>
-          </div>
+    <div 
+      className="min-h-screen" 
+      style={{
+        backgroundImage: `url(${bgMain})`,
+        backgroundSize: 'cover',
+        backgroundAttachment: 'fixed',
+        backgroundPosition: 'center'
+      }}
+    >
+      {/* Spacer to prevent header overlap */}
+      <div style={{ height: '80px' }}></div>
+      
+      {/* Title Section with Special Background */}
+      <div 
+        className="relative py-16 mb-12"
+        style={{
+          backgroundImage: `url(${bgTitle})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="relative z-10 container mx-auto text-center">
+          <h1 className="uniform-page-title text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
+            {t('articles.title') || 'Articles'}
+          </h1>
         </div>
       </div>
 
       {/* Filters Section */}
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -313,34 +282,16 @@ export default function Articles() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="News">News</SelectItem>
-                  <SelectItem value="Technical">Technical</SelectItem>
-                  <SelectItem value="Case Study">Case Study</SelectItem>
-                  <SelectItem value="Industry">Industry</SelectItem>
-                  <SelectItem value="Product">Product</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Template Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Template
-              </label>
-              <Select value={filters.template || 'all'} onValueChange={handleTemplateChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Templates" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Templates</SelectItem>
-                  {articleTemplates.map(template => (
-                    <SelectItem key={template.id} value={template.id}>
-                      {template.name}
+                  {projectCategories.map(category => (
+                    <SelectItem key={category} value={category}>
+                      {category}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+
+
 
             {/* Clear Filters */}
             <div className="flex items-end">
