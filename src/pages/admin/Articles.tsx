@@ -13,8 +13,18 @@ import { useAdminLanguage } from '@/contexts/AdminLanguageContext';
 import InlineArticleEditor from '@/components/InlineArticleEditor';
 import { ContentBlock } from '@/components/InlineArticleEditor';
 import articleService, { Article, ArticleTag } from '@/services/articleService';
-import TagSelector from '@/components/TagSelector';
-import { Plus, Edit, Trash2, Eye, Upload, Image as ImageIcon } from 'lucide-react';
+import FeaturesChecklist from '@/components/FeaturesChecklist';
+import { Plus, Edit, Trash2, Eye, Upload, Image as ImageIcon, Globe, Type, FileText, User } from 'lucide-react';
+
+const languages = [
+  { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸' },
+  { code: 'zh-Hant', name: 'Traditional Chinese', nativeName: '繁體中文', flag: '🇹🇼' },
+  { code: 'zh-Hans', name: 'Simplified Chinese', nativeName: '简体中文', flag: '🇨🇳' },
+  { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' },
+  { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
+  { code: 'th', name: 'Thai', nativeName: 'ไทย', flag: '🇹🇭' },
+  { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', flag: '🇻🇳' }
+];
 
 const articleTemplates = [
   { id: 'news', name: 'News', description: 'Company news and announcements', icon: '📰' },
@@ -28,14 +38,14 @@ export default function AdminArticles() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
-  const { language: currentLanguage } = useAdminLanguage();
+  const { language: adminLanguage } = useAdminLanguage();
   
   const [articles, setArticles] = useState<Article[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [articleId, setArticleId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [availableTags, setAvailableTags] = useState<ArticleTag[]>([]);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
   
   // Article form state
   const [article, setArticle] = useState<Article>({
@@ -53,8 +63,9 @@ export default function AdminArticles() {
   
   const [selectedTemplate, setSelectedTemplate] = useState('news');
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
-  const [selectedTags, setSelectedTags] = useState<ArticleTag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [currentLanguage, setCurrentLanguage] = useState('en'); // Track current tab language
 
   useEffect(() => {
     loadArticles();
@@ -99,7 +110,8 @@ export default function AdminArticles() {
       console.log('Loading tags from database...');
       const tags = await articleService.getAllTags();
       console.log('Tags loaded:', tags);
-      setAvailableTags(tags);
+      // Convert ArticleTag objects to strings for FeaturesChecklist
+      setAvailableTags(tags.map(tag => tag.name));
     } catch (error) {
       console.error('Error loading tags:', error);
     }
@@ -111,7 +123,7 @@ export default function AdminArticles() {
       if (data) {
         setArticle(data);
         setContentBlocks(data.content_blocks || []);
-        setSelectedTags(data.tags || []);
+        setSelectedTags(data.tags?.map(tag => tag.name) || []);
         setUploadedImages(data.images?.map(img => img.image_url) || []);
         
         // Set template based on category
@@ -165,14 +177,14 @@ export default function AdminArticles() {
         
         // Update tags
         if (savedArticle) {
-          await articleService.updateArticleTags(savedArticle.id, selectedTags.map(t => t.id));
+          await articleService.updateArticleTags(savedArticle.id, selectedTags);
         }
       } else {
         savedArticle = await articleService.addArticle(articleData);
         
         // Update tags and save images if new article
         if (savedArticle) {
-          await articleService.updateArticleTags(savedArticle.id, selectedTags.map(t => t.id));
+          await articleService.updateArticleTags(savedArticle.id, selectedTags);
           
           // Save uploaded images
           for (const imageUrl of uploadedImages) {
@@ -365,7 +377,7 @@ export default function AdminArticles() {
       content_blocks: testBlocks
     });
     setSelectedTemplate('technical');
-    setSelectedTags(availableTags.filter(t => ['Technical', 'Test', 'Components'].includes(t.name)));
+    setSelectedTags(['Technical', 'Test', 'Components']);
     setIsEditing(false);
     setArticleId(null);
   };
@@ -400,15 +412,7 @@ export default function AdminArticles() {
     }
   };
 
-  const languages = [
-    { code: 'en', name: 'English' },
-    { code: 'zh-Hant', name: '繁體中文' },
-    { code: 'zh-Hans', name: '简体中文' },
-    { code: 'ja', name: '日本語' },
-    { code: 'ko', name: '한국어' },
-    { code: 'th', name: 'ไทย' },
-    { code: 'vi', name: 'Tiếng Việt' }
-  ];
+
 
   if (isEditing) {
     return (
@@ -422,57 +426,81 @@ export default function AdminArticles() {
 
         {/* Language Picker */}
         <div className="bg-white p-4 rounded-lg border">
-          <h2 className="text-lg font-semibold mb-4">Language Selection</h2>
-          <Tabs value={currentLanguage} className="w-full">
-            <TabsList className="grid w-full grid-cols-7">
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Globe className="h-5 w-5" />
+            Language Selection
+          </h2>
+          <Tabs defaultValue="en" className="w-full" onValueChange={setCurrentLanguage}>
+            <TabsList className="grid w-full grid-cols-7 h-12 mb-6">
               {languages.map(lang => (
-                <TabsTrigger key={lang.code} value={lang.code}>
-                  {lang.name}
+                <TabsTrigger key={lang.code} value={lang.code} className="flex flex-col items-center gap-1 p-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <span className="text-lg">{lang.flag}</span>
+                  <span className="text-xs font-medium">{lang.code.toUpperCase()}</span>
                 </TabsTrigger>
               ))}
             </TabsList>
             
             {languages.map(lang => (
-              <TabsContent key={lang.code} value={lang.code} className="mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor={`title-${lang.code}`}>Article Title ({lang.name})</Label>
-                    <Input
-                      id={`title-${lang.code}`}
-                      value={article.titles?.[lang.code] || ''}
-                      onChange={(e) => updateTranslation('titles', lang.code, e.target.value)}
-                      placeholder={`Enter title in ${lang.name}`}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor={`author-${lang.code}`}>Author ({lang.name})</Label>
-                    <Input
-                      id={`author-${lang.code}`}
-                      value={article.authors_multilingual?.[lang.code] || ''}
-                      onChange={(e) => updateTranslation('authors_multilingual', lang.code, e.target.value)}
-                      placeholder={`Enter author in ${lang.name}`}
-                    />
-                  </div>
-                  
-                  <div className="md:col-span-2">
-                    <Label htmlFor={`excerpt-${lang.code}`}>Article Excerpt ({lang.name})</Label>
-                    <Input
-                      id={`excerpt-${lang.code}`}
-                      value={article.excerpts?.[lang.code] || ''}
-                      onChange={(e) => updateTranslation('excerpts', lang.code, e.target.value)}
-                      placeholder={`Enter excerpt in ${lang.name}`}
-                    />
-                  </div>
-                  
-                  <div className="md:col-span-2">
-                    <Label htmlFor={`content-${lang.code}`}>Article Content ({lang.code})</Label>
-                    <Input
-                      id={`content-${lang.code}`}
-                      value={article.contents?.[lang.code] || ''}
-                      onChange={(e) => updateTranslation('contents', lang.code, e.target.value)}
-                      placeholder={`Enter content in ${lang.code}`}
-                    />
+              <TabsContent key={lang.code} value={lang.code} className="space-y-6">
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <span>{lang.flag}</span>
+                    {lang.nativeName} - {lang.name}
+                  </h3>
+                  <div className="space-y-4">
+                    {/* Title */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        <Type className="h-4 w-4 inline mr-2" />
+                        Article Title ({lang.nativeName})
+                      </label>
+                      <Input
+                        value={article.titles?.[lang.code] || ''}
+                        onChange={(e) => updateTranslation('titles', lang.code, e.target.value)}
+                        placeholder={`Enter title in ${lang.nativeName}`}
+                        className="text-lg font-medium"
+                      />
+                    </div>
+                    
+                    {/* Author */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        <User className="h-4 w-4 inline mr-2" />
+                        Author ({lang.nativeName})
+                      </label>
+                      <Input
+                        value={article.authors_multilingual?.[lang.code] || ''}
+                        onChange={(e) => updateTranslation('authors_multilingual', lang.code, e.target.value)}
+                        placeholder={`Enter author in ${lang.nativeName}`}
+                      />
+                    </div>
+                    
+                    {/* Excerpt */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        <FileText className="h-4 w-4 inline mr-2" />
+                        Article Excerpt ({lang.nativeName})
+                      </label>
+                      <Input
+                        value={article.excerpts?.[lang.code] || ''}
+                        onChange={(e) => updateTranslation('excerpts', lang.code, e.target.value)}
+                        placeholder={`Enter excerpt in ${lang.nativeName}`}
+                      />
+                    </div>
+                    
+                    {/* Content */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        <FileText className="h-4 w-4 inline mr-2" />
+                        Article Content ({lang.nativeName})
+                      </label>
+                      <Input
+                        value={article.contents?.[lang.code] || ''}
+                        onChange={(e) => updateTranslation('contents', lang.code, e.target.value)}
+                        placeholder={`Enter content in ${lang.nativeName}`}
+                        className="min-h-[100px]"
+                      />
+                    </div>
                   </div>
                 </div>
               </TabsContent>
@@ -526,12 +554,13 @@ export default function AdminArticles() {
         {/* Tags Selection */}
         <div className="bg-white p-4 rounded-lg border">
           <h2 className="text-lg font-semibold mb-4">Article Tags</h2>
-          <TagSelector
-            selectedTags={selectedTags}
-            availableTags={availableTags}
-            onTagsChange={setSelectedTags}
-            maxTags={10}
-            placeholder="Select tags for this article..."
+          <FeaturesChecklist
+            features={[]}
+            selectedFeatures={selectedTags}
+            onFeaturesChange={setSelectedTags}
+            language={adminLanguage}
+            placeholder="Search tags..."
+            className="max-h-60"
           />
         </div>
 
