@@ -17,7 +17,7 @@ CREATE TABLE article_tags (
 -- Create article images table for uploaded images
 CREATE TABLE article_images (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    article_id UUID REFERENCES articles(id) ON DELETE CASCADE,
+    article_id UUID,
     image_url TEXT NOT NULL,
     alt_text TEXT,
     caption TEXT,
@@ -46,6 +46,10 @@ CREATE TABLE articles (
     -- Content blocks for inline editor
     content_blocks JSONB DEFAULT '[]'
 );
+
+-- Now add foreign key constraint to article_images
+ALTER TABLE article_images ADD CONSTRAINT fk_article_images_article_id 
+    FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE;
 
 -- Create article_tags junction table for many-to-many relationship
 CREATE TABLE article_tags_junction (
@@ -133,7 +137,7 @@ $$ language 'plpgsql';
 CREATE TRIGGER update_articles_updated_at BEFORE UPDATE ON articles
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Create function to generate article slug
+-- Create function to generate article slug (AFTER articles table exists)
 CREATE OR REPLACE FUNCTION generate_article_slug(title TEXT)
 RETURNS TEXT AS $$
 DECLARE
@@ -202,7 +206,7 @@ INSERT INTO articles (slug, titles, contents, excerpts, authors_multilingual, ca
     generate_article_slug('Sample Article - All Components'),
     '{"en": "Sample Article - All Components", "zh-Hant": "測試文章 - 所有組件", "zh-Hans": "测试文章 - 所有组件", "ja": "テスト記事 - すべてのコンポーネント", "ko": "테스트 기사 - 모든 구성 요소", "th": "บทความทดสอบ - ส่วนประกอบทั้งหมด", "vi": "Bài viết kiểm tra - Tất cả các thành phần"}',
     '{"en": "This is a test article to demonstrate all available components.", "zh-Hant": "這是一篇測試文章，用於展示所有可用的組件。", "zh-Hans": "这是一篇测试文章，用于展示所有可用的组件。", "ja": "これは利用可能なすべてのコンポーネントを実演するためのテスト記事です。", "ko": "이것은 사용 가능한 모든 구성 요소를 시연하기 위한 테스트 기사입니다.", "th": "นี่คือบทความทดสอบเพื่อแสดงส่วนประกอบทั้งหมดที่มีอยู่", "vi": "Đây là một bài viết kiểm tra để trình diễn tất cả các thành phần có sẵn."}',
-    '{"en": "A comprehensive test article showcasing all editor components.", "zh-Hant": "展示所有編輯器組件的綜合測試文章。", "zh-Hans": "展示所有编辑器组件的综合测试文章。", "ja": "すべてのエディターコンポーネントを紹介する包括的なテスト記事。", "ko": "모든 편집기 구성 요소를 보여주는 포괄적인 테스트 기사.", "th": "บทความทดสอบที่ครอบคลุมซึ่งแสดงส่วนประกอบของตัวแก้ไขทั้งหมด", "vi": "Một bài viết kiểm tra toàn diện giới thiệu tất cả các thành phần của trình soạn thảo."}',
+    '{"en": "A comprehensive test article showcasing all editor components.", "zh-Hant": "展示所有編輯器組件的綜合測試文章。", "zh-Hans": "展示所有编辑器组件的综合测试文章。", "ja": "すべてのエディターコンポーネントを紹介する包括的なテスト記事。", "ko": "모든 편집기 구성 요소를 보여주는 포괄적인 테스트 기사。", "th": "บทความทดสอบที่ครอบคลุมซึ่งแสดงส่วนประกอบของตัวแก้ไขทั้งหมด", "vi": "Một bài viết kiểm tra toàn diện giới thiệu tất cả các thành phần của trình soạn thảo."}',
     '{"en": "Test Author", "zh-Hant": "測試作者", "zh-Hans": "测试作者", "ja": "テスト著者", "ko": "테스트 저자", "th": "ผู้เขียนทดสอบ", "vi": "Tác giả kiểm tra"}',
     '{"en": "Technical", "zh-Hant": "技術", "zh-Hans": "技术", "ja": "技術", "ko": "기술", "th": "เทคนิค", "vi": "Kỹ thuật"}',
     true
