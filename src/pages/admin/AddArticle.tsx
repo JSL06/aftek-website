@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from '@/hooks/useTranslation';
 import ModernRichTextEditor from '@/components/ModernRichTextEditor';
+import ArticleImageManager, { ArticleImageBlock } from '@/components/ArticleImageManager';
 
 // Language configuration
 const languages = [
@@ -97,6 +98,7 @@ interface Article {
   featured_image?: string;
   read_time?: number;
   tags?: string[];
+  content_blocks?: ArticleImageBlock[];
   // Multilingual fields
   titles?: Record<string, string>;
   contents?: Record<string, string>;
@@ -132,6 +134,7 @@ export default function AddArticle() {
   });
   const [saving, setSaving] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('en'); // Track current tab language
+  const [contentBlocks, setContentBlocks] = useState<ArticleImageBlock[]>([]);
 
   const updateBasicField = (field: string, value: any) => {
     setArticle({
@@ -420,6 +423,18 @@ export default function AddArticle() {
               </Tabs>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Content Blocks */}
+        <div className="xl:col-span-2">
+          <ArticleImageManager 
+            blocks={contentBlocks}
+            onBlocksChange={setContentBlocks}
+            onPreview={() => {
+              // TODO: Implement preview functionality
+              console.log('Preview article with blocks:', contentBlocks);
+            }}
+          />
         </div>
       </div>
     </div>
