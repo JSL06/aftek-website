@@ -72,7 +72,9 @@ export default function AdminArticles() {
   const loadArticles = async () => {
     setIsLoading(true);
     try {
+      console.log('Loading articles from database...');
       const data = await articleService.loadArticlesFromDatabase();
+      console.log('Articles loaded:', data);
       setArticles(data);
     } catch (error) {
       console.error('Error loading articles:', error);
@@ -88,7 +90,9 @@ export default function AdminArticles() {
 
   const loadTags = async () => {
     try {
+      console.log('Loading tags from database...');
       const tags = await articleService.getAllTags();
+      console.log('Tags loaded:', tags);
       setAvailableTags(tags);
     } catch (error) {
       console.error('Error loading tags:', error);
