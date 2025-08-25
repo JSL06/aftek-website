@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { productService } from '@/services/productService';
 import { projectService } from '@/services/projectService';
+import { articleService } from '@/services/articleService';
 
 export interface AdminCounts {
   products: number;
@@ -34,9 +35,11 @@ export const useAdminCounts = () => {
       const projects = await projectService.getAdminProjects();
       const projectsCount = projects.length;
 
-      // For now, set articles and media to 0 (can be implemented later)
-      // These would need their respective services
-      const articlesCount = 0;
+      // Fetch articles count
+      const articles = await articleService.getAdminArticles();
+      const articlesCount = articles.length;
+
+      // For now, set media to 0 (can be implemented later)
       const mediaCount = 0;
 
       // Calculate translations count (products * languages)

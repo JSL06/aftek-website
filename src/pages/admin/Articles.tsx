@@ -14,7 +14,7 @@ import InlineArticleEditor from '@/components/InlineArticleEditor';
 import { ContentBlock } from '@/components/InlineArticleEditor';
 import articleService, { Article, ArticleTag } from '@/services/articleService';
 import FeaturesChecklist from '@/components/FeaturesChecklist';
-import { Plus, Edit, Trash2, Eye, Upload, Image as ImageIcon, Globe, Type, FileText, User } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Upload, Image as ImageIcon, Globe, Type, FileText, User, Check } from 'lucide-react';
 
 const languages = [
   { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸' },
@@ -424,179 +424,209 @@ export default function AdminArticles() {
           </Button>
         </div>
 
-        {/* Language Picker */}
-        <div className="bg-white p-4 rounded-lg border">
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Globe className="h-5 w-5" />
-            Language Selection
-          </h2>
-          <Tabs defaultValue="en" className="w-full" onValueChange={setCurrentLanguage}>
-            <TabsList className="grid w-full grid-cols-7 h-12 mb-6">
-              {languages.map(lang => (
-                <TabsTrigger key={lang.code} value={lang.code} className="flex flex-col items-center gap-1 p-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  <span className="text-lg">{lang.flag}</span>
-                  <span className="text-xs font-medium">{lang.code.toUpperCase()}</span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            
-            {languages.map(lang => (
-              <TabsContent key={lang.code} value={lang.code} className="space-y-6">
-                <div className="bg-muted/30 p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <span>{lang.flag}</span>
-                    {lang.nativeName} - {lang.name}
-                  </h3>
-                  <div className="space-y-4">
-                    {/* Title */}
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        <Type className="h-4 w-4 inline mr-2" />
-                        Article Title ({lang.nativeName})
-                      </label>
-                      <Input
-                        value={article.titles?.[lang.code] || ''}
-                        onChange={(e) => updateTranslation('titles', lang.code, e.target.value)}
-                        placeholder={`Enter title in ${lang.nativeName}`}
-                        className="text-lg font-medium"
-                      />
-                    </div>
-                    
-                    {/* Author */}
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        <User className="h-4 w-4 inline mr-2" />
-                        Author ({lang.nativeName})
-                      </label>
-                      <Input
-                        value={article.authors_multilingual?.[lang.code] || ''}
-                        onChange={(e) => updateTranslation('authors_multilingual', lang.code, e.target.value)}
-                        placeholder={`Enter author in ${lang.nativeName}`}
-                      />
-                    </div>
-                    
-                    {/* Excerpt */}
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        <FileText className="h-4 w-4 inline mr-2" />
-                        Article Excerpt ({lang.nativeName})
-                      </label>
-                      <Input
-                        value={article.excerpts?.[lang.code] || ''}
-                        onChange={(e) => updateTranslation('excerpts', lang.code, e.target.value)}
-                        placeholder={`Enter excerpt in ${lang.nativeName}`}
-                      />
-                    </div>
-                    
-                    {/* Content */}
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        <FileText className="h-4 w-4 inline mr-2" />
-                        Article Content ({lang.nativeName})
-                      </label>
-                      <Input
-                        value={article.contents?.[lang.code] || ''}
-                        onChange={(e) => updateTranslation('contents', lang.code, e.target.value)}
-                        placeholder={`Enter content in ${lang.nativeName}`}
-                        className="min-h-[100px]"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-            ))}
-          </Tabs>
-        </div>
-
-        {/* Article Settings */}
-        <div className="bg-white p-4 rounded-lg border">
-          <h2 className="text-lg font-semibold mb-4">Article Settings</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="template">Article Template</Label>
-              <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select template" />
-                </SelectTrigger>
-                <SelectContent>
-                  {articleTemplates.map(template => (
-                    <SelectItem key={template.id} value={template.id}>
-                      {template.icon} {template.name}
-                    </SelectItem>
+        {/* Main Content Section - Two Columns */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          {/* Left Column - Language Content */}
+          <div className="space-y-6">
+            {/* Language Picker */}
+            <div className="bg-white p-6 rounded-lg border shadow-sm">
+              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+                <Globe className="h-6 w-6" />
+                Multilingual Content
+              </h2>
+              <Tabs defaultValue="en" className="w-full" onValueChange={setCurrentLanguage}>
+                <TabsList className="grid w-full grid-cols-7 h-14 mb-6">
+                  {languages.map(lang => (
+                    <TabsTrigger key={lang.code} value={lang.code} className="flex flex-col items-center gap-1 p-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                      <span className="text-lg">{lang.flag}</span>
+                      <span className="text-xs font-medium">{lang.code.toUpperCase()}</span>
+                    </TabsTrigger>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Label htmlFor="read-time">Read Time (minutes)</Label>
-              <Input
-                id="read-time"
-                type="number"
-                value={article.read_time || 5}
-                onChange={(e) => setArticle(prev => ({ ...prev, read_time: parseInt(e.target.value) || 5 }))}
-                min="1"
-                max="60"
-              />
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="published"
-                checked={article.is_published || false}
-                onCheckedChange={(checked) => setArticle(prev => ({ ...prev, is_published: checked }))}
-              />
-              <Label htmlFor="published">Published</Label>
+                </TabsList>
+                
+                {languages.map(lang => (
+                  <TabsContent key={lang.code} value={lang.code} className="space-y-6">
+                    <div className="bg-muted/30 p-6 rounded-lg">
+                      <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                        <span>{lang.flag}</span>
+                        {lang.nativeName} - {lang.name}
+                      </h3>
+                      <div className="space-y-6">
+                        {/* Title */}
+                        <div>
+                          <label className="block text-sm font-medium mb-3">
+                            <Type className="h-4 w-4 inline mr-2" />
+                            Article Title ({lang.nativeName})
+                          </label>
+                          <Input
+                            value={article.titles?.[lang.code] || ''}
+                            onChange={(e) => updateTranslation('titles', lang.code, e.target.value)}
+                            placeholder={`Enter title in ${lang.nativeName}`}
+                            className="text-lg font-medium h-12"
+                          />
+                        </div>
+                        
+                        {/* Author */}
+                        <div>
+                          <label className="block text-sm font-medium mb-3">
+                            <User className="h-4 w-4 inline mr-2" />
+                            Author ({lang.nativeName})
+                          </label>
+                          <Input
+                            value={article.authors_multilingual?.[lang.code] || ''}
+                            onChange={(e) => updateTranslation('authors_multilingual', lang.code, e.target.value)}
+                            placeholder={`Enter author in ${lang.nativeName}`}
+                            className="h-12"
+                          />
+                        </div>
+                        
+                        {/* Excerpt */}
+                        <div>
+                          <label className="block text-sm font-medium mb-3">
+                            <FileText className="h-4 w-4 inline mr-2" />
+                            Article Excerpt ({lang.nativeName})
+                          </label>
+                          <Input
+                            value={article.excerpts?.[lang.code] || ''}
+                            onChange={(e) => updateTranslation('excerpts', lang.code, e.target.value)}
+                            placeholder={`Enter excerpt in ${lang.nativeName}`}
+                            className="h-12"
+                          />
+                        </div>
+                        
+                        {/* Content */}
+                        <div>
+                          <label className="block text-sm font-medium mb-3">
+                            <FileText className="h-4 w-4 inline mr-2" />
+                            Article Content ({lang.nativeName})
+                          </label>
+                          <Input
+                            value={article.contents?.[lang.code] || ''}
+                            onChange={(e) => updateTranslation('contents', lang.code, e.target.value)}
+                            placeholder={`Enter content in ${lang.nativeName}`}
+                            className="min-h-[120px]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+                ))}
+              </Tabs>
             </div>
           </div>
-        </div>
 
-        {/* Tags Selection */}
-        <div className="bg-white p-4 rounded-lg border">
-          <h2 className="text-lg font-semibold mb-4">Article Tags</h2>
-          <FeaturesChecklist
-            features={[]}
-            selectedFeatures={selectedTags}
-            onFeaturesChange={setSelectedTags}
-            language={adminLanguage}
-            placeholder="Search tags..."
-            className="max-h-60"
-          />
-        </div>
-
-        {/* Image Upload */}
-        <div className="bg-white p-4 rounded-lg border">
-          <h2 className="text-lg font-semibold mb-4">Featured Image</h2>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="image-upload">Upload Image</Label>
-              <Input
-                id="image-upload"
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleImageUpload(file);
-                }}
-              />
-            </div>
-            
-            {article.featured_image && (
-              <div>
-                <Label>Current Featured Image</Label>
-                <img 
-                  src={article.featured_image} 
-                  alt="Featured" 
-                  className="w-32 h-32 object-cover rounded border"
-                />
+          {/* Right Column - Settings & Configuration */}
+          <div className="space-y-6">
+            {/* Article Settings */}
+            <div className="bg-white p-6 rounded-lg border shadow-sm">
+              <h2 className="text-xl font-semibold mb-6">Article Settings</h2>
+              <div className="space-y-6">
+                <div>
+                  <Label htmlFor="template" className="text-sm font-medium mb-3 block">Article Template</Label>
+                  <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                    <SelectTrigger className="h-12">
+                      <SelectValue placeholder="Select template" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {articleTemplates.map(template => (
+                        <SelectItem key={template.id} value={template.id}>
+                          {template.icon} {template.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="read-time" className="text-sm font-medium mb-3 block">Read Time (minutes)</Label>
+                  <Input
+                    id="read-time"
+                    type="number"
+                    value={article.read_time || 5}
+                    onChange={(e) => setArticle(prev => ({ ...prev, read_time: parseInt(e.target.value) || 5 }))}
+                    min="1"
+                    max="60"
+                    className="h-12"
+                  />
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  <Switch
+                    id="published"
+                    checked={article.is_published || false}
+                    onCheckedChange={(checked) => setArticle(prev => ({ ...prev, is_published: checked }))}
+                  />
+                  <Label htmlFor="published" className="text-sm font-medium">Published</Label>
+                </div>
               </div>
-            )}
+            </div>
+
+            {/* Tags Selection */}
+            <div className="bg-white p-6 rounded-lg border shadow-sm">
+              <h2 className="text-xl font-semibold mb-6">Article Tags</h2>
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {availableTags.map(tag => (
+                    <Button
+                      key={tag}
+                      variant={selectedTags.includes(tag) ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        if (selectedTags.includes(tag)) {
+                          setSelectedTags(selectedTags.filter(t => t !== tag));
+                        } else {
+                          setSelectedTags([...selectedTags, tag]);
+                        }
+                      }}
+                      className="h-8"
+                    >
+                      {tag}
+                      {selectedTags.includes(tag) && <Check className="w-3 h-3 ml-1" />}
+                    </Button>
+                  ))}
+                </div>
+                <div className="text-sm text-gray-500">
+                  Selected: {selectedTags.length} tags
+                </div>
+              </div>
+            </div>
+
+            {/* Featured Image */}
+            <div className="bg-white p-6 rounded-lg border shadow-sm">
+              <h2 className="text-xl font-semibold mb-6">Featured Image</h2>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="image-upload" className="text-sm font-medium mb-3 block">Upload Image</Label>
+                  <Input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleImageUpload(file);
+                    }}
+                    className="h-12"
+                  />
+                </div>
+                
+                {article.featured_image && (
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Current Featured Image</Label>
+                    <img 
+                      src={article.featured_image} 
+                      alt="Featured" 
+                      className="w-40 h-40 object-cover rounded-lg border shadow-sm"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Content Editor - Full Width at Bottom */}
-        <div className="bg-white p-4 rounded-lg border">
-          <h2 className="text-lg font-semibold mb-4">Article Content Editor</h2>
+        <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <h2 className="text-xl font-semibold mb-6">Article Content Editor</h2>
           <div className="w-full">
             <InlineArticleEditor
               initialContent={contentBlocks}

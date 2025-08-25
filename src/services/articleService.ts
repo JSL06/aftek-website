@@ -397,11 +397,19 @@ class ArticleService {
 
   async getAdminArticles(): Promise<Article[]> {
     // For admin, return all articles
+    // Ensure articles are loaded first
+    if (this.articles.length === 0) {
+      await this.loadArticlesFromDatabase();
+    }
     return this.articles;
   }
 
   async getPublishedArticles(): Promise<Article[]> {
     // For public view, return only published articles
+    // Ensure articles are loaded first
+    if (this.articles.length === 0) {
+      await this.loadArticlesFromDatabase();
+    }
     return this.articles.filter(article => article.is_published);
   }
 
