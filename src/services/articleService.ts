@@ -166,13 +166,7 @@ class ArticleService {
       try {
         const { data, error } = await supabase
           .from('articles')
-          .select(`
-            *,
-            tags:article_tags_junction(
-              tag:article_tags(*)
-            ),
-            images:article_images(*)
-          `)
+          .select('*')
           .eq('slug', slug)
           .single();
 
@@ -181,11 +175,7 @@ class ArticleService {
           return null;
         }
 
-        article = {
-          ...data,
-          tags: data.tags?.map((t: any) => t.tag) || [],
-          images: data.images || []
-        };
+        article = data as Article;
         
         if (article) {
           this.articles.push(article);
@@ -208,13 +198,7 @@ class ArticleService {
       try {
         const { data, error } = await supabase
           .from('articles')
-          .select(`
-            *,
-            tags:article_tags_junction(
-              tag:article_tags(*)
-            ),
-            images:article_images(*)
-          `)
+          .select('*')
           .eq('id', id)
           .single();
 
@@ -223,11 +207,7 @@ class ArticleService {
           return null;
         }
 
-        article = {
-          ...data,
-          tags: data.tags?.map((t: any) => t.tag) || [],
-          images: data.images || []
-        };
+        article = data as Article;
         
         if (article) {
           this.articles.push(article);
