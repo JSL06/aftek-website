@@ -585,7 +585,7 @@ export default function AdminArticles() {
           <Button onClick={createTestArticle} variant="outline">
             Create Test Article
           </Button>
-          <Button onClick={() => navigate('/admin/add-article')}>
+          <Button onClick={() => navigate('/admin/articles/new')}>
             <Plus className="w-4 h-4 mr-2" />
             Add New Article
           </Button>

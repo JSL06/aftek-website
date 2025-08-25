@@ -100,6 +100,7 @@ const App = () => (
                 <Route path="featured-products" element={<FeaturedProductsManager />} />
                 <Route path="articles" element={<AdminArticles />} />
                 <Route path="articles/new" element={<AddArticle />} />
+                <Route path="add-article" element={<AddArticle />} />
                 <Route path="articles/edit/:articleId" element={<AdminArticles />} />
                 <Route path="media" element={<MediaManager />} />
                 <Route path="media/:mediaId" element={<MediaManager />} />
