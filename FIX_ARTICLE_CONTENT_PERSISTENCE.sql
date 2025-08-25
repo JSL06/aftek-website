@@ -187,7 +187,11 @@ SELECT
     jsonb_typeof(authors_multilingual) as authors_type,
     jsonb_typeof(categories_multilingual) as categories_type,
     jsonb_typeof(content_blocks) as content_blocks_type,
-    jsonb_typeof(related_products) as related_products_type,
+    CASE 
+        WHEN related_products IS NULL THEN 'NULL'
+        WHEN array_length(related_products, 1) IS NULL THEN 'empty array'
+        ELSE 'array with ' || array_length(related_products, 1) || ' elements'
+    END as related_products_type,
     jsonb_typeof(related_links) as related_links_type,
     jsonb_typeof(custom_buttons) as custom_buttons_type
 FROM articles 
