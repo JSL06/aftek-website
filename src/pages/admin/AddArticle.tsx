@@ -5,6 +5,7 @@ import { ArrowLeft, Type, FileText, Globe, Loader2, Upload, Image as ImageIcon, 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
@@ -130,6 +131,7 @@ export default function AddArticle() {
     categories_multilingual: {}
   });
   const [saving, setSaving] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState('en'); // Track current tab language
 
   const updateBasicField = (field: string, value: any) => {
     setArticle({
@@ -351,77 +353,71 @@ export default function AddArticle() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
+              <Tabs defaultValue="en" className="w-full" onValueChange={setCurrentLanguage}>
+                <TabsList className="grid w-full grid-cols-7 h-12 mb-6">
+                  {languages.map(lang => (
+                    <TabsTrigger key={lang.code} value={lang.code} className="flex flex-col items-center gap-1 p-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                      <span className="text-lg">{lang.flag}</span>
+                      <span className="text-xs font-medium">{lang.code.toUpperCase()}</span>
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+
                 {languages.map(lang => (
-                  <div key={lang.code} className="p-4 border border-slate-200 rounded-lg">
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                      <span>{lang.flag}</span>
-                      {lang.nativeName} - {lang.name}
-                    </h3>
-                    <div className="space-y-4">
-                      {/* Title */}
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Article Title ({lang.nativeName})
-                        </label>
-                        <Input 
-                          value={article.titles?.[lang.code] || ''} 
-                          onChange={(e) => updateTranslation(lang.code, 'title', e.target.value)} 
-                          placeholder="Enter article title" 
-                          className="text-lg font-medium" 
-                        />
-                      </div>
-                      
-                      {/* Excerpt */}
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Article Excerpt ({lang.nativeName})
-                        </label>
-                        <textarea
-                          value={article.excerpts?.[lang.code] || ''} 
-                          onChange={(e) => updateTranslation(lang.code, 'excerpt', e.target.value)} 
-                          placeholder="Enter article excerpt..." 
-                          className="w-full p-3 border border-slate-300 rounded-lg resize-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                          rows={3}
-                        />
-                      </div>
-                      
-                      {/* Content */}
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Article Content ({lang.nativeName})
-                        </label>
-                        <ModernRichTextEditor 
-                          value={article.contents?.[lang.code] || ''} 
-                          onChange={(v) => updateTranslation(lang.code, 'content', v)} 
-                          placeholder="Enter article content..." 
-                          height="200px" 
-                        />
-                      </div>
-                      
-                      {/* Author */}
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Author ({lang.nativeName})</label>
-                        <Input 
-                          value={article.authors_multilingual?.[lang.code] || ''} 
-                          onChange={(e) => updateTranslation(lang.code, 'author', e.target.value)} 
-                          placeholder="Author name" 
-                        />
-                      </div>
-                      
-                      {/* Category */}
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Category ({lang.nativeName})</label>
-                        <Input 
-                          value={article.categories_multilingual?.[lang.code] || ''} 
-                          onChange={(e) => updateTranslation(lang.code, 'category', e.target.value)} 
-                          placeholder="Category name" 
-                        />
+                  <TabsContent key={lang.code} value={lang.code} className="space-y-6">
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <span>{lang.flag}</span>
+                        {lang.nativeName} - {lang.name}
+                      </h3>
+                      <div className="space-y-4">
+                        {/* Title */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            <Type className="h-4 w-4 inline mr-2" />
+                            Article Title ({lang.nativeName})
+                          </label>
+                          <Input 
+                            value={article.titles?.[lang.code] || ''} 
+                            onChange={(e) => updateTranslation(lang.code, 'title', e.target.value)} 
+                            placeholder="Enter article title" 
+                            className="text-lg font-medium" 
+                          />
+                        </div>
+                        
+                        {/* Excerpt */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            <FileText className="h-4 w-4 inline mr-2" />
+                            Article Excerpt ({lang.nativeName})
+                          </label>
+                          <textarea
+                            value={article.excerpts?.[lang.code] || ''} 
+                            onChange={(e) => updateTranslation(lang.code, 'excerpt', e.target.value)} 
+                            placeholder="Enter article excerpt..." 
+                            className="w-full p-3 border border-slate-300 rounded-lg resize-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                            rows={3}
+                          />
+                        </div>
+                        
+                        {/* Content */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            <FileText className="h-4 w-4 inline mr-2" />
+                            Article Content ({lang.nativeName})
+                          </label>
+                          <ModernRichTextEditor 
+                            value={article.contents?.[lang.code] || ''} 
+                            onChange={(v) => updateTranslation(lang.code, 'content', v)} 
+                            placeholder="Enter article content..." 
+                            height="200px" 
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </TabsContent>
                 ))}
-              </div>
+              </Tabs>
             </CardContent>
           </Card>
         </div>
