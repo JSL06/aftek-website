@@ -73,28 +73,62 @@ class ArticleService {
 
   async loadArticlesFromDatabase(): Promise<Article[]> {
     try {
-      const { data, error } = await supabase
+      // First, get articles without complex joins to avoid foreign key issues
+      const { data: articlesData, error: articlesError } = await supabase
         .from('articles')
-        .select(`
-          *,
-          tags:article_tags_junction(
-            tag:article_tags(*)
-          ),
-          images:article_images(*)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error loading articles:', error);
+      if (articlesError) {
+        console.error('Error loading articles:', articlesError);
         return [];
       }
 
+      // Then, get tags separately
+      const { data: tagsData, error: tagsError } = await supabase
+        .from('article_tags')
+        .select('*');
+
+      if (tagsError) {
+        console.error('Error loading tags:', tagsError);
+      }
+
+      // Get article-tag relationships
+      const { data: junctionData, error: junctionError } = await supabase
+        .from('article_tags_junction')
+        .select('*');
+
+      if (junctionError) {
+        console.error('Error loading article-tag relationships:', junctionError);
+      }
+
+      // Get article images
+      const { data: imagesData, error: imagesError } = await supabase
+        .from('article_images')
+        .select('*');
+
+      if (imagesError) {
+        console.error('Error loading article images:', imagesError);
+      }
+
       // Transform the data to match our interface
-      this.articles = (data || []).map(article => ({
-        ...article,
-        tags: article.tags?.map((t: any) => t.tag) || [],
-        images: article.images || []
-      }));
+      this.articles = (articlesData || []).map(article => {
+        // Find tags for this article
+        const articleTags = junctionData
+          ?.filter(j => j.article_id === article.id)
+          ?.map(j => tagsData?.find(t => t.id === j.tag_id))
+          ?.filter(Boolean) || [];
+
+        // Find images for this article
+        const articleImages = imagesData
+          ?.filter(img => img.article_id === article.id) || [];
+
+        return {
+          ...article,
+          tags: articleTags,
+          images: articleImages
+        };
+      });
       
       return this.articles;
     } catch (error) {
