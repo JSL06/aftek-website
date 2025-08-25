@@ -23,6 +23,15 @@ interface Article {
   is_published: boolean;
   displayorder: number;
   slug: string;
+  featured_image?: string;
+  read_time?: number;
+  tags?: string[];
+  // Multilingual fields
+  titles?: Record<string, string>;
+  contents?: Record<string, string>;
+  excerpts?: Record<string, string>;
+  authors_multilingual?: Record<string, string>;
+  categories_multilingual?: Record<string, string>;
 }
 
 interface ArticleFilters {
@@ -102,7 +111,7 @@ const ArticleCard: React.FC<{ article: Article }> = ({ article }) => {
             
             {/* Category Badge */}
             <span className="absolute top-4 left-4 text-white/80 text-xs font-medium px-2 py-1 bg-white/20 rounded-full backdrop-blur-sm z-10">
-              {article.category}
+              {getLocalizedText(article, 'category', article.category)}
             </span>
 
             {/* Image Navigation Dots */}
@@ -132,16 +141,16 @@ const ArticleCard: React.FC<{ article: Article }> = ({ article }) => {
           {/* Content Section */}
           <div className="p-6 flex-1 flex flex-col">
             <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-red-600 transition-colors duration-300 line-clamp-2">
-              {article.title}
+              {getLocalizedText(article, 'title', article.title)}
             </h3>
             <p className="text-gray-600 mb-4 text-sm leading-relaxed line-clamp-3 flex-1">
-              {article.excerpt}
+              {getLocalizedText(article, 'excerpt', article.excerpt)}
             </p>
             <div className="flex items-center justify-between text-xs text-gray-500 mt-auto pt-4 border-t border-gray-100">
-              <span className="font-medium">{article.author}</span>
+              <span className="font-medium">{getLocalizedText(article, 'author', article.author)}</span>
               <div className="flex space-x-2">
                 <span className="px-2 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium">
-                  {article.category}
+                  {getLocalizedText(article, 'category', article.category)}
                 </span>
               </div>
             </div>
@@ -154,6 +163,16 @@ const ArticleCard: React.FC<{ article: Article }> = ({ article }) => {
 
 const Articles = () => {
   const { t, currentLanguage } = useTranslation();
+  
+  // Helper function to get localized text with fallback
+  const getLocalizedText = (article: Article, field: keyof Article, fallback: string): string => {
+    const multilingualField = `${field}_multilingual` as keyof Article;
+    if (multilingualField in article && article[multilingualField]) {
+      const multilingualData = article[multilingualField] as Record<string, string>;
+      return multilingualData[currentLanguage] || multilingualData['en'] || fallback;
+    }
+    return fallback;
+  };
   const [articles, setArticles] = useState<Article[]>([]);
   const [filteredArticles, setFilteredArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
@@ -208,19 +227,25 @@ const Articles = () => {
     // Search filter
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
-      filtered = filtered.filter(article =>
-        article.title.toLowerCase().includes(searchLower) ||
-        article.excerpt.toLowerCase().includes(searchLower) ||
-        article.content.toLowerCase().includes(searchLower) ||
-        article.author.toLowerCase().includes(searchLower)
-      );
+      filtered = filtered.filter(article => {
+        // Search in multilingual fields first, then fallback to base fields
+        const title = getLocalizedText(article, 'title', article.title);
+        const excerpt = getLocalizedText(article, 'excerpt', article.excerpt);
+        const author = getLocalizedText(article, 'author', article.author);
+        
+        return title.toLowerCase().includes(searchLower) ||
+               excerpt.toLowerCase().includes(searchLower) ||
+               article.content.toLowerCase().includes(searchLower) ||
+               author.toLowerCase().includes(searchLower);
+      });
     }
 
     // Category filter
     if (filters.category.length > 0) {
-      filtered = filtered.filter(article =>
-        filters.category.includes(article.category)
-      );
+      filtered = filtered.filter(article => {
+        const category = getLocalizedText(article, 'category', article.category);
+        return filters.category.includes(category);
+      });
     }
 
     setFilteredArticles(filtered);

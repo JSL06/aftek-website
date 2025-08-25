@@ -1,26 +1,39 @@
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { ArrowLeft, Type, FileText, Globe, Loader2, Upload, Image as ImageIcon, Building2, Calendar, MapPin, User, DollarSign, Clock, Star, Trash2, Save, Plus, Filter, SortAsc, SortDesc, Eye, EyeOff, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Edit, Trash2, Save, ArrowLeft, FileText, Calendar, Globe } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { Link } from 'react-router-dom';
-import ArticleFilter from '@/components/ArticleFilter';
-import EnhancedRichTextEditor from '@/components/EnhancedRichTextEditor';
-import LanguageSelector, { Language, LANGUAGES } from '@/components/LanguageSelector';
-import MultilingualFormField from '@/components/MultilingualFormField';
-import TranslationStatus from '@/components/TranslationStatus';
 import { useTranslation } from '@/hooks/useTranslation';
+import ModernRichTextEditor from '@/components/ModernRichTextEditor';
 
-interface ArticleFilters {
-  search: string;
-  category: string[];
-}
+// Language configuration
+const languages = [
+  { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸' },
+  { code: 'zh-Hant', name: 'Traditional Chinese', nativeName: '繁體中文', flag: '🇹🇼' },
+  { code: 'zh-Hans', name: 'Simplified Chinese', nativeName: '简体中文', flag: '🇨🇳' },
+  { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' },
+  { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
+  { code: 'th', name: 'Thai', nativeName: 'ไทย', flag: '🇹🇭' },
+  { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', flag: '🇻🇳' }
+];
+
+// Article categories
+const categories = [
+  { value: 'Industry News', label: 'Industry News' },
+  { value: 'Technology', label: 'Technology' },
+  { value: 'Sustainability', label: 'Sustainability' },
+  { value: 'Case Studies', label: 'Case Studies' },
+  { value: 'Product Updates', label: 'Product Updates' },
+  { value: 'Company News', label: 'Company News' },
+  { value: 'Technical Articles', label: 'Technical Articles' },
+  { value: 'Market Analysis', label: 'Market Analysis' }
+];
 
 interface Article {
   id: string;
@@ -32,514 +45,307 @@ interface Article {
   published_at?: string;
   is_published?: boolean;
   created_at?: string;
+  updated_at?: string;
+  slug?: string;
+  featured_image?: string;
+  read_time?: number;
+  tags?: string[];
   // Multilingual fields
   titles?: Record<string, string>;
   contents?: Record<string, string>;
   excerpts?: Record<string, string>;
+  authors_multilingual?: Record<string, string>;
+  categories_multilingual?: Record<string, string>;
 }
 
-const Articles = () => {
+export default function AdminArticles() {
+  const { articleId } = useParams<{ articleId: string }>();
+  const navigate = useNavigate();
   const { t } = useTranslation();
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>('en' as Language);
+  
+  const [article, setArticle] = useState<Article | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
-  const [filteredArticles, setFilteredArticles] = useState<Article[]>([]);
-  const [editingArticle, setEditingArticle] = useState<Article | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [filters, setFilters] = useState<ArticleFilters>({ 
-    search: '', 
-    category: []
-  });
-  const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    excerpt: '',
-    author: '',
-    category: '',
-    is_published: true,
-    // Multilingual content
-    translations: {} as Record<string, any>
-  });
+  const [listLoading, setListLoading] = useState<boolean>(false);
+  const [listError, setListError] = useState<string | null>(null);
 
-  // Article categories
-  const categories = [
-    { value: 'Industry News', label: 'Industry News' },
-    { value: 'Technology', label: 'Technology' },
-    { value: 'Sustainability', label: 'Sustainability' },
-    { value: 'Case Studies', label: 'Case Studies' },
-    { value: 'Product Updates', label: 'Product Updates' },
-    { value: 'Company News', label: 'Company News' }
-  ];
-
-  // Fetch articles from Supabase
-  useEffect(() => {
-    fetchArticles();
-  }, []);
-
-  // Apply filters whenever articles or filters change
-  useEffect(() => {
-    let filtered = [...articles];
-
-    // Search filter
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      filtered = filtered.filter(article =>
-        article.title.toLowerCase().includes(searchLower) ||
-        (article.excerpt && article.excerpt.toLowerCase().includes(searchLower)) ||
-        article.content.toLowerCase().includes(searchLower) ||
-        (article.author && article.author.toLowerCase().includes(searchLower))
-      );
-    }
-
-    // Category filter
-    if (filters.category.length > 0) {
-      filtered = filtered.filter(article =>
-        article.category && filters.category.includes(article.category)
-      );
-    }
-
-    setFilteredArticles(filtered);
-  }, [articles, filters]);
-
-  const fetchArticles = async () => {
-    setLoading(true);
+  // Load articles list function
+  const loadArticles = async () => {
     try {
+      console.log('🔄 Loading articles from database...');
+      setListLoading(true);
+      setListError(null);
+      
       const { data, error } = await supabase
         .from('articles')
         .select('*')
         .order('created_at', { ascending: false });
+
       if (error) {
-        console.error('Error fetching articles:', error);
-      } else {
-        setArticles(data || []);
+        throw error;
       }
-    } catch (error) {
-      console.error('Error fetching articles:', error);
+
+      console.log('🔄 Articles loaded:', data?.length || 0, 'articles');
+      setArticles(data || []);
+    } catch (err: any) {
+      console.error('Error loading articles list:', err);
+      setListError(err?.message || 'Failed to load articles');
+    } finally {
+      setListLoading(false);
     }
-    setLoading(false);
   };
 
+  // Load article when articleId changes
+  useEffect(() => {
+    if (articleId) {
+      loadArticle(articleId);
+    } else {
+      loadArticles();
+    }
+  }, [articleId]);
 
+  const loadArticle = async (id: string) => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-  const handleAddNew = () => {
-    setEditingArticle(null);
-    setFormData({
-      title: '',
-      content: '',
-      excerpt: '',
-      author: '',
-      category: '',
-      is_published: true,
-      translations: {}
-    });
-    setShowForm(true);
+      if (error) throw error;
+      setArticle(data);
+    } catch (error: any) {
+      console.error('Error loading article:', error);
+      toast.error('Failed to load article: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleEdit = (article: Article) => {
-    setEditingArticle(article);
-    
-    // Prepare translations data
-    const translations: Record<string, any> = {};
-    LANGUAGES.forEach(lang => {
-      translations[lang.code] = {
-        title: lang.code === 'en' ? article.title : (article.titles?.[lang.code] || ''),
-        content: lang.code === 'en' ? article.content : (article.contents?.[lang.code] || ''),
-        excerpt: lang.code === 'en' ? article.excerpt : (article.excerpts?.[lang.code] || ''),
-        author: article.author || '',
-        category: article.category || ''
+  const updateBasicField = (field: string, value: any) => {
+    if (article) {
+      setArticle({
+        ...article,
+        [field]: value
+      });
+    }
+  };
+
+  const updateTranslation = (languageCode: string, field: string, value: string) => {
+    if (article) {
+      const fieldMap: Record<string, keyof Article> = {
+        'title': 'titles',
+        'content': 'contents',
+        'excerpt': 'excerpts',
+        'author': 'authors_multilingual',
+        'category': 'categories_multilingual'
       };
-    });
-
-    setFormData({
-      title: article.title,
-      content: article.content,
-      excerpt: article.excerpt || '',
-      author: article.author || '',
-      category: article.category || '',
-      is_published: article.is_published !== false,
-      translations
-    });
-    setShowForm(true);
-  };
-
-  const handleTranslationChange = (language: Language, fieldName: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      translations: {
-        ...prev.translations,
-        [language]: {
-          ...prev.translations[language],
-          [fieldName]: value
-        }
+      
+      const multilingualField = fieldMap[field];
+      if (multilingualField) {
+        const currentValue = article[multilingualField] as Record<string, string> || {};
+        setArticle({
+          ...article,
+          [multilingualField]: {
+            ...currentValue,
+            [languageCode]: value
+          }
+        });
       }
-    }));
+    }
   };
-
-
 
   const handleSave = async () => {
-    setLoading(true);
+    if (!article) return;
     
-    // Validate required fields for current language
-    const currentLangData = formData.translations[selectedLanguage] || {};
-    if (!currentLangData.title && !formData.title) {
-      alert(t('admin.articles.titleRequired'));
-      setLoading(false);
-      return;
-    }
-
     try {
-      // Generate slug from title
-      const generateSlug = (title: string) => {
-        return title
-          .toLowerCase()
-          .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-          .replace(/\s+/g, '-') // Replace spaces with hyphens
-          .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
-          .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
-      };
+      setSaving(true);
+      
+      const { error } = await supabase
+        .from('articles')
+        .upsert(article);
 
-      const slug = generateSlug(formData.title || currentLangData.title);
-
-      // Prepare article data with multilingual content
-      const articleData: Partial<Article> = {
-        title: formData.title || currentLangData.title,
-        content: formData.content || currentLangData.content,
-        excerpt: formData.excerpt || currentLangData.excerpt,
-        author: formData.author,
-        category: formData.category,
-        is_published: formData.is_published,
-        published_at: formData.is_published ? new Date().toISOString() : null,
-        titles: {},
-        contents: {},
-        excerpts: {}
-      };
-
-      // Add multilingual content
-      LANGUAGES.forEach(lang => {
-        const langData = formData.translations[lang.code];
-        if (langData?.title) {
-          articleData.titles![lang.code] = langData.title;
-        }
-        if (langData?.content) {
-          articleData.contents![lang.code] = langData.content;
-        }
-        if (langData?.excerpt) {
-          articleData.excerpts![lang.code] = langData.excerpt;
-        }
-      });
-
-      if (editingArticle && editingArticle.id) {
-        // Update existing article
-        const { error } = await supabase
-          .from('articles')
-          .update({
-            ...articleData,
-            slug: slug
-          })
-          .eq('id', editingArticle.id);
-        if (error) {
-          console.error('Supabase update error:', error);
-                  alert(t('admin.articles.updateError') + ': ' + error.message);
-      } else {
-        alert(t('admin.articles.updateSuccess'));
+      if (error) throw error;
+      
+      toast.success('Article saved successfully!');
+      if (!articleId) {
+        navigate('/admin/articles');
       }
-      } else {
-        // Add new article
-        const { error } = await supabase
-          .from('articles')
-          .insert([{
-            ...articleData,
-            slug: slug
-          }]);
-        if (error) {
-          console.error('Supabase insert error:', error);
-                  alert(t('admin.articles.addError') + ': ' + error.message);
-      } else {
-        alert(t('admin.articles.addSuccess'));
-      }
-      }
-      await fetchArticles();
-      setShowForm(false);
-      setEditingArticle(null);
-    } catch (error) {
-      alert(t('admin.articles.saveError'));
+    } catch (error: any) {
+      console.error('Error saving article:', error);
+      toast.error('Failed to save article: ' + error.message);
+    } finally {
+      setSaving(false);
     }
-    setLoading(false);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this article?')) return;
-    setLoading(true);
+  const deleteArticle = async (id: string) => {
     try {
       const { error } = await supabase
         .from('articles')
         .delete()
         .eq('id', id);
-      if (error) {
-        alert(t('admin.articles.deleteError'));
-      } else {
-        alert(t('admin.articles.deleteSuccess'));
-        await fetchArticles();
-      }
-    } catch (error) {
-      alert(t('admin.articles.deleteError'));
+
+      if (error) throw error;
+      
+      toast.success('Article deleted successfully');
+      loadArticles();
+    } catch (error: any) {
+      console.error('Error deleting article:', error);
+      toast.error('Failed to delete article: ' + error.message);
     }
-    setLoading(false);
   };
 
-  if (showForm) {
+  // Index page: show list when no articleId
+  if (!articleId) {
     return (
-      <div className="min-h-screen bg-background pt-24">
-        <div className="container mx-auto p-8">
-          <div className="mb-6">
-            <Button variant="outline" onClick={() => setShowForm(false)}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Articles
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Articles</h1>
+          <div className="flex items-center gap-3">
+            <Button 
+              onClick={() => navigate('/admin/articles/new')}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add New Article
             </Button>
           </div>
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {editingArticle ? t('admin.articles.edit') : t('admin.articles.addNew')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Language Selector */}
-              <div className="bg-background border-b border-border pb-4 mb-6">
-                <LanguageSelector
-                  selectedLanguage={selectedLanguage}
-                  onLanguageChange={setSelectedLanguage}
-                />
-              </div>
-
-              {/* Translation Status */}
-              <div className="bg-muted p-4 rounded-lg">
-                <TranslationStatus
-                  translations={formData.translations}
-                  requiredFields={['title', 'content']}
-                />
-              </div>
-
-
-
-              {/* Language-specific editing */}
-              <div className="bg-muted p-4 rounded-lg">
-                <h3 className="font-semibold mb-3">
-                  {t('admin.dashboard.currentSelection')}: {LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName}
-                </h3>
-                
-                <div className="space-y-6">
-                  <MultilingualFormField
-                    label={t('admin.articles.articleTitle')}
-                    fieldName="title"
-                    type="text"
-                    translations={formData.translations}
-                    onTranslationChange={handleTranslationChange}
-                    currentLanguage={selectedLanguage}
-                    required={true}
-                  />
-
-                  <MultilingualFormField
-                    label={t('admin.articles.excerpt')}
-                    fieldName="excerpt"
-                    type="textarea"
-                    translations={formData.translations}
-                    onTranslationChange={handleTranslationChange}
-                    currentLanguage={selectedLanguage}
-                    required={false}
-                  />
-
-                  <div>
-                    <Label htmlFor="content">{t('admin.articles.content')} ({LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName})</Label>
-                    <EnhancedRichTextEditor
-                      value={formData.translations[selectedLanguage]?.content || ''}
-                      onChange={(value) => handleTranslationChange(selectedLanguage, 'content', value)}
-                      placeholder={`${t('admin.articles.contentPlaceholder')} (${LANGUAGES.find(l => l.code === selectedLanguage)?.nativeName})`}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Common fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="author">{t('admin.articles.author')}</Label>
-                  <Input
-                    id="author"
-                    value={formData.author}
-                    onChange={(e) => setFormData(prev => ({ ...prev, author: e.target.value }))}
-                    placeholder={t('admin.articles.authorPlaceholder')}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="category">{t('admin.articles.category')}</Label>
-                  <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('admin.articles.selectCategory')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.value} value={category.value}>
-                          {category.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="is_published"
-                  checked={formData.is_published}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_published: checked }))}
-                />
-                <Label htmlFor="is_published">{t('admin.articles.published')}</Label>
-              </div>
-
-              <div className="flex gap-4">
-                <Button onClick={handleSave} disabled={loading}>
-                  <Save className="h-4 w-4 mr-2" />
-                  {loading ? t('admin.articles.saving') : t('admin.articles.save')}
-                </Button>
-                <Button variant="outline" onClick={() => setShowForm(false)}>
-                  {t('admin.products.cancel')}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </div>
-      </div>
-    );
-  }
 
-  const displayArticles = filteredArticles;
-
-  return (
-    <div className="min-h-screen bg-background pt-24">
-      <div className="bg-gradient-hero text-primary-foreground p-6">
-        <div className="container mx-auto">
-          <Link to="/admin/dashboard">
-            <Button variant="secondary" className="mb-4 bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              {t('admin.products.backToProducts')}
-            </Button>
-          </Link>
-          <h1 className="text-2xl font-bold">{t('admin.articles.title')}</h1>
-        </div>
-      </div>
-
-      {/* Language Selection */}
-      <div className="bg-background border-b border-border">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+        {/* Article Management Controls */}
+        <div className="flex items-center justify-between bg-slate-50 p-4 rounded-lg border">
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <Globe className="h-5 w-5 text-muted-foreground" />
-              <span className="text-sm font-medium text-muted-foreground">{t('admin.dashboard.selectLanguage')}:</span>
+              <Filter className="h-4 w-4 text-slate-500" />
+              <Select value="all" onValueChange={(value) => console.log('Filter:', value)}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Filter by..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Articles</SelectItem>
+                  <SelectItem value="published">Published Only</SelectItem>
+                  <SelectItem value="draft">Draft Only</SelectItem>
+                  <SelectItem value="featured">Featured Only</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="flex gap-2">
-              {LANGUAGES.map(lang => (
-                <Button
-                  key={lang.code}
-                  variant={selectedLanguage === lang.code ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedLanguage(lang.code as Language)}
-                  className="flex items-center gap-2"
-                >
-                  <span>{lang.flag}</span>
-                  <span>{lang.nativeName}</span>
-                </Button>
-              ))}
+            
+            <div className="flex items-center gap-2">
+              <SortAsc className="h-4 w-4 text-slate-500" />
+              <Select value="newest" onValueChange={(value) => console.log('Sort:', value)}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Sort by..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest First</SelectItem>
+                  <SelectItem value="oldest">Oldest First</SelectItem>
+                  <SelectItem value="title">Title A-Z</SelectItem>
+                  <SelectItem value="category">Category</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => console.log('Bulk actions')}
+              className="text-red-600 border-red-200 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Bulk Delete
+            </Button>
           </div>
         </div>
-      </div>
 
-      <div className="container mx-auto p-8">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold">{t('admin.articles.title')}</h1>
-            <p className="text-muted-foreground">{t('admin.articles.manageArticles')}</p>
+        {listLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin" />
           </div>
-          <Button onClick={handleAddNew}>
-            <Plus className="h-4 w-4 mr-2" />
-            {t('admin.articles.addNew')}
-          </Button>
-        </div>
-
-        {/* Article Filter */}
-        <ArticleFilter 
-          searchTerm={filters.search}
-          selectedCategory={filters.category.length > 0 ? filters.category[0] : 'all'}
-          onSearchChange={(value) => setFilters(prev => ({ ...prev, search: value }))}
-          onCategoryChange={(value) => setFilters(prev => ({ ...prev, category: value === 'all' ? [] : [value] }))}
-          onSearch={() => {}} // No additional search action needed
-          onClear={() => setFilters({ search: '', category: [] })}
-        />
-
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">{t('admin.articles.loading')}</p>
-            </div>
-          </div>
+        ) : listError ? (
+          <div className="p-4 border rounded text-red-700 bg-red-50">{listError}</div>
+        ) : articles.length === 0 ? (
+          <div className="p-6 border rounded text-muted-foreground">No articles found.</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {displayArticles.map((article) => (
-              <Card key={article.id} className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold">{article.title}</h3>
-                      <Badge variant={article.is_published ? "default" : "secondary"}>
-                        {article.is_published ? t('admin.articles.published') : t('admin.articles.draft')}
-                      </Badge>
-                      {article.category && (
-                        <Badge variant="outline" className="ml-2">
-                          {article.category}
-                        </Badge>
-                      )}
-                      <p className="text-muted-foreground text-sm mb-2 mt-2 line-clamp-2">
-                        {article.excerpt}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{t('admin.articles.author')}: {article.author}</p>
-                      <p className="text-xs text-muted-foreground">{article.published_at ? `${t('admin.articles.published')}: ${new Date(article.published_at).toLocaleDateString()}` : ''}</p>
+          <div className="grid gap-4">
+            {articles.map(a => (
+              <Card key={a.id} className={`${!a.is_published ? 'opacity-60 bg-slate-50' : ''}`}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="text-lg font-semibold truncate">
+                          {a.titles?.['en'] || a.title}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {a.is_published ? (
+                            <Badge variant="default" className="bg-green-100 text-green-800">Published</Badge>
+                          ) : (
+                            <Badge variant="secondary" className="bg-slate-100 text-slate-600">Draft</Badge>
+                          )}
+                          {a.category && (
+                            <Badge variant="outline" className="border-blue-200 text-blue-700">
+                              {a.category}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-sm text-muted-foreground truncate">
+                        {a.excerpt || 'No excerpt available'}
+                      </div>
+                      <div className="text-xs text-slate-400 mt-1">
+                        ID: {a.id} • Created: {new Date(a.created_at || Date.now()).toLocaleDateString()}
+                        {a.author && ` • Author: ${a.author}`}
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-2 ml-4">
-                      <Button size="sm" variant="outline" onClick={() => handleEdit(article)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleDelete(article.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                      <Button
+                    
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="ghost" 
                         size="sm"
-                        variant={article.is_published ? "destructive" : "default"}
-                        className={article.is_published ? "bg-red-600 text-white hover:bg-red-700" : "bg-green-600 text-white hover:bg-green-700"}
-                        onClick={async () => {
-                          setLoading(true);
-                          await supabase
+                        onClick={() => {
+                          // Toggle article visibility
+                          const updatedArticle = { ...a, is_published: !a.is_published };
+                          supabase
                             .from('articles')
-                            .update({ is_published: !article.is_published, published_at: !article.is_published ? new Date().toISOString() : null })
-                            .eq('id', article.id);
-                          await fetchArticles();
-                          setLoading(false);
+                            .update({ is_published: !a.is_published })
+                            .eq('id', a.id)
+                            .then(() => loadArticles());
+                        }}
+                        title={a.is_published ? 'Unpublish Article' : 'Publish Article'}
+                      >
+                        {a.is_published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => navigate(`/admin/articles/edit/${a.id}`)}
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={async () => {
+                          if (confirm(`Are you sure you want to delete "${a.titles?.['en'] || a.title}"? This action cannot be undone.`)) {
+                            try {
+                              console.log('🗑️ Deleting article:', a.id, a.titles?.['en'] || a.title);
+                              await deleteArticle(a.id);
+                              console.log('🗑️ Delete result: success');
+                            } catch (error) {
+                              console.error('🗑️ Delete error:', error);
+                            }
+                          }
                         }}
                       >
-                        {article.is_published ? (
-                          <>
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            Deactivate
-                          </>
-                        ) : (
-                          <>
-                            <Edit className="h-4 w-4 mr-1" />
-                            Activate
-                          </>
-                        )}
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -548,29 +354,244 @@ const Articles = () => {
             ))}
           </div>
         )}
-        {displayArticles.length === 0 && !loading && (
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="ml-2">Loading...</span>
+      </div>
+    );
+  }
+
+  if (!article) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-red-800 mb-2">Article Not Found</h2>
+          <p className="text-muted-foreground mb-4">The article you're looking for doesn't exist or has been deleted.</p>
+          <Button onClick={() => navigate('/admin/articles')}>
+            Back to Articles
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" onClick={() => navigate('/admin/articles')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Articles
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">
+              {articleId ? 'Edit Article' : 'Add New Article'}
+            </h1>
+            {articleId && (
+              <p className="text-muted-foreground">ID: {article.id}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Save Article
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        {/* Basic Info */}
+        <div className="xl:col-span-1">
           <Card>
-            <CardContent className="p-12 text-center">
-              <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No articles found</h3>
-              <p className="text-muted-foreground mb-4">
-                Get started by adding your first article.
-              </p>
-              <Button onClick={handleAddNew}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Your First Article
-              </Button>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Type className="h-5 w-5" />
+                Basic Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Category */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Category</label>
+                <Select 
+                  value={article.category || ''} 
+                  onValueChange={(value) => updateBasicField('category', value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(category => (
+                      <SelectItem key={category.value} value={category.value}>
+                        {category.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Author */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Author</label>
+                <Input 
+                  value={article.author || ''} 
+                  onChange={(e) => updateBasicField('author', e.target.value)} 
+                  placeholder="Author name"
+                />
+              </div>
+
+              {/* Published Date */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Published Date</label>
+                <Input 
+                  type="date" 
+                  value={article.published_at ? new Date(article.published_at).toISOString().split('T')[0] : ''} 
+                  onChange={(e) => updateBasicField('published_at', e.target.value)} 
+                />
+              </div>
+
+              {/* Read Time */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Read Time (minutes)</label>
+                <Input 
+                  type="number" 
+                  value={article.read_time || ''} 
+                  onChange={(e) => updateBasicField('read_time', parseInt(e.target.value) || 0)} 
+                  placeholder="5"
+                />
+              </div>
+
+              {/* Featured Image */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Featured Image URL</label>
+                <Input 
+                  value={article.featured_image || ''} 
+                  onChange={(e) => updateBasicField('featured_image', e.target.value)} 
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+
+              {/* Flags */}
+              <div className="space-y-4 pt-4 border-t">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-sm font-medium">Published</label>
+                    <p className="text-xs text-muted-foreground">Show this article on the website</p>
+                  </div>
+                  <Switch 
+                    checked={article.is_published || false} 
+                    onCheckedChange={(checked) => updateBasicField('is_published', checked)} 
+                  />
+                </div>
+              </div>
             </CardContent>
           </Card>
-        )}
-        <div className="text-center mt-8">
-          <p className="text-muted-foreground">
-            Showing {displayArticles.length} of {articles.length} articles
-          </p>
+        </div>
+
+        {/* Multilingual Content */}
+        <div className="xl:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                Multilingual Content
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {languages.map(lang => (
+                  <div key={lang.code} className="p-4 border border-slate-200 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <span>{lang.flag}</span>
+                      {lang.nativeName} - {lang.name}
+                    </h3>
+                    <div className="space-y-4">
+                      {/* Title */}
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          Article Title ({lang.nativeName})
+                        </label>
+                        <Input 
+                          value={article.titles?.[lang.code] || ''} 
+                          onChange={(e) => updateTranslation(lang.code, 'title', e.target.value)} 
+                          placeholder="Enter article title" 
+                          className="text-lg font-medium" 
+                        />
+                      </div>
+                      
+                      {/* Excerpt */}
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          Article Excerpt ({lang.nativeName})
+                        </label>
+                        <textarea
+                          value={article.excerpts?.[lang.code] || ''} 
+                          onChange={(e) => updateTranslation(lang.code, 'excerpt', e.target.value)} 
+                          placeholder="Enter article excerpt..." 
+                          className="w-full p-3 border border-slate-300 rounded-lg resize-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                          rows={3}
+                        />
+                      </div>
+                      
+                      {/* Content */}
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          Article Content ({lang.nativeName})
+                        </label>
+                        <ModernRichTextEditor 
+                          value={article.contents?.[lang.code] || ''} 
+                          onChange={(v) => updateTranslation(lang.code, 'content', v)} 
+                          placeholder="Enter article content..." 
+                          height="200px" 
+                        />
+                      </div>
+                      
+                      {/* Author */}
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Author ({lang.nativeName})</label>
+                        <Input 
+                          value={article.authors_multilingual?.[lang.code] || ''} 
+                          onChange={(e) => updateTranslation(lang.code, 'author', e.target.value)} 
+                          placeholder="Author name" 
+                        />
+                      </div>
+                      
+                      {/* Category */}
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Category ({lang.nativeName})</label>
+                        <Input 
+                          value={article.categories_multilingual?.[lang.code] || ''} 
+                          onChange={(e) => updateTranslation(lang.code, 'category', e.target.value)} 
+                          placeholder="Category name" 
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
   );
-};
-
-export default Articles;
+}
