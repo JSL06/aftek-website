@@ -43,7 +43,7 @@ export const useAdminCounts = () => {
       const mediaCount = 0;
 
       // Calculate translations count (products * languages)
-      const languagesCount = 7; // en, zh-Hant, zh-Hans, ja, ko, th, vi
+      const languagesCount = 6; // en, zh-Hant, ja, ko, th, vi
       const translationsCount = productsCount * languagesCount;
 
       setCounts({

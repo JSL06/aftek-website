@@ -7,10 +7,9 @@ import jaTranslations from '@/locales/ja';
 import koTranslations from '@/locales/ko';
 import thTranslations from '@/locales/th';
 import viTranslations from '@/locales/vi';
-import zhHansTranslations from '@/locales/zh-Hans';
 import zhHantTranslations from '@/locales/zh-Hant';
 
-export type Language = 'en' | 'ja' | 'ko' | 'th' | 'vi' | 'zh-Hans' | 'zh-Hant';
+export type Language = 'en' | 'ja' | 'ko' | 'th' | 'vi' | 'zh-Hant';
 
 interface Translation {
   key: string;
@@ -30,7 +29,6 @@ const localTranslations: { [K in Language]: Translations } = {
   'ko': koTranslations,
   'th': thTranslations,
   'vi': viTranslations,
-  'zh-Hans': zhHansTranslations,
   'zh-Hant': zhHantTranslations,
 };
 
@@ -41,7 +39,6 @@ console.log('Local translations loaded:', {
   ko: Object.keys(koTranslations).length,
   th: Object.keys(thTranslations).length,
   vi: Object.keys(viTranslations).length,
-  zhHans: Object.keys(zhHansTranslations).length,
   zhHant: Object.keys(zhHantTranslations).length,
 });
 
@@ -57,7 +54,6 @@ const fallbackTranslations: { [key: string]: { [K in Language]: string } } = {
     'ko': '홈',
     'th': 'หน้าแรก',
     'vi': 'Trang chủ',
-    'zh-Hans': '首页',
     'zh-Hant': '首頁'
   },
   'nav.about': {
@@ -66,7 +62,6 @@ const fallbackTranslations: { [key: string]: { [K in Language]: string } } = {
     'ko': '회사소개',
     'th': 'เกี่ยวกับเรา',
     'vi': 'Về chúng tôi',
-    'zh-Hans': '关于我们',
     'zh-Hant': '關於我們'
   },
   'nav.products': {
@@ -75,7 +70,6 @@ const fallbackTranslations: { [key: string]: { [K in Language]: string } } = {
     'ko': '제품',
     'th': 'ผลิตภัณฑ์',
     'vi': 'Sản phẩm',
-    'zh-Hans': '产品',
     'zh-Hant': '產品'
   },
   'nav.projects': {
@@ -84,7 +78,6 @@ const fallbackTranslations: { [key: string]: { [K in Language]: string } } = {
     'ko': '프로젝트',
     'th': 'โครงการ',
     'vi': 'Dự án',
-    'zh-Hans': '项目',
     'zh-Hant': '專案'
   },
   'nav.articles': {
@@ -93,7 +86,6 @@ const fallbackTranslations: { [key: string]: { [K in Language]: string } } = {
     'ko': '기사',
     'th': 'บทความ',
     'vi': 'Bài viết',
-    'zh-Hans': '文章',
     'zh-Hant': '文章'
   },
   'nav.contact': {
@@ -102,7 +94,6 @@ const fallbackTranslations: { [key: string]: { [K in Language]: string } } = {
     'ko': '연락처',
     'th': 'ติดต่อ',
     'vi': 'Liên hệ',
-    'zh-Hans': '联系',
     'zh-Hant': '聯絡'
   },
   'nav.guide': {
@@ -111,7 +102,6 @@ const fallbackTranslations: { [key: string]: { [K in Language]: string } } = {
     'ko': '가이드',
     'th': 'คู่มือ',
     'vi': 'Hướng dẫn',
-    'zh-Hans': '指南',
     'zh-Hant': '指南'
   },
 };

@@ -153,7 +153,6 @@ const translations = {
     // Language Names
     'language.en': 'English',
     'language.zh-Hant': 'Traditional Chinese',
-    'language.zh-Hans': 'Simplified Chinese',
     'language.ja': 'Japanese',
     'language.ko': 'Korean',
     'language.th': 'Thai',
@@ -162,7 +161,6 @@ const translations = {
     // Language Native Names
     'language.native.en': 'English',
     'language.native.zh-Hant': '繁體中文',
-    'language.native.zh-Hans': '简体中文',
     'language.native.ja': '日本語',
     'language.native.ko': '한국어',
     'language.native.th': 'ไทย',

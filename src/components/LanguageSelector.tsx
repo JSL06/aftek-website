@@ -2,11 +2,10 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Globe } from 'lucide-react';
 
-export type Language = 'en' | 'zh-Hans' | 'zh-Hant' | 'ja' | 'ko' | 'th' | 'vi';
+export type Language = 'en' | 'zh-Hant' | 'ja' | 'ko' | 'th' | 'vi';
 
 export const LANGUAGES = [
   { code: 'en', name: 'English', flag: '🇺🇸', nativeName: 'English' },
-  { code: 'zh-Hans', name: '简体中文', flag: '🇨🇳', nativeName: '简体中文' },
   { code: 'zh-Hant', name: '繁體中文', flag: '🇹🇼', nativeName: '繁體中文' },
   { code: 'ja', name: '日本語', flag: '🇯🇵', nativeName: '日本語' },
   { code: 'ko', name: '한국어', flag: '🇰🇷', nativeName: '한국어' },

@@ -6,10 +6,9 @@ import jaTranslations from '@/locales/ja';
 import koTranslations from '@/locales/ko';
 import thTranslations from '@/locales/th';
 import viTranslations from '@/locales/vi';
-import zhHansTranslations from '@/locales/zh-Hans';
 import zhHantTranslations from '@/locales/zh-Hant';
 
-export type Language = 'en' | 'ja' | 'ko' | 'th' | 'vi' | 'zh-Hans' | 'zh-Hant';
+export type Language = 'en' | 'ja' | 'ko' | 'th' | 'vi' | 'zh-Hant';
 
 interface TranslationStatus {
   complete: number;
@@ -44,7 +43,6 @@ const allTranslations = {
   'ko': koTranslations,
   'th': thTranslations,
   'vi': viTranslations,
-  'zh-Hans': zhHansTranslations,
   'zh-Hant': zhHantTranslations,
 };
 

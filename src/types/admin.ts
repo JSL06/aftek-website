@@ -2,7 +2,7 @@
 export type UserRole = 'admin' | 'editor' | 'translator' | 'viewer';
 export type ContentType = 'product' | 'project' | 'article' | 'page';
 export type ContentStatus = 'draft' | 'review' | 'published' | 'archived';
-export type Language = 'en' | 'zh-Hans' | 'zh-Hant' | 'ja' | 'ko' | 'th' | 'vi';
+export type Language = 'en' | 'zh-Hant' | 'ja' | 'ko' | 'th' | 'vi';
 
 // User Management
 export interface AdminUser {

@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 
-export type Language = 'en' | 'ja' | 'ko' | 'th' | 'vi' | 'zh-Hans' | 'zh-Hant';
+export type Language = 'en' | 'ja' | 'ko' | 'th' | 'vi' | 'zh-Hant';
 
 interface TranslationResult {
   translatedText: string;
@@ -25,7 +25,6 @@ const LANGUAGE_MAP = {
   'ko': { google: 'ko', libre: 'ko', deepl: 'KO' },
   'th': { google: 'th', libre: 'th', deepl: 'TH' },
   'vi': { google: 'vi', libre: 'vi', deepl: 'VI' },
-  'zh-Hans': { google: 'zh-CN', libre: 'zh', deepl: 'ZH' },
   'zh-Hant': { google: 'zh-TW', libre: 'zh-TW', deepl: 'ZH' },
 };
 

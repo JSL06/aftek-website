@@ -46,7 +46,6 @@ import UnsavedChangesWarning from './UnsavedChangesWarning';
 
 const LANGUAGES: { code: Language; name: string; flag: string; nativeName: string }[] = [
   { code: 'en', name: 'English', flag: '🇺🇸', nativeName: 'English' },
-  { code: 'zh-Hans', name: '简体中文', flag: '🇨🇳', nativeName: '简体中文' },
   { code: 'zh-Hant', name: '繁體中文', flag: '🇹🇼', nativeName: '繁體中文' },
   { code: 'ja', name: '日本語', flag: '🇯🇵', nativeName: '日本語' },
   { code: 'ko', name: '한국어', flag: '🇰🇷', nativeName: '한국어' },
@@ -110,7 +109,6 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
     },
     multilingual: {
       en: { title: '', description: '', content: '' },
-      'zh-Hans': { title: '', description: '', content: '' },
       'zh-Hant': { title: '', description: '', content: '' },
       ja: { title: '', description: '', content: '' },
       ko: { title: '', description: '', content: '' },
@@ -129,7 +127,7 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [translationProgress, setTranslationProgress] = useState<Record<Language, number>>({
-    en: 0, 'zh-Hans': 0, 'zh-Hant': 0, ja: 0, ko: 0, th: 0, vi: 0
+    en: 0, 'zh-Hant': 0, ja: 0, ko: 0, th: 0, vi: 0
   });
 
   // Track unsaved changes
