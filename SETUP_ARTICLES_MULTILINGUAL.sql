@@ -2,8 +2,11 @@
 -- This script sets up the articles table with full multilingual support
 -- Run this in your Supabase SQL editor
 
+-- Drop existing articles table if it exists (this will remove all data)
+DROP TABLE IF EXISTS articles CASCADE;
+
 -- Create articles table with multilingual support and content blocks
-CREATE TABLE IF NOT EXISTS articles (
+CREATE TABLE articles (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     slug TEXT UNIQUE NOT NULL,
     featured_image TEXT,
@@ -24,11 +27,11 @@ CREATE TABLE IF NOT EXISTS articles (
 );
 
 -- Create indexes
-CREATE INDEX IF NOT EXISTS idx_articles_slug ON articles(slug);
-CREATE INDEX IF NOT EXISTS idx_articles_published ON articles(is_published, published_at);
-CREATE INDEX IF NOT EXISTS idx_articles_category ON articles USING GIN(categories_multilingual);
-CREATE INDEX IF NOT EXISTS idx_articles_tags ON articles USING GIN(tags);
-CREATE INDEX IF NOT EXISTS idx_articles_content_blocks ON articles USING GIN(content_blocks);
+CREATE INDEX idx_articles_slug ON articles(slug);
+CREATE INDEX idx_articles_published ON articles(is_published, published_at);
+CREATE INDEX idx_articles_category ON articles USING GIN(categories_multilingual);
+CREATE INDEX idx_articles_tags ON articles USING GIN(tags);
+CREATE INDEX idx_articles_content_blocks ON articles USING GIN(content_blocks);
 
 -- Enable Row Level Security
 ALTER TABLE articles ENABLE ROW LEVEL SECURITY;
