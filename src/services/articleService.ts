@@ -1,13 +1,27 @@
 import { supabase } from '@/integrations/supabase/client';
 import { ContentBlock } from '@/components/InlineArticleEditor';
 
+export interface ArticleTag {
+  id: string;
+  name: string;
+  created_at?: string;
+}
+
+export interface ArticleImage {
+  id: string;
+  article_id: string;
+  image_url: string;
+  alt_text?: string;
+  caption?: string;
+  order_index: number;
+  created_at?: string;
+}
+
 export interface Article {
   id?: string;
   slug: string;
   featured_image?: string;
   read_time?: number;
-  tags?: string[];
-  content_blocks?: ContentBlock[];
   published_at?: string;
   is_published?: boolean;
   created_at?: string;
@@ -19,6 +33,13 @@ export interface Article {
   excerpts: Record<string, string>;
   authors_multilingual: Record<string, string>;
   categories_multilingual: Record<string, string>;
+  
+  // Content blocks for inline editor
+  content_blocks?: ContentBlock[];
+  
+  // Related data
+  tags?: ArticleTag[];
+  images?: ArticleImage[];
 }
 
 export interface MultilingualArticle {
@@ -26,8 +47,6 @@ export interface MultilingualArticle {
   slug: string;
   featured_image?: string;
   read_time?: number;
-  tags?: string[];
-  content_blocks?: ContentBlock[];
   published_at?: string;
   is_published?: boolean;
   created_at?: string;
@@ -39,16 +58,30 @@ export interface MultilingualArticle {
   excerpts: Record<string, string>;
   authors_multilingual: Record<string, string>;
   categories_multilingual: Record<string, string>;
+  
+  // Content blocks for inline editor
+  content_blocks?: ContentBlock[];
+  
+  // Related data
+  tags?: ArticleTag[];
+  images?: ArticleImage[];
 }
 
 class ArticleService {
   private articles: Article[] = [];
+  private tags: ArticleTag[] = [];
 
   async loadArticlesFromDatabase(): Promise<Article[]> {
     try {
       const { data, error } = await supabase
         .from('articles')
-        .select('*')
+        .select(`
+          *,
+          tags:article_tags_junction(
+            tag:article_tags(*)
+          ),
+          images:article_images(*)
+        `)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -56,10 +89,36 @@ class ArticleService {
         return [];
       }
 
-      this.articles = data || [];
+      // Transform the data to match our interface
+      this.articles = (data || []).map(article => ({
+        ...article,
+        tags: article.tags?.map((t: any) => t.tag) || [],
+        images: article.images || []
+      }));
+      
       return this.articles;
     } catch (error) {
       console.error('Error loading articles:', error);
+      return [];
+    }
+  }
+
+  async loadTagsFromDatabase(): Promise<ArticleTag[]> {
+    try {
+      const { data, error } = await supabase
+        .from('article_tags')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Error loading tags:', error);
+        return [];
+      }
+
+      this.tags = data || [];
+      return this.tags;
+    } catch (error) {
+      console.error('Error loading tags:', error);
       return [];
     }
   }
@@ -73,7 +132,13 @@ class ArticleService {
       try {
         const { data, error } = await supabase
           .from('articles')
-          .select('*')
+          .select(`
+            *,
+            tags:article_tags_junction(
+              tag:article_tags(*)
+            ),
+            images:article_images(*)
+          `)
           .eq('slug', slug)
           .single();
 
@@ -82,7 +147,12 @@ class ArticleService {
           return null;
         }
 
-        article = data;
+        article = {
+          ...data,
+          tags: data.tags?.map((t: any) => t.tag) || [],
+          images: data.images || []
+        };
+        
         if (article) {
           this.articles.push(article);
         }
@@ -97,9 +167,20 @@ class ArticleService {
 
   async addArticle(article: Omit<Article, 'id' | 'created_at' | 'updated_at'>): Promise<Article | null> {
     try {
+      // Generate slug from English title if not provided
+      let slug = article.slug;
+      if (!slug && article.titles?.en) {
+        slug = this.generateSlug(article.titles.en);
+      }
+
+      const articleData = {
+        ...article,
+        slug
+      };
+
       const { data, error } = await supabase
         .from('articles')
-        .insert([article])
+        .insert([articleData])
         .select()
         .single();
 
@@ -167,6 +248,97 @@ class ArticleService {
     }
   }
 
+  async uploadImage(file: File, articleId?: string): Promise<string | null> {
+    try {
+      const fileName = `${Date.now()}-${file.name}`;
+      const filePath = `article-images/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('article-images')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        console.error('Error uploading image:', uploadError);
+        return null;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('article-images')
+        .getPublicUrl(filePath);
+
+      // If articleId is provided, save image record
+      if (articleId) {
+        await this.saveImageRecord(articleId, publicUrl, file.name);
+      }
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      return null;
+    }
+  }
+
+  async saveImageRecord(articleId: string, imageUrl: string, altText?: string, caption?: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('article_images')
+        .insert([{
+          article_id: articleId,
+          image_url: imageUrl,
+          alt_text: altText,
+          caption: caption,
+          order_index: 0
+        }]);
+
+      if (error) {
+        console.error('Error saving image record:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error saving image record:', error);
+      return false;
+    }
+  }
+
+  async updateArticleTags(articleId: string, tagIds: string[]): Promise<boolean> {
+    try {
+      // First, remove all existing tag associations
+      const { error: deleteError } = await supabase
+        .from('article_tags_junction')
+        .delete()
+        .eq('article_id', articleId);
+
+      if (deleteError) {
+        console.error('Error removing existing tags:', deleteError);
+        return false;
+      }
+
+      // Then, add new tag associations
+      if (tagIds.length > 0) {
+        const tagAssociations = tagIds.map(tagId => ({
+          article_id: articleId,
+          tag_id: tagId
+        }));
+
+        const { error: insertError } = await supabase
+          .from('article_tags_junction')
+          .insert(tagAssociations);
+
+        if (insertError) {
+          console.error('Error adding new tags:', insertError);
+          return false;
+        }
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error updating article tags:', error);
+      return false;
+    }
+  }
+
   async getAdminArticles(): Promise<Article[]> {
     // For admin, return all articles
     return this.articles;
@@ -177,6 +349,35 @@ class ArticleService {
     return this.articles.filter(article => article.is_published);
   }
 
+  async getAllTags(): Promise<ArticleTag[]> {
+    if (this.tags.length === 0) {
+      return await this.loadTagsFromDatabase();
+    }
+    return this.tags;
+  }
+
+  // Helper function to generate slug from title
+  generateSlug(title: string): string {
+    let slug = title.toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .trim();
+    
+    // Remove leading/trailing hyphens
+    slug = slug.replace(/^-+|-+$/g, '');
+    
+    // Check if slug exists and append number if needed
+    let finalSlug = slug;
+    let counter = 1;
+    
+    while (this.articles.some(a => a.slug === finalSlug)) {
+      finalSlug = `${slug}-${counter}`;
+      counter++;
+    }
+    
+    return finalSlug;
+  }
+
   // Helper function to convert database article to frontend article
   convertDatabaseToArticle(dbArticle: any): Article {
     return {
@@ -184,8 +385,6 @@ class ArticleService {
       slug: dbArticle.slug,
       featured_image: dbArticle.featured_image,
       read_time: dbArticle.read_time,
-      tags: dbArticle.tags || [],
-      content_blocks: dbArticle.content_blocks || [],
       published_at: dbArticle.published_at,
       is_published: dbArticle.is_published,
       created_at: dbArticle.created_at,
@@ -194,7 +393,10 @@ class ArticleService {
       contents: dbArticle.contents || {},
       excerpts: dbArticle.excerpts || {},
       authors_multilingual: dbArticle.authors_multilingual || {},
-      categories_multilingual: dbArticle.categories_multilingual || {}
+      categories_multilingual: dbArticle.categories_multilingual || {},
+      content_blocks: dbArticle.content_blocks || [],
+      tags: dbArticle.tags || [],
+      images: dbArticle.images || []
     };
   }
 
@@ -204,15 +406,14 @@ class ArticleService {
       slug: article.slug,
       featured_image: article.featured_image,
       read_time: article.read_time,
-      tags: article.tags || [],
-      content_blocks: article.content_blocks || [],
       published_at: article.published_at,
       is_published: article.is_published,
       titles: article.titles,
       contents: article.contents,
       excerpts: article.excerpts,
       authors_multilingual: article.authors_multilingual,
-      categories_multilingual: article.categories_multilingual
+      categories_multilingual: article.categories_multilingual,
+      content_blocks: article.content_blocks || []
     };
   }
 }

@@ -1,52 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAdminLanguage } from '@/contexts/AdminLanguageContext';
-import InlineArticleEditor, { ContentBlock } from '@/components/InlineArticleEditor';
-import articleService, { Article } from '@/services/articleService';
-import { 
-  ArrowLeft, 
-  Save, 
-  Eye, 
-  Plus,
-  FileText,
-  Image as ImageIcon,
-  Type,
-  List,
-  Columns,
-  Trash2
-} from 'lucide-react';
+import InlineArticleEditor from '@/components/InlineArticleEditor';
+import { ContentBlock } from '@/components/InlineArticleEditor';
+import articleService, { Article, ArticleTag } from '@/services/articleService';
+import TagSelector from '@/components/TagSelector';
+import { Plus, Edit, Trash2, Eye, Upload, Image as ImageIcon } from 'lucide-react';
 
 const articleTemplates = [
-  { id: 'news', name: 'News', description: 'Company updates and announcements', icon: FileText },
-  { id: 'feature', name: 'Feature', description: 'In-depth articles and stories', icon: FileText },
-  { id: 'technical', name: 'Technical', description: 'Technical guides and specifications', icon: FileText },
-  { id: 'case-study', name: 'Case Study', description: 'Project showcases and success stories', icon: FileText },
-  { id: 'market-analysis', name: 'Market Analysis', description: 'Industry insights and trends', icon: FileText },
-  { id: 'opinion-piece', name: 'Opinion Piece', description: 'Expert opinions and commentary', icon: FileText }
+  { id: 'news', name: 'News', description: 'Company news and announcements', icon: '📰' },
+  { id: 'technical', name: 'Technical', description: 'Technical articles and guides', icon: '🔧' },
+  { id: 'case-study', name: 'Case Study', description: 'Project case studies and success stories', icon: '📊' },
+  { id: 'industry', name: 'Industry', description: 'Industry insights and trends', icon: '🏭' },
+  { id: 'product', name: 'Product', description: 'Product information and updates', icon: '📦' }
 ];
 
 export default function AdminArticles() {
-  const { articleId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { language: currentLanguage } = useAdminLanguage();
   
-  const [isEditing, setIsEditing] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState('news');
-  const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [articleId, setArticleId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
+  const [availableTags, setAvailableTags] = useState<ArticleTag[]>([]);
+  
   // Article form state
   const [article, setArticle] = useState<Article>({
     slug: '',
@@ -55,25 +44,36 @@ export default function AdminArticles() {
     excerpts: {},
     authors_multilingual: {},
     categories_multilingual: {},
-    featured_image: '',
     read_time: 5,
-    tags: [],
-    content_blocks: [],
-    is_published: false
+    is_published: false,
+    featured_image: '',
+    content_blocks: []
   });
+  
+  const [selectedTemplate, setSelectedTemplate] = useState('news');
+  const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
+  const [selectedTags, setSelectedTags] = useState<ArticleTag[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
 
   useEffect(() => {
     loadArticles();
-    if (articleId) {
-      loadArticle(articleId);
+    loadTags();
+    
+    // Check if we're editing an existing article
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit');
+    if (editId) {
+      setArticleId(editId);
       setIsEditing(true);
+      loadArticle(editId);
     }
-  }, [articleId]);
+  }, []);
 
   const loadArticles = async () => {
+    setIsLoading(true);
     try {
-      const articlesData = await articleService.loadArticlesFromDatabase();
-      setArticles(articlesData);
+      const data = await articleService.loadArticlesFromDatabase();
+      setArticles(data);
     } catch (error) {
       console.error('Error loading articles:', error);
       toast({
@@ -81,16 +81,37 @@ export default function AdminArticles() {
         description: "Failed to load articles",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadTags = async () => {
+    try {
+      const tags = await articleService.getAllTags();
+      setAvailableTags(tags);
+    } catch (error) {
+      console.error('Error loading tags:', error);
     }
   };
 
   const loadArticle = async (id: string) => {
     try {
-      const articleData = await articleService.getArticle(id);
-      if (articleData) {
-        setArticle(articleData);
-        setContentBlocks(articleData.content_blocks || []);
-        setSelectedTemplate(articleData.categories_multilingual?.en || 'news');
+      const data = await articleService.getArticle(id);
+      if (data) {
+        setArticle(data);
+        setContentBlocks(data.content_blocks || []);
+        setSelectedTags(data.tags || []);
+        setUploadedImages(data.images?.map(img => img.image_url) || []);
+        
+        // Set template based on category
+        const category = data.categories_multilingual?.en || '';
+        const template = articleTemplates.find(t => 
+          t.name.toLowerCase() === category.toLowerCase()
+        );
+        if (template) {
+          setSelectedTemplate(template.id);
+        }
       }
     } catch (error) {
       console.error('Error loading article:', error);
@@ -103,10 +124,10 @@ export default function AdminArticles() {
   };
 
   const handleSave = async () => {
-    if (!article.slug.trim()) {
+    if (!article.titles?.en) {
       toast({
         title: "Error",
-        description: "Article slug is required",
+        description: "Article title is required",
         variant: "destructive"
       });
       return;
@@ -114,8 +135,12 @@ export default function AdminArticles() {
 
     setIsSaving(true);
     try {
+      // Generate slug from English title
+      const slug = articleService.generateSlug(article.titles.en);
+      
       const articleData = {
         ...article,
+        slug,
         content_blocks: contentBlocks,
         categories_multilingual: {
           ...article.categories_multilingual,
@@ -127,14 +152,29 @@ export default function AdminArticles() {
       
       if (isEditing && article.id) {
         savedArticle = await articleService.updateArticle(article.id, articleData);
+        
+        // Update tags
+        if (savedArticle) {
+          await articleService.updateArticleTags(savedArticle.id, selectedTags.map(t => t.id));
+        }
       } else {
         savedArticle = await articleService.addArticle(articleData);
+        
+        // Update tags and save images if new article
+        if (savedArticle) {
+          await articleService.updateArticleTags(savedArticle.id, selectedTags.map(t => t.id));
+          
+          // Save uploaded images
+          for (const imageUrl of uploadedImages) {
+            await articleService.saveImageRecord(savedArticle.id, imageUrl);
+          }
+        }
       }
 
       if (savedArticle) {
         toast({
           title: "Success",
-          description: `Article ${isEditing ? 'updated' : 'created'} successfully`,
+          description: isEditing ? "Article updated successfully" : "Article created successfully"
         });
         
         if (!isEditing) {
@@ -146,19 +186,18 @@ export default function AdminArticles() {
             excerpts: {},
             authors_multilingual: {},
             categories_multilingual: {},
-            featured_image: '',
             read_time: 5,
-            tags: [],
-            content_blocks: [],
-            is_published: false
+            is_published: false,
+            featured_image: '',
+            content_blocks: []
           });
           setContentBlocks([]);
+          setSelectedTags([]);
+          setUploadedImages([]);
           setSelectedTemplate('news');
         }
         
         await loadArticles();
-      } else {
-        throw new Error('Failed to save article');
       }
     } catch (error) {
       console.error('Error saving article:', error);
@@ -172,219 +211,6 @@ export default function AdminArticles() {
     }
   };
 
-  const createTestArticle = async () => {
-    const testArticle: Article = {
-      slug: 'test-article-components',
-      titles: {
-        en: 'Test Article - All Components',
-        'zh-Hant': '測試文章 - 所有組件',
-        'zh-Hans': '测试文章 - 所有组件',
-        'ja': 'テスト記事 - すべてのコンポーネント',
-        'ko': '테스트 기사 - 모든 구성 요소',
-        'th': 'บทความทดสอบ - ส่วนประกอบทั้งหมด',
-        'vi': 'Bài viết kiểm tra - Tất cả các thành phần'
-      },
-      contents: {
-        en: 'This is a test article to demonstrate all available components.',
-        'zh-Hant': '這是一篇測試文章，用於展示所有可用的組件。',
-        'zh-Hans': '这是一篇测试文章，用于展示所有可用的组件。',
-        'ja': 'これは利用可能なすべてのコンポーネントを実演するためのテスト記事です。',
-        'ko': '이것은 사용 가능한 모든 구성 요소를 시연하기 위한 테스트 기사입니다.',
-        'th': 'นี่คือบทความทดสอบเพื่อแสดงส่วนประกอบทั้งหมดที่มีอยู่',
-        'vi': 'Đây là một bài viết kiểm tra để trình diễn tất cả các thành phần có sẵn.'
-      },
-      excerpts: {
-        en: 'A comprehensive test article showcasing all editor components.',
-        'zh-Hant': '展示所有編輯器組件的綜合測試文章。',
-        'zh-Hans': '展示所有编辑器组件的综合测试文章。',
-        'ja': 'すべてのエディターコンポーネントを紹介する包括的なテスト記事。',
-        'ko': '모든 편집기 구성 요소를 보여주는 포괄적인 테스트 기사.',
-        'th': 'บทความทดสอบที่ครอบคลุมซึ่งแสดงส่วนประกอบของตัวแก้ไขทั้งหมด',
-        'vi': 'Một bài viết kiểm tra toàn diện giới thiệu tất cả các thành phần của trình soạn thảo.'
-      },
-      authors_multilingual: {
-        en: 'Test Author',
-        'zh-Hant': '測試作者',
-        'zh-Hans': '测试作者',
-        'ja': 'テスト著者',
-        'ko': '테스트 저자',
-        'th': 'ผู้เขียนทดสอบ',
-        'vi': 'Tác giả kiểm tra'
-      },
-      categories_multilingual: {
-        en: 'Technical',
-        'zh-Hant': '技術',
-        'zh-Hans': '技术',
-        'ja': '技術',
-        'ko': '기술',
-        'th': 'เทคนิค',
-        'vi': 'Kỹ thuật'
-      },
-      featured_image: '',
-      read_time: 8,
-      tags: ['test', 'components', 'demo'],
-      content_blocks: [
-        {
-          id: crypto.randomUUID(),
-          type: 'heading',
-          content: 'Heading Component',
-          alignment: 'center',
-          fontSize: 'h1',
-          fontWeight: 'bold',
-          fontStyle: 'normal',
-          textDecoration: 'none',
-          width: 'full',
-          margin: 'normal',
-          isSelected: false
-        },
-        {
-          id: crypto.randomUUID(),
-          type: 'paragraph',
-          content: 'Paragraph Component - This is a regular paragraph with normal text formatting.',
-          alignment: 'left',
-          fontSize: 'normal',
-          fontWeight: 'normal',
-          fontStyle: 'normal',
-          textDecoration: 'none',
-          width: 'full',
-          margin: 'normal',
-          isSelected: false
-        },
-        {
-          id: crypto.randomUUID(),
-          type: 'row',
-          content: 'Multi-column Row',
-          alignment: 'left',
-          fontSize: 'normal',
-          fontWeight: 'normal',
-          fontStyle: 'normal',
-          textDecoration: 'none',
-          width: 'full',
-          margin: 'normal',
-          isSelected: false,
-          columns: 2,
-          columnLayout: 'equal',
-          children: [
-            {
-              id: crypto.randomUUID(),
-              type: 'image',
-              content: 'Left Column Image',
-              alignment: 'center',
-              fontSize: 'normal',
-              fontWeight: 'normal',
-              fontStyle: 'normal',
-              textDecoration: 'none',
-              width: 'full',
-              margin: 'normal',
-              isSelected: false
-            },
-            {
-              id: crypto.randomUUID(),
-              type: 'paragraph',
-              content: 'Right Column Text - This demonstrates the multi-column layout with image on the left and text on the right.',
-              alignment: 'left',
-              fontSize: 'normal',
-              fontWeight: 'normal',
-              fontStyle: 'normal',
-              textDecoration: 'none',
-              width: 'full',
-              margin: 'normal',
-              isSelected: false
-            }
-          ]
-        },
-        {
-          id: crypto.randomUUID(),
-          type: 'heading',
-          content: 'List Component',
-          alignment: 'left',
-          fontSize: 'h2',
-          fontWeight: 'bold',
-          fontStyle: 'normal',
-          textDecoration: 'none',
-          width: 'full',
-          margin: 'normal',
-          isSelected: false
-        },
-        {
-          id: crypto.randomUUID(),
-          type: 'list',
-          content: 'List Item - This demonstrates the list component functionality.',
-          alignment: 'left',
-          fontSize: 'normal',
-          fontWeight: 'normal',
-          fontStyle: 'normal',
-          textDecoration: 'none',
-          width: 'full',
-          margin: 'normal',
-          isSelected: false
-        },
-        {
-          id: crypto.randomUUID(),
-          type: 'row',
-          content: 'Wide Left Layout',
-          alignment: 'left',
-          fontSize: 'normal',
-          fontWeight: 'normal',
-          fontStyle: 'normal',
-          textDecoration: 'none',
-          width: 'full',
-          margin: 'normal',
-          isSelected: false,
-          columns: 3,
-          columnLayout: 'wide-left',
-          children: [
-            {
-              id: crypto.randomUUID(),
-              type: 'image',
-              content: 'Wide Left Image',
-              alignment: 'center',
-              fontSize: 'normal',
-              fontWeight: 'normal',
-              fontStyle: 'normal',
-              textDecoration: 'none',
-              width: 'full',
-              margin: 'normal',
-              isSelected: false
-            },
-            {
-              id: crypto.randomUUID(),
-              type: 'paragraph',
-              content: 'Narrow Right Text - This demonstrates the wide-left layout where the image takes up more space.',
-              alignment: 'left',
-              fontSize: 'normal',
-              fontWeight: 'normal',
-              fontStyle: 'normal',
-              textDecoration: 'none',
-              width: 'full',
-              margin: 'normal',
-              isSelected: false
-            }
-          ]
-        }
-      ],
-      is_published: true
-    };
-
-    try {
-      const savedArticle = await articleService.addArticle(testArticle);
-      if (savedArticle) {
-        toast({
-          title: "Success",
-          description: "Test article created successfully!",
-        });
-        await loadArticles();
-      }
-    } catch (error) {
-      console.error('Error creating test article:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create test article",
-        variant: "destructive"
-      });
-    }
-  };
-
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this article?')) {
       try {
@@ -392,7 +218,7 @@ export default function AdminArticles() {
         if (success) {
           toast({
             title: "Success",
-            description: "Article deleted successfully",
+            description: "Article deleted successfully"
           });
           await loadArticles();
         }
@@ -407,6 +233,130 @@ export default function AdminArticles() {
     }
   };
 
+  const createTestArticle = async () => {
+    const testBlocks: ContentBlock[] = [
+      {
+        id: '1',
+        type: 'heading',
+        content: 'Heading Component',
+        alignment: 'center',
+        fontSize: 'h1',
+        fontWeight: 'bold',
+        fontStyle: 'normal',
+        textDecoration: 'none',
+        width: 'full',
+        margin: 'normal',
+        isSelected: false
+      },
+      {
+        id: '2',
+        type: 'paragraph',
+        content: 'Paragraph Component - This is a test paragraph to demonstrate the paragraph component functionality.',
+        alignment: 'left',
+        fontSize: 'normal',
+        fontWeight: 'normal',
+        fontStyle: 'normal',
+        textDecoration: 'none',
+        width: 'full',
+        margin: 'normal',
+        isSelected: false
+      },
+      {
+        id: '3',
+        type: 'image',
+        content: 'https://via.placeholder.com/600x400?text=Test+Image',
+        imageUrl: 'https://via.placeholder.com/600x400?text=Test+Image',
+        imageAlt: 'Test Image',
+        imageCaption: 'This is a test image component',
+        alignment: 'center',
+        fontSize: 'normal',
+        fontWeight: 'normal',
+        fontStyle: 'normal',
+        textDecoration: 'none',
+        width: 'medium',
+        margin: 'normal',
+        isSelected: false
+      },
+      {
+        id: '4',
+        type: 'list',
+        content: 'List Component\n• First item\n• Second item\n• Third item',
+        alignment: 'left',
+        fontSize: 'normal',
+        fontWeight: 'normal',
+        fontStyle: 'normal',
+        textDecoration: 'none',
+        width: 'full',
+        margin: 'normal',
+        isSelected: false
+      },
+      {
+        id: '5',
+        type: 'row',
+        content: 'Multi-column Row',
+        alignment: 'left',
+        fontSize: 'normal',
+        fontWeight: 'normal',
+        fontStyle: 'normal',
+        textDecoration: 'none',
+        width: 'full',
+        margin: 'normal',
+        isSelected: false,
+        columns: 2,
+        columnLayout: 'equal',
+        children: [
+          {
+            id: '5a',
+            type: 'image',
+            content: 'https://via.placeholder.com/300x200?text=Left+Image',
+            imageUrl: 'https://via.placeholder.com/300x200?text=Left+Image',
+            imageAlt: 'Left Image',
+            imageCaption: 'Left column image',
+            alignment: 'center',
+            fontSize: 'normal',
+            fontWeight: 'normal',
+            fontStyle: 'normal',
+            textDecoration: 'none',
+            width: 'full',
+            margin: 'tight',
+            isSelected: false
+          },
+          {
+            id: '5b',
+            type: 'paragraph',
+            content: 'Right column text - This demonstrates a multi-column layout with image on the left and text on the right.',
+            alignment: 'left',
+            fontSize: 'normal',
+            fontWeight: 'normal',
+            fontStyle: 'normal',
+            textDecoration: 'none',
+            width: 'full',
+            margin: 'tight',
+            isSelected: false
+          }
+        ]
+      }
+    ];
+
+    setContentBlocks(testBlocks);
+    setArticle({
+      slug: '',
+      titles: { en: 'Test Article - All Components' },
+      contents: { en: 'This is a test article to demonstrate all available components.' },
+      excerpts: { en: 'A comprehensive test article showcasing all editor components.' },
+      authors_multilingual: { en: 'Test Author' },
+      categories_multilingual: { en: 'Technical' },
+      read_time: 5,
+      is_published: true,
+      featured_image: '',
+      content_blocks: testBlocks
+    });
+    setSelectedTemplate('technical');
+    setSelectedTags(availableTags.filter(t => ['Technical', 'Test', 'Components'].includes(t.name)));
+    setIsEditing(false);
+    setArticleId(null);
+  };
+
   const updateTranslation = (field: string, language: string, value: string) => {
     setArticle(prev => ({
       ...prev,
@@ -417,59 +367,285 @@ export default function AdminArticles() {
     }));
   };
 
-  if (!isEditing) {
+  const handleImageUpload = async (file: File) => {
+    try {
+      const imageUrl = await articleService.uploadImage(file);
+      if (imageUrl) {
+        setUploadedImages(prev => [...prev, imageUrl]);
+        toast({
+          title: "Success",
+          description: "Image uploaded successfully"
+        });
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload image",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const languages = [
+    { code: 'en', name: 'English' },
+    { code: 'zh-Hant', name: '繁體中文' },
+    { code: 'zh-Hans', name: '简体中文' },
+    { code: 'ja', name: '日本語' },
+    { code: 'ko', name: '한국어' },
+    { code: 'th', name: 'ไทย' },
+    { code: 'vi', name: 'Tiếng Việt' }
+  ];
+
+  if (isEditing) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">Articles Management</h1>
-          <div className="flex items-center gap-2">
-            <Button onClick={createTestArticle} variant="outline">
-              <Plus className="h-4 w-4 mr-2" />
-              Create Test Article
-            </Button>
-            <Button onClick={() => setIsEditing(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add New Article
-            </Button>
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Edit Article</h1>
+          <Button onClick={() => setIsEditing(false)} variant="outline">
+            Back to Articles
+          </Button>
+        </div>
+
+        {/* Language Picker */}
+        <div className="bg-white p-4 rounded-lg border">
+          <h2 className="text-lg font-semibold mb-4">Language Selection</h2>
+          <Tabs value={currentLanguage} className="w-full">
+            <TabsList className="grid w-full grid-cols-7">
+              {languages.map(lang => (
+                <TabsTrigger key={lang.code} value={lang.code}>
+                  {lang.name}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            
+            {languages.map(lang => (
+              <TabsContent key={lang.code} value={lang.code} className="mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor={`title-${lang.code}`}>Article Title ({lang.name})</Label>
+                    <Input
+                      id={`title-${lang.code}`}
+                      value={article.titles?.[lang.code] || ''}
+                      onChange={(e) => updateTranslation('titles', lang.code, e.target.value)}
+                      placeholder={`Enter title in ${lang.name}`}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor={`author-${lang.code}`}>Author ({lang.name})</Label>
+                    <Input
+                      id={`author-${lang.code}`}
+                      value={article.authors_multilingual?.[lang.code] || ''}
+                      onChange={(e) => updateTranslation('authors_multilingual', lang.code, e.target.value)}
+                      placeholder={`Enter author in ${lang.name}`}
+                    />
+                  </div>
+                  
+                  <div className="md:col-span-2">
+                    <Label htmlFor={`excerpt-${lang.code}`}>Article Excerpt ({lang.name})</Label>
+                    <Input
+                      id={`excerpt-${lang.code}`}
+                      value={article.excerpts?.[lang.code] || ''}
+                      onChange={(e) => updateTranslation('excerpts', lang.code, e.target.value)}
+                      placeholder={`Enter excerpt in ${lang.name}`}
+                    />
+                  </div>
+                  
+                  <div className="md:col-span-2">
+                    <Label htmlFor={`content-${lang.code}`}>Article Content ({lang.code})</Label>
+                    <Input
+                      id={`content-${lang.code}`}
+                      value={article.contents?.[lang.code] || ''}
+                      onChange={(e) => updateTranslation('contents', lang.code, e.target.value)}
+                      placeholder={`Enter content in ${lang.code}`}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+            ))}
+          </Tabs>
+        </div>
+
+        {/* Article Settings */}
+        <div className="bg-white p-4 rounded-lg border">
+          <h2 className="text-lg font-semibold mb-4">Article Settings</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="template">Article Template</Label>
+              <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select template" />
+                </SelectTrigger>
+                <SelectContent>
+                  {articleTemplates.map(template => (
+                    <SelectItem key={template.id} value={template.id}>
+                      {template.icon} {template.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="read-time">Read Time (minutes)</Label>
+              <Input
+                id="read-time"
+                type="number"
+                value={article.read_time || 5}
+                onChange={(e) => setArticle(prev => ({ ...prev, read_time: parseInt(e.target.value) || 5 }))}
+                min="1"
+                max="60"
+              />
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="published"
+                checked={article.is_published || false}
+                onCheckedChange={(checked) => setArticle(prev => ({ ...prev, is_published: checked }))}
+              />
+              <Label htmlFor="published">Published</Label>
+            </div>
           </div>
         </div>
 
+        {/* Tags Selection */}
+        <div className="bg-white p-4 rounded-lg border">
+          <h2 className="text-lg font-semibold mb-4">Article Tags</h2>
+          <TagSelector
+            selectedTags={selectedTags}
+            availableTags={availableTags}
+            onTagsChange={setSelectedTags}
+            maxTags={10}
+            placeholder="Select tags for this article..."
+          />
+        </div>
+
+        {/* Image Upload */}
+        <div className="bg-white p-4 rounded-lg border">
+          <h2 className="text-lg font-semibold mb-4">Featured Image</h2>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="image-upload">Upload Image</Label>
+              <Input
+                id="image-upload"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleImageUpload(file);
+                }}
+              />
+            </div>
+            
+            {article.featured_image && (
+              <div>
+                <Label>Current Featured Image</Label>
+                <img 
+                  src={article.featured_image} 
+                  alt="Featured" 
+                  className="w-32 h-32 object-cover rounded border"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Content Editor - Full Width at Bottom */}
+        <div className="bg-white p-4 rounded-lg border">
+          <h2 className="text-lg font-semibold mb-4">Article Content Editor</h2>
+          <div className="w-full">
+            <InlineArticleEditor
+              initialContent={contentBlocks}
+              onContentChange={setContentBlocks}
+              onSave={handleSave}
+            />
+          </div>
+        </div>
+
+        {/* Save Button */}
+        <div className="flex justify-end space-x-4">
+          <Button onClick={() => setIsEditing(false)} variant="outline">
+            Cancel
+          </Button>
+          <Button onClick={handleSave} disabled={isSaving}>
+            {isSaving ? 'Saving...' : 'Save Article'}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Articles Management</h1>
+        <div className="space-x-2">
+          <Button onClick={createTestArticle} variant="outline">
+            Create Test Article
+          </Button>
+          <Button onClick={() => navigate('/admin/add-article')}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add New Article
+          </Button>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="text-center py-8">Loading articles...</div>
+      ) : (
         <div className="grid gap-4">
           {articles.map((article) => (
             <Card key={article.id}>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
                     <CardTitle className="flex items-center gap-2">
                       {article.titles?.en || 'Untitled'}
-                      <Badge variant={article.is_published ? "default" : "secondary"}>
-                        {article.is_published ? "Published" : "Draft"}
-                      </Badge>
+                      {article.is_published && (
+                        <Badge variant="secondary">Published</Badge>
+                      )}
                     </CardTitle>
-                    <p className="text-sm text-gray-600">
-                      Slug: {article.slug} • {article.categories_multilingual?.en || 'No Category'}
+                    <p className="text-sm text-gray-600 mt-1">
+                      {article.excerpts?.en || 'No excerpt available'}
                     </p>
+                    <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                      <span>Author: {article.authors_multilingual?.en || 'Unknown'}</span>
+                      <span>Category: {article.categories_multilingual?.en || 'Uncategorized'}</span>
+                      <span>Read time: {article.read_time || 5} min</span>
+                    </div>
+                    {article.tags && article.tags.length > 0 && (
+                      <div className="flex gap-2 mt-2">
+                        {article.tags.map(tag => (
+                          <Badge key={tag.id} variant="outline" className="text-xs">
+                            {tag.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex space-x-2">
                     <Button
-                      variant="outline"
                       size="sm"
-                      onClick={() => {
-                        setArticle(article);
-                        setContentBlocks(article.content_blocks || []);
-                        setSelectedTemplate(article.categories_multilingual?.en || 'news');
-                        setIsEditing(true);
-                      }}
+                      variant="outline"
+                      onClick={() => navigate(`/admin/articles?edit=${article.id}`)}
                     >
-                      Edit
+                      <Edit className="w-4 h-4" />
                     </Button>
                     <Button
-                      variant="outline"
                       size="sm"
-                      onClick={() => handleDelete(article.id!)}
-                      className="text-red-600 hover:text-red-700"
+                      variant="outline"
+                      onClick={() => navigate(`/articles/${article.slug}`)}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDelete(article.id!)}
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
@@ -478,353 +654,12 @@ export default function AdminArticles() {
           ))}
           
           {articles.length === 0 && (
-            <Card>
-              <CardContent className="text-center py-8">
-                <p className="text-gray-500">No articles found. Create your first article or generate a test article to see the components in action.</p>
-              </CardContent>
-            </Card>
+            <div className="text-center py-8 text-gray-500">
+              No articles found. Create your first article!
+            </div>
           )}
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="container mx-auto p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => setIsEditing(false)}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Articles
-          </Button>
-          <h1 className="text-3xl font-bold">
-            {article.id ? 'Edit Article' : 'Add New Article'}
-          </h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => {}}>
-            <Eye className="h-4 w-4 mr-2" />
-            Preview
-          </Button>
-          <Button onClick={handleSave} disabled={isSaving}>
-            <Save className="h-4 w-4 mr-2" />
-            {isSaving ? 'Saving...' : 'Save Article'}
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Left Column - Article Settings */}
-        <div className="xl:col-span-1 space-y-6">
-          {/* Basic Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Article Slug</label>
-                <Input
-                  value={article.slug}
-                  onChange={(e) => setArticle(prev => ({ ...prev, slug: e.target.value }))}
-                  placeholder="article-slug"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-2">Template</label>
-                <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {articleTemplates.map(template => (
-                      <SelectItem key={template.id} value={template.id}>
-                        <div className="flex items-center gap-2">
-                          <template.icon className="h-4 w-4" />
-                          {template.name}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Featured Image URL</label>
-                <Input
-                  value={article.featured_image || ''}
-                  onChange={(e) => setArticle(prev => ({ ...prev, featured_image: e.target.value }))}
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Read Time (minutes)</label>
-                <Input
-                  type="number"
-                  value={article.read_time || 5}
-                  onChange={(e) => setArticle(prev => ({ ...prev, read_time: parseInt(e.target.value) || 5 }))}
-                  min="1"
-                  max="60"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Tags (comma-separated)</label>
-                <Input
-                  value={article.tags?.join(', ') || ''}
-                  onChange={(e) => setArticle(prev => ({ 
-                    ...prev, 
-                    tags: e.target.value.split(',').map(tag => tag.trim()).filter(Boolean)
-                  }))}
-                  placeholder="news, company, update"
-                />
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="published"
-                  checked={article.is_published || false}
-                  onCheckedChange={(checked) => setArticle(prev => ({ ...prev, is_published: checked }))}
-                />
-                <label htmlFor="published" className="text-sm font-medium">
-                  Publish Article
-                </label>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Multilingual Content */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Multilingual Content</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Tabs value={currentLanguage} className="w-full">
-                <TabsList className="grid w-full grid-cols-7">
-                  <TabsTrigger value="en">EN</TabsTrigger>
-                  <TabsTrigger value="zh-Hant">繁</TabsTrigger>
-                  <TabsTrigger value="zh-Hans">简</TabsTrigger>
-                  <TabsTrigger value="ja">JP</TabsTrigger>
-                  <TabsTrigger value="ko">KR</TabsTrigger>
-                  <TabsTrigger value="th">TH</TabsTrigger>
-                  <TabsTrigger value="vi">VN</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="en" className="space-y-4 mt-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Title</label>
-                    <Input
-                      value={article.titles?.en || ''}
-                      onChange={(e) => updateTranslation('titles', 'en', e.target.value)}
-                      placeholder="Enter article title"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Excerpt</label>
-                    <Textarea
-                      value={article.excerpts?.en || ''}
-                      onChange={(e) => updateTranslation('excerpts', 'en', e.target.value)}
-                      placeholder="Enter article excerpt"
-                      rows={3}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Author</label>
-                    <Input
-                      value={article.authors_multilingual?.en || ''}
-                      onChange={(e) => updateTranslation('authors_multilingual', 'en', e.target.value)}
-                      placeholder="Enter author name"
-                    />
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="zh-Hant" className="space-y-4 mt-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">標題</label>
-                    <Input
-                      value={article.titles?.['zh-Hant'] || ''}
-                      onChange={(e) => updateTranslation('titles', 'zh-Hant', e.target.value)}
-                      placeholder="輸入文章標題"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">摘要</label>
-                    <Textarea
-                      value={article.excerpts?.['zh-Hant'] || ''}
-                      onChange={(e) => updateTranslation('excerpts', 'zh-Hant', e.target.value)}
-                      placeholder="輸入文章摘要"
-                      rows={3}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">作者</label>
-                    <Input
-                      value={article.authors_multilingual?.['zh-Hant'] || ''}
-                      onChange={(e) => updateTranslation('authors_multilingual', 'zh-Hant', e.target.value)}
-                      placeholder="輸入作者姓名"
-                    />
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="zh-Hans" className="space-y-4 mt-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">标题</label>
-                    <Input
-                      value={article.titles?.['zh-Hans'] || ''}
-                      onChange={(e) => updateTranslation('titles', 'zh-Hans', e.target.value)}
-                      placeholder="输入文章标题"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">摘要</label>
-                    <Textarea
-                      value={article.excerpts?.['zh-Hans'] || ''}
-                      onChange={(e) => updateTranslation('excerpts', 'zh-Hans', e.target.value)}
-                      placeholder="输入文章摘要"
-                      rows={3}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">作者</label>
-                    <Input
-                      value={article.authors_multilingual?.['zh-Hans'] || ''}
-                      onChange={(e) => updateTranslation('authors_multilingual', 'zh-Hans', e.target.value)}
-                      placeholder="输入作者姓名"
-                    />
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="ja" className="space-y-4 mt-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">タイトル</label>
-                    <Input
-                      value={article.titles?.ja || ''}
-                      onChange={(e) => updateTranslation('titles', 'ja', e.target.value)}
-                      placeholder="記事のタイトルを入力"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">要約</label>
-                    <Textarea
-                      value={article.excerpts?.ja || ''}
-                      onChange={(e) => updateTranslation('excerpts', 'ja', e.target.value)}
-                      placeholder="記事の要約を入力"
-                      rows={3}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">著者</label>
-                    <Input
-                      value={article.authors_multilingual?.ja || ''}
-                      onChange={(e) => updateTranslation('authors_multilingual', 'ja', e.target.value)}
-                      placeholder="著者名を入力"
-                    />
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="ko" className="space-y-4 mt-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">제목</label>
-                    <Input
-                      value={article.titles?.ko || ''}
-                      onChange={(e) => updateTranslation('titles', 'ko', e.target.value)}
-                      placeholder="기사 제목 입력"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">요약</label>
-                    <Textarea
-                      value={article.excerpts?.ko || ''}
-                      onChange={(e) => updateTranslation('excerpts', 'ko', e.target.value)}
-                      placeholder="기사 요약 입력"
-                      rows={3}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">작가</label>
-                    <Input
-                      value={article.authors_multilingual?.ko || ''}
-                      onChange={(e) => updateTranslation('authors_multilingual', 'ko', e.target.value)}
-                      placeholder="작가 이름 입력"
-                    />
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="th" className="space-y-4 mt-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">หัวข้อ</label>
-                    <Input
-                      value={article.titles?.th || ''}
-                      onChange={(e) => updateTranslation('titles', 'th', e.target.value)}
-                      placeholder="ใส่หัวข้อบทความ"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">บทคัดย่อ</label>
-                    <Textarea
-                      value={article.excerpts?.th || ''}
-                      onChange={(e) => updateTranslation('excerpts', 'th', e.target.value)}
-                      placeholder="ใส่บทคัดย่อบทความ"
-                      rows={3}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">ผู้เขียน</label>
-                    <Input
-                      value={article.authors_multilingual?.th || ''}
-                      onChange={(e) => updateTranslation('authors_multilingual', 'th', e.target.value)}
-                      placeholder="ใส่ชื่อผู้เขียน"
-                    />
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="vi" className="space-y-4 mt-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Tiêu đề</label>
-                    <Input
-                      value={article.titles?.vi || ''}
-                      onChange={(e) => updateTranslation('titles', 'vi', e.target.value)}
-                      placeholder="Nhập tiêu đề bài viết"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Tóm tắt</label>
-                    <Textarea
-                      value={article.excerpts?.vi || ''}
-                      onChange={(e) => updateTranslation('excerpts', 'vi', e.target.value)}
-                      placeholder="Nhập tóm tắt bài viết"
-                      rows={3}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Tác giả</label>
-                    <Input
-                      value={article.authors_multilingual?.vi || ''}
-                      onChange={(e) => updateTranslation('authors_multilingual', 'vi', e.target.value)}
-                      placeholder="Nhập tên tác giả"
-                    />
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Column - Content Editor */}
-        <div className="xl:col-span-2">
-          <InlineArticleEditor 
-            initialContent={contentBlocks}
-            onContentChange={setContentBlocks}
-            onPreview={() => {
-              // TODO: Implement preview functionality
-              console.log('Preview article with blocks:', contentBlocks);
-            }}
-            onSave={handleSave}
-          />
-        </div>
-      </div>
+      )}
     </div>
   );
 }
