@@ -35,7 +35,8 @@ import { productService, UnifiedProduct } from '@/services/productService';
 export interface ContentBlock {
   id: string;
   type: 'text' | 'image' | 'heading' | 'paragraph' | 'list' | 'row';
-  content: string;
+  content: string; // Default/English content
+  content_multilingual?: Record<string, string>; // Multilingual content for different languages
   imageUrl?: string;
   imageAlt?: string;
   imageCaption?: string;
@@ -118,10 +119,53 @@ export default function InlineArticleEditor({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   
+  // Language selection state
+  const [currentLanguage, setCurrentLanguage] = useState('en');
+  const languages = [
+    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'zh-Hant', name: '繁體中文', flag: '🇹🇼' },
+    { code: 'ja', name: '日本語', flag: '🇯🇵' },
+    { code: 'ko', name: '한국어', flag: '🇰🇷' },
+    { code: 'th', name: 'ไทย', flag: '🇹🇭' },
+    { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' }
+  ];
+  
   // Product selection state
   const [products, setProducts] = useState<UnifiedProduct[]>([]);
   const [showProductSelector, setShowProductSelector] = useState(false);
   const [productSearch, setProductSearch] = useState('');
+
+  // Helper function to get localized content for a block
+  const getLocalizedContent = (block: ContentBlock, language: string): string => {
+    if (language === 'en') {
+      return block.content;
+    }
+    return block.content_multilingual?.[language] || block.content;
+  };
+
+  // Helper function to update localized content for a block
+  const updateLocalizedContent = (blockId: string, language: string, newContent: string) => {
+    setContent(prevContent => {
+      const updatedContent = prevContent.map(block => {
+        if (block.id === blockId) {
+          if (language === 'en') {
+            return { ...block, content: newContent };
+          } else {
+            return {
+              ...block,
+              content_multilingual: {
+                ...block.content_multilingual,
+                [language]: newContent
+              }
+            };
+          }
+        }
+        return block;
+      });
+      onContentChange(updatedContent);
+      return updatedContent;
+    });
+  };
 
   // Initialize with default content if empty
   useEffect(() => {
@@ -130,6 +174,9 @@ export default function InlineArticleEditor({
         id: crypto.randomUUID(),
         type: 'paragraph',
         content: 'Start typing your article here...',
+        content_multilingual: {
+          en: 'Start typing your article here...'
+        },
         alignment: 'left',
         fontSize: 'normal',
         fontWeight: 'normal',
@@ -165,6 +212,9 @@ export default function InlineArticleEditor({
       id: crypto.randomUUID(),
       type,
       content: type === 'image' ? '' : 'New content...',
+      content_multilingual: {
+        en: type === 'image' ? '' : 'New content...'
+      },
       alignment: 'left',
       fontSize: type === 'heading' ? 'h2' : 'normal',
       fontWeight: type === 'heading' ? 'bold' : 'normal',
@@ -285,14 +335,8 @@ export default function InlineArticleEditor({
   }, [content]);
 
   const handleTextChange = useCallback((blockId: string, newContent: string) => {
-    const newContentArray = content.map(block => 
-      block.id === blockId 
-        ? { ...block, content: newContent }
-        : block
-    );
-    setContent(newContentArray);
-    onContentChange(newContentArray);
-  }, [content, onContentChange]);
+    updateLocalizedContent(blockId, currentLanguage, newContent);
+  }, [currentLanguage]);
 
   const handleImageUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>, blockId: string) => {
     const file = event.target.files?.[0];
@@ -378,6 +422,7 @@ export default function InlineArticleEditor({
       p-2 
       rounded-lg
       ${widthClass}
+      relative
     `;
 
     const textClasses = `
@@ -509,9 +554,15 @@ export default function InlineArticleEditor({
             onDragOver={!readOnly ? handleDragOver : undefined}
             onDrop={!readOnly ? (e) => handleDrop(e, index) : undefined}
           >
+            {/* Language Indicator */}
+            {!readOnly && (
+              <div className="absolute top-1 right-1 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
+                {languages.find(lang => lang.code === currentLanguage)?.flag} {currentLanguage.toUpperCase()}
+              </div>
+            )}
             {!readOnly && block.isSelected ? (
               <Input
-                value={block.content}
+                value={getLocalizedContent(block, currentLanguage)}
                 onChange={(e) => handleTextChange(block.id, e.target.value)}
                 className={`${textClasses} border-2 border-blue-500 focus:border-blue-600`}
                 placeholder="Enter heading..."
@@ -519,7 +570,7 @@ export default function InlineArticleEditor({
               />
             ) : (
               <h2 className={textClasses}>
-                {block.content || 'Click to edit heading...'}
+                {getLocalizedContent(block, currentLanguage) || 'Click to edit heading...'}
               </h2>
             )}
           </div>
@@ -537,9 +588,15 @@ export default function InlineArticleEditor({
             onDragOver={!readOnly ? handleDragOver : undefined}
             onDrop={!readOnly ? (e) => handleDrop(e, index) : undefined}
           >
+            {/* Language Indicator */}
+            {!readOnly && (
+              <div className="absolute top-1 right-1 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
+                {languages.find(lang => lang.code === currentLanguage)?.flag} {currentLanguage.toUpperCase()}
+              </div>
+            )}
             {!readOnly && block.isSelected ? (
               <Input
-                value={block.content}
+                value={getLocalizedContent(block, currentLanguage)}
                 onChange={(e) => handleTextChange(block.id, e.target.value)}
                 className={`${textClasses} border-2 border-blue-500 focus:border-blue-600`}
                 placeholder="Enter text content..."
@@ -547,7 +604,7 @@ export default function InlineArticleEditor({
               />
             ) : (
               <p className={textClasses}>
-                {block.content || 'Click to edit text...'}
+                {getLocalizedContent(block, currentLanguage) || 'Click to edit text...'}
               </p>
             )}
           </div>
@@ -564,8 +621,14 @@ export default function InlineArticleEditor({
             onDragOver={!readOnly ? handleDragOver : undefined}
             onDrop={!readOnly ? (e) => handleDrop(e, index) : undefined}
           >
+            {/* Language Indicator */}
+            {!readOnly && (
+              <div className="absolute top-1 right-1 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
+                {languages.find(lang => lang.code === currentLanguage)?.flag} {currentLanguage.toUpperCase()}
+              </div>
+            )}
             <ul className={textClasses}>
-              <li>{block.content}</li>
+              <li>{getLocalizedContent(block, currentLanguage)}</li>
             </ul>
           </div>
         );
@@ -650,6 +713,25 @@ export default function InlineArticleEditor({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <h2 className="text-lg font-semibold">Article Editor</h2>
+            
+            {/* Language Selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-600">Language:</span>
+              <div className="flex gap-1">
+                {languages.map(lang => (
+                  <Button
+                    key={lang.code}
+                    variant={currentLanguage === lang.code ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCurrentLanguage(lang.code)}
+                    className="px-2 py-1 text-xs"
+                  >
+                    <span className="mr-1">{lang.flag}</span>
+                    <span className="hidden sm:inline">{lang.code.toUpperCase()}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
             
             {/* Block Type Selector */}
             <Select 

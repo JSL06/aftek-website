@@ -99,17 +99,20 @@ const ArticleDetail = () => {
       console.log('Current language:', currentLanguage);
       console.log('Block content_multilingual:', block.content_multilingual);
       
+      // First check if the block has multilingual content
       if (block.content_multilingual && block.content_multilingual[currentLanguage]) {
         console.log('Using localized content for', currentLanguage, ':', block.content_multilingual[currentLanguage]);
         return block.content_multilingual[currentLanguage];
       }
-      // Fallback to English
+      
+      // Fallback to English from multilingual content
       if (block.content_multilingual && block.content_multilingual['en']) {
-        console.log('Using English fallback:', block.content_multilingual['en']);
+        console.log('Using English fallback from multilingual:', block.content_multilingual['en']);
         return block.content_multilingual['en'];
       }
-      // Fallback to original content
-      console.log('Using original content:', block.content);
+      
+      // Fallback to original content field
+      console.log('Using original content field:', block.content);
       return block.content;
     };
 
