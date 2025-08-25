@@ -97,7 +97,7 @@ export default function AdminArticles() {
 
   const loadArticle = async (id: string) => {
     try {
-      const data = await articleService.getArticle(id);
+      const data = await articleService.getArticleById(id);
       if (data) {
         setArticle(data);
         setContentBlocks(data.content_blocks || []);
@@ -629,7 +629,8 @@ export default function AdminArticles() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => navigate(`/admin/articles?edit=${article.id}`)}
+                      onClick={() => article.id && navigate(`/admin/articles?edit=${article.id}`)}
+                      disabled={!article.id}
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
@@ -643,7 +644,8 @@ export default function AdminArticles() {
                     <Button
                       size="sm"
                       variant="destructive"
-                      onClick={() => handleDelete(article.id!)}
+                      onClick={() => article.id && handleDelete(article.id)}
+                      disabled={!article.id}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

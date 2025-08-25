@@ -165,6 +165,48 @@ class ArticleService {
     return article || null;
   }
 
+  async getArticleById(id: string): Promise<Article | null> {
+    // First check local cache
+    let article = this.articles.find(a => a.id === id);
+    
+    if (!article) {
+      // If not in cache, fetch from database
+      try {
+        const { data, error } = await supabase
+          .from('articles')
+          .select(`
+            *,
+            tags:article_tags_junction(
+              tag:article_tags(*)
+            ),
+            images:article_images(*)
+          `)
+          .eq('id', id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching article by ID:', error);
+          return null;
+        }
+
+        article = {
+          ...data,
+          tags: data.tags?.map((t: any) => t.tag) || [],
+          images: data.images || []
+        };
+        
+        if (article) {
+          this.articles.push(article);
+        }
+      } catch (error) {
+        console.error('Error fetching article by ID:', error);
+        return null;
+      }
+    }
+
+    return article || null;
+  }
+
   async addArticle(article: Omit<Article, 'id' | 'created_at' | 'updated_at'>): Promise<Article | null> {
     try {
       // Generate slug from English title if not provided
