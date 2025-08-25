@@ -1,503 +1,548 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { ArrowLeft, Type, FileText, Globe, Loader2, Upload, Image as ImageIcon, Building2, Calendar, MapPin, User, DollarSign, Clock, Star, Trash2, Save, Plus, Filter, SortAsc, SortDesc, Eye, EyeOff, Edit } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
-import { useTranslation } from '@/hooks/useTranslation';
-import ModernRichTextEditor from '@/components/ModernRichTextEditor';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { useAdminLanguage } from '@/contexts/AdminLanguageContext';
 import InlineArticleEditor, { ContentBlock } from '@/components/InlineArticleEditor';
+import articleService, { Article } from '@/services/articleService';
+import { 
+  ArrowLeft, 
+  Save, 
+  Eye, 
+  Plus,
+  FileText,
+  Image as ImageIcon,
+  Type,
+  List,
+  Columns,
+  Trash2
+} from 'lucide-react';
 
-// Language configuration
-const languages = [
-  { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸' },
-  { code: 'zh-Hant', name: 'Traditional Chinese', nativeName: '繁體中文', flag: '🇹🇼' },
-  { code: 'zh-Hans', name: 'Simplified Chinese', nativeName: '简体中文', flag: '🇨🇳' },
-  { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' },
-  { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
-  { code: 'th', name: 'Thai', nativeName: 'ไทย', flag: '🇹🇭' },
-  { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', flag: '🇻🇳' }
-];
-
-// Article categories with template mapping
-const categories = [
-  { value: 'Industry News', label: 'Industry News', template: 'news', color: 'bg-blue-50 text-blue-800 border-blue-200' },
-  { value: 'Technology', label: 'Technology', template: 'technical', color: 'bg-green-50 text-green-800 border-green-200' },
-  { value: 'Sustainability', label: 'Sustainability', template: 'feature', color: 'bg-purple-50 text-purple-800 border-purple-200' },
-  { value: 'Case Studies', label: 'Case Studies', template: 'case-study', color: 'bg-orange-50 text-orange-800 border-orange-200' },
-  { value: 'Product Updates', label: 'Product Updates', template: 'news', color: 'bg-blue-50 text-blue-800 border-blue-200' },
-  { value: 'Company News', label: 'Company News', template: 'news', color: 'bg-blue-50 text-blue-800 border-blue-200' },
-  { value: 'Technical Articles', label: 'Technical Articles', template: 'technical', color: 'bg-green-50 text-green-800 border-green-200' },
-  { value: 'Market Analysis', label: 'Market Analysis', template: 'analysis', color: 'bg-red-50 text-red-800 border-red-200' }
-];
-
-// Article templates for easy selection
 const articleTemplates = [
-  { 
-    id: 'news', 
-    name: 'News Article', 
-    description: 'Standard news format with headline, lead, and body',
-    icon: '📰',
-    color: 'bg-blue-50 border-blue-200 text-blue-800'
-  },
-  { 
-    id: 'feature', 
-    name: 'Feature Story', 
-    description: 'In-depth feature with detailed analysis',
-    icon: '📝',
-    color: 'bg-purple-50 border-purple-200 text-purple-800'
-  },
-  { 
-    id: 'technical', 
-    name: 'Technical Article', 
-    description: 'Technical content with diagrams and explanations',
-    icon: '💡',
-    color: 'bg-green-50 border-green-200 text-green-800'
-  },
-  { 
-    id: 'case-study', 
-    name: 'Case Study', 
-    description: 'Real-world examples and success stories',
-    icon: '📚',
-    color: 'bg-orange-50 border-orange-200 text-orange-800'
-  },
-  { 
-    id: 'analysis', 
-    name: 'Market Analysis', 
-    description: 'Data-driven market insights and trends',
-    icon: '📊',
-    color: 'bg-red-50 border-red-200 text-red-800'
-  },
-  { 
-    id: 'opinion', 
-    name: 'Opinion Piece', 
-    description: 'Expert opinions and industry perspectives',
-    icon: '🌐',
-    color: 'bg-indigo-50 border-indigo-200 text-indigo-800'
-  }
+  { id: 'news', name: 'News', description: 'Company updates and announcements', icon: FileText },
+  { id: 'feature', name: 'Feature', description: 'In-depth articles and stories', icon: FileText },
+  { id: 'technical', name: 'Technical', description: 'Technical guides and specifications', icon: FileText },
+  { id: 'case-study', name: 'Case Study', description: 'Project showcases and success stories', icon: FileText },
+  { id: 'market-analysis', name: 'Market Analysis', description: 'Industry insights and trends', icon: FileText },
+  { id: 'opinion-piece', name: 'Opinion Piece', description: 'Expert opinions and commentary', icon: FileText }
 ];
-
-interface Article {
-  id: string;
-  title: string;
-  content: string;
-  excerpt?: string;
-  author?: string;
-  category?: string;
-  published_at?: string;
-  is_published?: boolean;
-  created_at?: string;
-  updated_at?: string;
-  slug?: string;
-  featured_image?: string;
-  read_time?: number;
-  tags?: string[];
-  content_blocks?: ContentBlock[];
-  // Multilingual fields
-  titles?: Record<string, string>;
-  contents?: Record<string, string>;
-  excerpts?: Record<string, string>;
-  authors_multilingual?: Record<string, string>;
-  categories_multilingual?: Record<string, string>;
-}
 
 export default function AdminArticles() {
-  const { articleId } = useParams<{ articleId: string }>();
+  const { articleId } = useParams();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { toast } = useToast();
+  const { language: currentLanguage } = useAdminLanguage();
   
-  const [article, setArticle] = useState<Article | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
-  const [listLoading, setListLoading] = useState<boolean>(false);
-  const [listError, setListError] = useState<string | null>(null);
-  const [currentLanguage, setCurrentLanguage] = useState('en'); // Track current tab language
+  const [selectedTemplate, setSelectedTemplate] = useState('news');
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Load articles list function
-  const loadArticles = async () => {
-    try {
-      console.log('🔄 Loading articles from database...');
-      setListLoading(true);
-      setListError(null);
-      
-      const { data, error } = await supabase
-        .from('articles')
-        .select('*')
-        .order('created_at', { ascending: false });
+  // Article form state
+  const [article, setArticle] = useState<Article>({
+    slug: '',
+    titles: {},
+    contents: {},
+    excerpts: {},
+    authors_multilingual: {},
+    categories_multilingual: {},
+    featured_image: '',
+    read_time: 5,
+    tags: [],
+    content_blocks: [],
+    is_published: false
+  });
 
-      if (error) {
-        throw error;
-      }
-
-      console.log('🔄 Articles loaded:', data?.length || 0, 'articles');
-      setArticles(data || []);
-    } catch (err: any) {
-      console.error('Error loading articles list:', err);
-      setListError(err?.message || 'Failed to load articles');
-    } finally {
-      setListLoading(false);
-    }
-  };
-
-  // Load article when articleId changes
   useEffect(() => {
+    loadArticles();
     if (articleId) {
       loadArticle(articleId);
-    } else {
-      loadArticles();
+      setIsEditing(true);
     }
   }, [articleId]);
 
-  const loadArticle = async (id: string) => {
+  const loadArticles = async () => {
     try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('articles')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error) throw error;
-      setArticle(data);
-    } catch (error: any) {
-      console.error('Error loading article:', error);
-      toast.error('Failed to load article: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateBasicField = (field: string, value: any) => {
-    if (article) {
-      setArticle({
-        ...article,
-        [field]: value
+      const articlesData = await articleService.loadArticlesFromDatabase();
+      setArticles(articlesData);
+    } catch (error) {
+      console.error('Error loading articles:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load articles",
+        variant: "destructive"
       });
     }
   };
 
-  const updateTranslation = (languageCode: string, field: string, value: string) => {
-    if (article) {
-      const fieldMap: Record<string, keyof Article> = {
-        'title': 'titles',
-        'content': 'contents',
-        'excerpt': 'excerpts',
-        'author': 'authors_multilingual',
-        'category': 'categories_multilingual'
+  const loadArticle = async (id: string) => {
+    try {
+      const articleData = await articleService.getArticle(id);
+      if (articleData) {
+        setArticle(articleData);
+        setContentBlocks(articleData.content_blocks || []);
+        setSelectedTemplate(articleData.categories_multilingual?.en || 'news');
+      }
+    } catch (error) {
+      console.error('Error loading article:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load article",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSave = async () => {
+    if (!article.slug.trim()) {
+      toast({
+        title: "Error",
+        description: "Article slug is required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const articleData = {
+        ...article,
+        content_blocks: contentBlocks,
+        categories_multilingual: {
+          ...article.categories_multilingual,
+          en: selectedTemplate
+        }
       };
+
+      let savedArticle: Article | null;
       
-      const multilingualField = fieldMap[field];
-      if (multilingualField) {
-        const currentValue = article[multilingualField] as Record<string, string> || {};
-        setArticle({
-          ...article,
-          [multilingualField]: {
-            ...currentValue,
-            [languageCode]: value
-          }
+      if (isEditing && article.id) {
+        savedArticle = await articleService.updateArticle(article.id, articleData);
+      } else {
+        savedArticle = await articleService.addArticle(articleData);
+      }
+
+      if (savedArticle) {
+        toast({
+          title: "Success",
+          description: `Article ${isEditing ? 'updated' : 'created'} successfully`,
+        });
+        
+        if (!isEditing) {
+          // Reset form for new article
+          setArticle({
+            slug: '',
+            titles: {},
+            contents: {},
+            excerpts: {},
+            authors_multilingual: {},
+            categories_multilingual: {},
+            featured_image: '',
+            read_time: 5,
+            tags: [],
+            content_blocks: [],
+            is_published: false
+          });
+          setContentBlocks([]);
+          setSelectedTemplate('news');
+        }
+        
+        await loadArticles();
+      } else {
+        throw new Error('Failed to save article');
+      }
+    } catch (error) {
+      console.error('Error saving article:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save article",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const createTestArticle = async () => {
+    const testArticle: Article = {
+      slug: 'test-article-components',
+      titles: {
+        en: 'Test Article - All Components',
+        'zh-Hant': '測試文章 - 所有組件',
+        'zh-Hans': '测试文章 - 所有组件',
+        'ja': 'テスト記事 - すべてのコンポーネント',
+        'ko': '테스트 기사 - 모든 구성 요소',
+        'th': 'บทความทดสอบ - ส่วนประกอบทั้งหมด',
+        'vi': 'Bài viết kiểm tra - Tất cả các thành phần'
+      },
+      contents: {
+        en: 'This is a test article to demonstrate all available components.',
+        'zh-Hant': '這是一篇測試文章，用於展示所有可用的組件。',
+        'zh-Hans': '这是一篇测试文章，用于展示所有可用的组件。',
+        'ja': 'これは利用可能なすべてのコンポーネントを実演するためのテスト記事です。',
+        'ko': '이것은 사용 가능한 모든 구성 요소를 시연하기 위한 테스트 기사입니다.',
+        'th': 'นี่คือบทความทดสอบเพื่อแสดงส่วนประกอบทั้งหมดที่มีอยู่',
+        'vi': 'Đây là một bài viết kiểm tra để trình diễn tất cả các thành phần có sẵn.'
+      },
+      excerpts: {
+        en: 'A comprehensive test article showcasing all editor components.',
+        'zh-Hant': '展示所有編輯器組件的綜合測試文章。',
+        'zh-Hans': '展示所有编辑器组件的综合测试文章。',
+        'ja': 'すべてのエディターコンポーネントを紹介する包括的なテスト記事。',
+        'ko': '모든 편집기 구성 요소를 보여주는 포괄적인 테스트 기사.',
+        'th': 'บทความทดสอบที่ครอบคลุมซึ่งแสดงส่วนประกอบของตัวแก้ไขทั้งหมด',
+        'vi': 'Một bài viết kiểm tra toàn diện giới thiệu tất cả các thành phần của trình soạn thảo.'
+      },
+      authors_multilingual: {
+        en: 'Test Author',
+        'zh-Hant': '測試作者',
+        'zh-Hans': '测试作者',
+        'ja': 'テスト著者',
+        'ko': '테스트 저자',
+        'th': 'ผู้เขียนทดสอบ',
+        'vi': 'Tác giả kiểm tra'
+      },
+      categories_multilingual: {
+        en: 'Technical',
+        'zh-Hant': '技術',
+        'zh-Hans': '技术',
+        'ja': '技術',
+        'ko': '기술',
+        'th': 'เทคนิค',
+        'vi': 'Kỹ thuật'
+      },
+      featured_image: '',
+      read_time: 8,
+      tags: ['test', 'components', 'demo'],
+      content_blocks: [
+        {
+          id: crypto.randomUUID(),
+          type: 'heading',
+          content: 'Heading Component',
+          alignment: 'center',
+          fontSize: 'h1',
+          fontWeight: 'bold',
+          fontStyle: 'normal',
+          textDecoration: 'none',
+          width: 'full',
+          margin: 'normal',
+          isSelected: false
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'paragraph',
+          content: 'Paragraph Component - This is a regular paragraph with normal text formatting.',
+          alignment: 'left',
+          fontSize: 'normal',
+          fontWeight: 'normal',
+          fontStyle: 'normal',
+          textDecoration: 'none',
+          width: 'full',
+          margin: 'normal',
+          isSelected: false
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'row',
+          content: 'Multi-column Row',
+          alignment: 'left',
+          fontSize: 'normal',
+          fontWeight: 'normal',
+          fontStyle: 'normal',
+          textDecoration: 'none',
+          width: 'full',
+          margin: 'normal',
+          isSelected: false,
+          columns: 2,
+          columnLayout: 'equal',
+          children: [
+            {
+              id: crypto.randomUUID(),
+              type: 'image',
+              content: 'Left Column Image',
+              alignment: 'center',
+              fontSize: 'normal',
+              fontWeight: 'normal',
+              fontStyle: 'normal',
+              textDecoration: 'none',
+              width: 'full',
+              margin: 'normal',
+              isSelected: false
+            },
+            {
+              id: crypto.randomUUID(),
+              type: 'paragraph',
+              content: 'Right Column Text - This demonstrates the multi-column layout with image on the left and text on the right.',
+              alignment: 'left',
+              fontSize: 'normal',
+              fontWeight: 'normal',
+              fontStyle: 'normal',
+              textDecoration: 'none',
+              width: 'full',
+              margin: 'normal',
+              isSelected: false
+            }
+          ]
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'heading',
+          content: 'List Component',
+          alignment: 'left',
+          fontSize: 'h2',
+          fontWeight: 'bold',
+          fontStyle: 'normal',
+          textDecoration: 'none',
+          width: 'full',
+          margin: 'normal',
+          isSelected: false
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'list',
+          content: 'List Item - This demonstrates the list component functionality.',
+          alignment: 'left',
+          fontSize: 'normal',
+          fontWeight: 'normal',
+          fontStyle: 'normal',
+          textDecoration: 'none',
+          width: 'full',
+          margin: 'normal',
+          isSelected: false
+        },
+        {
+          id: crypto.randomUUID(),
+          type: 'row',
+          content: 'Wide Left Layout',
+          alignment: 'left',
+          fontSize: 'normal',
+          fontWeight: 'normal',
+          fontStyle: 'normal',
+          textDecoration: 'none',
+          width: 'full',
+          margin: 'normal',
+          isSelected: false,
+          columns: 3,
+          columnLayout: 'wide-left',
+          children: [
+            {
+              id: crypto.randomUUID(),
+              type: 'image',
+              content: 'Wide Left Image',
+              alignment: 'center',
+              fontSize: 'normal',
+              fontWeight: 'normal',
+              fontStyle: 'normal',
+              textDecoration: 'none',
+              width: 'full',
+              margin: 'normal',
+              isSelected: false
+            },
+            {
+              id: crypto.randomUUID(),
+              type: 'paragraph',
+              content: 'Narrow Right Text - This demonstrates the wide-left layout where the image takes up more space.',
+              alignment: 'left',
+              fontSize: 'normal',
+              fontWeight: 'normal',
+              fontStyle: 'normal',
+              textDecoration: 'none',
+              width: 'full',
+              margin: 'normal',
+              isSelected: false
+            }
+          ]
+        }
+      ],
+      is_published: true
+    };
+
+    try {
+      const savedArticle = await articleService.addArticle(testArticle);
+      if (savedArticle) {
+        toast({
+          title: "Success",
+          description: "Test article created successfully!",
+        });
+        await loadArticles();
+      }
+    } catch (error) {
+      console.error('Error creating test article:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create test article",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this article?')) {
+      try {
+        const success = await articleService.deleteArticle(id);
+        if (success) {
+          toast({
+            title: "Success",
+            description: "Article deleted successfully",
+          });
+          await loadArticles();
+        }
+      } catch (error) {
+        console.error('Error deleting article:', error);
+        toast({
+          title: "Error",
+          description: "Failed to delete article",
+          variant: "destructive"
         });
       }
     }
   };
 
-  const handleSave = async () => {
-    if (!article) return;
-    
-    try {
-      setSaving(true);
-      
-      const { error } = await supabase
-        .from('articles')
-        .upsert(article);
-
-      if (error) throw error;
-      
-      toast.success('Article saved successfully!');
-      if (!articleId) {
-        navigate('/admin/articles');
+  const updateTranslation = (field: string, language: string, value: string) => {
+    setArticle(prev => ({
+      ...prev,
+      [field]: {
+        ...prev[field as keyof Article] as Record<string, string>,
+        [language]: value
       }
-    } catch (error: any) {
-      console.error('Error saving article:', error);
-      toast.error('Failed to save article: ' + error.message);
-    } finally {
-      setSaving(false);
-    }
+    }));
   };
 
-  const deleteArticle = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('articles')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      
-      toast.success('Article deleted successfully');
-      loadArticles();
-    } catch (error: any) {
-      console.error('Error deleting article:', error);
-      toast.error('Failed to delete article: ' + error.message);
-    }
-  };
-
-  // Index page: show list when no articleId
-  if (!articleId) {
+  if (!isEditing) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Articles</h1>
-          <div className="flex items-center gap-3">
-            <Button 
-              onClick={() => navigate('/admin/articles/new')}
-              className="bg-green-600 hover:bg-green-700"
-            >
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold">Articles Management</h1>
+          <div className="flex items-center gap-2">
+            <Button onClick={createTestArticle} variant="outline">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Test Article
+            </Button>
+            <Button onClick={() => setIsEditing(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Add New Article
             </Button>
           </div>
         </div>
 
-        {/* Article Management Controls */}
-        <div className="flex items-center justify-between bg-slate-50 p-4 rounded-lg border">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-slate-500" />
-              <Select value="all" onValueChange={(value) => console.log('Filter:', value)}>
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Filter by..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Articles</SelectItem>
-                  <SelectItem value="published">Published Only</SelectItem>
-                  <SelectItem value="draft">Draft Only</SelectItem>
-                  <SelectItem value="featured">Featured Only</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <SortAsc className="h-4 w-4 text-slate-500" />
-              <Select value="newest" onValueChange={(value) => console.log('Sort:', value)}>
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Sort by..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="newest">Newest First</SelectItem>
-                  <SelectItem value="oldest">Oldest First</SelectItem>
-                  <SelectItem value="title">Title A-Z</SelectItem>
-                  <SelectItem value="category">Category</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => console.log('Bulk actions')}
-              className="text-red-600 border-red-200 hover:bg-red-50"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Bulk Delete
-            </Button>
-          </div>
-        </div>
-
-        {listLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin" />
-          </div>
-        ) : listError ? (
-          <div className="p-4 border rounded text-red-700 bg-red-50">{listError}</div>
-        ) : articles.length === 0 ? (
-          <div className="p-6 border rounded text-muted-foreground">No articles found.</div>
-        ) : (
-          <div className="grid gap-4">
-            {articles.map(a => (
-              <Card key={a.id} className={`${!a.is_published ? 'opacity-60 bg-slate-50' : ''}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="text-lg font-semibold truncate">
-                          {a.titles?.['en'] || a.title}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {a.is_published ? (
-                            <Badge variant="default" className="bg-green-100 text-green-800">Published</Badge>
-                          ) : (
-                            <Badge variant="secondary" className="bg-slate-100 text-slate-600">Draft</Badge>
-                          )}
-                          {a.category && (
-                            <Badge variant="outline" className="border-blue-200 text-blue-700">
-                              {a.category}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-sm text-muted-foreground truncate">
-                        {a.excerpt || 'No excerpt available'}
-                      </div>
-                      <div className="text-xs text-slate-400 mt-1">
-                        ID: {a.id} • Created: {new Date(a.created_at || Date.now()).toLocaleDateString()}
-                        {a.author && ` • Author: ${a.author}`}
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => {
-                          // Toggle article visibility
-                          const updatedArticle = { ...a, is_published: !a.is_published };
-                          supabase
-                            .from('articles')
-                            .update({ is_published: !a.is_published })
-                            .eq('id', a.id)
-                            .then(() => loadArticles());
-                        }}
-                        title={a.is_published ? 'Unpublish Article' : 'Publish Article'}
-                      >
-                        {a.is_published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                      
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => navigate(`/admin/articles/edit/${a.id}`)}
-                      >
-                        <Edit className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                      
-                      <Button 
-                        variant="destructive" 
-                        size="sm"
-                        onClick={async () => {
-                          if (confirm(`Are you sure you want to delete "${a.titles?.['en'] || a.title}"? This action cannot be undone.`)) {
-                            try {
-                              console.log('🗑️ Deleting article:', a.id, a.titles?.['en'] || a.title);
-                              await deleteArticle(a.id);
-                              console.log('🗑️ Delete result: success');
-                            } catch (error) {
-                              console.error('🗑️ Delete error:', error);
-                            }
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+        <div className="grid gap-4">
+          {articles.map((article) => (
+            <Card key={article.id}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      {article.titles?.en || 'Untitled'}
+                      <Badge variant={article.is_published ? "default" : "secondary"}>
+                        {article.is_published ? "Published" : "Draft"}
+                      </Badge>
+                    </CardTitle>
+                    <p className="text-sm text-gray-600">
+                      Slug: {article.slug} • {article.categories_multilingual?.en || 'No Category'}
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">Loading...</span>
-      </div>
-    );
-  }
-
-  if (!article) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-red-800 mb-2">Article Not Found</h2>
-          <p className="text-muted-foreground mb-4">The article you're looking for doesn't exist or has been deleted.</p>
-          <Button onClick={() => navigate('/admin/articles')}>
-            Back to Articles
-          </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setArticle(article);
+                        setContentBlocks(article.content_blocks || []);
+                        setSelectedTemplate(article.categories_multilingual?.en || 'news');
+                        setIsEditing(true);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(article.id!)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          ))}
+          
+          {articles.length === 0 && (
+            <Card>
+              <CardContent className="text-center py-8">
+                <p className="text-gray-500">No articles found. Create your first article or generate a test article to see the components in action.</p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto p-6">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate('/admin/articles')}>
+          <Button variant="outline" onClick={() => setIsEditing(false)}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Articles
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold">
-              {articleId ? 'Edit Article' : 'Add New Article'}
-            </h1>
-            {articleId && (
-              <p className="text-muted-foreground">ID: {article.id}</p>
-            )}
-          </div>
+          <h1 className="text-3xl font-bold">
+            {article.id ? 'Edit Article' : 'Add New Article'}
+          </h1>
         </div>
-
-        <div className="flex items-center gap-4">
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Save Article
-              </>
-            )}
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => {}}>
+            <Eye className="h-4 w-4 mr-2" />
+            Preview
+          </Button>
+          <Button onClick={handleSave} disabled={isSaving}>
+            <Save className="h-4 w-4 mr-2" />
+            {isSaving ? 'Saving...' : 'Save Article'}
           </Button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        {/* Basic Info */}
-        <div className="xl:col-span-1">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Left Column - Article Settings */}
+        <div className="xl:col-span-1 space-y-6">
+          {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Type className="h-5 w-5" />
-                Basic Information
-              </CardTitle>
+              <CardTitle>Basic Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Category */}
               <div>
-                <label className="block text-sm font-medium mb-2">Category</label>
-                <Select 
-                  value={article.category || ''} 
-                  onValueChange={(value) => updateBasicField('category', value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select category" />
+                <label className="block text-sm font-medium mb-2">Article Slug</label>
+                <Input
+                  value={article.slug}
+                  onChange={(e) => setArticle(prev => ({ ...prev, slug: e.target.value }))}
+                  placeholder="article-slug"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-2">Template</label>
+                <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                  <SelectTrigger>
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map(category => (
-                      <SelectItem key={category.value} value={category.value}>
+                    {articleTemplates.map(template => (
+                      <SelectItem key={template.id} value={template.id}>
                         <div className="flex items-center gap-2">
-                          <span>{category.label}</span>
-                          <Badge variant="outline" className={`${category.color} text-xs`}>
-                            {articleTemplates.find(t => t.id === category.template)?.icon} {articleTemplates.find(t => t.id === category.template)?.name}
-                          </Badge>
+                          <template.icon className="h-4 w-4" />
+                          {template.name}
                         </div>
                       </SelectItem>
                     ))}
@@ -505,169 +550,269 @@ export default function AdminArticles() {
                 </Select>
               </div>
 
-              {/* Template Preview */}
-              {article.category && (
-                <div className="p-3 bg-gray-50 rounded-lg border">
-                  <label className="block text-sm font-medium mb-2 text-gray-700">Template Preview</label>
-                  <div className="flex items-center gap-2">
-                    {(() => {
-                      const selectedCategory = categories.find(c => c.value === article.category);
-                      const template = selectedCategory ? articleTemplates.find(t => t.id === selectedCategory.template) : null;
-                      if (template) {
-                        return (
-                          <>
-                            <span className="text-2xl">{template.icon}</span>
-                            <div>
-                              <div className="font-medium text-gray-900">{template.name}</div>
-                              <div className="text-sm text-gray-600">{template.description}</div>
-                            </div>
-                          </>
-                        );
-                      }
-                      return <span className="text-gray-500">Select a category to see template</span>;
-                    })()}
-                  </div>
-                </div>
-              )}
-
-              {/* Author */}
-              <div>
-                <label className="block text-sm font-medium mb-2">Author</label>
-                <Input 
-                  value={article.author || ''} 
-                  onChange={(e) => updateBasicField('author', e.target.value)} 
-                  placeholder="Author name"
-                />
-              </div>
-
-              {/* Published Date */}
-              <div>
-                <label className="block text-sm font-medium mb-2">Published Date</label>
-                <Input 
-                  type="date" 
-                  value={article.published_at ? new Date(article.published_at).toISOString().split('T')[0] : ''} 
-                  onChange={(e) => updateBasicField('published_at', e.target.value)} 
-                />
-              </div>
-
-              {/* Read Time */}
-              <div>
-                <label className="block text-sm font-medium mb-2">Read Time (minutes)</label>
-                <Input 
-                  type="number" 
-                  value={article.read_time || ''} 
-                  onChange={(e) => updateBasicField('read_time', parseInt(e.target.value) || 0)} 
-                  placeholder="5"
-                />
-              </div>
-
-              {/* Featured Image */}
               <div>
                 <label className="block text-sm font-medium mb-2">Featured Image URL</label>
-                <Input 
-                  value={article.featured_image || ''} 
-                  onChange={(e) => updateBasicField('featured_image', e.target.value)} 
+                <Input
+                  value={article.featured_image || ''}
+                  onChange={(e) => setArticle(prev => ({ ...prev, featured_image: e.target.value }))}
                   placeholder="https://example.com/image.jpg"
                 />
               </div>
 
-              {/* Flags */}
-              <div className="space-y-4 pt-4 border-t">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="text-sm font-medium">Published</label>
-                    <p className="text-xs text-muted-foreground">Show this article on the website</p>
-                  </div>
-                  <Switch 
-                    checked={article.is_published || false} 
-                    onCheckedChange={(checked) => updateBasicField('is_published', checked)} 
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Read Time (minutes)</label>
+                <Input
+                  type="number"
+                  value={article.read_time || 5}
+                  onChange={(e) => setArticle(prev => ({ ...prev, read_time: parseInt(e.target.value) || 5 }))}
+                  min="1"
+                  max="60"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Tags (comma-separated)</label>
+                <Input
+                  value={article.tags?.join(', ') || ''}
+                  onChange={(e) => setArticle(prev => ({ 
+                    ...prev, 
+                    tags: e.target.value.split(',').map(tag => tag.trim()).filter(Boolean)
+                  }))}
+                  placeholder="news, company, update"
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="published"
+                  checked={article.is_published || false}
+                  onCheckedChange={(checked) => setArticle(prev => ({ ...prev, is_published: checked }))}
+                />
+                <label htmlFor="published" className="text-sm font-medium">
+                  Publish Article
+                </label>
               </div>
             </CardContent>
           </Card>
-        </div>
 
-        {/* Multilingual Content */}
-        <div className="xl:col-span-1">
+          {/* Multilingual Content */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5" />
-                Multilingual Content
-              </CardTitle>
+              <CardTitle>Multilingual Content</CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="en" className="w-full" onValueChange={setCurrentLanguage}>
-                <TabsList className="grid w-full grid-cols-7 h-12 mb-6">
-                  {languages.map(lang => (
-                    <TabsTrigger key={lang.code} value={lang.code} className="flex flex-col items-center gap-1 p-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                      <span className="text-lg">{lang.flag}</span>
-                      <span className="text-xs font-medium">{lang.code.toUpperCase()}</span>
-                    </TabsTrigger>
-                  ))}
+              <Tabs value={currentLanguage} className="w-full">
+                <TabsList className="grid w-full grid-cols-7">
+                  <TabsTrigger value="en">EN</TabsTrigger>
+                  <TabsTrigger value="zh-Hant">繁</TabsTrigger>
+                  <TabsTrigger value="zh-Hans">简</TabsTrigger>
+                  <TabsTrigger value="ja">JP</TabsTrigger>
+                  <TabsTrigger value="ko">KR</TabsTrigger>
+                  <TabsTrigger value="th">TH</TabsTrigger>
+                  <TabsTrigger value="vi">VN</TabsTrigger>
                 </TabsList>
+                
+                <TabsContent value="en" className="space-y-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Title</label>
+                    <Input
+                      value={article.titles?.en || ''}
+                      onChange={(e) => updateTranslation('titles', 'en', e.target.value)}
+                      placeholder="Enter article title"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Excerpt</label>
+                    <Textarea
+                      value={article.excerpts?.en || ''}
+                      onChange={(e) => updateTranslation('excerpts', 'en', e.target.value)}
+                      placeholder="Enter article excerpt"
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Author</label>
+                    <Input
+                      value={article.authors_multilingual?.en || ''}
+                      onChange={(e) => updateTranslation('authors_multilingual', 'en', e.target.value)}
+                      placeholder="Enter author name"
+                    />
+                  </div>
+                </TabsContent>
 
-                {languages.map(lang => (
-                  <TabsContent key={lang.code} value={lang.code} className="space-y-6">
-                    <div className="bg-muted/30 p-4 rounded-lg">
-                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <span>{lang.flag}</span>
-                        {lang.nativeName} - {lang.name}
-                      </h3>
-                      <div className="space-y-4">
-                        {/* Title */}
-                        <div>
-                          <label className="block text-sm font-medium mb-2">
-                            <Type className="h-4 w-4 inline mr-2" />
-                            Article Title ({lang.nativeName})
-                          </label>
-                          <Input 
-                            value={article.titles?.[lang.code] || ''} 
-                            onChange={(e) => updateTranslation(lang.code, 'title', e.target.value)} 
-                            placeholder="Enter article title" 
-                            className="text-lg font-medium" 
-                          />
-                        </div>
-                        
-                        {/* Excerpt */}
-                        <div>
-                          <label className="block text-sm font-medium mb-2">
-                            <FileText className="h-4 w-4 inline mr-2" />
-                            Article Excerpt ({lang.nativeName})
-                          </label>
-                          <textarea
-                            value={article.excerpts?.[lang.code] || ''} 
-                            onChange={(e) => updateTranslation(lang.code, 'excerpt', e.target.value)} 
-                            placeholder="Enter article excerpt..." 
-                            className="w-full p-3 border border-slate-300 rounded-lg resize-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                            rows={3}
-                          />
-                        </div>
-                        
-                        {/* Content */}
-                        <div>
-                          <label className="block text-sm font-medium mb-2">
-                            <FileText className="h-4 w-4 inline mr-2" />
-                            Article Content ({lang.nativeName})
-                          </label>
-                          <ModernRichTextEditor 
-                            value={article.contents?.[lang.code] || ''} 
-                            onChange={(v) => updateTranslation(lang.code, 'content', v)} 
-                            placeholder="Enter article content..." 
-                            height="200px" 
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </TabsContent>
-                ))}
+                <TabsContent value="zh-Hant" className="space-y-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">標題</label>
+                    <Input
+                      value={article.titles?.['zh-Hant'] || ''}
+                      onChange={(e) => updateTranslation('titles', 'zh-Hant', e.target.value)}
+                      placeholder="輸入文章標題"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">摘要</label>
+                    <Textarea
+                      value={article.excerpts?.['zh-Hant'] || ''}
+                      onChange={(e) => updateTranslation('excerpts', 'zh-Hant', e.target.value)}
+                      placeholder="輸入文章摘要"
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">作者</label>
+                    <Input
+                      value={article.authors_multilingual?.['zh-Hant'] || ''}
+                      onChange={(e) => updateTranslation('authors_multilingual', 'zh-Hant', e.target.value)}
+                      placeholder="輸入作者姓名"
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="zh-Hans" className="space-y-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">标题</label>
+                    <Input
+                      value={article.titles?.['zh-Hans'] || ''}
+                      onChange={(e) => updateTranslation('titles', 'zh-Hans', e.target.value)}
+                      placeholder="输入文章标题"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">摘要</label>
+                    <Textarea
+                      value={article.excerpts?.['zh-Hans'] || ''}
+                      onChange={(e) => updateTranslation('excerpts', 'zh-Hans', e.target.value)}
+                      placeholder="输入文章摘要"
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">作者</label>
+                    <Input
+                      value={article.authors_multilingual?.['zh-Hans'] || ''}
+                      onChange={(e) => updateTranslation('authors_multilingual', 'zh-Hans', e.target.value)}
+                      placeholder="输入作者姓名"
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="ja" className="space-y-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">タイトル</label>
+                    <Input
+                      value={article.titles?.ja || ''}
+                      onChange={(e) => updateTranslation('titles', 'ja', e.target.value)}
+                      placeholder="記事のタイトルを入力"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">要約</label>
+                    <Textarea
+                      value={article.excerpts?.ja || ''}
+                      onChange={(e) => updateTranslation('excerpts', 'ja', e.target.value)}
+                      placeholder="記事の要約を入力"
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">著者</label>
+                    <Input
+                      value={article.authors_multilingual?.ja || ''}
+                      onChange={(e) => updateTranslation('authors_multilingual', 'ja', e.target.value)}
+                      placeholder="著者名を入力"
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="ko" className="space-y-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">제목</label>
+                    <Input
+                      value={article.titles?.ko || ''}
+                      onChange={(e) => updateTranslation('titles', 'ko', e.target.value)}
+                      placeholder="기사 제목 입력"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">요약</label>
+                    <Textarea
+                      value={article.excerpts?.ko || ''}
+                      onChange={(e) => updateTranslation('excerpts', 'ko', e.target.value)}
+                      placeholder="기사 요약 입력"
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">작가</label>
+                    <Input
+                      value={article.authors_multilingual?.ko || ''}
+                      onChange={(e) => updateTranslation('authors_multilingual', 'ko', e.target.value)}
+                      placeholder="작가 이름 입력"
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="th" className="space-y-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">หัวข้อ</label>
+                    <Input
+                      value={article.titles?.th || ''}
+                      onChange={(e) => updateTranslation('titles', 'th', e.target.value)}
+                      placeholder="ใส่หัวข้อบทความ"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">บทคัดย่อ</label>
+                    <Textarea
+                      value={article.excerpts?.th || ''}
+                      onChange={(e) => updateTranslation('excerpts', 'th', e.target.value)}
+                      placeholder="ใส่บทคัดย่อบทความ"
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">ผู้เขียน</label>
+                    <Input
+                      value={article.authors_multilingual?.th || ''}
+                      onChange={(e) => updateTranslation('authors_multilingual', 'th', e.target.value)}
+                      placeholder="ใส่ชื่อผู้เขียน"
+                    />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="vi" className="space-y-4 mt-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Tiêu đề</label>
+                    <Input
+                      value={article.titles?.vi || ''}
+                      onChange={(e) => updateTranslation('titles', 'vi', e.target.value)}
+                      placeholder="Nhập tiêu đề bài viết"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Tóm tắt</label>
+                    <Textarea
+                      value={article.excerpts?.vi || ''}
+                      onChange={(e) => updateTranslation('excerpts', 'vi', e.target.value)}
+                      placeholder="Nhập tóm tắt bài viết"
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Tác giả</label>
+                    <Input
+                      value={article.authors_multilingual?.vi || ''}
+                      onChange={(e) => updateTranslation('authors_multilingual', 'vi', e.target.value)}
+                      placeholder="Nhập tên tác giả"
+                    />
+                  </div>
+                </TabsContent>
               </Tabs>
             </CardContent>
           </Card>
         </div>
 
-        {/* Content Blocks */}
+        {/* Right Column - Content Editor */}
         <div className="xl:col-span-2">
           <InlineArticleEditor 
             initialContent={contentBlocks}
@@ -676,10 +821,7 @@ export default function AdminArticles() {
               // TODO: Implement preview functionality
               console.log('Preview article with blocks:', contentBlocks);
             }}
-            onSave={() => {
-              // TODO: Implement save functionality
-              console.log('Save article with blocks:', contentBlocks);
-            }}
+            onSave={handleSave}
           />
         </div>
       </div>
