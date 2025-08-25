@@ -47,14 +47,28 @@ const ArticleDetail = () => {
   }, [slug, currentLanguage]); // Re-fetch when language changes
 
   // Helper function to get localized text with fallback
-  const getLocalizedText = (article: Article, field: 'titles' | 'excerpts' | 'authors_multilingual' | 'categories_multilingual', fallback: string): string => {
-    if (article[field] && article[field][currentLanguage]) {
-      return article[field][currentLanguage];
+  const getLocalizedText = (article: Article, field: 'title' | 'excerpt' | 'author' | 'category', fallback: string): string => {
+    const languageSuffix = currentLanguage === 'en' ? '_en' : 
+                           currentLanguage === 'zh-Hant' ? '_zh_hant' :
+                           currentLanguage === 'ja' ? '_ja' :
+                           currentLanguage === 'ko' ? '_ko' :
+                           currentLanguage === 'th' ? '_th' :
+                           currentLanguage === 'vi' ? '_vi' : '_en';
+    
+    const fieldName = `${field}${languageSuffix}` as keyof Article;
+    const value = article[fieldName];
+    
+    if (value && typeof value === 'string' && value.trim()) {
+      return value;
     }
+    
     // Fallback to English
-    if (article[field] && article[field]['en']) {
-      return article[field]['en'];
+    const englishFieldName = `${field}_en` as keyof Article;
+    const englishValue = article[englishFieldName];
+    if (englishValue && typeof englishValue === 'string' && englishValue.trim()) {
+      return englishValue;
     }
+    
     return fallback;
   };
 
@@ -97,26 +111,13 @@ const ArticleDetail = () => {
     const getLocalizedBlockContent = (block: any) => {
       console.log('Rendering block:', block);
       console.log('Current language:', currentLanguage);
-      console.log('Block content_multilingual:', block.content_multilingual);
       
-      // First check if the block has multilingual content
-      if (block.content_multilingual && block.content_multilingual[currentLanguage]) {
-        console.log('Using localized content for', currentLanguage, ':', block.content_multilingual[currentLanguage]);
-        return block.content_multilingual[currentLanguage];
-      }
-      
-      // Fallback to English from multilingual content
-      if (block.content_multilingual && block.content_multilingual['en']) {
-        console.log('Using English fallback from multilingual:', block.content_multilingual['en']);
-        return block.content_multilingual['en'];
-      }
-      
-      // Fallback to original content field
-      console.log('Using original content field:', block.content);
+      // Since we're now using separate language columns, we just return the block content
+      // The parent component will handle switching between different language content arrays
       return block.content;
     };
 
-        const localizedContent = getLocalizedBlockContent(block);
+    const localizedContent = getLocalizedBlockContent(block);
     
     switch (block.type) {
       case 'heading':
@@ -313,12 +314,12 @@ const ArticleDetail = () => {
           </div>
           
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              {getLocalizedText(article, 'titles', 'Untitled Article')}
-            </h1>
-            <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
-              {getLocalizedText(article, 'excerpts', 'No excerpt available')}
-            </p>
+                         <h1 className="text-4xl md:text-6xl font-bold mb-6">
+               {getLocalizedText(article, 'title', 'Untitled Article')}
+             </h1>
+             <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
+               {getLocalizedText(article, 'excerpt', 'No excerpt available')}
+             </p>
           </div>
         </div>
       </div>
@@ -339,14 +340,14 @@ const ArticleDetail = () => {
                 <Clock className="w-4 h-4" />
                 <span>{article.read_time || 5} min read</span>
               </div>
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4" />
-                <span>{getLocalizedText(article, 'authors_multilingual', 'Unknown Author')}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Tag className="w-4 h-4" />
-                <span>{getLocalizedText(article, 'categories_multilingual', 'Uncategorized')}</span>
-              </div>
+                             <div className="flex items-center gap-2">
+                 <User className="w-4 h-4" />
+                 <span>{getLocalizedText(article, 'author', 'Unknown Author')}</span>
+               </div>
+               <div className="flex items-center gap-2">
+                 <Tag className="w-4 h-4" />
+                 <span>{getLocalizedText(article, 'category', 'Uncategorized')}</span>
+               </div>
             </div>
 
             {article.tags && article.tags.length > 0 && (
@@ -360,28 +361,45 @@ const ArticleDetail = () => {
             )}
           </div>
 
-          {/* Article Content */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            {article.content_blocks && article.content_blocks.length > 0 ? (
-              <div className="prose prose-lg max-w-none">
-                {/* Display content blocks in read-only mode */}
-                {article.content_blocks.map((block, index) => (
-                  <div key={block.id || index} className={`mb-4 ${getBlockClasses(block)}`}>
-                    {renderContentBlock(block)}
-                  </div>
-                ))}
-                
-                {/* Display related content */}
-                {renderRelatedContent()}
-              </div>
-            ) : (
-              <div className="prose prose-lg max-w-none">
-                <p className="text-gray-600 italic">
-                  {getLocalizedText(article, 'contents', 'No content available for this article.')}
-                </p>
-              </div>
-            )}
-          </div>
+                     {/* Article Content */}
+           <div className="bg-white rounded-lg shadow-md p-6">
+             {(() => {
+               // Get content blocks for the current language
+               const languageSuffix = currentLanguage === 'en' ? '_en' : 
+                                     currentLanguage === 'zh-Hant' ? '_zh_hant' :
+                                     currentLanguage === 'ja' ? '_ja' :
+                                     currentLanguage === 'ko' ? '_ko' :
+                                     currentLanguage === 'th' ? '_th' :
+                                     currentLanguage === 'vi' ? '_vi' : '_en';
+               
+               const contentBlocksField = `content_blocks${languageSuffix}` as keyof Article;
+               const contentBlocks = article[contentBlocksField] as ContentBlock[];
+               
+               if (contentBlocks && contentBlocks.length > 0) {
+                 return (
+                   <div className="prose prose-lg max-w-none">
+                     {/* Display content blocks in read-only mode */}
+                     {contentBlocks.map((block, index) => (
+                       <div key={block.id || index} className={`mb-4 ${getBlockClasses(block)}`}>
+                         {renderContentBlock(block)}
+                       </div>
+                     ))}
+                     
+                     {/* Display related content */}
+                     {renderRelatedContent()}
+                   </div>
+                 );
+               } else {
+                 return (
+                   <div className="prose prose-lg max-w-none">
+                     <p className="text-gray-600 italic">
+                       {getLocalizedText(article, 'excerpt', 'No content available for this article.')}
+                     </p>
+                   </div>
+                 );
+               }
+             })()}
+           </div>
         </div>
       </div>
     </div>

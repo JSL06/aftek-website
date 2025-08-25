@@ -27,15 +27,45 @@ export interface Article {
   created_at?: string;
   updated_at?: string;
   
-  // Multilingual fields
-  titles: Record<string, string>;
-  contents: Record<string, string>;
-  excerpts: Record<string, string>;
-  authors_multilingual: Record<string, string>;
-  categories_multilingual: Record<string, string>;
+  // Separate language columns for titles
+  title_en: string;
+  title_zh_hant: string;
+  title_ja: string;
+  title_ko: string;
+  title_th: string;
+  title_vi: string;
   
-  // Content blocks for inline editor
-  content_blocks?: ContentBlock[];
+  // Separate language columns for excerpts
+  excerpt_en: string;
+  excerpt_zh_hant: string;
+  excerpt_ja: string;
+  excerpt_ko: string;
+  excerpt_th: string;
+  excerpt_vi: string;
+  
+  // Separate language columns for authors
+  author_en: string;
+  author_zh_hant: string;
+  author_ja: string;
+  author_ko: string;
+  author_th: string;
+  author_vi: string;
+  
+  // Separate language columns for categories
+  category_en: string;
+  category_zh_hant: string;
+  category_ja: string;
+  category_ko: string;
+  category_th: string;
+  category_vi: string;
+  
+  // Separate language columns for content blocks
+  content_blocks_en?: ContentBlock[];
+  content_blocks_zh_hant?: ContentBlock[];
+  content_blocks_ja?: ContentBlock[];
+  content_blocks_ko?: ContentBlock[];
+  content_blocks_th?: ContentBlock[];
+  content_blocks_vi?: ContentBlock[];
   
   // Related data
   tags?: ArticleTag[];
@@ -57,15 +87,45 @@ export interface MultilingualArticle {
   created_at?: string;
   updated_at?: string;
   
-  // Multilingual fields
-  titles: Record<string, string>;
-  contents: Record<string, string>;
-  excerpts: Record<string, string>;
-  authors_multilingual: Record<string, string>;
-  categories_multilingual: Record<string, string>;
+  // Separate language columns for titles
+  title_en: string;
+  title_zh_hant: string;
+  title_ja: string;
+  title_ko: string;
+  title_th: string;
+  title_vi: string;
   
-  // Content blocks for inline editor
-  content_blocks?: ContentBlock[];
+  // Separate language columns for excerpts
+  excerpt_en: string;
+  excerpt_zh_hant: string;
+  excerpt_ja: string;
+  excerpt_ko: string;
+  excerpt_th: string;
+  excerpt_vi: string;
+  
+  // Separate language columns for authors
+  author_en: string;
+  author_zh_hant: string;
+  author_ja: string;
+  author_ko: string;
+  author_th: string;
+  author_vi: string;
+  
+  // Separate language columns for categories
+  category_en: string;
+  category_zh_hant: string;
+  category_ja: string;
+  category_ko: string;
+  category_th: string;
+  category_vi: string;
+  
+  // Separate language columns for content blocks
+  content_blocks_en?: ContentBlock[];
+  content_blocks_zh_hant?: ContentBlock[];
+  content_blocks_ja?: ContentBlock[];
+  content_blocks_ko?: ContentBlock[];
+  content_blocks_th?: ContentBlock[];
+  content_blocks_vi?: ContentBlock[];
   
   // Related data
   tags?: ArticleTag[];

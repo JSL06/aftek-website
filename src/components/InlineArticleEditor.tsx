@@ -35,8 +35,7 @@ import { productService, UnifiedProduct } from '@/services/productService';
 export interface ContentBlock {
   id: string;
   type: 'text' | 'image' | 'heading' | 'paragraph' | 'list' | 'row';
-  content: string; // Default/English content
-  content_multilingual?: Record<string, string>; // Multilingual content for different languages
+  content: string; // Content for the current language
   imageUrl?: string;
   imageAlt?: string;
   imageCaption?: string;
@@ -137,10 +136,9 @@ export default function InlineArticleEditor({
 
   // Helper function to get localized content for a block
   const getLocalizedContent = (block: ContentBlock, language: string): string => {
-    if (language === 'en') {
-      return block.content;
-    }
-    return block.content_multilingual?.[language] || block.content;
+    // Since we're now using separate language columns, we just return the content
+    // The parent component will handle switching between different language content arrays
+    return block.content;
   };
 
   // Helper function to update localized content for a block
@@ -148,17 +146,7 @@ export default function InlineArticleEditor({
     setContent(prevContent => {
       const updatedContent = prevContent.map(block => {
         if (block.id === blockId) {
-          if (language === 'en') {
-            return { ...block, content: newContent };
-          } else {
-            return {
-              ...block,
-              content_multilingual: {
-                ...block.content_multilingual,
-                [language]: newContent
-              }
-            };
-          }
+          return { ...block, content: newContent };
         }
         return block;
       });
@@ -174,9 +162,6 @@ export default function InlineArticleEditor({
         id: crypto.randomUUID(),
         type: 'paragraph',
         content: 'Start typing your article here...',
-        content_multilingual: {
-          en: 'Start typing your article here...'
-        },
         alignment: 'left',
         fontSize: 'normal',
         fontWeight: 'normal',
@@ -212,9 +197,6 @@ export default function InlineArticleEditor({
       id: crypto.randomUUID(),
       type,
       content: type === 'image' ? '' : 'New content...',
-      content_multilingual: {
-        en: type === 'image' ? '' : 'New content...'
-      },
       alignment: 'left',
       fontSize: type === 'heading' ? 'h2' : 'normal',
       fontWeight: type === 'heading' ? 'bold' : 'normal',
