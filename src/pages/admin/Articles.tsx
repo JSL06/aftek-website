@@ -14,7 +14,7 @@ import InlineArticleEditor from '@/components/InlineArticleEditor';
 import { ContentBlock } from '@/components/InlineArticleEditor';
 import articleService, { Article, ArticleTag } from '@/services/articleService';
 import FeaturesChecklist from '@/components/FeaturesChecklist';
-import { Plus, Edit, Trash2, Eye, Upload, Image as ImageIcon, Globe, Type, FileText, User, Check } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Upload, Image as ImageIcon, Globe, Type, FileText, User, Check, Link, ExternalLink, Package, X } from 'lucide-react';
 
 const languages = [
   { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸' },
@@ -66,6 +66,11 @@ export default function AdminArticles() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [currentLanguage, setCurrentLanguage] = useState('en'); // Track current tab language
+  
+  // Related content state
+  const [relatedProducts, setRelatedProducts] = useState<string[]>([]);
+  const [relatedLinks, setRelatedLinks] = useState<Array<{ title: string; url: string; description?: string }>>([]);
+  const [customButtons, setCustomButtons] = useState<Array<{ text: string; url: string; variant?: 'default' | 'outline' | 'secondary' | 'destructive' }>>([]);
 
   useEffect(() => {
     loadArticles();
@@ -126,6 +131,11 @@ export default function AdminArticles() {
         setSelectedTags(data.tags?.map(tag => tag.name) || []);
         setUploadedImages(data.images?.map(img => img.image_url) || []);
         
+        // Load new related content fields
+        setRelatedProducts(data.related_products || []);
+        setRelatedLinks(data.related_links || []);
+        setCustomButtons(data.custom_buttons || []);
+        
         // Set template based on category
         const category = data.categories_multilingual?.en || '';
         const template = articleTemplates.find(t => 
@@ -167,7 +177,10 @@ export default function AdminArticles() {
         categories_multilingual: {
           ...article.categories_multilingual,
           en: selectedTemplate
-        }
+        },
+        related_products: relatedProducts,
+        related_links: relatedLinks,
+        custom_buttons: customButtons
       };
 
       let savedArticle: Article | null;
@@ -378,6 +391,19 @@ export default function AdminArticles() {
     });
     setSelectedTemplate('technical');
     setSelectedTags(['Technical', 'Test', 'Components']);
+    
+    // Set test data for new related content fields
+    setRelatedProducts(['Test Product A', 'Test Product B', 'Sample Product C']);
+    setRelatedLinks([
+      { title: 'External Documentation', url: 'https://example.com/docs', description: 'Comprehensive documentation for this topic' },
+      { title: 'Related Research', url: 'https://example.com/research', description: 'Academic research and studies' }
+    ]);
+    setCustomButtons([
+      { text: 'Download PDF', url: 'https://example.com/download', variant: 'default' },
+      { text: 'View Demo', url: 'https://example.com/demo', variant: 'outline' },
+      { text: 'Contact Sales', url: 'https://example.com/contact', variant: 'secondary' }
+    ]);
+    
     setIsEditing(false);
     setArticleId(null);
   };
@@ -587,6 +613,210 @@ export default function AdminArticles() {
                 </div>
                 <div className="text-sm text-gray-500">
                   Selected: {selectedTags.length} tags
+                </div>
+              </div>
+            </div>
+
+            {/* Related Products */}
+            <div className="bg-white p-6 rounded-lg border shadow-sm">
+              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                Related Products
+              </h2>
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {relatedProducts.map((product, index) => (
+                    <div key={index} className="flex items-center gap-2 bg-muted px-3 py-2 rounded-lg">
+                      <span className="text-sm">{product}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setRelatedProducts(relatedProducts.filter((_, i) => i !== index))}
+                        className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Enter product name..."
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value.trim() && e.target.value.includes('Enter')) {
+                        // This is a placeholder, don't add it
+                        return;
+                      }
+                    }}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                        setRelatedProducts([...relatedProducts, e.currentTarget.value.trim()]);
+                        e.currentTarget.value = '';
+                      }
+                    }}
+                    className="flex-1"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const input = document.querySelector('input[placeholder="Enter product name..."]') as HTMLInputElement;
+                      const inputElement = input as HTMLInputElement;
+                      if (inputElement && inputElement.value.trim()) {
+                        setRelatedProducts([...relatedProducts, inputElement.value.trim()]);
+                        inputElement.value = '';
+                      }
+                    }}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Related Links */}
+            <div className="bg-white p-6 rounded-lg border shadow-sm">
+              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+                <Link className="h-5 w-5" />
+                Related Links
+              </h2>
+              <div className="space-y-4">
+                {relatedLinks.map((link, index) => (
+                  <div key={index} className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate">{link.title}</div>
+                      <div className="text-xs text-gray-500 truncate">{link.url}</div>
+                      {link.description && (
+                        <div className="text-xs text-gray-600 mt-1">{link.description}</div>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setRelatedLinks(relatedLinks.filter((_, i) => i !== index))}
+                      className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+                <div className="space-y-3">
+                  <Input
+                    placeholder="Link title..."
+                    className="h-10"
+                  />
+                  <Input
+                    placeholder="URL..."
+                    className="h-10"
+                  />
+                  <Input
+                    placeholder="Description (optional)..."
+                    className="h-10"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const titleInput = document.querySelector('input[placeholder="Link title..."]') as HTMLInputElement;
+                      const urlInput = document.querySelector('input[placeholder="URL..."]') as HTMLInputElement;
+                      const descInput = document.querySelector('input[placeholder="Description (optional)..."]') as HTMLInputElement;
+                      
+                      if (titleInput?.value.trim() && urlInput?.value.trim()) {
+                        setRelatedLinks([...relatedLinks, {
+                          title: titleInput.value.trim(),
+                          url: urlInput.value.trim(),
+                          description: descInput?.value.trim() || undefined
+                        }]);
+                        titleInput.value = '';
+                        urlInput.value = '';
+                        descInput.value = '';
+                      }
+                    }}
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Link
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Custom Buttons */}
+            <div className="bg-white p-6 rounded-lg border shadow-sm">
+              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+                <ExternalLink className="h-5 w-5" />
+                Custom Buttons
+              </h2>
+              <div className="space-y-4">
+                {customButtons.map((button, index) => (
+                  <div key={index} className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant={button.variant || 'default'}
+                          size="sm"
+                          className="pointer-events-none"
+                        >
+                          {button.text}
+                        </Button>
+                        <span className="text-xs text-gray-500">→ {button.url}</span>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setCustomButtons(customButtons.filter((_, i) => i !== index))}
+                      className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+                <div className="space-y-3">
+                  <Input
+                    placeholder="Button text..."
+                    className="h-10"
+                  />
+                  <Input
+                    placeholder="URL..."
+                    className="h-10"
+                  />
+                  <Select value="default" onValueChange={() => {}}>
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="Button style" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="default">Default</SelectItem>
+                      <SelectItem value="outline">Outline</SelectItem>
+                      <SelectItem value="secondary">Secondary</SelectItem>
+                      <SelectItem value="destructive">Destructive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const textInput = document.querySelector('input[placeholder="Button text..."]') as HTMLInputElement;
+                      const urlInput = document.querySelector('input[placeholder="URL..."]') as HTMLInputElement;
+                      const styleSelect = document.querySelector('select') as HTMLSelectElement;
+                      
+                      if (textInput?.value.trim() && urlInput?.value.trim()) {
+                        setCustomButtons([...customButtons, {
+                          text: textInput.value.trim(),
+                          url: urlInput.value.trim(),
+                          variant: (styleSelect?.value as any) || 'default'
+                        }]);
+                        textInput.value = '';
+                        urlInput.value = '';
+                        if (styleSelect) styleSelect.value = 'default';
+                      }
+                    }}
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Button
+                  </Button>
                 </div>
               </div>
             </div>

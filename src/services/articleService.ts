@@ -40,6 +40,11 @@ export interface Article {
   // Related data
   tags?: ArticleTag[];
   images?: ArticleImage[];
+  
+  // New fields for related content
+  related_products?: string[];
+  related_links?: Array<{ title: string; url: string; description?: string }>;
+  custom_buttons?: Array<{ text: string; url: string; variant?: 'default' | 'outline' | 'secondary' | 'destructive' }>;
 }
 
 export interface MultilingualArticle {
@@ -65,6 +70,11 @@ export interface MultilingualArticle {
   // Related data
   tags?: ArticleTag[];
   images?: ArticleImage[];
+  
+  // New fields for related content
+  related_products?: string[];
+  related_links?: Array<{ title: string; url: string; description?: string }>;
+  custom_buttons?: Array<{ text: string; url: string; variant?: 'default' | 'outline' | 'secondary' | 'destructive' }>;
 }
 
 class ArticleService {
