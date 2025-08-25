@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from '@/hooks/useTranslation';
 import ModernRichTextEditor from '@/components/ModernRichTextEditor';
-import ArticleImageManager, { ArticleImageBlock } from '@/components/ArticleImageManager';
+import InlineArticleEditor, { ContentBlock } from '@/components/InlineArticleEditor';
 
 // Language configuration
 const languages = [
@@ -98,7 +98,7 @@ interface Article {
   featured_image?: string;
   read_time?: number;
   tags?: string[];
-  content_blocks?: ArticleImageBlock[];
+  content_blocks?: ContentBlock[];
   // Multilingual fields
   titles?: Record<string, string>;
   contents?: Record<string, string>;
@@ -119,7 +119,7 @@ export default function AdminArticles() {
   const [listLoading, setListLoading] = useState<boolean>(false);
   const [listError, setListError] = useState<string | null>(null);
   const [currentLanguage, setCurrentLanguage] = useState('en'); // Track current tab language
-  const [contentBlocks, setContentBlocks] = useState<ArticleImageBlock[]>([]);
+  const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
 
   // Load articles list function
   const loadArticles = async () => {
@@ -669,21 +669,17 @@ export default function AdminArticles() {
 
         {/* Content Blocks */}
         <div className="xl:col-span-2">
-          <ArticleImageManager 
-            blocks={contentBlocks}
-            onBlocksChange={setContentBlocks}
+          <InlineArticleEditor 
+            initialContent={contentBlocks}
+            onContentChange={setContentBlocks}
             onPreview={() => {
               // TODO: Implement preview functionality
               console.log('Preview article with blocks:', contentBlocks);
             }}
-            articleTitle={article.titles?.[currentLanguage] || article.title || ''}
-            articleExcerpt={article.excerpts?.[currentLanguage] || article.excerpt || ''}
-            articleContent={article.contents?.[currentLanguage] || article.content || ''}
-            featuredImage={article.featured_image}
-            author={article.authors_multilingual?.[currentLanguage] || article.author}
-            category={article.categories_multilingual?.[currentLanguage] || article.category}
-            publishedAt={article.published_at}
-            readTime={article.read_time}
+            onSave={() => {
+              // TODO: Implement save functionality
+              console.log('Save article with blocks:', contentBlocks);
+            }}
           />
         </div>
       </div>
