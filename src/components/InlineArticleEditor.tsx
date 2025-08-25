@@ -52,6 +52,7 @@ interface InlineArticleEditorProps {
   onContentChange: (content: ContentBlock[]) => void;
   onSave?: () => void;
   onPreview?: () => void;
+  readOnly?: boolean;
 }
 
 const fontSizeOptions = [
@@ -87,7 +88,8 @@ export default function InlineArticleEditor({
   initialContent = [], 
   onContentChange, 
   onSave, 
-  onPreview 
+  onPreview,
+  readOnly = false
 }: InlineArticleEditorProps) {
   const [content, setContent] = useState<ContentBlock[]>(initialContent);
   const [selectedBlock, setSelectedBlock] = useState<string | null>(null);
@@ -322,10 +324,7 @@ export default function InlineArticleEditor({
       ${block.alignment === 'center' ? 'mx-auto' : ''} 
       ${block.alignment === 'right' ? 'ml-auto' : ''} 
       ${block.isSelected ? 'ring-2 ring-blue-500' : ''} 
-      cursor-pointer 
-      transition-all 
-      duration-200 
-      hover:bg-gray-50 
+      ${!readOnly ? 'cursor-pointer transition-all duration-200 hover:bg-gray-50' : ''} 
       p-2 
       rounded-lg
       ${widthClass}
@@ -347,11 +346,11 @@ export default function InlineArticleEditor({
           <div
             key={block.id}
             className={`${blockClasses} ${block.isSelected ? 'ring-2 ring-blue-500' : ''}`}
-            onClick={() => handleBlockClick(block.id)}
-            draggable
-            onDragStart={(e) => handleDragStart(e, index)}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, index)}
+            onClick={!readOnly ? () => handleBlockClick(block.id) : undefined}
+            draggable={!readOnly}
+            onDragStart={!readOnly ? (e) => handleDragStart(e, index) : undefined}
+            onDragOver={!readOnly ? handleDragOver : undefined}
+            onDrop={!readOnly ? (e) => handleDrop(e, index) : undefined}
           >
             <div className="mb-3 p-2 bg-blue-50 rounded border border-blue-200">
               <div className="flex items-center justify-between">
@@ -359,34 +358,42 @@ export default function InlineArticleEditor({
                   Row Layout: {block.columns} columns ({block.columnLayout})
                 </span>
                 <div className="flex items-center gap-2">
-                  <Select 
-                    value={block.columns?.toString() || '2'} 
-                    onValueChange={(value) => updateBlock(block.id, { columns: parseInt(value) })}
-                  >
-                    <SelectTrigger className="w-20">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="2">2 cols</SelectItem>
-                      <SelectItem value="3">3 cols</SelectItem>
-                      <SelectItem value="4">4 cols</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select 
-                    value={block.columnLayout || 'equal'} 
-                    onValueChange={(value: any) => updateBlock(block.id, { columnLayout: value })}
-                  >
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {columnLayoutOptions.map(option => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {!readOnly ? (
+                    <>
+                      <Select 
+                        value={block.columns?.toString() || '2'} 
+                        onValueChange={(value) => updateBlock(block.id, { columns: parseInt(value) })}
+                      >
+                        <SelectTrigger className="w-20">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="2">2 cols</SelectItem>
+                          <SelectItem value="3">3 cols</SelectItem>
+                          <SelectItem value="4">4 cols</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Select 
+                        value={block.columnLayout || 'equal'} 
+                        onValueChange={(value: any) => updateBlock(block.id, { columnLayout: value })}
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {columnLayoutOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </>
+                  ) : (
+                    <span className="text-sm text-gray-600">
+                      {block.columns} columns ({block.columnLayout})
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -406,11 +413,11 @@ export default function InlineArticleEditor({
           <div
             key={block.id}
             className={blockClasses}
-            onClick={() => handleBlockClick(block.id)}
-            draggable
-            onDragStart={(e) => handleDragStart(e, index)}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, index)}
+            onClick={!readOnly ? () => handleBlockClick(block.id) : undefined}
+            draggable={!readOnly}
+            onDragStart={!readOnly ? (e) => handleDragStart(e, index) : undefined}
+            onDragOver={!readOnly ? handleDragOver : undefined}
+            onDrop={!readOnly ? (e) => handleDrop(e, index) : undefined}
           >
             {block.imageUrl ? (
               <div className="relative group">
@@ -446,11 +453,11 @@ export default function InlineArticleEditor({
           <div
             key={block.id}
             className={blockClasses}
-            onClick={() => handleBlockClick(block.id)}
-            draggable
-            onDragStart={(e) => handleDragStart(e, index)}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, index)}
+            onClick={!readOnly ? () => handleBlockClick(block.id) : undefined}
+            draggable={!readOnly}
+            onDragStart={!readOnly ? (e) => handleDragStart(e, index) : undefined}
+            onDragOver={!readOnly ? handleDragOver : undefined}
+            onDrop={!readOnly ? (e) => handleDrop(e, index) : undefined}
           >
             <h2 className={textClasses}>
               {block.content}
@@ -464,11 +471,11 @@ export default function InlineArticleEditor({
           <div
             key={block.id}
             className={blockClasses}
-            onClick={() => handleBlockClick(block.id)}
-            draggable
-            onDragStart={(e) => handleDragStart(e, index)}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, index)}
+            onClick={!readOnly ? () => handleBlockClick(block.id) : undefined}
+            draggable={!readOnly}
+            onDragStart={!readOnly ? (e) => handleDragStart(e, index) : undefined}
+            onDragOver={!readOnly ? handleDragOver : undefined}
+            onDrop={!readOnly ? (e) => handleDrop(e, index) : undefined}
           >
             <p className={textClasses}>
               {block.content}
@@ -481,11 +488,11 @@ export default function InlineArticleEditor({
           <div
             key={block.id}
             className={blockClasses}
-            onClick={() => handleBlockClick(block.id)}
-            draggable
-            onDragStart={(e) => handleDragStart(e, index)}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, index)}
+            onClick={!readOnly ? () => handleBlockClick(block.id) : undefined}
+            draggable={!readOnly}
+            onDragStart={!readOnly ? (e) => handleDragStart(e, index) : undefined}
+            onDragOver={!readOnly ? handleDragOver : undefined}
+            onDrop={!readOnly ? (e) => handleDrop(e, index) : undefined}
           >
             <ul className={textClasses}>
               <li>{block.content}</li>
@@ -761,11 +768,12 @@ export default function InlineArticleEditor({
 
   return (
     <div className="w-full">
-      {renderToolbar()}
+      {!readOnly && renderToolbar()}
       
       <div className="p-6 max-w-6xl mx-auto">
-        {/* Quick Add Buttons */}
-        <div className="flex items-center gap-2 mb-6 p-4 bg-gray-50 rounded-lg">
+        {/* Quick Add Buttons - Hidden in read-only mode */}
+        {!readOnly && (
+          <div className="flex items-center gap-2 mb-6 p-4 bg-gray-50 rounded-lg">
           <span className="text-sm font-medium text-gray-700">Quick Add:</span>
           <Button
             variant="outline"
@@ -803,22 +811,23 @@ export default function InlineArticleEditor({
             <Type className="h-4 w-4" />
             List
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => createNewBlock('row')}
-            className="flex items-center gap-2"
-          >
-            <Columns className="h-4 w-4" />
-            Multi-column Row
-          </Button>
-        </div>
+                      <Button
+              variant="outline"
+              size="sm"
+              onClick={() => createNewBlock('row')}
+              className="flex items-center gap-2"
+            >
+              <Columns className="h-4 w-4" />
+              Multi-column Row
+            </Button>
+          </div>
+        )}
 
         {/* Content Editor */}
         <div 
           ref={editorRef}
           className="min-h-[600px] bg-white border border-gray-200 rounded-lg p-6"
-          onPaste={(e) => {
+          onPaste={!readOnly ? (e) => {
             // Handle pasting images into the editor
             const items = e.clipboardData.items;
             for (let i = 0; i < items.length; i++) {
@@ -848,7 +857,7 @@ export default function InlineArticleEditor({
                 }
               }
             }
-          }}
+          } : undefined}
         >
           {content.map((block, index) => renderBlock(block, index))}
           
@@ -865,18 +874,20 @@ export default function InlineArticleEditor({
           </div>
         </div>
 
-        {/* Hidden file input for image uploads */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            if (selectedBlock) {
-              handleImageUpload(e, selectedBlock);
-            }
-          }}
-        />
+        {/* Hidden file input for image uploads - Hidden in read-only mode */}
+        {!readOnly && (
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              if (selectedBlock) {
+                handleImageUpload(e, selectedBlock);
+              }
+            }}
+          />
+        )}
       </div>
     </div>
   );
