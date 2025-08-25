@@ -3,9 +3,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useTranslation } from '@/hooks/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
+import { Calendar, Clock, User, Eye, ArrowRight, FileText, Newspaper, TrendingUp, Lightbulb, BookOpen, BarChart3, Globe, Zap } from 'lucide-react';
 import bgMain from '@/assets/17580.jpg';
 import bgTitle from '@/assets/pexels-pixabay-159306.png';
 
@@ -18,7 +20,7 @@ interface Article {
   author: string;
   published_at: string;
   image: string;
-  images?: string[]; // Array of image URLs for carousel
+  images?: string[];
   isactive: boolean;
   is_published: boolean;
   displayorder: number;
@@ -37,132 +39,59 @@ interface Article {
 interface ArticleFilters {
   search: string;
   category: string[];
+  template: string;
 }
 
-// Article Card Component with Image Carousel
+// Article Template Types
+const articleTemplates = [
+  { 
+    id: 'news', 
+    name: 'News Article', 
+    icon: Newspaper,
+    description: 'Standard news format with headline, lead, and body',
+    className: 'bg-blue-50 border-blue-200 text-blue-800'
+  },
+  { 
+    id: 'feature', 
+    name: 'Feature Story', 
+    icon: FileText,
+    description: 'In-depth feature with detailed analysis',
+    className: 'bg-purple-50 border-purple-200 text-purple-800'
+  },
+  { 
+    id: 'technical', 
+    name: 'Technical Article', 
+    icon: Lightbulb,
+    description: 'Technical content with diagrams and explanations',
+    className: 'bg-green-50 border-green-200 text-green-800'
+  },
+  { 
+    id: 'case-study', 
+    name: 'Case Study', 
+    icon: BookOpen,
+    description: 'Real-world examples and success stories',
+    className: 'bg-orange-50 border-orange-200 text-orange-800'
+  },
+  { 
+    id: 'analysis', 
+    name: 'Market Analysis', 
+    icon: BarChart3,
+    description: 'Data-driven market insights and trends',
+    className: 'bg-red-50 border-red-200 text-red-800'
+  },
+  { 
+    id: 'opinion', 
+    name: 'Opinion Piece', 
+    icon: Globe,
+    description: 'Expert opinions and industry perspectives',
+    className: 'bg-indigo-50 border-indigo-200 text-indigo-800'
+  }
+];
+
+// Article Card Component with Template-based Design
 const ArticleCard: React.FC<{ article: Article }> = ({ article }) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const navigate = useNavigate();
-  
-  // Get images array - fallback to single image if images array not available
-  const getArticleImages = (article: Article): string[] => {
-    if (article.images && article.images.length > 0) {
-      return article.images;
-    }
-    // For demonstration, create mock images based on article
-    // In production, you'd get this from your database
-    const mockImages = [
-      bgTitle, // Using existing image as fallback
-    ];
-    
-    // Add more images for some articles for demo purposes
-    if (article.id.includes('1') || article.id.includes('3')) {
-      mockImages.push(bgMain);
-    }
-    if (article.id.includes('2') || article.id.includes('4')) {
-      mockImages.push(bgTitle, bgMain);
-    }
-    
-    return mockImages;
-  };
-
-  const images = getArticleImages(article);
-  const hasMultipleImages = images.length > 1;
-
-  const handleDotClick = (index: number, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setCurrentImageIndex(index);
-  };
-
-  // Ensure we have a valid slug or ID for navigation
-  const getArticleUrl = (article: Article): string => {
-    if (article.slug && article.slug !== 'null' && article.slug.trim() !== '') {
-      return `/articles/${article.slug}`;
-    }
-    // Fallback to ID if slug is not available
-    return `/articles/${article.id}`;
-  };
-
-  const handleArticleClick = () => {
-    const url = getArticleUrl(article);
-    console.log('Navigating to article:', url);
-    navigate(url);
-  };
-
-  return (
-    <div onClick={handleArticleClick} className="block group cursor-pointer">
-      <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 group bg-white hover:bg-gray-50 overflow-hidden rounded-xl cursor-pointer h-full">
-        <CardContent className="p-0 h-full flex flex-col">
-          {/* Image Carousel Section */}
-          <div className="relative h-48 overflow-hidden">
-            {/* Current Image */}
-            <div 
-              className="w-full h-full bg-cover bg-center transition-all duration-500 group-hover:scale-105"
-              style={{
-                backgroundImage: `url(${images[currentImageIndex] || bgTitle})`
-              }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-black/40"></div>
-              <div className="absolute inset-0 opacity-20">
-                <div className="w-full h-full bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.15)_1px,transparent_0)] bg-[length:20px_20px]"></div>
-              </div>
-            </div>
-            
-            {/* Category Badge */}
-            <span className="absolute top-4 left-4 text-white/80 text-xs font-medium px-2 py-1 bg-white/20 rounded-full backdrop-blur-sm z-10">
-              {getLocalizedText(article, 'category', article.category)}
-            </span>
-
-            {/* Image Navigation Dots */}
-            {hasMultipleImages && (
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
-                {images.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={(e) => handleDotClick(index, e)}
-                    className={`w-8 h-1 rounded-full transition-all duration-300 hover:opacity-80 ${
-                      currentImageIndex === index 
-                        ? 'bg-red-500' 
-                        : 'bg-white/50'
-                    }`}
-                    aria-label={`View image ${index + 1}`}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Date */}
-            <div className="absolute bottom-4 right-4 text-white/80 text-xs font-medium z-10">
-              {new Date(article.published_at).toLocaleDateString()}
-            </div>
-          </div>
-
-          {/* Content Section */}
-          <div className="p-6 flex-1 flex flex-col">
-            <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-red-600 transition-colors duration-300 line-clamp-2">
-              {getLocalizedText(article, 'title', article.title)}
-            </h3>
-            <p className="text-gray-600 mb-4 text-sm leading-relaxed line-clamp-3 flex-1">
-              {getLocalizedText(article, 'excerpt', article.excerpt)}
-            </p>
-            <div className="flex items-center justify-between text-xs text-gray-500 mt-auto pt-4 border-t border-gray-100">
-              <span className="font-medium">{getLocalizedText(article, 'author', article.author)}</span>
-              <div className="flex space-x-2">
-                <span className="px-2 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium">
-                  {getLocalizedText(article, 'category', article.category)}
-                </span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
-
-const Articles = () => {
-  const { t, currentLanguage } = useTranslation();
+  const { t, language: currentLanguage } = useTranslation();
   
   // Helper function to get localized text with fallback
   const getLocalizedText = (article: Article, field: keyof Article, fallback: string): string => {
@@ -173,12 +102,119 @@ const Articles = () => {
     }
     return fallback;
   };
+
+  // Get template info based on category
+  const getTemplateInfo = (category: string) => {
+    const template = articleTemplates.find(t => t.id === category.toLowerCase().replace(/\s+/g, '-')) || 
+                    articleTemplates.find(t => t.id === 'news');
+    return template || articleTemplates[0];
+  };
+
+  const template = getTemplateInfo(article.category);
+  const TemplateIcon = template.icon;
+
+  // Ensure we have a valid slug or ID for navigation
+  const getArticleUrl = (article: Article): string => {
+    if (article.slug && article.slug !== 'null' && article.slug.trim() !== '') {
+      return `/articles/${article.slug}`;
+    }
+    return `/articles/${article.id}`;
+  };
+
+  const handleArticleClick = () => {
+    const url = getArticleUrl(article);
+    console.log('Navigating to article:', url);
+    navigate(url);
+  };
+
+  const title = getLocalizedText(article, 'title', article.title);
+  const excerpt = getLocalizedText(article, 'excerpt', article.excerpt);
+  const author = getLocalizedText(article, 'author', article.author);
+  const category = getLocalizedText(article, 'category', article.category);
+
+  return (
+    <div onClick={handleArticleClick} className="block group cursor-pointer">
+      <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 group bg-white hover:bg-gray-50 overflow-hidden rounded-xl cursor-pointer h-full">
+        <CardContent className="p-0 h-full flex flex-col">
+          {/* Header with Template Badge */}
+          <div className="p-6 pb-4">
+            <div className="flex items-center justify-between mb-3">
+              <Badge 
+                variant="outline" 
+                className={`${template.className} border-2 font-medium text-xs px-3 py-1`}
+              >
+                <TemplateIcon className="h-3 w-3 mr-1" />
+                {template.name}
+              </Badge>
+              <div className="text-xs text-gray-500">
+                {article.read_time ? `${article.read_time} min read` : '5 min read'}
+              </div>
+            </div>
+
+            {/* Title */}
+            <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-red-600 transition-colors duration-300 line-clamp-2 leading-tight">
+              {title}
+            </h3>
+
+            {/* Excerpt */}
+            <p className="text-gray-600 mb-4 text-sm leading-relaxed line-clamp-3">
+              {excerpt}
+            </p>
+
+            {/* Meta Information */}
+            <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center">
+                  <User className="h-3 w-3 mr-1" />
+                  <span className="font-medium">{author}</span>
+                </div>
+                <div className="flex items-center">
+                  <Calendar className="h-3 w-3 mr-1" />
+                  <span>{new Date(article.published_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Category */}
+            <div className="flex items-center justify-between">
+              <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-gray-200">
+                {category}
+              </Badge>
+              <div className="flex items-center text-red-600 group-hover:text-red-700 transition-colors">
+                <span className="text-sm font-medium mr-1">Read More</span>
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+          </div>
+
+          {/* Featured Image (if available) */}
+          {article.featured_image && (
+            <div className="mt-auto">
+              <div 
+                className="w-full h-32 bg-cover bg-center transition-all duration-500 group-hover:scale-105"
+                style={{
+                  backgroundImage: `url(${article.featured_image})`
+                }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+const Articles = () => {
+  const { t, currentLanguage } = useTranslation();
   const [articles, setArticles] = useState<Article[]>([]);
   const [filteredArticles, setFilteredArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<ArticleFilters>({ 
     search: '', 
-    category: []
+    category: [],
+    template: 'all'
   });
 
   // Listen for language changes and force reload to ensure all translations are loaded
@@ -248,10 +284,27 @@ const Articles = () => {
       });
     }
 
+    // Template filter
+    if (filters.template !== 'all') {
+      filtered = filtered.filter(article => {
+        const category = getLocalizedText(article, 'category', article.category);
+        const templateId = category.toLowerCase().replace(/\s+/g, '-');
+        return templateId === filters.template;
+      });
+    }
+
     setFilteredArticles(filtered);
   }, [articles, filters, currentLanguage]);
 
-
+  // Helper function to get localized text with fallback
+  const getLocalizedText = (article: Article, field: keyof Article, fallback: string): string => {
+    const multilingualField = `${field}_multilingual` as keyof Article;
+    if (multilingualField in article && article[multilingualField]) {
+      const multilingualData = article[multilingualField] as Record<string, string>;
+      return multilingualData[currentLanguage] || multilingualData['en'] || fallback;
+    }
+    return fallback;
+  };
 
   const displayArticles = filteredArticles;
 
@@ -283,17 +336,52 @@ const Articles = () => {
           <h1 className="uniform-page-title text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
             {t('articles.title') || 'Articles'}
           </h1>
+          <p className="text-white/90 text-lg mt-4 max-w-2xl mx-auto">
+            Discover industry insights, technical articles, and company updates from AFTEK
+          </p>
         </div>
       </div>
       
-      <div className="container mx-auto p-8 max-w-6xl">
+      <div className="container mx-auto p-8 max-w-7xl">
         
+        {/* Template Selection */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">Choose Article Type</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {articleTemplates.map((template) => {
+              const TemplateIcon = template.icon;
+              const isSelected = filters.template === template.id;
+              
+              return (
+                <button
+                  key={template.id}
+                  onClick={() => setFilters(prev => ({ 
+                    ...prev, 
+                    template: isSelected ? 'all' : template.id 
+                  }))}
+                  className={`p-4 rounded-lg border-2 transition-all duration-200 text-center ${
+                    isSelected 
+                      ? `${template.className} scale-105 shadow-lg` 
+                      : 'bg-white/90 border-gray-200 hover:border-gray-300 hover:bg-white'
+                  }`}
+                >
+                  <TemplateIcon className={`h-8 w-8 mx-auto mb-2 ${isSelected ? 'text-current' : 'text-gray-600'}`} />
+                  <div className="text-sm font-medium">{template.name}</div>
+                  <div className="text-xs text-gray-500 mt-1 hidden lg:block">
+                    {template.description}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Filters */}
-        <div className="mb-6 p-6 border border-border rounded-lg bg-white/90 backdrop-blur-sm shadow-elegant">
+        <div className="mb-8 p-6 border border-border rounded-lg bg-white/90 backdrop-blur-sm shadow-elegant">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <Input
-                placeholder="Search articles..."
+                placeholder="Search articles by title, content, or author..."
                 value={filters.search}
                 onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
                 className="bg-white/50 border-border focus:border-primary focus:ring-primary/20"
@@ -309,10 +397,32 @@ const Articles = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="news">News</SelectItem>
-                  <SelectItem value="case-studies">Case Studies</SelectItem>
-                  <SelectItem value="technical">Technical</SelectItem>
-                  <SelectItem value="industry">Industry</SelectItem>
+                  <SelectItem value="Industry News">Industry News</SelectItem>
+                  <SelectItem value="Technology">Technology</SelectItem>
+                  <SelectItem value="Sustainability">Sustainability</SelectItem>
+                  <SelectItem value="Case Studies">Case Studies</SelectItem>
+                  <SelectItem value="Product Updates">Product Updates</SelectItem>
+                  <SelectItem value="Company News">Company News</SelectItem>
+                  <SelectItem value="Technical Articles">Technical Articles</SelectItem>
+                  <SelectItem value="Market Analysis">Market Analysis</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-full sm:w-48">
+              <Select 
+                value={filters.template} 
+                onValueChange={(value) => setFilters(prev => ({ ...prev, template: value }))}
+              >
+                <SelectTrigger className="bg-white/50 border-border focus:border-primary focus:ring-primary/20">
+                  <SelectValue placeholder="All Templates" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Templates</SelectItem>
+                  {articleTemplates.map(template => (
+                    <SelectItem key={template.id} value={template.id}>
+                      {template.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -325,7 +435,7 @@ const Articles = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 col-span-full">
               {[...Array(6)].map((_, index) => (
                 <div key={index} className="animate-pulse">
-                  <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
+                  <div className="h-64 bg-gray-200 rounded-lg mb-4"></div>
                   <div className="h-4 bg-gray-200 rounded mb-2"></div>
                   <div className="h-4 bg-gray-200 rounded mb-2"></div>
                   <div className="h-4 bg-gray-200 rounded w-3/4"></div>
@@ -339,30 +449,28 @@ const Articles = () => {
           ) : (
             <div className="col-span-full text-center py-12">
               <div className="text-gray-400 mb-4">
-                <svg className="w-16 h-16 mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                </svg>
+                <FileText className="w-16 h-16 mx-auto mb-4" />
               </div>
               <h3 className="text-lg font-semibold text-gray-700 mb-2">No articles found</h3>
-              <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
+              <p className="text-gray-500 mb-4">Try adjusting your search, category, or template filters</p>
               <Button 
-                onClick={() => setFilters({ search: '', category: [] })} 
+                onClick={() => setFilters({ search: '', category: [], template: 'all' })} 
                 variant="outline"
                 className="bg-white/50 border-gray-200 hover:bg-white hover:border-red-300 hover:text-red-600"
               >
-                Clear Filters
+                Clear All Filters
               </Button>
             </div>
           )}
         </div>
+
         {/* Results Summary */}
-        {!loading && (
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-gray-200 shadow-sm">
-              <span className="text-sm font-medium text-gray-700">
-                Showing <span className="text-red-600 font-semibold">{displayArticles.length}</span> of <span className="text-red-600 font-semibold">{articles.length}</span> articles
-              </span>
-            </div>
+        {displayArticles.length > 0 && (
+          <div className="text-center text-gray-500 mb-8">
+            <p>
+              Showing {displayArticles.length} of {articles.length} articles
+              {filters.template !== 'all' && ` in ${articleTemplates.find(t => t.id === filters.template)?.name} format`}
+            </p>
           </div>
         )}
       </div>

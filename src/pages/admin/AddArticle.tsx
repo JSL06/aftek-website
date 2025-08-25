@@ -23,16 +23,62 @@ const languages = [
   { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', flag: '🇻🇳' }
 ];
 
-// Article categories
+// Article categories with template mapping
 const categories = [
-  { value: 'Industry News', label: 'Industry News' },
-  { value: 'Technology', label: 'Technology' },
-  { value: 'Sustainability', label: 'Sustainability' },
-  { value: 'Case Studies', label: 'Case Studies' },
-  { value: 'Product Updates', label: 'Product Updates' },
-  { value: 'Company News', label: 'Company News' },
-  { value: 'Technical Articles', label: 'Technical Articles' },
-  { value: 'Market Analysis', label: 'Market Analysis' }
+  { value: 'Industry News', label: 'Industry News', template: 'news', color: 'bg-blue-50 text-blue-800 border-blue-200' },
+  { value: 'Technology', label: 'Technology', template: 'technical', color: 'bg-green-50 text-green-800 border-green-200' },
+  { value: 'Sustainability', label: 'Sustainability', template: 'feature', color: 'bg-purple-50 text-purple-800 border-purple-200' },
+  { value: 'Case Studies', label: 'Case Studies', template: 'case-study', color: 'bg-orange-50 text-orange-800 border-orange-200' },
+  { value: 'Product Updates', label: 'Product Updates', template: 'news', color: 'bg-blue-50 text-blue-800 border-blue-200' },
+  { value: 'Company News', label: 'Company News', template: 'news', color: 'bg-blue-50 text-blue-800 border-blue-200' },
+  { value: 'Technical Articles', label: 'Technical Articles', template: 'technical', color: 'bg-green-50 text-green-800 border-green-200' },
+  { value: 'Market Analysis', label: 'Market Analysis', template: 'analysis', color: 'bg-red-50 text-red-800 border-red-200' }
+];
+
+// Article templates for easy selection
+const articleTemplates = [
+  { 
+    id: 'news', 
+    name: 'News Article', 
+    description: 'Standard news format with headline, lead, and body',
+    icon: '📰',
+    color: 'bg-blue-50 border-blue-200 text-blue-800'
+  },
+  { 
+    id: 'feature', 
+    name: 'Feature Story', 
+    description: 'In-depth feature with detailed analysis',
+    icon: '📝',
+    color: 'bg-purple-50 border-purple-200 text-purple-800'
+  },
+  { 
+    id: 'technical', 
+    name: 'Technical Article', 
+    description: 'Technical content with diagrams and explanations',
+    icon: '💡',
+    color: 'bg-green-50 border-green-200 text-green-800'
+  },
+  { 
+    id: 'case-study', 
+    name: 'Case Study', 
+    description: 'Real-world examples and success stories',
+    icon: '📚',
+    color: 'bg-orange-50 border-orange-200 text-orange-800'
+  },
+  { 
+    id: 'analysis', 
+    name: 'Market Analysis', 
+    description: 'Data-driven market insights and trends',
+    icon: '📊',
+    color: 'bg-red-50 border-red-200 text-red-800'
+  },
+  { 
+    id: 'opinion', 
+    name: 'Opinion Piece', 
+    description: 'Expert opinions and industry perspectives',
+    icon: '🌐',
+    color: 'bg-indigo-50 border-indigo-200 text-indigo-800'
+  }
 ];
 
 interface Article {
@@ -200,12 +246,42 @@ export default function AddArticle() {
                   <SelectContent>
                     {categories.map(category => (
                       <SelectItem key={category.value} value={category.value}>
-                        {category.label}
+                        <div className="flex items-center gap-2">
+                          <span>{category.label}</span>
+                          <Badge variant="outline" className={`${category.color} text-xs`}>
+                            {articleTemplates.find(t => t.id === category.template)?.icon} {articleTemplates.find(t => t.id === category.template)?.name}
+                          </Badge>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Template Preview */}
+              {article.category && (
+                <div className="p-3 bg-gray-50 rounded-lg border">
+                  <label className="block text-sm font-medium mb-2 text-gray-700">Template Preview</label>
+                  <div className="flex items-center gap-2">
+                    {(() => {
+                      const selectedCategory = categories.find(c => c.value === article.category);
+                      const template = selectedCategory ? articleTemplates.find(t => t.id === selectedCategory.template) : null;
+                      if (template) {
+                        return (
+                          <>
+                            <span className="text-2xl">{template.icon}</span>
+                            <div>
+                              <div className="font-medium text-gray-900">{template.name}</div>
+                              <div className="text-sm text-gray-600">{template.description}</div>
+                            </div>
+                          </>
+                        );
+                      }
+                      return <span className="text-gray-500">Select a category to see template</span>;
+                    })()}
+                  </div>
+                </div>
+              )}
 
               {/* Author */}
               <div>
