@@ -7,7 +7,7 @@ import { ArrowLeft, Calendar, User, Tag, Clock } from 'lucide-react';
 import bgMain from '@/assets/17580.jpg';
 import bgTitle from '@/assets/pexels-pixabay-159306.png';
 import articleService, { Article } from '@/services/articleService';
-import { InlineArticleEditor } from '@/components/InlineArticleEditor';
+import InlineArticleEditor from '@/components/InlineArticleEditor';
 
 const ArticleDetail = () => {
   const { slug } = useParams<{ slug: string }>();
