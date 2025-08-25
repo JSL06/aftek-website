@@ -91,8 +91,8 @@ const ArticleDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* Hero Section */}
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
       <div className="relative bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
         <div className="absolute inset-0">
           {article.featured_image && (
@@ -166,6 +166,9 @@ const ArticleDetail = () => {
                   initialContent={article.content_blocks}
                   onContentChange={() => {}} // Read-only in detail view
                   readOnly={true}
+                  relatedProducts={article.related_products}
+                  relatedLinks={article.related_links}
+                  customButtons={article.custom_buttons}
                 />
               </div>
             ) : (
