@@ -188,6 +188,81 @@ class ArticleService {
         article = data as Article;
         
         if (article) {
+          // Ensure content_blocks is properly parsed
+          if (typeof article.content_blocks === 'string') {
+            try {
+              article.content_blocks = JSON.parse(article.content_blocks);
+            } catch (e) {
+              console.warn('Failed to parse content_blocks:', e);
+              article.content_blocks = [];
+            }
+          }
+          
+          // Ensure other JSONB fields are properly parsed
+          if (typeof article.titles === 'string') {
+            try {
+              article.titles = JSON.parse(article.titles);
+            } catch (e) {
+              article.titles = {};
+            }
+          }
+          
+          if (typeof article.contents === 'string') {
+            try {
+              article.contents = JSON.parse(article.contents);
+            } catch (e) {
+              article.contents = {};
+            }
+          }
+          
+          if (typeof article.excerpts === 'string') {
+            try {
+              article.excerpts = JSON.parse(article.excerpts);
+            } catch (e) {
+              article.excerpts = {};
+            }
+          }
+          
+          if (typeof article.authors_multilingual === 'string') {
+            try {
+              article.authors_multilingual = JSON.parse(article.authors_multilingual);
+            } catch (e) {
+              article.authors_multilingual = {};
+            }
+          }
+          
+          if (typeof article.categories_multilingual === 'string') {
+            try {
+              article.categories_multilingual = JSON.parse(article.categories_multilingual);
+            } catch (e) {
+              article.categories_multilingual = {};
+            }
+          }
+          
+          if (typeof article.related_products === 'string') {
+            try {
+              article.related_products = JSON.parse(article.related_products);
+            } catch (e) {
+              article.related_products = [];
+            }
+          }
+          
+          if (typeof article.related_links === 'string') {
+            try {
+              article.related_links = JSON.parse(article.related_links);
+            } catch (e) {
+              article.related_links = [];
+            }
+          }
+          
+          if (typeof article.custom_buttons === 'string') {
+            try {
+              article.custom_buttons = JSON.parse(article.custom_buttons);
+            } catch (e) {
+              article.custom_buttons = [];
+            }
+          }
+          
           this.articles.push(article);
         }
       } catch (error) {
@@ -220,6 +295,81 @@ class ArticleService {
         article = data as Article;
         
         if (article) {
+          // Ensure content_blocks is properly parsed
+          if (typeof article.content_blocks === 'string') {
+            try {
+              article.content_blocks = JSON.parse(article.content_blocks);
+            } catch (e) {
+              console.warn('Failed to parse content_blocks:', e);
+              article.content_blocks = [];
+            }
+          }
+          
+          // Ensure other JSONB fields are properly parsed
+          if (typeof article.titles === 'string') {
+            try {
+              article.titles = JSON.parse(article.titles);
+            } catch (e) {
+              article.titles = {};
+            }
+          }
+          
+          if (typeof article.contents === 'string') {
+            try {
+              article.contents = JSON.parse(article.contents);
+            } catch (e) {
+              article.contents = {};
+            }
+          }
+          
+          if (typeof article.excerpts === 'string') {
+            try {
+              article.excerpts = JSON.parse(article.excerpts);
+            } catch (e) {
+              article.excerpts = {};
+            }
+          }
+          
+          if (typeof article.authors_multilingual === 'string') {
+            try {
+              article.authors_multilingual = JSON.parse(article.authors_multilingual);
+            } catch (e) {
+              article.authors_multilingual = {};
+            }
+          }
+          
+          if (typeof article.categories_multilingual === 'string') {
+            try {
+              article.categories_multilingual = JSON.parse(article.categories_multilingual);
+            } catch (e) {
+              article.categories_multilingual = {};
+            }
+          }
+          
+          if (typeof article.related_products === 'string') {
+            try {
+              article.related_products = JSON.parse(article.related_products);
+            } catch (e) {
+              article.related_products = [];
+            }
+          }
+          
+          if (typeof article.related_links === 'string') {
+            try {
+              article.related_links = JSON.parse(article.related_links);
+            } catch (e) {
+              article.related_links = [];
+            }
+          }
+          
+          if (typeof article.custom_buttons === 'string') {
+            try {
+              article.custom_buttons = JSON.parse(article.custom_buttons);
+            } catch (e) {
+              article.custom_buttons = [];
+            }
+          }
+          
           this.articles.push(article);
         }
       } catch (error) {

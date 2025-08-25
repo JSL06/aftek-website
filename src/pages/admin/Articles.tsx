@@ -433,10 +433,18 @@ export default function AdminArticles() {
     try {
       const imageUrl = await articleService.uploadImage(file);
       if (imageUrl) {
+        // Set as featured image
+        setArticle(prev => ({
+          ...prev,
+          featured_image: imageUrl
+        }));
+        
+        // Also add to uploaded images array
         setUploadedImages(prev => [...prev, imageUrl]);
+        
         toast({
           title: "Success",
-          description: "Image uploaded successfully"
+          description: "Featured image uploaded successfully"
         });
       }
     } catch (error) {
@@ -651,11 +659,28 @@ export default function AdminArticles() {
                 {article.featured_image && (
                   <div>
                     <Label className="text-sm font-medium mb-3 block">Current Featured Image</Label>
-                    <img 
-                      src={article.featured_image} 
-                      alt="Featured" 
-                      className="w-40 h-40 object-cover rounded-lg border shadow-sm"
-                    />
+                    <div className="relative">
+                      <img 
+                        src={article.featured_image} 
+                        alt="Featured" 
+                        className="w-40 h-40 object-cover rounded-lg border shadow-sm"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2 h-6 w-6 p-0"
+                        onClick={() => {
+                          setArticle(prev => ({ ...prev, featured_image: '' }));
+                          toast({
+                            title: "Success",
+                            description: "Featured image removed"
+                          });
+                        }}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
