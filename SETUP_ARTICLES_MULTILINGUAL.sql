@@ -143,6 +143,10 @@ BEGIN
     END IF;
     
     -- Add foreign keys for article_tags_junction if they don't exist
+    -- First, remove any existing constraints to avoid duplicates
+    ALTER TABLE article_tags_junction DROP CONSTRAINT IF EXISTS article_tags_junction_article_id_fkey;
+    ALTER TABLE article_tags_junction DROP CONSTRAINT IF EXISTS article_tags_junction_tag_id_fkey;
+    
     IF NOT EXISTS (
         SELECT 1 FROM information_schema.table_constraints 
         WHERE constraint_name = 'fk_article_tags_junction_article_id' 
