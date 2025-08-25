@@ -434,6 +434,14 @@ export default function AddArticle() {
               // TODO: Implement preview functionality
               console.log('Preview article with blocks:', contentBlocks);
             }}
+            articleTitle={article.titles?.[currentLanguage] || article.title || ''}
+            articleExcerpt={article.excerpts?.[currentLanguage] || article.excerpt || ''}
+            articleContent={article.contents?.[currentLanguage] || article.content || ''}
+            featuredImage={article.featured_image}
+            author={article.authors_multilingual?.[currentLanguage] || article.author}
+            category={article.categories_multilingual?.[currentLanguage] || article.category}
+            publishedAt={article.published_at}
+            readTime={article.read_time}
           />
         </div>
       </div>
