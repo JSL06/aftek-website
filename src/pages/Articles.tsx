@@ -174,8 +174,8 @@ export default function Articles() {
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<ArticleFilters>({
     search: '',
-    category: [],
-    template: ''
+    category: ['all'],
+    template: 'all'
   });
 
   useEffect(() => {
@@ -213,14 +213,14 @@ export default function Articles() {
     }
 
     // Apply category filter
-    if (filters.category.length > 0) {
+    if (filters.category.length > 0 && filters.category[0] !== 'all') {
       filtered = filtered.filter(article => 
         filters.category.includes(article.categories_multilingual?.[currentLanguage] || article.categories_multilingual?.['en'] || '')
       );
     }
 
     // Apply template filter
-    if (filters.template) {
+    if (filters.template && filters.template !== 'all') {
       filtered = filtered.filter(article => 
         article.categories_multilingual?.[currentLanguage] === filters.template ||
         article.categories_multilingual?.['en'] === filters.template
@@ -245,8 +245,8 @@ export default function Articles() {
   const clearFilters = () => {
     setFilters({
       search: '',
-      category: [],
-      template: ''
+      category: ['all'],
+      template: 'all'
     });
   };
 
@@ -307,12 +307,12 @@ export default function Articles() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Category
               </label>
-              <Select value={filters.category[0] || ''} onValueChange={(value) => handleCategoryChange([value])}>
+              <Select value={filters.category[0] || 'all'} onValueChange={(value) => handleCategoryChange([value])}>
                 <SelectTrigger>
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
                   <SelectItem value="News">News</SelectItem>
                   <SelectItem value="Technical">Technical</SelectItem>
                   <SelectItem value="Case Study">Case Study</SelectItem>
@@ -327,12 +327,12 @@ export default function Articles() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Template
               </label>
-              <Select value={filters.template} onValueChange={handleTemplateChange}>
+              <Select value={filters.template || 'all'} onValueChange={handleTemplateChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="All Templates" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Templates</SelectItem>
+                  <SelectItem value="all">All Templates</SelectItem>
                   {articleTemplates.map(template => (
                     <SelectItem key={template.id} value={template.id}>
                       {template.name}
