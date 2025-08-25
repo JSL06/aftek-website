@@ -46,7 +46,26 @@ CREATE POLICY "Articles are updatable by authenticated users" ON articles
 CREATE POLICY "Articles are deletable by authenticated users" ON articles
     FOR DELETE USING (true);
 
--- Insert sample articles
+-- Create updated_at trigger
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_articles_updated_at BEFORE UPDATE ON articles
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Grant necessary permissions
+GRANT ALL ON articles TO authenticated;
+GRANT ALL ON articles TO anon;
+
+-- Enable realtime for articles table (optional, for real-time updates)
+ALTER PUBLICATION supabase_realtime ADD TABLE articles;
+
+-- Insert sample articles AFTER table creation
 INSERT INTO articles (slug, titles, contents, excerpts, authors_multilingual, categories_multilingual, is_published) VALUES
 (
     'sample-article-1',
@@ -66,22 +85,3 @@ INSERT INTO articles (slug, titles, contents, excerpts, authors_multilingual, ca
     '{"en": "Technical", "zh-Hant": "技術", "zh-Hans": "技术", "ja": "技術", "ko": "기술", "th": "เทคนิค", "vi": "Kỹ thuật"}',
     true
 );
-
--- Create updated_at trigger
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-
-CREATE TRIGGER update_articles_updated_at BEFORE UPDATE ON articles
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- Grant necessary permissions
-GRANT ALL ON articles TO authenticated;
-GRANT SELECT ON articles TO anon;
-
--- Enable realtime for articles table (optional, for real-time updates)
-ALTER PUBLICATION supabase_realtime ADD TABLE articles;
