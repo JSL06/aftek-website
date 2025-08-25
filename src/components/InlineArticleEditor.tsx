@@ -710,135 +710,138 @@ export default function InlineArticleEditor({
     
     return (
       <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h2 className="text-lg font-semibold">Article Editor</h2>
-            
-            {/* Language Selector */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-600">Language:</span>
-              <div className="flex gap-1">
-                {languages.map(lang => (
-                  <Button
-                    key={lang.code}
-                    variant={currentLanguage === lang.code ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setCurrentLanguage(lang.code)}
-                    className="px-2 py-1 text-xs"
-                  >
-                    <span className="mr-1">{lang.flag}</span>
-                    <span className="hidden sm:inline">{lang.code.toUpperCase()}</span>
-                  </Button>
-                ))}
-              </div>
+        {/* First Row - Main Controls */}
+        <div className="flex items-center gap-4 mb-3">
+          <h2 className="text-lg font-semibold">Article Editor</h2>
+          
+          {/* Language Selector */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-600">Language:</span>
+            <div className="flex gap-1">
+              {languages.map(lang => (
+                <Button
+                  key={lang.code}
+                  variant={currentLanguage === lang.code ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentLanguage(lang.code)}
+                  className="px-2 py-1 text-xs"
+                >
+                  <span className="mr-1">{lang.flag}</span>
+                  <span className="hidden sm:inline">{lang.code.toUpperCase()}</span>
+                </Button>
+              ))}
             </div>
-            
-            {/* Block Type Selector */}
-            <Select 
-              value={selectedBlockData?.type || 'paragraph'} 
-              onValueChange={(value: any) => {
-                if (selectedBlock) {
-                  updateBlock(selectedBlock, { type: value });
-                }
-              }}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="paragraph">Paragraph</SelectItem>
-                <SelectItem value="heading">Heading</SelectItem>
-                <SelectItem value="image">Image</SelectItem>
-                <SelectItem value="list">List</SelectItem>
-                <SelectItem value="row">Row (Multi-column)</SelectItem>
-              </SelectContent>
-            </Select>
+          </div>
+          
+          {/* Block Type Selector */}
+          <Select 
+            value={selectedBlockData?.type || 'paragraph'} 
+            onValueChange={(value: any) => {
+              if (selectedBlock) {
+                updateBlock(selectedBlock, { type: value });
+              }
+            }}
+          >
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="paragraph">Paragraph</SelectItem>
+              <SelectItem value="heading">Heading</SelectItem>
+              <SelectItem value="image">Image</SelectItem>
+              <SelectItem value="list">List</SelectItem>
+              <SelectItem value="row">Row (Multi-column)</SelectItem>
+            </SelectContent>
+          </Select>
 
-            {/* Alignment Controls */}
-            <div className="flex items-center gap-1">
-              <Button
-                variant={selectedBlockData?.alignment === 'left' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => selectedBlock && updateBlock(selectedBlock, { alignment: 'left' })}
-              >
-                <AlignLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={selectedBlockData?.alignment === 'center' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => selectedBlock && updateBlock(selectedBlock, { alignment: 'center' })}
-              >
-                <AlignCenter className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={selectedBlockData?.alignment === 'right' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => selectedBlock && updateBlock(selectedBlock, { alignment: 'right' })}
-              >
-                <AlignRight className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={selectedBlockData?.alignment === 'justify' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => selectedBlock && updateBlock(selectedBlock, { alignment: 'justify' })}
-              >
-                <AlignJustify className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Font Controls */}
-            <Select 
-              value={selectedBlockData?.fontSize || 'normal'} 
-              onValueChange={(value: any) => {
-                if (selectedBlock) {
-                  updateBlock(selectedBlock, { fontSize: value });
-                }
-              }}
-            >
-              <SelectTrigger className="w-24">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {fontSizeOptions.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Text Formatting */}
+          {/* Alignment Controls */}
+          <div className="flex items-center gap-1">
             <Button
-              variant={selectedBlockData?.fontWeight === 'bold' ? 'default' : 'outline'}
+              variant={selectedBlockData?.alignment === 'left' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => selectedBlock && updateBlock(selectedBlock, { 
-                fontWeight: selectedBlockData?.fontWeight === 'bold' ? 'normal' : 'bold' 
-              })}
+              onClick={() => selectedBlock && updateBlock(selectedBlock, { alignment: 'left' })}
             >
-              <Bold className="h-4 w-4" />
+              <AlignLeft className="h-4 w-4" />
             </Button>
             <Button
-              variant={selectedBlockData?.fontStyle === 'italic' ? 'default' : 'outline'}
+              variant={selectedBlockData?.alignment === 'center' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => selectedBlock && updateBlock(selectedBlock, { 
-                fontStyle: selectedBlockData?.fontStyle === 'italic' ? 'normal' : 'italic' 
-              })}
+              onClick={() => selectedBlock && updateBlock(selectedBlock, { alignment: 'center' })}
             >
-              <Italic className="h-4 w-4" />
+              <AlignCenter className="h-4 w-4" />
             </Button>
             <Button
-              variant={selectedBlockData?.textDecoration === 'underline' ? 'default' : 'outline'}
+              variant={selectedBlockData?.alignment === 'right' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => selectedBlock && updateBlock(selectedBlock, { 
-                textDecoration: selectedBlockData?.textDecoration === 'underline' ? 'none' : 'underline' 
-              })}
+              onClick={() => selectedBlock && updateBlock(selectedBlock, { alignment: 'right' })}
             >
-              <Underline className="h-4 w-4" />
+              <AlignRight className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={selectedBlockData?.alignment === 'justify' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => selectedBlock && updateBlock(selectedBlock, { alignment: 'justify' })}
+            >
+              <AlignJustify className="h-4 w-4" />
             </Button>
           </div>
 
+          {/* Font Size */}
+          <Select 
+            value={selectedBlockData?.fontSize || 'normal'} 
+            onValueChange={(value: any) => {
+              if (selectedBlock) {
+                updateBlock(selectedBlock, { fontSize: value });
+              }
+            }}
+          >
+            <SelectTrigger className="w-24">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {fontSizeOptions.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Text Formatting */}
+          <Button
+            variant={selectedBlockData?.fontWeight === 'bold' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => selectedBlock && updateBlock(selectedBlock, { 
+              fontWeight: selectedBlockData?.fontWeight === 'bold' ? 'normal' : 'bold' 
+            })}
+          >
+            <Bold className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={selectedBlockData?.fontStyle === 'italic' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => selectedBlock && updateBlock(selectedBlock, { 
+              fontStyle: selectedBlockData?.fontStyle === 'italic' ? 'normal' : 'italic' 
+            })}
+          >
+            <Italic className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={selectedBlockData?.textDecoration === 'underline' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => selectedBlock && updateBlock(selectedBlock, { 
+              textDecoration: selectedBlockData?.textDecoration === 'underline' ? 'none' : 'underline' 
+            })}
+          >
+            <Underline className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Second Row - Additional Controls */}
+        <div className="flex items-center gap-4">
+          {/* Width Control */}
           <div className="flex items-center gap-2">
-            {/* Width Control */}
+            <span className="text-sm font-medium text-gray-600">Width:</span>
             <Select 
               value={selectedBlockData?.width || 'full'} 
               onValueChange={(value: any) => {
@@ -858,8 +861,11 @@ export default function InlineArticleEditor({
                 ))}
               </SelectContent>
             </Select>
+          </div>
 
-            {/* Margin Control */}
+          {/* Margin Control */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-600">Margin:</span>
             <Select 
               value={selectedBlockData?.margin || 'normal'} 
               onValueChange={(value: any) => {
@@ -879,8 +885,10 @@ export default function InlineArticleEditor({
                 ))}
               </SelectContent>
             </Select>
+          </div>
 
-            {/* Action Buttons */}
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 ml-auto">
             <Button
               variant="outline"
               size="sm"
