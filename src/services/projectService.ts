@@ -13,23 +13,35 @@ export interface Project {
   completion_date: string;
   project_type: string;
   image: string;
-  gallery: string[];
+  gallery_images: string[];
+  gallery_captions?: Record<string, string[]>; // Multilingual captions for gallery images
+  gallery_hotspots?: Array<{
+    productName: string;
+    x: number;
+    y: number;
+  }>[]; // Array of hotspots for each image
   case_study_pdf?: string;
   features: string[];
   specifications?: any;
   products_used: string[];
   project_value?: string;
   duration: string;
-  challenges?: string;
-  solutions?: string;
-  results?: string;
-  testimonial?: string;
   isActive: boolean;
   showInFeatured: boolean;
   displayOrder: number;
   tags?: string[];
   created_at: string;
   updated_at?: string;
+  // Multilingual fields
+  titles?: Record<string, string>;
+  descriptions?: Record<string, string>;
+  locations_multilingual?: Record<string, string>;
+  clients_multilingual?: Record<string, string>;
+  categories_multilingual?: Record<string, string>;
+  completion_dates_multilingual?: Record<string, string>;
+  project_types_multilingual?: Record<string, string>;
+  project_values_multilingual?: Record<string, string>;
+  durations_multilingual?: Record<string, string>;
 }
 
 // Interface for project translations
@@ -65,29 +77,29 @@ export interface MultilingualProject {
   project_type: string;
   project_value: string;
   duration: string;
-  challenges: string;
-  solutions: string;
-  results: string;
   features: string[];
   products_used: string[];
   image: string;
   gallery_images: string[];
+  gallery_captions?: Record<string, string[]>; // Multilingual captions for gallery images
+  gallery_hotspots?: Array<{
+    productName: string;
+    x: number;
+    y: number;
+  }>[]; // Array of hotspots for each image
   isActive: boolean;
   showInFeatured: boolean;
   displayOrder: number;
   // Multilingual fields
-    titles?: Record<string, string>;
-    descriptions?: Record<string, string>;
-    challenges_multilingual?: Record<string, string>;
-    solutions_multilingual?: Record<string, string>;
-    results_multilingual?: Record<string, string>;
-    locations_multilingual?: Record<string, string>;
+  titles?: Record<string, string>;
+  descriptions?: Record<string, string>;
+  locations_multilingual?: Record<string, string>;
   categories_multilingual?: Record<string, string>;
-    clients_multilingual?: Record<string, string>;
-    completion_dates_multilingual?: Record<string, string>;
-    project_types_multilingual?: Record<string, string>;
-    project_values_multilingual?: Record<string, string>;
-    durations_multilingual?: Record<string, string>;
+  clients_multilingual?: Record<string, string>;
+  completion_dates_multilingual?: Record<string, string>;
+  project_types_multilingual?: Record<string, string>;
+  project_values_multilingual?: Record<string, string>;
+  durations_multilingual?: Record<string, string>;
   features_multilingual?: Record<string, string[]>;
 }
 
@@ -99,9 +111,9 @@ class ProjectService {
   }
 
   // Manual refresh method for when database connection is ready
-  async refreshProjects(): Promise<void> {
-    console.log('Manual refresh of projects requested');
-    await this.initializeProjects();
+  async refreshProjects(adminMode: boolean = false): Promise<void> {
+    console.log('Manual refresh of projects requested', adminMode ? '(admin mode)' : '(website mode)');
+    await this.initializeProjects(adminMode);
   }
 
   // Generate SEO-friendly slug from project title
@@ -123,9 +135,9 @@ class ProjectService {
   }
 
   // Initialize projects from database
-  private async initializeProjects(): Promise<void> {
+  private async initializeProjects(adminMode: boolean = false): Promise<void> {
     try {
-      await this.loadProjectsFromDatabase();
+      await this.loadProjectsFromDatabase(adminMode);
       console.log('Loaded projects from database');
             } catch (error) {
       console.error('Failed to initialize projects:', error);
@@ -134,14 +146,18 @@ class ProjectService {
   }
 
   // Load projects from Supabase database
-  private async loadProjectsFromDatabase(): Promise<void> {
+  private async loadProjectsFromDatabase(adminMode: boolean = false): Promise<void> {
     try {
-      console.log('Loading projects from database...');
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('isActive', true)
-        .order('displayOrder', { ascending: true });
+      console.log('Loading projects from database...', adminMode ? '(admin mode)' : '(website mode)');
+      
+      let query = supabase.from('projects').select('*');
+      
+      if (!adminMode) {
+        // For website display, only load active projects
+        query = query.eq('isActive', true);
+      }
+      
+      const { data, error } = await query.order('displayOrder', { ascending: true });
 
       if (error) {
         console.error('Database error loading projects:', error);
@@ -173,17 +189,25 @@ class ProjectService {
       completion_date: dbProject.completion_date || '',
       project_type: dbProject.project_type || '',
       image: dbProject.image || '/placeholder.svg',
-      gallery: safeJsonParse(dbProject.gallery, []),
+      gallery_images: dbProject.gallery_images || [],
       case_study_pdf: dbProject.case_study_pdf,
       features: dbProject.features || [],
       specifications: safeJsonParse(dbProject.specifications, {}),
       products_used: dbProject.products_used || [],
       project_value: dbProject.project_value,
       duration: dbProject.duration,
-      challenges: dbProject.challenges,
-      solutions: dbProject.solutions,
-      results: dbProject.results,
-      testimonial: dbProject.testimonial,
+      gallery_captions: dbProject.gallery_captions || [],
+      gallery_hotspots: dbProject.gallery_hotspots || [],
+      // Multilingual fields
+      titles: dbProject.titles || {},
+      descriptions: dbProject.descriptions || {},
+      locations_multilingual: dbProject.locations_multilingual || {},
+      clients_multilingual: dbProject.clients_multilingual || {},
+      categories_multilingual: dbProject.categories_multilingual || {},
+      completion_dates_multilingual: dbProject.completion_dates_multilingual || {},
+      project_types_multilingual: dbProject.project_types_multilingual || {},
+      project_values_multilingual: dbProject.project_values_multilingual || {},
+      durations_multilingual: dbProject.durations_multilingual || {},
       isActive: dbProject.isActive !== false,
       showInFeatured: dbProject.showInFeatured || false,
       displayOrder: dbProject.displayOrder || 99,
@@ -207,21 +231,29 @@ class ProjectService {
       completion_date: project.completion_date,
       project_type: project.project_type,
       image: project.image,
-      gallery: JSON.stringify(project.gallery || []),
+      gallery_images: project.gallery_images || [],
+      gallery_captions: project.gallery_captions || [],
+      gallery_hotspots: project.gallery_hotspots || [],
       case_study_pdf: project.case_study_pdf,
       features: project.features,
       specifications: JSON.stringify(project.specifications || {}),
       products_used: project.products_used,
       project_value: project.project_value,
       duration: project.duration,
-      challenges: project.challenges,
-      solutions: project.solutions,
-      results: project.results,
-      testimonial: project.testimonial,
       isActive: project.isActive,
       showInFeatured: project.showInFeatured,
       displayOrder: project.displayOrder,
-      tags: project.tags
+      tags: project.tags,
+      // Multilingual fields
+      titles: project.titles || {},
+      descriptions: project.descriptions || {},
+      locations_multilingual: project.locations_multilingual || {},
+      clients_multilingual: project.clients_multilingual || {},
+      categories_multilingual: project.categories_multilingual || {},
+      completion_dates_multilingual: project.completion_dates_multilingual || {},
+      project_types_multilingual: project.project_types_multilingual || {},
+      project_values_multilingual: project.project_values_multilingual || {},
+      durations_multilingual: project.durations_multilingual || {}
     };
   }
 
@@ -232,7 +264,37 @@ class ProjectService {
 
   // Get project by ID
   async getProject(id: string): Promise<Project | undefined> {
-    return this.projects.find(p => p.id === id);
+    // First try to find in local array
+    let project = this.projects.find(p => p.id === id);
+    
+    // If not found locally, try to load from database
+    if (!project) {
+      try {
+        console.log('Project not found locally, loading from database...');
+        const { data, error } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (error) {
+          console.error('Database error loading project:', error);
+          return undefined;
+        }
+
+        if (data) {
+          project = this.convertDatabaseToProject(data);
+          // Add to local array for future use
+          this.projects.push(project);
+          console.log('Project loaded from database:', project.title);
+        }
+      } catch (dbError) {
+        console.error('Error loading project from database:', dbError);
+        return undefined;
+      }
+    }
+    
+    return project;
   }
 
   // Get project by slug
@@ -258,7 +320,7 @@ class ProjectService {
       // If no projects loaded, try to refresh
       if (this.projects.length === 0) {
         console.log('No projects loaded, attempting to refresh...');
-        await this.refreshProjects();
+        await this.refreshProjects(false); // Website mode
       }
       
       const activeProjects = this.projects.filter(project => project.isActive);
@@ -271,9 +333,20 @@ class ProjectService {
   }
 
   // Get projects for admin (all projects)
-  async getAdminProjects(): Promise<Project[]> {
+  async getAdminProjects(language?: string): Promise<Project[]> {
     try {
-      return this.projects;
+      console.log('getAdminProjects called, total projects:', this.projects.length);
+      
+      // If no projects loaded, try to refresh
+      if (this.projects.length === 0) {
+        console.log('No projects loaded, attempting to refresh...');
+        await this.refreshProjects(true); // Admin mode
+      }
+      
+      // Return all projects sorted by creation date (newest first)
+      return [...this.projects].sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
     } catch (error) {
       console.error('Error getting admin projects:', error);
       return [];
@@ -308,17 +381,24 @@ class ProjectService {
       completion_date: projectData.completion_date || '',
       project_type: projectData.project_type || '',
       image: projectData.image || '/placeholder.svg',
-      gallery: projectData.gallery || [],
+      gallery_images: projectData.gallery_images || [],
       case_study_pdf: projectData.case_study_pdf,
       features: projectData.features || [],
       specifications: projectData.specifications || {},
       products_used: projectData.products_used || [],
         project_value: projectData.project_value || '',
         duration: projectData.duration || '',
-        challenges: projectData.challenges || '',
-        solutions: projectData.solutions || '',
-        results: projectData.results || '',
-      testimonial: projectData.testimonial,
+        gallery_captions: projectData.gallery_captions || [],
+        gallery_hotspots: projectData.gallery_hotspots || [],
+        // Multilingual fields
+        titles: projectData.titles || {},
+        descriptions: projectData.descriptions || {},
+        locations_multilingual: projectData.locations_multilingual || {},
+        clients_multilingual: projectData.clients_multilingual || {},
+        categories_multilingual: projectData.categories_multilingual || {},
+        project_types_multilingual: projectData.project_types_multilingual || {},
+        project_values_multilingual: projectData.project_values_multilingual || {},
+        durations_multilingual: projectData.durations_multilingual || {},
       isActive: projectData.isActive ?? true,
       showInFeatured: projectData.showInFeatured ?? false,
         displayOrder: projectData.displayOrder ?? 99,
@@ -328,6 +408,27 @@ class ProjectService {
       };
 
       this.projects.unshift(newProject);
+
+      // Save to database
+      try {
+        const dbProject = this.convertProjectToDatabase(newProject);
+        const { error } = await supabase
+          .from('projects')
+          .insert(dbProject);
+
+        if (error) {
+          console.error('Database insert error:', error);
+          throw new Error(`Failed to insert project in database: ${error.message}`);
+        }
+
+        console.log('✅ Project added successfully to database:', newProject.title);
+      } catch (dbError) {
+        console.error('❌ Database insert failed:', dbError);
+        // Remove from local array if database insert fails
+        this.projects.shift();
+        throw dbError;
+      }
+
       return newProject;
     } catch (error) {
       console.error('Error adding project:', error);
@@ -345,6 +446,28 @@ class ProjectService {
 
       const updatedProject = { ...this.projects[projectIndex], ...updates, updated_at: new Date().toISOString() };
       this.projects[projectIndex] = updatedProject;
+
+      // Save to database
+      try {
+        const dbProject = this.convertProjectToDatabase(updatedProject);
+        const { error } = await supabase
+          .from('projects')
+          .update(dbProject)
+          .eq('id', id);
+
+        if (error) {
+          console.error('Database update error:', error);
+          throw new Error(`Failed to update project in database: ${error.message}`);
+        }
+
+        console.log('✅ Project updated successfully in database:', updatedProject.title);
+      } catch (dbError) {
+        console.error('❌ Database update failed:', dbError);
+        // Revert local changes if database update fails
+        this.projects[projectIndex] = this.projects[projectIndex];
+        throw dbError;
+      }
+
       return updatedProject;
     } catch (error) {
       console.error('Error updating project:', error);
@@ -355,12 +478,24 @@ class ProjectService {
   // Delete project
   async deleteProject(id: string): Promise<boolean> {
     try {
-      const projectIndex = this.projects.findIndex(p => p.id === id);
-      if (projectIndex === -1) {
-        return false;
+      // First, delete from the database
+      const { error: dbError } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', id);
+
+      if (dbError) {
+        console.error('Database delete error:', dbError);
+        throw new Error(`Failed to delete project from database: ${dbError.message}`);
       }
 
-      this.projects.splice(projectIndex, 1);
+      // Then remove from local array
+      const projectIndex = this.projects.findIndex(p => p.id === id);
+      if (projectIndex !== -1) {
+        this.projects.splice(projectIndex, 1);
+      }
+
+      console.log(`Project ${id} deleted successfully from database and local cache`);
       return true;
     } catch (error) {
       console.error('Error deleting project:', error);

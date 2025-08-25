@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { ArrowLeft, Type, FileText, Globe, Loader2, Upload, X, Image as ImageIcon, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Type, FileText, Globe, Loader2, Upload, X, Image as ImageIcon, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import ModernRichTextEditor from '@/components/ModernRichTextEditor';
 import { useAdminLanguage } from '@/contexts/AdminLanguageContext';
@@ -27,297 +26,174 @@ const languages = [
   { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', flag: '🇻🇳' }
 ];
 
-export default function ProjectEdit() {
-  const { projectId } = useParams<{ projectId: string }>();
+export default function AddProject() {
   const navigate = useNavigate();
   const { t, language: adminLanguage } = useAdminLanguage();
 
   const { categories } = useCategories('en');
 
-  const [project, setProject] = useState<MultilingualProject | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [project, setProject] = useState<MultilingualProject>({
+    id: '',
+    title: '',
+    description: '',
+    location: '',
+    category: '',
+    client: '',
+    completion_date: '',
+    project_type: '',
+    project_value: '',
+    duration: '',
+    features: [],
+    products_used: [],
+    image: '',
+    gallery_images: [],
+    isActive: true,
+    showInFeatured: false,
+    displayOrder: 99,
+    // Initialize multilingual fields
+    titles: {},
+    descriptions: {},
+    locations_multilingual: {},
+    clients_multilingual: {},
+    completion_dates_multilingual: {},
+    project_types_multilingual: {},
+    project_values_multilingual: {},
+    durations_multilingual: {},
+    gallery_captions: {},
+    gallery_hotspots: []
+  });
+
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [allProducts, setAllProducts] = useState<UnifiedProduct[]>([]);
-  const [currentLanguage, setCurrentLanguage] = useState('en'); // Track current tab language
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
-  const [clickPosition, setClickPosition] = useState<{ x: number; y: number } | null>(null);
-  const [showProductDialog, setShowProductDialog] = useState(false);
-  const [productSearchTerm, setProductSearchTerm] = useState('');
+  const [currentLanguage, setCurrentLanguage] = useState('en');
 
+  // Load products on component mount
   useEffect(() => {
-    const load = async () => {
+    const loadProducts = async () => {
       try {
-        setLoading(true);
-        if (!projectId) {
-          setProject(null);
-          return;
-        }
-        const [p, products] = await Promise.all([
-          projectService.getProject(projectId),
-          productService.getAllProducts()
-        ]);
-        if (!p) {
-          setProject(null);
-        } else {
-          console.log('Loading project data:', p);
-          console.log('Multilingual fields:', {
-            titles: p.titles,
-            descriptions: p.descriptions,
-            locations_multilingual: p.locations_multilingual,
-            clients_multilingual: p.clients_multilingual,
-            completion_dates_multilingual: p.completion_dates_multilingual,
-            project_types_multilingual: p.project_types_multilingual,
-            project_values_multilingual: p.project_values_multilingual,
-            durations_multilingual: p.durations_multilingual,
-            gallery_captions: p.gallery_captions,
-            gallery_hotspots: p.gallery_hotspots
-          });
-          
-          // Convert Project to MultilingualProject structure
-          setProject({
-            id: p.id,
-            title: p.title,
-            description: p.description,
-            location: p.location,
-            category: p.category,
-            client: p.client,
-            completion_date: p.completion_date,
-            project_type: p.project_type,
-            project_value: p.project_value || '',
-            duration: p.duration,
-
-            features: p.features || [],
-            products_used: Array.isArray(p.products_used) ? p.products_used : [],
-            image: p.image,
-            gallery_images: Array.isArray(p.gallery_images) ? p.gallery_images : [],
-            isActive: p.isActive,
-            showInFeatured: p.showInFeatured,
-            displayOrder: p.displayOrder,
-            // Initialize multilingual fields from project data
-            titles: p.titles || {},
-            descriptions: p.descriptions || {},
-            locations_multilingual: p.locations_multilingual || {},
-            clients_multilingual: p.clients_multilingual || {},
-            completion_dates_multilingual: p.completion_dates_multilingual || {},
-            project_types_multilingual: p.project_types_multilingual || {},
-            project_values_multilingual: p.project_values_multilingual || {},
-            durations_multilingual: p.durations_multilingual || {},
-            gallery_captions: p.gallery_captions || {},
-            gallery_hotspots: p.gallery_hotspots || []
-          });
-        }
+        const products = await productService.getAllProducts();
         setAllProducts(products);
-      } catch (e) {
-        console.error(e);
-        toast.error(t('messages.loadError'));
-      } finally {
-        setLoading(false);
+      } catch (error) {
+        console.error('Error loading products:', error);
       }
     };
-    load();
-  }, [projectId, t]);
-
-  // Add a refresh function that can be called manually
-  const refreshProject = async () => {
-    if (projectId) {
-      console.log('Refreshing project data...');
-      const load = async () => {
-        try {
-          setLoading(true);
-          const [p, products] = await Promise.all([
-            projectService.getProject(projectId),
-            productService.getAllProducts()
-          ]);
-          if (!p) {
-            setProject(null);
-          } else {
-            console.log('Refreshed project data:', p);
-            // Convert Project to MultilingualProject structure
-            setProject({
-              id: p.id,
-              title: p.title,
-              description: p.description,
-              location: p.location,
-              category: p.category,
-              client: p.client,
-              completion_date: p.completion_date,
-              project_type: p.project_type,
-              project_value: p.project_value || '',
-              duration: p.duration,
-              features: p.features || [],
-              products_used: Array.isArray(p.products_used) ? p.products_used : [],
-              image: p.image,
-              gallery_images: Array.isArray(p.gallery_images) ? p.gallery_images : [],
-              isActive: p.isActive,
-              showInFeatured: p.showInFeatured,
-              displayOrder: p.displayOrder,
-              // Initialize multilingual fields from project data
-              titles: p.titles || {},
-              descriptions: p.descriptions || {},
-              locations_multilingual: p.locations_multilingual || {},
-              clients_multilingual: p.clients_multilingual || {},
-              completion_dates_multilingual: p.completion_dates_multilingual || {},
-              project_types_multilingual: p.project_types_multilingual || {},
-              project_values_multilingual: p.project_values_multilingual || {},
-              durations_multilingual: p.durations_multilingual || {},
-              gallery_captions: p.gallery_captions || {},
-              gallery_hotspots: p.gallery_hotspots || []
-            });
-          }
-          setAllProducts(products);
-        } catch (e) {
-          console.error(e);
-          toast.error('Failed to refresh project');
-        } finally {
-          setLoading(false);
-        }
-      };
-      await load();
-    }
-  };
+    loadProducts();
+  }, []);
 
   const updateBasicField = (field: string, value: any) => {
-    if (!project) return;
-    setProject(prev => ({ ...prev!, [field]: value }));
+    setProject(prev => ({ ...prev, [field]: value }));
   };
 
   const updateTranslation = (languageCode: string, field: string, value: string) => {
-    if (!project) return;
-    const map: Record<string, keyof MultilingualProject> = {
-      title: 'titles',
-      description: 'descriptions',
-      location: 'locations_multilingual',
-      client: 'clients_multilingual',
-      category: 'categories_multilingual',
-      completion_date: 'completion_dates_multilingual',
-      project_type: 'project_types_multilingual',
-      project_value: 'project_values_multilingual',
-      duration: 'durations_multilingual'
+    const fieldMap: Record<string, keyof MultilingualProject> = {
+      'title': 'titles',
+      'description': 'descriptions',
+      'location': 'locations_multilingual',
+      'client': 'clients_multilingual',
+      'completion_date': 'completion_dates_multilingual',
+      'project_type': 'project_types_multilingual',
+      'project_value': 'project_values_multilingual',
+      'duration': 'durations_multilingual'
     };
-    const key = map[field];
-    if (!key) return;
-    setProject(prev => ({
-      ...prev!,
-      [key]: {
-        ...((prev as any)[key] || {}),
-        [languageCode]: value
-      }
-    } as MultilingualProject));
+    
+    const multilingualField = fieldMap[field];
+    if (multilingualField) {
+      const currentValue = project[multilingualField] as Record<string, string> || {};
+      setProject(prev => ({
+        ...prev,
+        [multilingualField]: {
+          ...currentValue,
+          [languageCode]: value
+        }
+      }));
+    }
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !project) return;
-    try {
-      const fileName = `project-${project.id}-${Date.now()}`;
-      const { error } = await supabase.storage.from('project-images').upload(fileName, file);
-      if (error) throw error;
-      const { data: { publicUrl } } = supabase.storage.from('project-images').getPublicUrl(fileName);
-      updateBasicField('image', publicUrl);
-      toast.success('Image uploaded');
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to upload image');
+    if (file) {
+      try {
+        const fileName = `project-new-${Date.now()}`;
+        const { data, error } = await supabase.storage
+          .from('project-images')
+          .upload(fileName, file);
+
+        if (error) throw error;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('project-images')
+          .getPublicUrl(fileName);
+      
+        updateBasicField('image', publicUrl);
+        toast.success('Image uploaded successfully');
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        toast.error('Failed to upload image');
+      }
     }
   };
 
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (files.length === 0 || !project) return;
-    try {
-      const urls: string[] = [];
-      for (const file of files) {
-        const fileName = `project-gallery-${project.id}-${Date.now()}-${Math.random()}`;
-        const { error } = await supabase.storage.from('project-images').upload(fileName, file);
-        if (error) throw error;
-        const { data: { publicUrl } } = supabase.storage.from('project-images').getPublicUrl(fileName);
-        urls.push(publicUrl);
+    if (files.length > 0) {
+      try {
+        const uploadPromises = files.map(async (file) => {
+          const fileName = `project-gallery-new-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          const { data, error } = await supabase.storage
+            .from('project-images')
+            .upload(fileName, file);
+
+          if (error) throw error;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('project-images')
+            .getPublicUrl(fileName);
+          
+          return publicUrl;
+        });
+
+        const newUrls = await Promise.all(uploadPromises);
+        const currentGallery = project.gallery_images || [];
+        updateBasicField('gallery_images', [...currentGallery, ...newUrls]);
+        toast.success(`${files.length} images uploaded successfully`);
+      } catch (error) {
+        console.error('Error uploading gallery images:', error);
+        toast.error('Failed to upload gallery images');
       }
-      updateBasicField('gallery_images', [...(project.gallery_images || []), ...urls]);
-      toast.success(`${urls.length} images uploaded`);
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to upload gallery');
     }
   };
 
   const handleSave = async () => {
-    if (!project) return;
     try {
       setSaving(true);
-      const updateData = {
-        category: project.category,
-        project_type: project.project_type,
-        project_value: project.project_value,
-        duration: project.duration,
-        completion_date: project.completion_date,
-        image: project.image,
-        gallery_images: project.gallery_images,
-        gallery_captions: project.gallery_captions || [],
-        gallery_hotspots: project.gallery_hotspots || [],
-        features: project.features || [],
-        products_used: project.products_used || [],
-        isActive: project.isActive,
-        showInFeatured: project.showInFeatured,
-        displayOrder: project.displayOrder,
-        titles: project.titles || {},
-        descriptions: project.descriptions || {},
-        locations_multilingual: project.locations_multilingual || {},
-        clients_multilingual: project.clients_multilingual || {},
-        completion_dates_multilingual: project.completion_dates_multilingual || {},
-        project_types_multilingual: project.project_types_multilingual || {},
-        project_values_multilingual: project.project_values_multilingual || {},
-        durations_multilingual: project.durations_multilingual || {}
-      } as any;
       
-      console.log('Saving project with data:', updateData);
-      const result = await projectService.updateProject(project.id, updateData);
-      console.log('Save result:', result);
+      // Generate a unique ID for the new project
+      const newProjectId = `project-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      const projectData = {
+        ...project,
+        id: newProjectId,
+        slug: (project.titles?.en || project.title || 'new-project').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      const result = await projectService.addProject(projectData);
+      
       if (result) {
-        // Convert the result back to MultilingualProject format
-        const updatedProject = {
-          ...project,
-          ...result,
-          gallery_images: result.gallery_images || []
-        };
-        console.log('Updated project state:', updatedProject);
-        setProject(updatedProject);
-        
-        // Refresh project data from database to ensure consistency
-        setTimeout(() => {
-          refreshProject();
-        }, 500);
+        toast.success('Project created successfully!');
+        navigate('/admin/projects');
+      } else {
+        toast.error('Failed to create project');
       }
-      toast.success(t('messages.saveSuccess'));
-    } catch (e: any) {
-      console.error(e);
-      toast.error(e?.message || t('messages.saveError'));
+    } catch (error: any) {
+      console.error('Error creating project:', error);
+      toast.error('Failed to create project: ' + error.message);
     } finally {
       setSaving(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">{t('messages.loading')}</span>
-      </div>
-    );
-  }
-
-  if (!project) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">{t('messages.notFound')}</h2>
-          <Button onClick={() => navigate('/admin/projects')}>
-            {t('nav.back')}
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-6 py-8">
@@ -329,18 +205,24 @@ export default function ProjectEdit() {
             {t('nav.back')}
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">{t('actions.edit')} {t('nav.projects')}</h1>
-            <p className="text-muted-foreground">ID: {project.id}</p>
+            <h1 className="text-3xl font-bold">Add New Project</h1>
+            <p className="text-muted-foreground">Create a new project with multilingual support</p>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={refreshProject} disabled={loading}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
           <Button onClick={handleSave} disabled={saving}>
-            {saving ? t('actions.saving') : t('actions.save')}
+            {saving ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              <>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Project
+              </>
+            )}
           </Button>
         </div>
       </div>
@@ -357,13 +239,13 @@ export default function ProjectEdit() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Completion Date - Keep this as it's a date field that doesn't need translation */}
+              {/* Completion Date */}
               <div>
                 <label className="block text-sm font-medium mb-2">Completion Date</label>
                 <Input type="date" value={project.completion_date || ''} onChange={(e) => updateBasicField('completion_date', e.target.value)} />
               </div>
 
-              {/* Category - Single selection for all languages */}
+              {/* Category */}
               <div>
                 <label className="block text-sm font-medium mb-2">Category</label>
                 <Select 
@@ -485,13 +367,34 @@ export default function ProjectEdit() {
 
               {/* Flags */}
               <div className="space-y-4 pt-4 border-t">
-                <div className="flex items-center space-x-2">
-                  <input type="checkbox" id="isActive" checked={project.isActive !== false} onChange={(e) => updateBasicField('isActive', e.target.checked)} className="rounded" />
-                  <label htmlFor="isActive" className="text-sm font-medium">Active</label>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-sm font-medium">Active</label>
+                    <p className="text-xs text-muted-foreground">Show this project on the website</p>
+                  </div>
+                  <Switch 
+                    checked={project.isActive} 
+                    onCheckedChange={(checked) => updateBasicField('isActive', checked)} 
+                  />
                 </div>
-                <div className="flex items-center space-x-2">
-                  <input type="checkbox" id="showInFeatured" checked={project.showInFeatured || false} onChange={(e) => updateBasicField('showInFeatured', e.target.checked)} className="rounded" />
-                  <label htmlFor="showInFeatured" className="text-sm font-medium">Show in Featured</label>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-sm font-medium">Featured</label>
+                    <p className="text-xs text-muted-foreground">Show in featured projects section</p>
+                  </div>
+                  <Switch 
+                    checked={project.showInFeatured} 
+                    onCheckedChange={(checked) => updateBasicField('showInFeatured', checked)} 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Display Order</label>
+                  <Input 
+                    type="number" 
+                    value={project.displayOrder} 
+                    onChange={(e) => updateBasicField('displayOrder', parseInt(e.target.value))} 
+                    placeholder="99"
+                  />
                 </div>
               </div>
             </CardContent>
@@ -570,10 +473,6 @@ export default function ProjectEdit() {
                             placeholder="Client" 
                           />
                         </div>
-
-
-
-
                         {/* Project Type */}
                         <div>
                           <label className="block text-sm font-medium mb-2">Project Type ({lang.nativeName})</label>
@@ -583,7 +482,6 @@ export default function ProjectEdit() {
                             placeholder="e.g., Commercial, Residential" 
                           />
                         </div>
-
                         {/* Project Value */}
                         <div>
                           <label className="block text-sm font-medium mb-2">Project Value ({lang.nativeName})</label>
@@ -593,7 +491,6 @@ export default function ProjectEdit() {
                             placeholder="e.g., $1.5M" 
                           />
                         </div>
-
                         {/* Duration */}
                         <div>
                           <label className="block text-sm font-medium mb-2">Duration ({lang.nativeName})</label>
@@ -603,7 +500,6 @@ export default function ProjectEdit() {
                             placeholder="e.g., 12 months" 
                           />
                         </div>
-
                         {/* Completion Date */}
                         <div>
                           <label className="block text-sm font-medium mb-2">Completion Date ({lang.nativeName})</label>
@@ -656,10 +552,10 @@ export default function ProjectEdit() {
                                           [index]: e.target.value
                                         }
                                       };
-                                      setProject(prev => prev ? {
+                                      setProject(prev => ({
                                         ...prev,
                                         gallery_captions: newCaptions
-                                      } : null);
+                                      }));
                                     }}
                                     placeholder={`Write a caption for this image in ${lang.nativeName}...`}
                                     className="w-full p-3 border border-slate-300 rounded-lg resize-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
@@ -724,13 +620,22 @@ export default function ProjectEdit() {
                                   const x = ((e.clientX - rect.left) / rect.width) * 100;
                                   const y = ((e.clientY - rect.top) / rect.height) * 100;
                                   
-                                  // Show product selection dialog
-                                  setSelectedImageIndex(index);
-                                  setClickPosition({ x, y });
-                                  setShowProductDialog(true);
+                                  // Add hotspot at click position
+                                  const newHotspots = [...(project.gallery_hotspots || [])];
+                                  if (!newHotspots[index]) newHotspots[index] = [];
+                                  newHotspots[index].push({
+                                    productName: 'Select Product',
+                                    x: Math.max(0, Math.min(100, x)),
+                                    y: Math.max(0, Math.min(100, y))
+                                  });
+                                  setProject(prev => ({
+                                    ...prev,
+                                    gallery_hotspots: newHotspots
+                                  }));
                                 }}
                               />
-                                                            {/* Hotspot markers - Draggable with Product Labels */}
+                              
+                              {/* Hotspot markers - Draggable with Product Labels */}
                               {(project.gallery_hotspots?.[index] || []).map((hotspot, hotspotIndex) => (
                                 <div
                                   key={hotspotIndex}
@@ -761,20 +666,20 @@ export default function ProjectEdit() {
                                           x: Math.max(0, Math.min(100, x)),
                                           y: Math.max(0, Math.min(100, y))
                                         };
-                                        setProject(prev => prev ? {
+                                        setProject(prev => ({
                                           ...prev,
                                           gallery_hotspots: newHotspots
-                                        } : null);
+                                        }));
                                       }
                                     }}
                                     onDoubleClick={() => {
                                       // Remove hotspot on double click
                                       const newHotspots = [...(project.gallery_hotspots || [])];
                                       newHotspots[index] = newHotspots[index].filter((_, i) => i !== hotspotIndex);
-                                      setProject(prev => prev ? {
-                                          ...prev,
-                                          gallery_hotspots: newHotspots
-                                        } : null);
+                                      setProject(prev => ({
+                                        ...prev,
+                                        gallery_hotspots: newHotspots
+                                      }));
                                     }}
                                     title={`${hotspot.productName} - Drag to move, double-click to remove`}
                                   />
@@ -827,10 +732,10 @@ export default function ProjectEdit() {
                                             x: 50, // Default center position
                                             y: 50
                                           });
-                                          setProject(prev => prev ? {
+                                          setProject(prev => ({
                                             ...prev,
                                             gallery_hotspots: newHotspots
-                                          } : null);
+                                          }));
                                         }
                                       }
                                     }}
@@ -843,19 +748,17 @@ export default function ProjectEdit() {
                                         <Input
                                           placeholder="Search products..."
                                           className="mb-2"
-                                          onChange={(e) => setProductSearchTerm(e.target.value)}
+                                          onChange={(e) => {
+                                            // Filter products for this specific select
+                                            const searchTerm = e.target.value;
+                                            // This is a simplified version - in a real implementation you might want to store search terms per image
+                                          }}
                                         />
-                                        {allProducts
-                                          .filter(product => 
-                                            (product.names?.en || product.name || '')
-                                              .toLowerCase()
-                                              .includes(productSearchTerm.toLowerCase())
-                                          )
-                                          .map((product) => (
-                                            <SelectItem key={product.id} value={product.id}>
-                                              {product.names?.en || product.name || 'Unknown Product'}
-                                            </SelectItem>
-                                          ))}
+                                        {allProducts.map((product) => (
+                                          <SelectItem key={product.id} value={product.id}>
+                                            {product.names?.[adminLanguage] || product.name || 'Unknown Product'}
+                                          </SelectItem>
+                                        ))}
                                       </div>
                                     </SelectContent>
                                   </Select>
@@ -878,10 +781,10 @@ export default function ProjectEdit() {
                                     onClick={() => {
                                       const newHotspots = [...(project.gallery_hotspots || [])];
                                       newHotspots[index] = newHotspots[index].filter((_, i) => i !== hotspotIndex);
-                                      setProject(prev => prev ? {
+                                      setProject(prev => ({
                                         ...prev,
                                         gallery_hotspots: newHotspots
-                                      } : null);
+                                      }));
                                     }}
                                   >
                                     <X className="h-4 w-4" />
@@ -902,59 +805,6 @@ export default function ProjectEdit() {
           </Card>
         </div>
       </div>
-
-      {/* Product Selection Dialog */}
-      <Dialog open={showProductDialog} onOpenChange={setShowProductDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Select Product for Hotspot</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Input
-              placeholder="Search products..."
-              value={productSearchTerm}
-              onChange={(e) => setProductSearchTerm(e.target.value)}
-              className="w-full"
-            />
-            <div className="max-h-60 overflow-y-auto space-y-2">
-              {allProducts
-                .filter(product => 
-                  (product.names?.en || product.name || '')
-                    .toLowerCase()
-                    .includes(productSearchTerm.toLowerCase())
-                )
-                .map((product) => (
-                  <div
-                    key={product.id}
-                    className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer"
-                    onClick={() => {
-                      if (selectedImageIndex !== null && clickPosition) {
-                        const newHotspots = [...(project?.gallery_hotspots || [])];
-                        if (!newHotspots[selectedImageIndex]) newHotspots[selectedImageIndex] = [];
-                        newHotspots[selectedImageIndex].push({
-                          productName: product.names?.en || product.name || 'Unknown Product',
-                          x: clickPosition.x,
-                          y: clickPosition.y
-                        });
-                        setProject(prev => prev ? {
-                          ...prev,
-                          gallery_hotspots: newHotspots
-                        } : null);
-                      }
-                      setShowProductDialog(false);
-                      setProductSearchTerm('');
-                    }}
-                  >
-                    <div className="font-medium">{product.names?.en || product.name || 'Unknown Product'}</div>
-                    <div className="text-sm text-slate-500">{product.category}</div>
-                  </div>
-                ))}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
-
-

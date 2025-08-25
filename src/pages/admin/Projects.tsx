@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { ArrowLeft, Type, FileText, Globe, Loader2, Upload, Image as ImageIcon, Building2, Calendar, MapPin, User, DollarSign, Clock, Star, Trash2, Save } from 'lucide-react';
+import { ArrowLeft, Type, FileText, Globe, Loader2, Upload, Image as ImageIcon, Building2, Calendar, MapPin, User, DollarSign, Clock, Star, Trash2, Save, Plus, Filter, SortAsc, SortDesc, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -135,6 +135,23 @@ export default function AdminProjects() {
       loadList();
     }
   }, [projectId]);
+
+  // Load projects list function
+  const loadProjects = async () => {
+    try {
+      console.log('🔄 Loading projects from database...');
+      setListLoading(true);
+      setListError(null);
+      const list = await projectService.getAdminProjects('en');
+      console.log('🔄 Projects loaded:', list.length, 'projects');
+      setProjects(list);
+    } catch (err: any) {
+      console.error('Error loading projects list:', err);
+      setListError(err?.message || 'Failed to load projects');
+    } finally {
+      setListLoading(false);
+    }
+  };
 
   // Load all products for selection
   useEffect(() => {
@@ -379,7 +396,63 @@ export default function AdminProjects() {
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Projects</h1>
-              </div>
+          <div className="flex items-center gap-3">
+            <Button 
+              onClick={() => navigate('/admin/projects/new')}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add New Project
+            </Button>
+          </div>
+        </div>
+        {/* Project Management Controls */}
+        <div className="flex items-center justify-between bg-slate-50 p-4 rounded-lg border">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-slate-500" />
+              <Select value="all" onValueChange={(value) => console.log('Filter:', value)}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Filter by..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Projects</SelectItem>
+                  <SelectItem value="active">Active Only</SelectItem>
+                  <SelectItem value="inactive">Inactive Only</SelectItem>
+                  <SelectItem value="featured">Featured Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <SortAsc className="h-4 w-4 text-slate-500" />
+              <Select value="newest" onValueChange={(value) => console.log('Sort:', value)}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Sort by..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest First</SelectItem>
+                  <SelectItem value="oldest">Oldest First</SelectItem>
+                  <SelectItem value="name">Name A-Z</SelectItem>
+                  <SelectItem value="category">Category</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => console.log('Bulk actions')}
+              className="text-red-600 border-red-200 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Bulk Delete
+            </Button>
+          </div>
+        </div>
+
         {listLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin" />
@@ -391,16 +464,87 @@ export default function AdminProjects() {
         ) : (
           <div className="grid gap-4">
             {projects.map(p => (
-              <Card key={p.id}>
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="min-w-0">
-                    <div className="text-lg font-semibold truncate">{p.titles?.['en'] || p.title}</div>
-                    <div className="text-sm text-muted-foreground truncate">
-                      {p.category} {p.completion_date ? `• ${p.completion_date}` : ''}
+              <Card key={p.id} className={`${!p.isActive ? 'opacity-60 bg-slate-50' : ''}`}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="text-lg font-semibold truncate">
+                          {p.titles?.['en'] || p.title}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {p.isActive ? (
+                            <Badge variant="default" className="bg-green-100 text-green-800">Active</Badge>
+                          ) : (
+                            <Badge variant="secondary" className="bg-slate-100 text-slate-600">Inactive</Badge>
+                          )}
+                          {p.showInFeatured && (
+                            <Badge variant="outline" className="border-yellow-200 text-yellow-700">
+                              <Star className="h-3 w-3 mr-1" />
+                              Featured
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-sm text-muted-foreground truncate">
+                        {p.category} {p.completion_date ? `• ${p.completion_date}` : ''}
+                      </div>
+                      <div className="text-xs text-slate-400 mt-1">
+                        ID: {p.id} • Created: {new Date(p.created_at || Date.now()).toLocaleDateString()}
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" onClick={() => navigate(`/admin/projects/edit/${p.id}`)}>Edit</Button>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                                                 onClick={() => {
+                           // Toggle project visibility
+                           const updatedProject = { ...p, isActive: !p.isActive };
+                           projectService.updateProject(p.id, updatedProject);
+                           // Refresh the list
+                           loadProjects();
+                         }}
+                        title={p.isActive ? 'Hide Project' : 'Show Project'}
+                      >
+                        {p.isActive ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => navigate(`/admin/projects/edit/${p.id}`)}
+                      >
+                        Edit
+                      </Button>
+                      
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={async () => {
+                          if (confirm(`Are you sure you want to delete "${p.titles?.['en'] || p.title}"? This action cannot be undone.`)) {
+                            try {
+                              console.log('🗑️ Deleting project:', p.id, p.titles?.['en'] || p.title);
+                              const result = await projectService.deleteProject(p.id);
+                              console.log('🗑️ Delete result:', result);
+                              
+                              if (result) {
+                                toast.success('Project deleted successfully');
+                                // Force refresh from database to ensure consistency
+                                await loadProjects();
+                              } else {
+                                toast.error('Failed to delete project');
+                              }
+                            } catch (error) {
+                              console.error('🗑️ Delete error:', error);
+                              toast.error('Failed to delete project: ' + error.message);
+                            }
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

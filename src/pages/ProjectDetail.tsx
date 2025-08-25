@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useProducts } from '@/hooks/useProducts';
+import { useCategories } from '@/hooks/useCategories';
 import { supabase } from '@/integrations/supabase/client';
 import { projectService } from '@/services/projectService';
 
@@ -26,7 +28,13 @@ interface Project {
   features: string[];
   products_used: string[];
   image: string;
-  gallery: string[];
+  gallery_images: string[];
+  gallery_captions?: string[]; // Array of captions for gallery images
+  gallery_hotspots?: Array<{
+    productName: string;
+    x: number;
+    y: number;
+  }>[]; // Array of hotspots for each image
   isActive: boolean;
   showInFeatured: boolean;
   displayOrder: number;
@@ -50,11 +58,12 @@ const ProjectDetail: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const { t } = useTranslation();
   const { currentLanguage } = useLanguage();
+  const { products } = useProducts();
+  const { categories } = useCategories(currentLanguage);
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
-  const [categories, setCategories] = useState<{ id: string; name: string; display_name: string }[]>([]);
   const [features, setFeatures] = useState<{ id: string; feature_key: string; display_name: string; category: string }[]>([]);
   const [productsUsed, setProductsUsed] = useState<{ id: string; name: string; category: string }[]>([]);
 
@@ -66,7 +75,6 @@ const ProjectDetail: React.FC = () => {
 
   useEffect(() => {
     if (projectId) {
-      loadCategories();
       loadFeatures();
     }
   }, [projectId, currentLanguage]);
@@ -93,6 +101,24 @@ const ProjectDetail: React.FC = () => {
       loadProductsUsed();
     }
   }, [project]);
+  
+  // Close hotspot labels when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('[id^="hotspot-label-"]') && !target.closest('[id^="thumbnail-hotspot-label-"]')) {
+        // Close all hotspot labels
+        document.querySelectorAll('[id^="hotspot-label-"], [id^="thumbnail-hotspot-label-"]').forEach(label => {
+          label.classList.add('hidden');
+        });
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
 
     const loadProject = async () => {
       try {
@@ -184,10 +210,10 @@ const ProjectDetail: React.FC = () => {
         }
 
         // Parse gallery images if they exist
-        if (projectData.gallery && Array.isArray(projectData.gallery)) {
-          transformedProject.gallery = projectData.gallery;
+        if (projectData.gallery_images && Array.isArray(projectData.gallery_images)) {
+          transformedProject.gallery_images = projectData.gallery_images;
         } else {
-          transformedProject.gallery = [];
+          transformedProject.gallery_images = [];
         }
 
         setProject(transformedProject);
@@ -199,17 +225,7 @@ const ProjectDetail: React.FC = () => {
       }
     };
 
-  const loadCategories = async () => {
-    try {
-      const categoriesData = await projectService.getCategories(currentLanguage);
-      console.log('Categories loaded:', categoriesData);
-      setCategories(categoriesData);
-    } catch (error) {
-      console.error('Error loading categories:', error);
-      // Set empty array to trigger fallback translations
-      setCategories([]);
-    }
-  };
+
 
   const loadFeatures = async () => {
     try {
@@ -237,29 +253,16 @@ const ProjectDetail: React.FC = () => {
   const getLocalizedCategory = () => {
     if (!project) return '';
     
-    console.log('getLocalizedCategory called:', {
-      projectCategory: project.category,
-      categories: categories,
-      currentLanguage,
-      categories_multilingual: project.categories_multilingual
-    });
-    
-    // First try to get from centralized categories
+    // First try to get from centralized categories with localized names
     if (categories.length > 0) {
       const centralizedCategory = categories.find(cat => cat.name === project.category);
       if (centralizedCategory) {
-        console.log('Found centralized category:', centralizedCategory);
-        return centralizedCategory.display_name;
+        // Use the localized name if available, otherwise fall back to English
+        return centralizedCategory.names?.[currentLanguage] || centralizedCategory.names?.['en'] || centralizedCategory.name;
       }
     }
     
-    // If no centralized categories loaded yet, try multilingual
-    if (project.categories_multilingual?.[currentLanguage]) {
-      console.log('Using multilingual category:', project.categories_multilingual[currentLanguage]);
-      return project.categories_multilingual[currentLanguage];
-    }
-    
-    // Final fallback: translate common category names manually
+    // Fallback: translate common category names manually
     const categoryTranslations: Record<string, Record<string, string>> = {
       'Sealant & Adhesive': {
         'en': 'Sealant & Adhesive',
@@ -445,7 +448,7 @@ const ProjectDetail: React.FC = () => {
               >
                 <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
                 <span className="font-medium">{t('projects.backToProjects')}</span>
-            </Link>
+              </Link>
               <div className="h-8 w-px bg-slate-300"></div>
               <div className="text-sm text-slate-500 uppercase tracking-wider">
                 {getLocalizedCategory()}
@@ -461,60 +464,157 @@ const ProjectDetail: React.FC = () => {
         </div>
       </div>
 
-          {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        {/* Hero Section with Main Image Background */}
-        <div className="relative py-16 mb-12" style={{
-          backgroundImage: `url(${project.image || '/placeholder.svg'})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center center',
-          backgroundAttachment: 'fixed'
-        }}>
-          <div className="absolute inset-0 bg-black/40"></div>
-          <div className="relative z-10 container mx-auto text-center">
-            <h1 className="uniform-page-title text-white" style={{textShadow: 'rgba(0, 0, 0, 0.8) 2px 2px 4px'}}>
-              {project.title}
-            </h1>
+          {/* Title Section with Special Background - Positioned right under header */}
+          <div 
+            className="relative py-16 mb-12 mt-0"
+            style={{
+              backgroundImage: `url(${project.image || '/placeholder.svg'})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center center',
+              backgroundAttachment: 'fixed'
+            }}
+          >
+            <div className="absolute inset-0 bg-black/40"></div>
+            <div className="relative z-10 container mx-auto text-center">
+              <h1 className="uniform-page-title text-white" style={{textShadow: 'rgba(0, 0, 0, 0.8) 2px 2px 4px'}}>
+                {project.titles?.[currentLanguage] || project.title}
+              </h1>
+            </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          {/* Left Column - Large Impactful Gallery */}
-          <div className="space-y-8">
-            {/* Gallery Section */}
-            <div className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-lg">
-              {/* Gallery Header */}
-              <div className="p-6 bg-slate-50 border-b border-slate-200">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold text-slate-900">Project Gallery</h3>
-                  {(() => {
-                    const images = project.gallery && project.gallery.length > 0 
-                      ? project.gallery 
-                      : [project.image]; // Use main image if no gallery
-                    
-                    return images.length > 1 ? (
-                      <div className="text-sm text-slate-600">
-                        {galleryIndex + 1} of {images.length} images
-                      </div>
-                    ) : null;
-                  })()}
-                </div>
-              </div>
+          {/* Main Content */}
+          <div className="max-w-7xl mx-auto px-6 py-12">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+              {/* Left Column - Large Impactful Gallery (Takes 2/3 of space) */}
+              <div className="lg:col-span-2 space-y-8">
+                {/* Gallery Section */}
+                <div className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-lg">
+                  {/* Gallery Header */}
+                  <div className="p-6 bg-slate-50 border-b border-slate-200">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xl font-semibold text-slate-900">{t('projects.gallery')}</h3>
+                      {(() => {
+                        const images = project.gallery_images && project.gallery_images.length > 0 
+                          ? project.gallery_images 
+                          : [project.image]; // Use main image if no gallery
+                        
+                        return images.length > 1 ? (
+                          <div className="text-sm text-slate-600">
+                            {t('projects.imageCounter').replace('{current}', String(galleryIndex + 1)).replace('{total}', String(images.length))}
+                          </div>
+                        ) : null;
+                      })()}
+                    </div>
+                  </div>
 
-              {/* Gallery Main Image */}
-              <div className="relative aspect-[4/3] bg-slate-100">
+                  {/* Gallery Main Image - Made Much Larger */}
+                  <div className="relative aspect-[4/3] bg-slate-100">
                 {(() => {
-                  const images = project.gallery && project.gallery.length > 0 
-                    ? project.gallery 
+                  const images = project.gallery_images && project.gallery_images.length > 0 
+                    ? project.gallery_images 
                     : [project.image]; // Use main image if no gallery
+                  
+                  // Get hotspots for current image
+                  const hotspots = project.gallery_hotspots || [];
+                  const currentHotspots = hotspots[galleryIndex] || [];
                   
                   return (
                     <>
                       <img
                         src={images[galleryIndex]}
-                        alt={`${project.title} - Gallery Image ${galleryIndex + 1}`}
+                        alt={`${project.titles?.[currentLanguage] || project.title} - Gallery Image ${galleryIndex + 1}`}
                         className="w-full h-full object-cover"
                       />
+                      
+                      {/* Product Hotspots on Image */}
+                      {currentHotspots.map((hotspot, idx) => (
+                        <div
+                          key={idx}
+                          className="absolute w-6 h-6 bg-red-500 rounded-full border-2 border-white cursor-pointer shadow-lg hover:bg-red-600 transition-colors"
+                          style={{
+                            left: `${hotspot.x}%`,
+                            top: `${hotspot.y}%`,
+                            transform: 'translate(-50%, -50%)'
+                          }}
+                          title={(() => {
+                            const product = products.find(p => p.name === hotspot.productName || p.names?.en === hotspot.productName);
+                            return product ? (product.names?.[currentLanguage] || product.name) : hotspot.productName;
+                          })()}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Toggle hotspot label visibility
+                            const hotspotLabel = document.getElementById(`hotspot-label-${galleryIndex}-${idx}`);
+                            if (hotspotLabel) {
+                              hotspotLabel.classList.toggle('hidden');
+                            }
+                          }}
+                        />
+                      ))}
+                      
+                      {/* Hotspot Labels */}
+                      {currentHotspots.map((hotspot, idx) => {
+                        // Find the product details
+                        const product = products.find(p => p.name === hotspot.productName || p.names?.en === hotspot.productName);
+                        
+                        return (
+                          <div
+                            key={idx}
+                            id={`hotspot-label-${galleryIndex}-${idx}`}
+                            className="absolute hidden bg-white border border-slate-200 rounded-lg shadow-lg z-10 max-w-xs overflow-hidden"
+                            style={{
+                              left: `${hotspot.x}%`,
+                              top: `${hotspot.y}%`,
+                              transform: 'translate(-50%, -100%)',
+                              marginTop: '-10px'
+                            }}
+                          >
+                            {product ? (
+                              <Link 
+                                to={`/products/${product.id}`}
+                                className="block hover:bg-slate-50 transition-colors"
+                                onClick={() => {
+                                  // Close the label when navigating
+                                  const label = document.getElementById(`hotspot-label-${galleryIndex}-${idx}`);
+                                  if (label) label.classList.add('hidden');
+                                }}
+                              >
+                                <div className="flex items-center space-x-3 p-3">
+                                  {/* Product Image */}
+                                  <div className="flex-shrink-0">
+                                    <img
+                                      src={product.image || '/placeholder.svg'}
+                                      alt={product.name}
+                                      className="w-12 h-12 object-cover rounded-lg border border-slate-200"
+                                    />
+                                  </div>
+                                  {/* Product Info */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-medium text-slate-900 truncate">
+                                      {product.names?.[currentLanguage] || product.name}
+                                    </div>
+                                    <div className="text-xs text-slate-500 truncate">
+                                      {product.category}
+                                    </div>
+                                  </div>
+                                  {/* Arrow Icon */}
+                                  <div className="flex-shrink-0">
+                                    <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                  </div>
+                                </div>
+                              </Link>
+                            ) : (
+                              <div className="p-3">
+                                <div className="text-sm font-medium text-slate-900 text-center">
+                                  {hotspot.productName}
+                                </div>
+                              </div>
+                            )}
+                            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+                          </div>
+                        );
+                      })}
                       
                       {/* Navigation Arrows */}
                       {images.length > 1 && (
@@ -545,117 +645,213 @@ const ProjectDetail: React.FC = () => {
                 })()}
               </div>
               
-              {/* Dynamic Image Caption Section - Only shows if caption exists */}
+              {/* Gallery Captions and Hotspots Display */}
               {(() => {
-                // This would be where you'd get captions from the database
-                // For now, showing placeholder captions that can be easily replaced
-                const captions = [
-                  "Main project overview showing the complete scope and scale of the waterproofing system",
-                  "Detailed view of the technical implementation with close-up of sealant application",
-                  "Close-up of key features and specifications demonstrating quality craftsmanship",
-                  "Final result showcasing the completed work with before/after comparison",
-                  "Technical specifications and material details for professional reference"
-                ];
+                const images = project.gallery_images && project.gallery_images.length > 0 
+                  ? project.gallery_images 
+                  : [project.image];
                 
-                const currentCaption = captions[galleryIndex];
+                // Get captions and hotspots from project data
+                const captions = project.gallery_captions || {};
+                const hotspots = project.gallery_hotspots || [];
+                const currentCaption = captions[currentLanguage]?.[galleryIndex] || captions['en']?.[galleryIndex] || '';
+                const currentHotspots = hotspots[galleryIndex] || [];
                 
-                // Only show caption section if there's a caption
-                return currentCaption ? (
-                  <div className="p-6 bg-slate-50 border-t border-slate-200">
-                    <div className="text-center">
+                return (
+                  <div className="p-6 bg-white border-t border-slate-200">
+                    <div className="space-y-6">
                       {/* Progress Bar */}
-                      <div className="mb-4">
+                      <div className="text-center">
                         <div className="flex items-center justify-center space-x-2 mb-2">
-                          <span className="text-sm font-medium text-slate-700">Progress</span>
+                          <span className="text-sm font-medium text-slate-700">{t('projects.progress')}</span>
                           <span className="text-sm text-slate-500">
-                            {galleryIndex + 1} of {(() => {
-                              const images = project.gallery && project.gallery.length > 0 
-                                ? project.gallery 
-                                : [project.image];
-                              return images.length;
-                            })()}
+                            {t('projects.imageCounter').replace('{current}', String(galleryIndex + 1)).replace('{total}', String(images.length))}
                           </span>
                         </div>
                         <div className="w-full bg-slate-200 rounded-full h-2">
                           <div 
                             className="bg-red-500 h-2 rounded-full transition-all duration-300 ease-out"
                             style={{
-                              width: `${(() => {
-                                const images = project.gallery && project.gallery.length > 0 
-                                  ? project.gallery 
-                                  : [project.image];
-                                return ((galleryIndex + 1) / images.length) * 100;
-                              })()}%`
+                              width: `${((galleryIndex + 1) / images.length) * 100}%`
                             }}
                           />
                         </div>
                       </div>
                       
-                      <p className="text-slate-600 leading-relaxed max-w-2xl mx-auto">
-                        {currentCaption}
-                      </p>
+                      {/* Caption Display */}
+                      {currentCaption && (
+                        <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                          <h4 className="text-sm font-medium text-slate-700 mb-2 text-center">{t('projects.imageCaption')}</h4>
+                          <p className="text-slate-700 leading-relaxed text-center">
+                            {currentCaption}
+                          </p>
+                        </div>
+                      )}
+                      
+
+                      
+                      {/* No Content Message */}
+                      {!currentCaption && (
+                        <div className="text-center text-slate-500 italic">
+                          {t('projects.noCaptionAvailable')}
+                        </div>
+                      )}
                     </div>
                   </div>
-                ) : null;
+                );
               })()}
               
               {/* Enhanced Thumbnail Gallery with Better Selection */}
               {(() => {
-                const images = project.gallery && project.gallery.length > 0 
-                  ? project.gallery 
+                const images = project.gallery_images && project.gallery_images.length > 0 
+                  ? project.gallery_images 
                   : [project.image]; // Use main image if no gallery
                 
+                // Get hotspots for all images
+                const hotspots = project.gallery_hotspots || [];
+                
                 return images.length > 1 ? (
-                  <div className="p-6 bg-white">
-                    <div className="mb-4">
-                      <h4 className="text-sm font-medium text-slate-700 mb-3">Select Image:</h4>
+                  <div className="p-8 bg-white border-t border-slate-200">
+                    <div className="mb-6">
+                      <h4 className="text-lg font-semibold text-slate-800 mb-4">{t('projects.galleryImages')}</h4>
                     </div>
-                    <div className="flex space-x-4 overflow-x-auto pb-2">
-                      {images.map((image, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setGalleryIndex(index)}
-                          className={`flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden border-2 transition-all duration-200 group ${
-                            index === galleryIndex 
-                              ? 'border-red-500 ring-4 ring-red-200 shadow-lg scale-105' 
-                              : 'border-slate-200 hover:border-slate-300 hover:shadow-md hover:scale-105'
-                          }`}
-                        >
-                          <img
-                            src={image}
-                            alt={`Thumbnail ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                          {/* Selection indicator */}
-                          {index === galleryIndex && (
-                            <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
-                              <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
-                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {images.map((image, index) => {
+                        const imageHotspots = hotspots[index] || [];
+                        return (
+                          <button
+                            key={index}
+                            onClick={() => setGalleryIndex(index)}
+                            className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200 group ${
+                              index === galleryIndex 
+                                ? 'border-red-500 ring-4 ring-red-200 shadow-lg scale-105' 
+                                : 'border-slate-200 hover:border-slate-300 hover:shadow-md hover:scale-105'
+                            }`}
+                          >
+                            <img
+                              src={image}
+                              alt={`${project.titles?.[currentLanguage] || project.title} - Thumbnail ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                            
+                            {/* Product Hotspots on Thumbnail */}
+                            {imageHotspots.map((hotspot, hotspotIdx) => (
+                              <div
+                                key={hotspotIdx}
+                                className="absolute w-3 h-3 bg-red-500 rounded-full border border-white shadow-sm cursor-pointer"
+                                style={{
+                                  left: `${hotspot.x}%`,
+                                  top: `${hotspot.y}%`,
+                                  transform: 'translate(-50%, -50%)'
+                                }}
+                                title={(() => {
+                                  const product = products.find(p => p.name === hotspot.productName || p.names?.en === hotspot.productName);
+                                  return product ? (product.names?.[currentLanguage] || product.name) : hotspot.productName;
+                                })()}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Toggle hotspot label visibility
+                                  const thumbnailLabel = document.getElementById(`thumbnail-hotspot-label-${index}-${hotspotIdx}`);
+                                  if (thumbnailLabel) {
+                                    thumbnailLabel.classList.toggle('hidden');
+                                  }
+                                }}
+                              />
+                            ))}
+                            
+                            {/* Thumbnail Hotspot Labels */}
+                            {imageHotspots.map((hotspot, hotspotIdx) => {
+                              // Find the product details
+                              const product = products.find(p => p.name === hotspot.productName || p.names?.en === hotspot.productName);
+                              
+                              return (
+                                <div
+                                  key={hotspotIdx}
+                                  id={`thumbnail-hotspot-label-${index}-${hotspotIdx}`}
+                                  className="absolute hidden bg-white border border-slate-200 rounded-lg shadow-lg z-20 max-w-32 overflow-hidden"
+                                  style={{
+                                    left: `${hotspot.x}%`,
+                                    top: `${hotspot.y}%`,
+                                    transform: 'translate(-50%, -100%)',
+                                    marginTop: '-5px'
+                                  }}
+                                >
+                                  {product ? (
+                                    <Link 
+                                      to={`/products/${product.id}`}
+                                      className="block hover:bg-slate-50 transition-colors"
+                                      onClick={() => {
+                                        // Close the label when navigating
+                                        const label = document.getElementById(`thumbnail-hotspot-label-${index}-${hotspotIdx}`);
+                                        if (label) label.classList.add('hidden');
+                                      }}
+                                    >
+                                      <div className="flex items-center space-x-2 p-2">
+                                        {/* Product Image */}
+                                        <div className="flex-shrink-0">
+                                          <img
+                                            src={product.image || '/placeholder.svg'}
+                                            alt={product.name}
+                                            className="w-8 h-8 object-cover rounded border border-slate-200"
+                                          />
+                                        </div>
+                                        {/* Product Name */}
+                                        <div className="flex-1 min-w-0">
+                                          <div className="text-xs font-medium text-slate-900 truncate">
+                                            {product.names?.[currentLanguage] || product.name}
+                                          </div>
+                                        </div>
+                                        {/* Arrow Icon */}
+                                        <div className="flex-shrink-0">
+                                          <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                          </svg>
+                                        </div>
+                                      </div>
+                                    </Link>
+                                  ) : (
+                                    <div className="p-2">
+                                      <div className="text-xs font-medium text-slate-900 text-center truncate">
+                                        {hotspot.productName}
+                                      </div>
+                                    </div>
+                                  )}
+                                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-white"></div>
+                                </div>
+                              );
+                            })}
+                            
+                            {/* Selection indicator */}
+                            {index === galleryIndex && (
+                              <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
+                                <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                </div>
                               </div>
-                            </div>
-                          )}
-                        </button>
-                      ))}
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                     
                     {/* Image Navigation Controls */}
-                    <div className="mt-4 flex items-center justify-center space-x-4">
+                    <div className="mt-6 flex items-center justify-center space-x-6">
                       <button
                         onClick={() => setGalleryIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))}
-                        className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                        className="flex items-center space-x-2 px-6 py-3 text-base font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200 hover:border-slate-300"
                       >
-                        <ChevronLeft className="h-4 w-4" />
-                        <span>Previous</span>
+                        <ChevronLeft className="h-5 w-5" />
+                        <span>{t('common.previous')}</span>
                       </button>
                       
-                      <div className="flex space-x-1">
+                      <div className="flex space-x-2">
                         {images.map((_, index) => (
                           <button
                             key={index}
                             onClick={() => setGalleryIndex(index)}
-                            className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                            className={`w-3 h-3 rounded-full transition-all duration-200 ${
                               index === galleryIndex ? 'bg-red-500' : 'bg-slate-300 hover:bg-slate-400'
                             }`}
                           />
@@ -664,10 +860,10 @@ const ProjectDetail: React.FC = () => {
                       
                       <button
                         onClick={() => setGalleryIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))}
-                        className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                        className="flex items-center space-x-2 px-6 py-3 text-base font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200 hover:border-slate-300"
                       >
-                        <span>Next</span>
-                        <ChevronRight className="h-4 w-4" />
+                        <span>{t('common.next')}</span>
+                        <ChevronRight className="h-5 w-5" />
                       </button>
                     </div>
                   </div>
@@ -675,88 +871,95 @@ const ProjectDetail: React.FC = () => {
               })()}
             </div>
 
-            {/* Project Overview Card */}
-            <div className="bg-white rounded-xl p-6 border border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">{t('projects.projectOverview')}</h3>
-              <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                  <Building2 className="h-5 w-5 text-slate-400" />
-              <div>
-                    <div className="text-sm text-slate-500">{t('projects.projectType')}</div>
-                    <div className="font-medium text-slate-900">{project.project_type}</div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <MapPin className="h-5 w-5 text-slate-400" />
-                  <div>
-                    <div className="text-sm text-slate-500">{t('projects.location')}</div>
-                    <div className="font-medium text-slate-900">{project.location}</div>
-                </div>
-              </div>
-                    <div className="flex items-center space-x-3">
-                  <Calendar className="h-5 w-5 text-slate-400" />
-              <div>
-                    <div className="text-sm text-slate-500">{t('projects.completion')}</div>
-                    <div className="font-medium text-slate-900">
-                      {project.completion_date ? new Date(project.completion_date).toLocaleDateString() : 'N/A'}
-                    </div>
-                  </div>
-                </div>
-                      </div>
-                </div>
-              </div>
+          </div>
 
-          {/* Right Column - Project Story */}
-          <div className="space-y-12">
-            {/* Project Meta */}
+          {/* Right Column - Project Description (Takes 1/3 of space) */}
+          <div className="lg:col-span-1 space-y-12">
+            
+            {/* Project Details Card - Moved to Right Side */}
             <div className="bg-white rounded-xl p-6 border border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Project Details</h3>
-              <div className="grid grid-cols-2 gap-6">
-              <div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-6">{t('projects.projectDetails')}</h3>
+              <div className="grid grid-cols-1 gap-4">
+                {/* Client */}
+                <div>
                   <div className="text-sm text-slate-500 mb-1">{t('projects.client')}</div>
-                  <div className="font-semibold text-slate-900">{project.client}</div>
+                  <div className="font-semibold text-slate-900">
+                    {project.clients_multilingual?.[currentLanguage] || project.client || 'N/A'}
+                  </div>
                 </div>
-              <div>
+                
+                {/* Location */}
+                <div>
                   <div className="text-sm text-slate-500 mb-1">{t('projects.location')}</div>
-                  <div className="font-semibold text-slate-900">{project.location}</div>
+                  <div className="font-semibold text-slate-900">
+                    {project.locations_multilingual?.[currentLanguage] || project.location || 'N/A'}
+                  </div>
                 </div>
-              <div>
-                  <div className="text-sm text-slate-500 mb-1">{t('projects.duration')}</div>
-                  <div className="font-semibold text-slate-900">{project.duration}</div>
+                
+                {/* Category */}
+                <div>
+                  <div className="text-sm text-slate-500 mb-1">{t('projects.category')}</div>
+                  <div className="font-semibold text-slate-900">
+                    {getLocalizedCategory() || 'N/A'}
+                  </div>
                 </div>
+                
+                {/* Project Type */}
+                <div>
+                  <div className="text-sm text-slate-500 mb-1">{t('projects.projectType')}</div>
+                  <div className="font-semibold text-slate-900">
+                    {project.project_types_multilingual?.[currentLanguage] || project.project_type || 'N/A'}
+                  </div>
+                </div>
+                
+                {/* Project Value */}
                 <div>
                   <div className="text-sm text-slate-500 mb-1">{t('projects.projectValue')}</div>
-                  <div className="font-semibold text-slate-900">{project.project_value}</div>
+                  <div className="font-semibold text-slate-900">
+                    {project.project_values_multilingual?.[currentLanguage] || project.project_value || 'N/A'}
+                  </div>
+                </div>
+                
+                {/* Duration */}
+                <div>
+                  <div className="text-sm text-slate-500 mb-1">{t('projects.duration')}</div>
+                  <div className="font-semibold text-slate-900">
+                    {project.durations_multilingual?.[currentLanguage] || project.duration || 'N/A'}
+                  </div>
+                </div>
+                
+                {/* Completion Date */}
+                <div>
+                  <div className="text-sm text-slate-500 mb-1">{t('projects.completion')}</div>
+                  <div className="font-semibold text-slate-900">
+                    {project.completion_dates_multilingual?.[currentLanguage] || 
+                     (project.completion_date ? new Date(project.completion_date).toLocaleDateString() : 'N/A')}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Project Story */}
+            {/* Project Description */}
             <div className="space-y-8">
               <div>
-                <h2 className="text-2xl font-bold text-slate-900 mb-6">{t('projects.projectStory')}</h2>
+                <h2 className="text-2xl font-bold text-slate-900 mb-6">{t('projects.projectDescription')}</h2>
                 <div className="space-y-6">
-                  {project.challenges && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-slate-800 mb-3">{t('projects.challenges')}</h3>
-                      <p className="text-slate-600 leading-relaxed">{project.challenges}</p>
-              </div>
-            )}
-                  {project.solutions && (
-              <div>
-                      <h3 className="text-lg font-semibold text-slate-800 mb-3">{t('projects.solutions')}</h3>
-                      <p className="text-slate-600 leading-relaxed">{project.solutions}</p>
-              </div>
-            )}
-                  {project.results && (
-              <div>
-                      <h3 className="text-lg font-semibold text-slate-800 mb-3">{t('projects.results')}</h3>
-                      <p className="text-slate-600 leading-relaxed">{project.results}</p>
-              </div>
-            )}
+                  {/* Project Description Display */}
+                  <div>
+                    <div className="bg-slate-50 rounded-lg p-4">
+                      {project.descriptions?.[currentLanguage] || project.description ? (
+                        <div 
+                          className="text-slate-700 leading-relaxed prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{ __html: project.descriptions?.[currentLanguage] || project.description || '' }}
+                        />
+                      ) : (
+                        <p className="text-slate-500 italic">{t('projects.noDescriptionAvailable')}</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-          </div>
+            </div>
 
             {/* Technical Details */}
             {project.features && project.features.length > 0 && (

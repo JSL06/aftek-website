@@ -138,6 +138,10 @@ const zhHans = {
   'ui.contactUs': '联系我们',
   'ui.getQuote': '获取报价',
   'ui.backToProducts': '返回产品',
+  
+  // Common navigation
+  'common.previous': '上一张',
+  'common.next': '下一张',
 
 
 
@@ -256,7 +260,13 @@ const zhHans = {
   'projects.completion': '完成日期',
   'projects.client': '客户',
   'projects.backToProjects': '返回项目列表',
-  'projects.projectStory': '项目故事',
+  'projects.projectDescription': '项目描述',
+  'projects.gallery': '项目画廊',
+  'projects.imageCounter': '第 {current} 张，共 {total} 张',
+  'projects.progress': '进度',
+  'projects.imageCaption': '图片说明',
+  'projects.galleryImages': '画廊图片',
+  'projects.projectDetails': '项目详情',
   'projects.challenges': '挑战',
   'projects.solutions': '解决方案',
   'projects.results': '成果',
@@ -268,6 +278,9 @@ const zhHans = {
   'projects.projectValue': '项目价值',
   'projects.duration': '工期',
   'projects.completionDate': '完成日期',
+  'projects.noCaptionAvailable': '此图片没有可用的说明。',
+  'projects.noDescriptionAvailable': '没有可用的项目描述。',
+  'projects.noCategory': '没有类别',
   'projects.categories.Waterproofing': '防水',
   'projects.categories.Structural Repair': '结构修复',
   'projects.categories.Flooring Systems': '地坪系统',
@@ -295,6 +308,20 @@ const zhHans = {
   'projects.categories.Transportation': '运输',
   'projects.categories.Energy': '能源',
   'projects.categories.Manufacturing': '制造业',
+  
+  // Project Categories
+  'projectCategory.infrastructure': '基础设施',
+  'projectCategory.industrial': '工业',
+  'projectCategory.highTech': '高科技',
+  'projectCategory.commercial': '商业',
+  'projectCategory.residential': '住宅',
+  'projectCategory.healthcare': '医疗',
+  'projectCategory.education': '教育',
+  'projectCategory.transportation': '交通运输',
+  'projectCategory.energy': '能源',
+  'projectCategory.waterTreatment': '水处理',
+  'projectCategory.manufacturing': '制造业',
+  'projectCategory.general': '一般',
 
   // Articles Page
   'articles.title': '文章与新闻',

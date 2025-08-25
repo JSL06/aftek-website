@@ -181,6 +181,10 @@ const en = {
   'ui.contactUs': 'Contact Us',
   'ui.getQuote': 'Get Quote',
   'ui.backToProducts': 'Back to Products',
+  
+  // Common navigation
+  'common.previous': 'Previous',
+  'common.next': 'Next',
 
 
 
@@ -299,7 +303,13 @@ const en = {
   'projects.completion': 'Completion Date',
   'projects.client': 'Client',
   'projects.backToProjects': 'Back to Projects',
-  'projects.projectStory': 'Project Story',
+  'projects.projectDescription': 'Project Description',
+  'projects.gallery': 'Project Gallery',
+  'projects.imageCounter': '{current} of {total} images',
+  'projects.progress': 'Progress',
+  'projects.imageCaption': 'Image Caption',
+  'projects.galleryImages': 'Gallery Images',
+  'projects.projectDetails': 'Project Details',
   'projects.challenges': 'Challenges',
   'projects.solutions': 'Solutions',
   'projects.results': 'Results',
@@ -311,6 +321,23 @@ const en = {
   'projects.projectValue': 'Project Value',
   'projects.duration': 'Duration',
   'projects.completionDate': 'Completion Date',
+  'projects.noCaptionAvailable': 'No caption available for this image.',
+  'projects.noDescriptionAvailable': 'No project description available.',
+  'projects.noCategory': 'No category',
+  
+  // Project Categories
+  'projectCategory.infrastructure': 'Infrastructure',
+  'projectCategory.industrial': 'Industrial',
+  'projectCategory.highTech': 'High-Tech',
+  'projectCategory.commercial': 'Commercial',
+  'projectCategory.residential': 'Residential',
+  'projectCategory.healthcare': 'Healthcare',
+  'projectCategory.education': 'Education',
+  'projectCategory.transportation': 'Transportation',
+  'projectCategory.energy': 'Energy',
+  'projectCategory.waterTreatment': 'Water Treatment',
+  'projectCategory.manufacturing': 'Manufacturing',
+  'projectCategory.general': 'General',
 
   // Articles Page
   'articles.title': 'Articles',

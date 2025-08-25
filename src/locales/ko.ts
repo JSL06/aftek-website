@@ -115,6 +115,10 @@ const ko = {
   'ui.contactUs': '연락하기',
   'ui.getQuote': '견적 받기',
   'ui.backToProducts': '제품으로 돌아가기',
+  
+  // Common navigation
+  'common.previous': '이전',
+  'common.next': '다음',
 
 
 
@@ -233,7 +237,13 @@ const ko = {
   'projects.completion': '완료일',
   'projects.client': '클라이언트',
   'projects.backToProjects': '프로젝트 목록으로 돌아가기',
-  'projects.projectStory': '프로젝트 스토리',
+  'projects.projectDescription': '프로젝트 설명',
+  'projects.gallery': '프로젝트 갤러리',
+  'projects.imageCounter': '{current} / {total} 이미지',
+  'projects.progress': '진행률',
+  'projects.imageCaption': '이미지 캡션',
+  'projects.galleryImages': '갤러리 이미지',
+  'projects.projectDetails': '프로젝트 세부사항',
   'projects.challenges': '도전과제',
   'projects.solutions': '해결책',
   'projects.results': '결과',
@@ -244,8 +254,11 @@ const ko = {
   'projects.projectType': '프로젝트 유형',
   'projects.projectValue': '프로젝트 가치',
   'projects.duration': '기간',
-  'projects.completionDate': '완료일',
-
+    'projects.completionDate': '완료일',
+  'projects.noCaptionAvailable': '이 이미지에는 캡션이 없습니다.',
+  'projects.noDescriptionAvailable': '프로젝트 설명을 사용할 수 없습니다.',
+  'projects.noCategory': '카테고리 없음',
+  
   // Articles Page
   'articles.title': '기사',
   'articles.subtitle': '최신 통찰력, 기술 가이드, 업계 뉴스',
@@ -327,7 +340,7 @@ const ko = {
   'projectCategory.residential': '주거',
   'projectCategory.healthcare': '의료',
   'projectCategory.education': '교육',
-  'projectCategory.transportation': '운송',
+  'projectCategory.transportation': '교통운송',
   'projectCategory.energy': '에너지',
   'projectCategory.waterTreatment': '수처리',
   'projectCategory.manufacturing': '제조업',

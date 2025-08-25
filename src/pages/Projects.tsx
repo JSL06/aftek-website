@@ -7,14 +7,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import ProjectFilter, { ProjectFilters } from '@/components/ProjectFilter';
 import { useProjects } from '@/hooks/useProjects';
+import { useCategories } from '@/hooks/useCategories';
 import { Project } from '@/services/projectService';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 
 const Projects = () => {
   const { t } = useTranslation();
+  const { currentLanguage } = useLanguage();
   const navigate = useNavigate();
   const { projects, loading } = useProjects();
+  const { categories } = useCategories(currentLanguage);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   
   // Listen for language changes and force reload to ensure all translations are loaded
@@ -57,10 +61,10 @@ const Projects = () => {
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       filtered = filtered.filter(project =>
-        project.title.toLowerCase().includes(searchLower) ||
-        project.description.toLowerCase().includes(searchLower) ||
-        project.location.toLowerCase().includes(searchLower) ||
-        project.client.toLowerCase().includes(searchLower) ||
+        (project.titles?.[currentLanguage] || project.title).toLowerCase().includes(searchLower) ||
+        (project.descriptions?.[currentLanguage] || project.description).toLowerCase().includes(searchLower) ||
+        (project.locations_multilingual?.[currentLanguage] || project.location).toLowerCase().includes(searchLower) ||
+        (project.clients_multilingual?.[currentLanguage] || project.client).toLowerCase().includes(searchLower) ||
         project.features.some(feature => feature.toLowerCase().includes(searchLower))
       );
     }
@@ -68,7 +72,7 @@ const Projects = () => {
     // Apply category filter
     if (filters.category.length > 0) {
       filtered = filtered.filter(project =>
-        filters.category.includes(project.category)
+                        filters.category.includes(project.category)
       );
     }
 
@@ -113,7 +117,7 @@ const Projects = () => {
   };
 
   const nextImage = () => {
-    if (selectedProject?.gallery && currentImageIndex < selectedProject.gallery.length - 1) {
+    if (selectedProject?.gallery_images && currentImageIndex < selectedProject.gallery_images.length - 1) {
       setCurrentImageIndex(prev => prev + 1);
     }
   };
@@ -128,8 +132,8 @@ const Projects = () => {
   const getProjectImages = (project: Project): string[] => {
     const images: string[] = [];
     if (project.image) images.push(project.image);
-    if (project.gallery && project.gallery.length > 0) {
-      images.push(...project.gallery);
+    if (project.gallery_images && project.gallery_images.length > 0) {
+      images.push(...project.gallery_images);
     }
     return images;
   };
@@ -225,8 +229,8 @@ const Projects = () => {
                     <div className="aspect-[4/3] lg:h-80">
                       {(() => {
                         // Get images from gallery or create mock images for demonstration
-                        const images = project.gallery && project.gallery.length > 0 
-                          ? project.gallery 
+                        const images = project.gallery_images && project.gallery_images.length > 0 
+                          ? project.gallery_images 
                           : project.image 
                             ? [project.image] 
                             : [bgMain, bgTitle]; // Fallback to mock images
@@ -266,12 +270,12 @@ const Projects = () => {
                       {/* Project Title */}
                       <div>
                         <h3 className="text-3xl lg:text-4xl font-bold text-slate-900 leading-tight mb-3">
-                          {project.title || "eng"}
+                          {project.titles?.[currentLanguage] || project.title || "eng"}
                         </h3>
                         
                         {/* Description */}
                         <p className="text-lg text-slate-600 leading-relaxed max-w-2xl">
-                          {project.description}
+                          {project.descriptions?.[currentLanguage] || project.description}
                         </p>
                       </div>
                       
@@ -279,11 +283,21 @@ const Projects = () => {
                       <div className="flex flex-wrap gap-2">
                         {project.category ? (
                           <span className="px-4 py-2 bg-red-50 text-red-600 rounded-full text-sm font-medium border border-red-200">
-                            {project.category}
+                            {(() => {
+                              // Try to get localized category name
+                              if (categories.length > 0) {
+                                const centralizedCategory = categories.find(cat => cat.name === project.category);
+                                if (centralizedCategory) {
+                                  return centralizedCategory.names?.[currentLanguage] || centralizedCategory.names?.['en'] || centralizedCategory.name;
+                                }
+                              }
+                              // Fallback to original category name
+                              return project.category;
+                            })()}
                           </span>
                         ) : (
-                          <span className="px-4 py-2 bg-slate-50 text-slate-500 rounded-full text-sm font-medium border border-slate-200">
-                            No category
+                          <span className="px-4 py-2 bg-slate-50 text-slate-500 rounded-full text-sm font-medium border border-red-200">
+                            {t('projects.noCategory')}
                           </span>
                         )}
                       </div>
@@ -291,22 +305,25 @@ const Projects = () => {
                       {/* Project Meta Grid */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-6 border-t border-slate-200">
                         <div>
-                          <div className="text-sm text-slate-500 mb-1 font-medium">Client</div>
-                          <div className="font-semibold text-slate-900">{project.client || 'N/A'}</div>
+                          <div className="text-sm text-slate-500 mb-1 font-medium">{t('projects.client')}</div>
+                          <div className="font-semibold text-slate-900">{project.clients_multilingual?.[currentLanguage] || project.client || 'N/A'}</div>
                         </div>
                         <div>
-                          <div className="text-sm text-slate-500 mb-1 font-medium">Location</div>
-                          <div className="font-semibold text-slate-900">{project.location || 'N/A'}</div>
+                          <div className="text-sm text-slate-500 mb-1 font-medium">{t('projects.location')}</div>
+                          <div className="font-semibold text-slate-900">{project.locations_multilingual?.[currentLanguage] || project.location || 'N/A'}</div>
                         </div>
                         <div>
-                          <div className="text-sm text-slate-500 mb-1 font-medium">Duration</div>
-                          <div className="font-semibold text-slate-900">{project.duration || 'N/A'}</div>
+                          <div className="text-sm text-slate-500 mb-1 font-medium">{t('projects.duration')}</div>
+                          <div className="font-semibold text-slate-900">{project.durations_multilingual?.[currentLanguage] || project.duration || 'N/A'}</div>
                         </div>
                         <div>
-                          <div className="text-sm text-slate-500 mb-1 font-medium">Completion</div>
+                          <div className="text-sm text-slate-500 mb-1 font-medium">{t('projects.completion')}</div>
                           <div className="font-semibold text-slate-900">
                             {(() => {
                               try {
+                                if (project.completion_dates_multilingual?.[currentLanguage]) {
+                                  return project.completion_dates_multilingual[currentLanguage];
+                                }
                                 if (project.completion_date) {
                                   const date = new Date(project.completion_date);
                                   if (!isNaN(date.getTime())) {
@@ -328,8 +345,8 @@ const Projects = () => {
                       <div className="flex items-center justify-between">
                         {/* Gallery Indicators */}
                         {(() => {
-                          const images = project.gallery && project.gallery.length > 0 
-                            ? project.gallery 
+                          const images = project.gallery_images && project.gallery_images.length > 0 
+                            ? project.gallery_images 
                             : project.image 
                               ? [project.image] 
                               : [bgMain, bgTitle];
@@ -574,35 +591,16 @@ const Projects = () => {
                   </div>
                 </div>
 
-                {/* Project Story */}
-                {selectedProject.challenges && (
+                {/* Project Description */}
+                {selectedProject.description && (
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-3">Project Story</h3>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3">Project Description</h3>
                     <div className="space-y-4">
-                      {selectedProject.challenges && (
-                        <div>
-                          <h4 className="font-medium text-gray-800 mb-2">Challenges</h4>
-                          <p className="text-gray-600 text-sm leading-relaxed bg-gray-50 rounded-lg p-3">
-                            {selectedProject.challenges}
-                          </p>
-                        </div>
-                      )}
-                      {selectedProject.solutions && (
-                        <div>
-                          <h4 className="font-medium text-gray-800 mb-2">Solutions</h4>
-                          <p className="text-gray-600 text-sm leading-relaxed bg-gray-50 rounded-lg p-3">
-                            {selectedProject.solutions}
-                          </p>
-                        </div>
-                      )}
-                      {selectedProject.results && (
-                        <div>
-                          <h4 className="font-medium text-gray-800 mb-2">Results</h4>
-                          <p className="text-gray-600 text-sm leading-relaxed bg-gray-50 rounded-lg p-3">
-                            {selectedProject.results}
-                          </p>
-                        </div>
-                      )}
+                      <div>
+                        <p className="text-gray-600 text-sm leading-relaxed bg-gray-50 rounded-lg p-3">
+                          {selectedProject.description}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}

@@ -29,6 +29,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/Products";
 import AdminProjects from "./pages/admin/Projects";
 import ProjectEdit from './pages/admin/ProjectEdit';
+import AddProject from './pages/admin/AddProject';
 import MultilingualCategoryManager from "./pages/admin/MultilingualCategoryManager";
 import FeaturesEditor from "./pages/admin/FeaturesEditor";
 import AdminArticles from "./pages/admin/Articles";
@@ -89,6 +90,7 @@ const App = () => (
                 <Route path="products" element={<UnifiedProducts />} />
                 <Route path="products/edit/:productId" element={<ProductEdit />} />
                 <Route path="projects" element={<AdminProjects />} />
+                <Route path="projects/new" element={<AddProject />} />
                 <Route path="projects/edit/:projectId" element={<ProjectEdit />} />
                 <Route path="category-manager" element={<MultilingualCategoryManager />} />
                 <Route path="features-editor" element={<FeaturesEditor />} />

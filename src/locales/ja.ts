@@ -120,6 +120,10 @@ const ja = {
   'ui.contactUs': 'お問い合わせ',
   'ui.getQuote': '見積もりを取得',
   'ui.backToProducts': '製品に戻る',
+  
+  // Common navigation
+  'common.previous': '前へ',
+  'common.next': '次へ',
 
 
 
@@ -238,7 +242,13 @@ const ja = {
   'projects.completion': '完了日',
   'projects.client': 'クライアント',
   'projects.backToProjects': 'プロジェクト一覧に戻る',
-  'projects.projectStory': 'プロジェクトストーリー',
+  'projects.projectDescription': 'プロジェクト説明',
+  'projects.gallery': 'プロジェクトギャラリー',
+  'projects.imageCounter': '{current} / {total} 枚',
+  'projects.progress': '進捗',
+  'projects.imageCaption': '画像キャプション',
+  'projects.galleryImages': 'ギャラリー画像',
+  'projects.projectDetails': 'プロジェクト詳細',
   'projects.challenges': '課題',
   'projects.solutions': '解決策',
   'projects.results': '結果',
@@ -250,6 +260,23 @@ const ja = {
   'projects.projectValue': 'プロジェクト価値',
   'projects.duration': '期間',
   'projects.completionDate': '完了日',
+  'projects.noCaptionAvailable': 'この画像にはキャプションがありません。',
+  'projects.noDescriptionAvailable': 'プロジェクトの説明がありません。',
+  'projects.noCategory': 'カテゴリなし',
+  
+  // Project Categories
+  'projectCategory.infrastructure': 'インフラストラクチャ',
+  'projectCategory.industrial': '産業',
+  'projectCategory.highTech': 'ハイテク',
+  'projectCategory.commercial': '商業',
+  'projectCategory.residential': '住宅',
+  'projectCategory.healthcare': '医療',
+  'projectCategory.education': '教育',
+  'projectCategory.transportation': '交通運輸',
+  'projectCategory.energy': 'エネルギー',
+  'projectCategory.waterTreatment': '水処理',
+  'projectCategory.manufacturing': '製造業',
+  'projectCategory.general': '一般',
 
   // Articles Page
   'articles.title': '記事',

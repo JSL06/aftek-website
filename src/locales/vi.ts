@@ -242,7 +242,13 @@ const vi = {
   'projects.completion': 'Ngày hoàn thành',
   'projects.client': 'Khách hàng',
   'projects.backToProjects': 'Quay lại danh sách dự án',
-  'projects.projectStory': 'Câu chuyện dự án',
+  'projects.projectDescription': 'Mô tả dự án',
+  'projects.gallery': 'Thư viện dự án',
+  'projects.imageCounter': '{current} / {total} hình ảnh',
+  'projects.progress': 'Tiến độ',
+  'projects.imageCaption': 'Chú thích hình ảnh',
+  'projects.galleryImages': 'Hình ảnh thư viện',
+  'projects.projectDetails': 'Chi tiết dự án',
   'projects.challenges': 'Thách thức',
   'projects.solutions': 'Giải pháp',
   'projects.results': 'Kết quả',
@@ -253,8 +259,11 @@ const vi = {
   'projects.projectType': 'Loại dự án',
   'projects.projectValue': 'Giá trị dự án',
   'projects.duration': 'Thời gian',
-  'projects.completionDate': 'Ngày hoàn thành',
-
+    'projects.completionDate': 'Ngày hoàn thành',
+  'projects.noCaptionAvailable': 'Không có chú thích cho hình ảnh này.',
+  'projects.noDescriptionAvailable': 'Không có mô tả dự án.',
+  'projects.noCategory': 'Không có danh mục',
+  
   // Articles Page
   'articles.title': 'Bài viết',
   'articles.subtitle': 'Thông tin mới nhất, hướng dẫn kỹ thuật và tin tức ngành',
