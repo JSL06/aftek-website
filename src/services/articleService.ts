@@ -268,6 +268,33 @@ class ArticleService {
         article = data as Article;
         
         if (article) {
+          // Load tags for this article
+          const { data: tagsData, error: tagsError } = await supabase
+            .from('article_tags')
+            .select('*');
+
+          if (tagsError) {
+            console.error('Error loading tags:', tagsError);
+          }
+
+          // Get article-tag relationships
+          const { data: junctionData, error: junctionError } = await supabase
+            .from('article_tags_junction')
+            .select('*')
+            .eq('article_id', article.id);
+
+          if (junctionError) {
+            console.error('Error loading article-tag relationships:', junctionError);
+          }
+
+          // Find tags for this article
+          const articleTags = junctionData
+            ?.map(j => tagsData?.find(t => t.id === j.tag_id))
+            ?.filter(Boolean) || [];
+
+          // Set the tags
+          article.tags = articleTags;
+          
           // Ensure content blocks are properly parsed for all languages
           const languageFields = ['en', 'zh_hant', 'ja', 'ko', 'th', 'vi'];
           
@@ -340,6 +367,33 @@ class ArticleService {
         article = data as Article;
         
         if (article) {
+          // Load tags for this article
+          const { data: tagsData, error: tagsError } = await supabase
+            .from('article_tags')
+            .select('*');
+
+          if (tagsError) {
+            console.error('Error loading tags:', tagsError);
+          }
+
+          // Get article-tag relationships
+          const { data: junctionData, error: junctionError } = await supabase
+            .from('article_tags_junction')
+            .select('*')
+            .eq('article_id', article.id);
+
+          if (junctionError) {
+            console.error('Error loading article-tag relationships:', junctionError);
+          }
+
+          // Find tags for this article
+          const articleTags = junctionData
+            ?.map(j => tagsData?.find(t => t.id === j.tag_id))
+            ?.filter(Boolean) || [];
+
+          // Set the tags
+          article.tags = articleTags;
+          
           // Ensure content blocks are properly parsed for all languages
           const languageFields = ['en', 'zh_hant', 'ja', 'ko', 'th', 'vi'];
           
@@ -403,6 +457,8 @@ class ArticleService {
       const articleData: any = {
         slug,
         featured_image: article.featured_image,
+        title_background_image: article.title_background_image,
+        card_image: article.card_image,
         read_time: article.read_time,
         published_at: article.published_at,
         is_published: article.is_published,
@@ -483,12 +539,20 @@ class ArticleService {
 
   async updateArticle(id: string, updates: Partial<Article>): Promise<Article | null> {
     try {
+      console.log('updateArticle called with updates:', updates);
+      console.log('Title background image in updates:', updates.title_background_image);
+      
       // Only send fields that exist in the database
       const validUpdates: any = {};
       
       // Basic fields
       if (updates.slug !== undefined) validUpdates.slug = updates.slug;
       if (updates.featured_image !== undefined) validUpdates.featured_image = updates.featured_image;
+      if (updates.title_background_image !== undefined) {
+        validUpdates.title_background_image = updates.title_background_image;
+        console.log('Including title_background_image in validUpdates:', updates.title_background_image);
+      }
+      if (updates.card_image !== undefined) validUpdates.card_image = updates.card_image;
       if (updates.read_time !== undefined) validUpdates.read_time = updates.read_time;
       if (updates.published_at !== undefined) validUpdates.published_at = updates.published_at;
       if (updates.is_published !== undefined) validUpdates.is_published = updates.is_published;
@@ -547,6 +611,9 @@ class ArticleService {
       if (updates.related_products !== undefined) validUpdates.related_products = updates.related_products;
       if (updates.related_links !== undefined) validUpdates.related_links = updates.related_links;
       if (updates.custom_buttons !== undefined) validUpdates.custom_buttons = updates.custom_buttons;
+      
+      console.log('Final validUpdates being sent to database:', validUpdates);
+      console.log('Title background image in validUpdates:', validUpdates.title_background_image);
       
       const { data, error } = await supabase
         .from('articles')

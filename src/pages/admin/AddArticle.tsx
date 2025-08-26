@@ -65,7 +65,6 @@ export default function AddArticle() {
     category_vi: 'news',
     read_time: 5,
     is_published: false,
-    featured_image: '',
     title_background_image: '',
     card_image: '',
     content_en: '',
@@ -89,7 +88,7 @@ export default function AddArticle() {
     setArticle(prev => ({ ...prev, [fieldKey]: value }));
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, imageType: 'featured' | 'title_background' | 'card') => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, imageType: 'title_background' | 'card') => {
     const file = e.target.files?.[0];
     if (file) {
       try {
@@ -130,7 +129,7 @@ export default function AddArticle() {
     }
   };
 
-  const removeImage = (imageType: 'featured' | 'title_background' | 'card') => {
+  const removeImage = (imageType: 'title_background' | 'card') => {
     updateBasicField(`${imageType}_image`, '');
     toast.success(`${imageType.charAt(0).toUpperCase() + imageType.slice(1)} image removed`);
   };
@@ -372,54 +371,6 @@ export default function AddArticle() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Featured Image */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <h3 className="text-md font-medium">Featured Image</h3>
-              <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">Main article image</span>
-            </div>
-            
-            {article.featured_image && (
-              <div className="relative">
-                <img
-                  src={article.featured_image}
-                  alt="Featured image"
-                  className="w-full h-32 object-cover rounded-lg border"
-                />
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="absolute top-2 right-2 h-6 w-6 p-0"
-                  onClick={() => removeImage('featured')}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-            
-            <div className="flex items-center gap-2">
-              <input
-                type="file"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 flex-1"
-                accept="image/*"
-                onChange={(e) => handleImageUpload(e, 'featured')}
-                disabled={loading}
-              />
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="px-3"
-                disabled={loading}
-              >
-                <Upload className="h-4 w-4" />
-              </Button>
-            </div>
-            
-            <p className="text-xs text-muted-foreground">
-              Main image displayed in article cards and detail pages. Recommended: 1200x630px, JPG/PNG, max 10MB
-            </p>
-          </div>
-
           {/* Title Background Image */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">

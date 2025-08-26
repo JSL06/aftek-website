@@ -17,6 +17,7 @@ import { ContentBlock } from '@/components/InlineArticleEditor';
 import articleService, { Article, ArticleTag } from '@/services/articleService';
 import { productService, UnifiedProduct } from '@/services/productService';
 import { Plus, Edit, Trash2, Eye, Upload, Image as ImageIcon, Globe, Type, FileText, User, Check, Link, ExternalLink, Package, X, Calendar, Clock, Tag as TagIcon } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const languages = [
   { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸' },
@@ -159,7 +160,7 @@ export default function AdminArticles() {
   const [articleId, setArticleId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [availableTags, setAvailableTags] = useState<{id: string, name: string}[]>([]);
   const [availableProducts, setAvailableProducts] = useState<UnifiedProduct[]>([]);
   
   // Article form state
@@ -191,13 +192,13 @@ export default function AdminArticles() {
     category_vi: '',
     read_time: 5,
     is_published: false,
-    featured_image: '',
     content_blocks_en: [],
     content_blocks_zh_hant: [],
     content_blocks_ja: [],
     content_blocks_ko: [],
     content_blocks_th: [],
-    content_blocks_vi: []
+    content_blocks_vi: [],
+    title_background_image: ''
   });
   
   const [selectedCategory, setSelectedCategory] = useState('General');
@@ -226,7 +227,9 @@ export default function AdminArticles() {
     const matchesSearch = !searchTerm || 
       (article.title_en && article.title_en.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (article.excerpt_en && article.excerpt_en.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (article.author_en && article.author_en.toLowerCase().includes(searchTerm.toLowerCase()));
+      (article.author_en && article.author_en.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      // Search in tags by name
+      (article.tags && article.tags.some(tag => tag.name && tag.name.toLowerCase().includes(searchTerm.toLowerCase())));
     
     const matchesCategory = filterCategory === 'all' || 
       (article.category_en && article.category_en === filterCategory);
@@ -239,11 +242,38 @@ export default function AdminArticles() {
   });
 
   // Load available tags and products
+  const loadAvailableTags = async () => {
+    try {
+      console.log('Loading available tags...');
+      // Load available tags from database
+      const tags = await articleService.getAllTags();
+      console.log('Loaded tags from database:', tags);
+      setAvailableTags(tags);
+    } catch (error) {
+      console.error('Error loading tags:', error);
+      // Fallback to default tags if database fails
+      console.log('Using fallback tags');
+      setAvailableTags([
+        {id: '1', name: 'Technical'},
+        {id: '2', name: 'Industry'},
+        {id: '3', name: 'Innovation'},
+        {id: '4', name: 'Sustainability'},
+        {id: '5', name: 'Quality'},
+        {id: '6', name: 'Safety'},
+        {id: '7', name: 'Performance'},
+        {id: '8', name: 'Research'},
+        {id: '9', name: 'Development'},
+        {id: '10', name: 'Case Study'}
+      ]);
+    }
+  };
+
+  // Load available products
   useEffect(() => {
     const loadAvailableData = async () => {
       try {
-        // Load available tags (you might want to create a tags service)
-        setAvailableTags(['Technical', 'Industry', 'Innovation', 'Sustainability', 'Quality', 'Safety', 'Performance', 'Research', 'Development', 'Case Study']);
+        // Load available tags
+        await loadAvailableTags();
         
         // Load available products
         const products = await productService.getAllProducts();
@@ -310,7 +340,8 @@ export default function AdminArticles() {
     try {
       const data = await articleService.getArticleById(id);
       if (data) {
-        console.log('Loading article:', data);
+        console.log('Loading article from database:', data);
+        console.log('Title background image from DB:', data.title_background_image);
         console.log('Admin language:', adminLanguage);
         
         setArticle(data);
@@ -323,7 +354,7 @@ export default function AdminArticles() {
         
         setContentBlocks(contentBlocks);
         
-        setSelectedTags(data.tags?.map(tag => tag.name) || []);
+        setSelectedTags(data.tags?.map(tag => tag.id) || []);
         setUploadedImages(data.images?.map(img => img.image_url) || []);
         
         // Load new related content fields
@@ -622,18 +653,49 @@ export default function AdminArticles() {
     }));
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTitleBackgroundImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     try {
-      // For now, we'll use a placeholder URL. In production, you'd upload to Supabase
-      const imageUrl = URL.createObjectURL(file);
-      setArticle(prev => ({ ...prev, featured_image: imageUrl }));
+      console.log('Starting image upload for file:', file.name);
+      
+      // Sanitize filename - remove special characters and Chinese characters
+      const originalName = file.name;
+      const fileExtension = originalName.split('.').pop() || 'png';
+      const sanitizedName = originalName
+        .replace(/[^a-zA-Z0-9.-]/g, '') // Remove special characters and non-ASCII
+        .replace(/\./g, '') // Remove dots except the last one
+        .substring(0, 50); // Limit length
+      
+      const fileName = `article-title-bg-${Date.now()}-${sanitizedName}.${fileExtension}`;
+      console.log('Sanitized filename:', fileName);
+      
+      // Upload to Supabase storage
+      const { data, error } = await supabase.storage
+        .from('article-images')
+        .upload(fileName, file);
+
+      if (error) throw error;
+
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('article-images')
+        .getPublicUrl(fileName);
+
+      console.log('Image uploaded successfully, public URL:', publicUrl);
+
+      // Update the article state with the Supabase URL
+      setArticle(prev => {
+        console.log('Previous article state:', prev);
+        const updated = { ...prev, title_background_image: publicUrl };
+        console.log('Updated article state:', updated);
+        return updated;
+      });
       
       toast({
         title: "Success",
-        description: "Image uploaded successfully"
+        description: "Title background image uploaded successfully"
       });
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -643,10 +705,6 @@ export default function AdminArticles() {
         variant: "destructive"
       });
     }
-  };
-
-  const removeFeaturedImage = () => {
-    setArticle(prev => ({ ...prev, featured_image: '' }));
   };
 
   const addRelatedProduct = () => {
@@ -738,23 +796,45 @@ export default function AdminArticles() {
         content_blocks_vi: article.content_blocks_vi || []
       };
 
+      // Explicitly ensure title_background_image is included
+      if (article.title_background_image) {
+        articleData.title_background_image = article.title_background_image;
+        console.log('Explicitly setting title_background_image:', article.title_background_image);
+      }
+
+      // Debug: Log the data being saved
+      console.log('Saving article data:', articleData);
+      console.log('Title background image:', articleData.title_background_image);
+      console.log('Full article state before save:', article);
+      console.log('Article ID being saved:', article.id);
+      
+      // Debug: Check if title_background_image is in the keys
+      console.log('Keys in articleData:', Object.keys(articleData));
+      console.log('Has title_background_image key:', 'title_background_image' in articleData);
+
       let savedArticle: Article | null;
       
       if (isEditing && article.id) {
         savedArticle = await articleService.updateArticle(article.id, articleData);
         
         // Update tags
-        if (savedArticle) {
+        if (selectedTags.length > 0) {
+          console.log('Updating article tags:', selectedTags);
           await articleService.updateArticleTags(savedArticle.id, selectedTags);
+          console.log('Tags updated successfully');
         }
       } else {
         savedArticle = await articleService.addArticle(articleData);
         
         // Update tags and save images if new article
-        if (savedArticle) {
+        if (selectedTags.length > 0) {
+          console.log('Updating tags for new article:', selectedTags);
           await articleService.updateArticleTags(savedArticle.id, selectedTags);
-          
-          // Save uploaded images
+          console.log('Tags updated successfully for new article');
+        }
+        
+        // Save images if any
+        if (savedArticle) {
           for (const imageUrl of uploadedImages) {
             await articleService.saveImageRecord(savedArticle.id, imageUrl);
           }
@@ -800,13 +880,13 @@ export default function AdminArticles() {
             category_vi: '',
             read_time: 5,
             is_published: false,
-            featured_image: '',
             content_blocks_en: [],
             content_blocks_zh_hant: [],
             content_blocks_ja: [],
             content_blocks_ko: [],
             content_blocks_th: [],
-            content_blocks_vi: []
+            content_blocks_vi: [],
+            title_background_image: ''
           });
           setContentBlocks([]);
           setSelectedTags([]);
@@ -963,45 +1043,40 @@ export default function AdminArticles() {
       slug: '',
       title_en: 'Test Article - All Components',
       title_zh_hant: '',
-
       title_ja: '',
       title_ko: '',
       title_th: '',
       title_vi: '',
       excerpt_en: 'A comprehensive test article showcasing all editor components.',
       excerpt_zh_hant: '',
-
       excerpt_ja: '',
       excerpt_ko: '',
       excerpt_th: '',
       excerpt_vi: '',
       author_en: 'Test Author',
       author_zh_hant: '',
-
       author_ja: '',
       author_ko: '',
       author_th: '',
       author_vi: '',
       category_en: 'Technical',
       category_zh_hant: '',
-
       category_ja: '',
       category_ko: '',
       category_th: '',
       category_vi: '',
       read_time: 5,
       is_published: true,
-      featured_image: '',
+      title_background_image: '',
       content_blocks_en: testBlocks,
       content_blocks_zh_hant: [],
-
       content_blocks_ja: [],
       content_blocks_ko: [],
       content_blocks_th: [],
       content_blocks_vi: []
     });
     setSelectedCategory('Technical');
-    setSelectedTags(['Technical', 'Test', 'Components']);
+    setSelectedTags(['1', '2', '3']); // Technical, Industry, Innovation
     setRelatedProducts(['Product 1', 'Product 2']);
     setRelatedLinks([
       { title: 'External Resource', url: 'https://example.com', description: 'A helpful external link' }
@@ -1025,63 +1100,15 @@ export default function AdminArticles() {
               </Button>
               <Button onClick={handleSave} disabled={isSaving}>
                 {isSaving ? 'Saving...' : 'Save Article'}
-            </Button>
+              </Button>
+            </div>
           </div>
-              </div>
 
           {/* Main Editor Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - Article Content Editor */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Featured Image */}
-              <div className="bg-white p-6 rounded-lg border shadow-sm">
-                <h2 className="text-xl font-semibold mb-4">Featured Image</h2>
-                <div className="space-y-4">
-                  {article.featured_image ? (
-                    <div className="relative">
-                      <img 
-                        src={article.featured_image} 
-                        alt="Featured" 
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                      <Button
-                        onClick={removeFeaturedImage}
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                      <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 mb-4">Upload featured image</p>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                        id="featured-image-upload"
-                      />
-                      <Label htmlFor="featured-image-upload" className="cursor-pointer">
-                        <Button variant="outline">Choose Image</Button>
-                      </Label>
-                    </div>
-                  )}
-                  {!article.featured_image && (
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      id="featured-image-upload"
-                    />
-                  )}
-                </div>
-              </div>
-
-                             {/* Unified Multilingual Content & Editor */}
+              {/* Unified Multilingual Content & Editor */}
               <div className="bg-white p-6 rounded-lg border shadow-sm">
                 <div className="text-center mb-6">
                   <h2 className="text-xl font-semibold">Multilingual Content & Editor</h2>
@@ -1114,20 +1141,6 @@ export default function AdminArticles() {
                       onChange={(e) => updateTranslation('title', contentLanguage, e.target.value)}
                       placeholder={`Enter title in ${getCurrentLanguageInfo().nativeName}`}
                       className="h-12"
-                    />
-                  </div>
-                  
-                  {/* Excerpt */}
-                  <div>
-                    <Label className="block text-sm font-medium mb-3">
-                      <FileText className="h-4 w-4 inline mr-2" />
-                      Article Excerpt ({getCurrentLanguageInfo().nativeName})
-                    </Label>
-                    <Textarea
-                      value={article[getExcerptField(contentLanguage)] as string || ''}
-                      onChange={(e) => updateTranslation('excerpt', contentLanguage, e.target.value)}
-                      placeholder={`Enter excerpt in ${getCurrentLanguageInfo().nativeName}`}
-                      className="min-h-[80px]"
                     />
                   </div>
                   
@@ -1186,7 +1199,43 @@ export default function AdminArticles() {
                   />
                 </div>
               </div>
+
+              {/* Title Background Image Upload */}
+              <div className="bg-white p-6 rounded-lg border shadow-sm">
+                <h2 className="text-xl font-semibold mb-6">Title Background Image</h2>
+                <div className="space-y-3">
+                  {/* Debug info */}
+                  <div className="text-xs text-gray-500 p-2 bg-gray-100 rounded">
+                    Current value: {article.title_background_image || 'No image set'}
+                  </div>
+                  
+                  {article.title_background_image && (
+                    <img 
+                      src={article.title_background_image} 
+                      alt="Title Background" 
+                      className="w-full h-32 object-cover rounded-lg border"
+                    />
+                  )}
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="file" 
+                      id="title-background-upload"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm flex-1" 
+                      accept="image/*"
+                      onChange={handleTitleBackgroundImageUpload}
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-9 px-3"
+                      onClick={() => document.getElementById('title-background-upload')?.click()}
+                    >
+                      <Upload className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
+              </div>
+            </div>
                 
             {/* Right Column - Settings & Configuration */}
             <div className="space-y-6">
@@ -1241,21 +1290,21 @@ export default function AdminArticles() {
                   <div className="flex flex-wrap gap-2">
                     {availableTags.map(tag => (
                       <Button
-                        key={tag}
-                        variant={selectedTags.includes(tag) ? "default" : "outline"}
+                        key={tag.id}
+                        variant={selectedTags.includes(tag.id) ? "default" : "outline"}
                         size="sm"
                         onClick={() => {
-                          if (selectedTags.includes(tag)) {
-                            setSelectedTags(selectedTags.filter(t => t !== tag));
+                          if (selectedTags.includes(tag.id)) {
+                            setSelectedTags(selectedTags.filter(t => t !== tag.id));
                           } else {
-                            setSelectedTags([...selectedTags, tag]);
+                            setSelectedTags([...selectedTags, tag.id]);
                           }
                         }}
                         className="h-8"
                       >
-                        {tag}
-                        {selectedTags.includes(tag) && <Check className="w-3 h-3 ml-1" />}
-                </Button>
+                        {tag.name}
+                        {selectedTags.includes(tag.id) && <Check className="h-3 w-3 ml-1" />}
+                        </Button>
                     ))}
               </div>
         </div>

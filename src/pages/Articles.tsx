@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Link, useNavigate } from 'react-router-dom';
-import { Calendar, Clock, User, Eye, ArrowRight, FileText, TrendingUp, BookOpen, BarChart3, Zap, Building, Home, Heart, Truck, Droplets, Settings } from 'lucide-react';
+import { Calendar, Clock, User, Eye, ArrowRight, FileText, TrendingUp, BookOpen, BarChart3, Building, Home, Heart, Truck, Droplets, Settings } from 'lucide-react';
 import bgMain from '@/assets/17580.jpg';
 import bgTitle from '@/assets/pexels-pixabay-159306.png';
 import articleService, { Article, ArticleTag } from '@/services/articleService';
@@ -40,27 +40,6 @@ const ArticleCard: React.FC<{ article: Article }> = ({ article }) => {
     return fallback;
   };
 
-  const getCategoryIcon = (category: string) => {
-    const iconMap: Record<string, any> = {
-      'Infrastructure': BarChart3,
-      'Industrial': TrendingUp,
-      'High-Tech': Zap,
-      'Commercial': Building,
-      'Residential': Home,
-      'Healthcare': Heart,
-      'Education': BookOpen,
-      'Transportation': Truck,
-      'Energy': Zap,
-      'Water Treatment': Droplets,
-      'Manufacturing': Settings,
-      'General': FileText
-    };
-    return iconMap[category] || FileText;
-  };
-
-  const category = article.categories_multilingual?.en || 'General';
-  const IconComponent = getCategoryIcon(category);
-
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <div className="relative">
@@ -71,12 +50,6 @@ const ArticleCard: React.FC<{ article: Article }> = ({ article }) => {
             className="w-full h-48 object-cover"
           />
         )}
-        <div className="absolute top-4 left-4">
-          <Badge className="bg-blue-50 border-blue-200 text-blue-800 border">
-            <IconComponent className="w-4 h-4 mr-2" />
-            {category}
-          </Badge>
-        </div>
       </div>
       
       <CardContent className="p-6">

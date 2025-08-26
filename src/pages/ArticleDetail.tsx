@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Calendar, User, Tag, Clock } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Clock, FileText } from 'lucide-react';
 import bgMain from '@/assets/17580.jpg';
 import bgTitle from '@/assets/pexels-pixabay-159306.png';
 import articleService, { Article } from '@/services/articleService';
@@ -304,7 +304,7 @@ const ArticleDetail = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-20">
             <div className="text-red-400 mb-4">
-              <Tag className="w-24 h-24 mx-auto" />
+              <FileText className="w-24 h-24 mx-auto" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Article Not Found</h1>
             <p className="text-gray-600 mb-4">{error || 'The article you are looking for does not exist.'}</p>
@@ -315,8 +315,8 @@ const ArticleDetail = () => {
             )}
             <div className="space-y-3">
               <Link to="/articles">
-                <Button variant="outline">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
+                <Button variant="outline" className="justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-white bg-transparent text-white hover:bg-white hover:text-red-600 h-9 px-3 flex items-center gap-2">
+                  <ArrowLeft className="w-4 h-4" />
                   Back to Articles
                 </Button>
               </Link>
@@ -338,31 +338,34 @@ const ArticleDetail = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="relative text-white min-h-[400px] flex items-center mt-20" style={{
-        background: article.featured_image 
-          ? `linear-gradient(rgba(37, 99, 235, 0.8), rgba(79, 70, 229, 0.8)), url(${article.featured_image})`
-          : 'linear-gradient(to right, rgb(37, 99, 235), rgb(79, 70, 229))'
+      <div className="relative py-16 mb-12 mt-20" style={{
+        backgroundImage: article.title_background_image 
+          ? `url(${article.title_background_image})`
+          : 'linear-gradient(to right, rgb(37, 99, 235), rgb(79, 70, 229))',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center center',
+        backgroundAttachment: 'fixed'
       }}>
-        <div className="container mx-auto px-4 py-20">
-          {/* Back Button - Positioned at top left */}
-          <div className="absolute top-4 left-4 z-10">
+        {/* Dimming overlay */}
+        <div className="absolute inset-0 bg-black/40"></div>
+        
+        <div className="relative z-10 container mx-auto text-center">
+          <h1 className="uniform-page-title text-white" style={{textShadow: 'rgba(0, 0, 0, 0.8) 2px 2px 4px'}}>
+            {getLocalizedText(article, 'title', 'Untitled Article')}
+          </h1>
+          
+          {/* Back Button - Positioned below the title */}
+          <div className="mt-8">
             <Link to="/articles">
-              <Button variant="outline" className="text-white border-white hover:bg-white hover:text-blue-600">
-                <ArrowLeft className="w-4 h-4 mr-2" />
+              <Button variant="outline" className="justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-white bg-transparent text-white hover:bg-white hover:text-red-600 h-9 px-3 flex items-center gap-2">
+                <ArrowLeft className="w-4 h-4" />
                 Back to Articles
               </Button>
             </Link>
           </div>
-          
-          <div className="text-center">
-                         <h1 className="text-4xl md:text-6xl font-bold mb-6">
-               {getLocalizedText(article, 'title', 'Untitled Article')}
-          </h1>
-             <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
-               {getLocalizedText(article, 'excerpt', 'No excerpt available')}
-             </p>
-          </div>
         </div>
+        
+        {/* Remove the old top-left positioned button */}
       </div>
 
       {/* Article Content */}
@@ -384,10 +387,6 @@ const ArticleDetail = () => {
             <div className="flex items-center gap-2">
                  <User className="w-4 h-4" />
                  <span>{getLocalizedText(article, 'author', 'Unknown Author')}</span>
-            </div>
-               <div className="flex items-center gap-2">
-                 <Tag className="w-4 h-4" />
-                 <span>{getLocalizedText(article, 'category', 'Uncategorized')}</span>
         </div>
       </div>
       
