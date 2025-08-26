@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -79,6 +79,51 @@ export default function AddArticle() {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
+  // Initialize article state with empty values for all languages
+  useEffect(() => {
+    const initialArticle: Article = {
+      slug: '',
+      title_en: '',
+      title_zh_hant: '',
+      title_ja: '',
+      title_ko: '',
+      title_th: '',
+      title_vi: '',
+      excerpt_en: '',
+      excerpt_zh_hant: '',
+      excerpt_ja: '',
+      excerpt_ko: '',
+      excerpt_th: '',
+      excerpt_vi: '',
+      author_en: '',
+      author_zh_hant: '',
+      author_ja: '',
+      author_ko: '',
+      author_th: '',
+      author_vi: '',
+      category_en: '',
+      category_zh_hant: '',
+      category_ja: '',
+      category_ko: '',
+      category_th: '',
+      category_vi: '',
+      read_time: 5,
+      is_published: false,
+      featured_image: '',
+      title_background_image: '',
+      card_image: '',
+      content_blocks_en: [],
+      content_blocks_zh_hant: [],
+      content_blocks_ja: [],
+      content_blocks_ko: [],
+      content_blocks_th: [],
+      content_blocks_vi: []
+    };
+    
+    setArticle(initialArticle);
+    console.log('Article state initialized');
+  }, []);
+
   useEffect(() => {
     loadTags();
   }, []);
@@ -155,12 +200,22 @@ export default function AddArticle() {
     }
   };
 
-  const updateTranslation = (field: string, language: string, value: string) => {
-    setArticle(prev => ({
-      ...prev,
-      [`${field}_${language}`]: value
-    }));
-  };
+  const updateTranslation = useCallback((field: string, language: string, value: string) => {
+    setArticle(prev => {
+      const newState = {
+        ...prev,
+        [`${field}_${language}`]: value
+      };
+      console.log(`Updating ${field}_${language} to:`, value);
+      return newState;
+    });
+  }, []);
+
+  // Helper function to get current field value
+  const getFieldValue = useCallback((field: string, language: string): string => {
+    const fieldKey = `${field}_${language}` as keyof Article;
+    return (article[fieldKey] as string) || '';
+  }, [article]);
 
   const languages = [
     { code: 'en', name: 'English' },
@@ -206,9 +261,21 @@ export default function AddArticle() {
                   <Label htmlFor={`title-${lang.code}`}>Article Title ({lang.name})</Label>
                   <Input
                     id={`title-${lang.code}`}
-                    value={article[`title_${lang.code}` as keyof Article] as string || ''}
-                    onChange={(e) => updateTranslation('title', lang.code, e.target.value)}
+                    value={getFieldValue('title', lang.code)}
+                    onChange={(e) => {
+                      e.preventDefault();
+                      const value = e.target.value;
+                      console.log(`Title ${lang.code} input change:`, value);
+                      updateTranslation('title', lang.code, value);
+                    }}
+                    onKeyDown={(e) => {
+                      // Prevent any weird key handling
+                      if (e.key === 'Backspace' || e.key === 'Delete') {
+                        e.stopPropagation();
+                      }
+                    }}
                     placeholder={`Enter title in ${lang.name}`}
+                    className="w-full"
                   />
                 </div>
                 
@@ -216,9 +283,21 @@ export default function AddArticle() {
                   <Label htmlFor={`author-${lang.code}`}>Author ({lang.name})</Label>
                   <Input
                     id={`author-${lang.code}`}
-                    value={article[`author_${lang.code}` as keyof Article] as string || ''}
-                    onChange={(e) => updateTranslation('author', lang.code, e.target.value)}
+                    value={getFieldValue('author', lang.code)}
+                    onChange={(e) => {
+                      e.preventDefault();
+                      const value = e.target.value;
+                      console.log(`Author ${lang.code} input change:`, value);
+                      updateTranslation('author', lang.code, value);
+                    }}
+                    onKeyDown={(e) => {
+                      // Prevent any weird key handling
+                      if (e.key === 'Backspace' || e.key === 'Delete') {
+                        e.stopPropagation();
+                      }
+                    }}
                     placeholder={`Enter author in ${lang.name}`}
+                    className="w-full"
                   />
                 </div>
                 
@@ -226,9 +305,21 @@ export default function AddArticle() {
                   <Label htmlFor={`excerpt-${lang.code}`}>Article Excerpt ({lang.name})</Label>
                   <Input
                     id={`excerpt-${lang.code}`}
-                    value={article[`excerpt_${lang.code}` as keyof Article] as string || ''}
-                    onChange={(e) => updateTranslation('excerpt', lang.code, e.target.value)}
+                    value={getFieldValue('excerpt', lang.code)}
+                    onChange={(e) => {
+                      e.preventDefault();
+                      const value = e.target.value;
+                      console.log(`Excerpt ${lang.code} input change:`, value);
+                      updateTranslation('excerpt', lang.code, value);
+                    }}
+                    onKeyDown={(e) => {
+                      // Prevent any weird key handling
+                      if (e.key === 'Backspace' || e.key === 'Delete') {
+                        e.stopPropagation();
+                      }
+                    }}
                     placeholder={`Enter excerpt in ${lang.name}`}
+                    className="w-full"
                   />
                 </div>
               </div>
