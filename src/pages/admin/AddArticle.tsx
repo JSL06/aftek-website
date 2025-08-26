@@ -15,6 +15,7 @@ import articleService, { Article, ArticleTag } from '@/services/articleService';
 import TagSelector from '@/components/TagSelector';
 import { ArrowLeft, Save, Upload, Image as ImageIcon, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
 
 const articleTemplates = [
   { id: 'news', name: 'News', description: 'Company news and announcements', icon: '📰' },
@@ -62,6 +63,8 @@ export default function AddArticle() {
     read_time: 5,
     is_published: false,
     featured_image: '',
+    title_background_image: '',
+    card_image: '',
     content_blocks_en: [],
     content_blocks_zh_hant: [],
     content_blocks_ja: [],
@@ -291,9 +294,16 @@ export default function AddArticle() {
 
       {/* Image Upload */}
       <div className="bg-white p-4 rounded-lg border">
-        <h2 className="text-lg font-semibold mb-4">Featured Image</h2>
-        <div className="space-y-3">
-          {/* Current Image Display */}
+        <h2 className="text-lg font-semibold mb-4">Article Images</h2>
+        
+        {/* Featured Image */}
+        <div className="space-y-3 mb-6">
+          <div className="flex items-center gap-2">
+            <h3 className="text-md font-medium">Featured Image</h3>
+            <Badge variant="secondary">Main article image</Badge>
+          </div>
+          
+          {/* Current Featured Image Display */}
           {article.featured_image && (
             <div className="relative">
               <img
@@ -315,7 +325,7 @@ export default function AddArticle() {
             </div>
           )}
           
-          {/* File input and upload button - EXACT same pattern as working projects */}
+          {/* Featured Image Upload */}
           <div className="flex items-center gap-2">
             <input
               type="file"
@@ -412,7 +422,247 @@ export default function AddArticle() {
           </div>
           
           <p className="text-xs text-muted-foreground">
-            Upload a new featured image. Supported formats: JPG, PNG, GIF. Max size: 10MB
+            Main image displayed in article cards and detail pages. Recommended: 1200x630px, JPG/PNG, max 10MB
+          </p>
+        </div>
+
+        {/* Title Background Image */}
+        <div className="space-y-3 mb-6">
+          <div className="flex items-center gap-2">
+            <h3 className="text-md font-medium">Title Background Image</h3>
+            <Badge variant="outline">Optional</Badge>
+          </div>
+          
+          {/* Current Title Background Image Display */}
+          {article.title_background_image && (
+            <div className="relative">
+              <img
+                src={article.title_background_image}
+                alt="Current title background image"
+                className="w-full h-24 object-cover rounded-lg border"
+              />
+              <Button
+                variant="destructive"
+                size="sm"
+                className="absolute top-2 right-2 h-6 w-6 p-0"
+                onClick={() => {
+                  setArticle(prev => ({ ...prev, title_background_image: '' }));
+                  setUploadedImages(prev => prev.filter(img => img !== article.title_background_image));
+                }}
+              >
+                ×
+              </Button>
+            </div>
+          )}
+          
+          {/* Title Background Image Upload */}
+          <div className="flex items-center gap-2">
+            <input
+              type="file"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm flex-1"
+              accept="image/*"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  try {
+                    setIsUploading(true);
+                    console.log('Starting title background image upload:', file.name, file.size, file.type);
+                    
+                    // Check buckets and find suitable one
+                    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+                    if (bucketsError) {
+                      console.error('Error listing buckets:', bucketsError);
+                      throw new Error('Failed to check storage buckets');
+                    }
+                    
+                    let targetBucket = 'article-images';
+                    const availableBuckets = buckets || [];
+                    
+                    if (!availableBuckets.some(b => b.name === 'article-images')) {
+                      const imageBucket = availableBuckets.find(b => 
+                        b.name.includes('image') || b.name.includes('media') || b.name.includes('upload') || b.name.includes('product')
+                      );
+                      
+                      if (imageBucket) {
+                        targetBucket = imageBucket.name;
+                        console.log(`Using fallback bucket: ${targetBucket}`);
+                      } else {
+                        throw new Error('No suitable storage bucket found. Please create an article-images bucket in Supabase.');
+                      }
+                    }
+                    
+                    const fileName = `article-title-bg-${Date.now()}-${file.name}`;
+                    console.log(`Uploading to bucket: ${targetBucket}, path: ${fileName}`);
+                    
+                    const { data, error } = await supabase.storage
+                      .from(targetBucket)
+                      .upload(fileName, file);
+                    
+                    if (error) {
+                      console.error('Supabase upload error:', error);
+                      throw error;
+                    }
+                    
+                    const { data: { publicUrl } } = supabase.storage
+                      .from(targetBucket)
+                      .getPublicUrl(fileName);
+                    
+                    console.log('Title background image upload successful:', publicUrl);
+                    
+                    setArticle(prev => ({ ...prev, title_background_image: publicUrl }));
+                    setUploadedImages(prev => [...prev, publicUrl]);
+                    
+                    toast({
+                      title: "Success",
+                      description: "Title background image uploaded successfully"
+                    });
+                    
+                  } catch (error) {
+                    console.error('Error uploading title background image:', error);
+                    toast({
+                      title: "Error",
+                      description: `Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                      variant: "destructive"
+                    });
+                  } finally {
+                    setIsUploading(false);
+                  }
+                }
+              }}
+              disabled={isUploading}
+            />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="px-3"
+              disabled={isUploading}
+            >
+              <Upload className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <p className="text-xs text-muted-foreground">
+            Background image for article title section. Recommended: 1920x400px, JPG/PNG, max 10MB
+          </p>
+        </div>
+
+        {/* Card Image */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <h3 className="text-md font-medium">Card Image</h3>
+            <Badge variant="outline">Optional</Badge>
+          </div>
+          
+          {/* Current Card Image Display */}
+          {article.card_image && (
+            <div className="relative">
+              <img
+                src={article.card_image}
+                alt="Current card image"
+                className="w-full h-24 object-cover rounded-lg border"
+              />
+              <Button
+                variant="destructive"
+                size="sm"
+                className="absolute top-2 right-2 h-6 w-6 p-0"
+                onClick={() => {
+                  setArticle(prev => ({ ...prev, card_image: '' }));
+                  setUploadedImages(prev => prev.filter(img => img !== article.card_image));
+                }}
+              >
+                ×
+              </Button>
+            </div>
+          )}
+          
+          {/* Card Image Upload */}
+          <div className="flex items-center gap-2">
+            <input
+              type="file"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm flex-1"
+              accept="image/*"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  try {
+                    setIsUploading(true);
+                    console.log('Starting card image upload:', file.name, file.size, file.type);
+                    
+                    // Check buckets and find suitable one
+                    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+                    if (bucketsError) {
+                      console.error('Error listing buckets:', bucketsError);
+                      throw new Error('Failed to check storage buckets');
+                    }
+                    
+                    let targetBucket = 'article-images';
+                    const availableBuckets = buckets || [];
+                    
+                    if (!availableBuckets.some(b => b.name === 'article-images')) {
+                      const imageBucket = availableBuckets.find(b => 
+                        b.name.includes('image') || b.name.includes('media') || b.name.includes('upload') || b.name.includes('product')
+                      );
+                      
+                      if (imageBucket) {
+                        targetBucket = imageBucket.name;
+                        console.log(`Using fallback bucket: ${targetBucket}`);
+                      } else {
+                        throw new Error('No suitable storage bucket found. Please create an article-images bucket in Supabase.');
+                      }
+                    }
+                    
+                    const fileName = `article-card-${Date.now()}-${file.name}`;
+                    console.log(`Uploading to bucket: ${targetBucket}, path: ${fileName}`);
+                    
+                    const { data, error } = await supabase.storage
+                      .from(targetBucket)
+                      .upload(fileName, file);
+                    
+                    if (error) {
+                      console.error('Supabase upload error:', error);
+                      throw error;
+                    }
+                    
+                    const { data: { publicUrl } } = supabase.storage
+                      .from(targetBucket)
+                      .getPublicUrl(fileName);
+                    
+                    console.log('Card image upload successful:', publicUrl);
+                    
+                    setArticle(prev => ({ ...prev, card_image: publicUrl }));
+                    setUploadedImages(prev => [...prev, publicUrl]);
+                    
+                    toast({
+                      title: "Success",
+                      description: "Card image uploaded successfully"
+                    });
+                    
+                  } catch (error) {
+                    console.error('Error uploading card image:', error);
+                    toast({
+                      title: "Error",
+                      description: `Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                      variant: "destructive"
+                    });
+                  } finally {
+                    setIsUploading(false);
+                  }
+                }
+              }}
+              disabled={isUploading}
+            />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="px-3"
+              disabled={isUploading}
+            >
+              <Upload className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <p className="text-xs text-muted-foreground">
+            Image displayed in article cards and lists. Recommended: 400x300px, JPG/PNG, max 10MB
           </p>
         </div>
       </div>

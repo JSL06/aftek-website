@@ -21,6 +21,8 @@ export interface Article {
   id?: string;
   slug: string;
   featured_image?: string;
+  title_background_image?: string;
+  card_image?: string;
   read_time?: number;
   published_at?: string;
   is_published?: boolean;
@@ -81,6 +83,8 @@ export interface MultilingualArticle {
   id?: string;
   slug: string;
   featured_image?: string;
+  title_background_image?: string;
+  card_image?: string;
   read_time?: number;
   published_at?: string;
   is_published?: boolean;
@@ -248,57 +252,22 @@ class ArticleService {
         article = data as Article;
         
         if (article) {
-          // Ensure content_blocks is properly parsed
-          if (typeof article.content_blocks === 'string') {
-            try {
-              article.content_blocks = JSON.parse(article.content_blocks);
-            } catch (e) {
-              console.warn('Failed to parse content_blocks:', e);
-              article.content_blocks = [];
-            }
-          }
+          // Ensure content blocks are properly parsed for all languages
+          const languageFields = ['en', 'zh_hant', 'ja', 'ko', 'th', 'vi'];
           
-          // Ensure other JSONB fields are properly parsed
-          if (typeof article.titles === 'string') {
-            try {
-              article.titles = JSON.parse(article.titles);
-            } catch (e) {
-              article.titles = {};
+          languageFields.forEach(lang => {
+            const contentField = `content_blocks_${lang}` as keyof Article;
+            if (typeof article[contentField] === 'string') {
+              try {
+                (article as any)[contentField] = JSON.parse(article[contentField] as string);
+              } catch (e) {
+                console.warn(`Failed to parse content_blocks_${lang}:`, e);
+                (article as any)[contentField] = [];
+              }
             }
-          }
+          });
           
-          if (typeof article.contents === 'string') {
-            try {
-              article.contents = JSON.parse(article.contents);
-            } catch (e) {
-              article.contents = {};
-            }
-          }
-          
-          if (typeof article.excerpts === 'string') {
-            try {
-              article.excerpts = JSON.parse(article.excerpts);
-            } catch (e) {
-              article.excerpts = {};
-            }
-          }
-          
-          if (typeof article.authors_multilingual === 'string') {
-            try {
-              article.authors_multilingual = JSON.parse(article.authors_multilingual);
-            } catch (e) {
-              article.authors_multilingual = {};
-            }
-          }
-          
-          if (typeof article.categories_multilingual === 'string') {
-            try {
-              article.categories_multilingual = JSON.parse(article.categories_multilingual);
-            } catch (e) {
-              article.categories_multilingual = {};
-            }
-          }
-          
+          // Ensure related content fields are properly parsed
           if (typeof article.related_products === 'string') {
             try {
               article.related_products = JSON.parse(article.related_products);
@@ -355,57 +324,22 @@ class ArticleService {
         article = data as Article;
         
         if (article) {
-          // Ensure content_blocks is properly parsed
-          if (typeof article.content_blocks === 'string') {
-            try {
-              article.content_blocks = JSON.parse(article.content_blocks);
-            } catch (e) {
-              console.warn('Failed to parse content_blocks:', e);
-              article.content_blocks = [];
-            }
-          }
+          // Ensure content blocks are properly parsed for all languages
+          const languageFields = ['en', 'zh_hant', 'ja', 'ko', 'th', 'vi'];
           
-          // Ensure other JSONB fields are properly parsed
-          if (typeof article.titles === 'string') {
-            try {
-              article.titles = JSON.parse(article.titles);
-            } catch (e) {
-              article.titles = {};
+          languageFields.forEach(lang => {
+            const contentField = `content_blocks_${lang}` as keyof Article;
+            if (typeof article[contentField] === 'string') {
+              try {
+                (article as any)[contentField] = JSON.parse(article[contentField] as string);
+              } catch (e) {
+                console.warn(`Failed to parse content_blocks_${lang}:`, e);
+                (article as any)[contentField] = [];
+              }
             }
-          }
+          });
           
-          if (typeof article.contents === 'string') {
-            try {
-              article.contents = JSON.parse(article.contents);
-            } catch (e) {
-              article.contents = {};
-            }
-          }
-          
-          if (typeof article.excerpts === 'string') {
-            try {
-              article.excerpts = JSON.parse(article.excerpts);
-            } catch (e) {
-              article.excerpts = {};
-            }
-          }
-          
-          if (typeof article.authors_multilingual === 'string') {
-            try {
-              article.authors_multilingual = JSON.parse(article.authors_multilingual);
-            } catch (e) {
-              article.authors_multilingual = {};
-            }
-          }
-          
-          if (typeof article.categories_multilingual === 'string') {
-            try {
-              article.categories_multilingual = JSON.parse(article.categories_multilingual);
-            } catch (e) {
-              article.categories_multilingual = {};
-            }
-          }
-          
+          // Ensure related content fields are properly parsed
           if (typeof article.related_products === 'string') {
             try {
               article.related_products = JSON.parse(article.related_products);
