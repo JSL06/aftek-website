@@ -69,6 +69,14 @@ export interface Article {
   content_blocks_th?: ContentBlock[];
   content_blocks_vi?: ContentBlock[];
   
+  // Separate language columns for content (plain text)
+  content_en?: string;
+  content_zh_hant?: string;
+  content_ja?: string;
+  content_ko?: string;
+  content_th?: string;
+  content_vi?: string;
+  
   // Related data
   tags?: ArticleTag[];
   images?: ArticleImage[];
@@ -130,6 +138,14 @@ export interface MultilingualArticle {
   content_blocks_ko?: ContentBlock[];
   content_blocks_th?: ContentBlock[];
   content_blocks_vi?: ContentBlock[];
+  
+  // Separate language columns for content (plain text)
+  content_en?: string;
+  content_zh_hant?: string;
+  content_ja?: string;
+  content_ko?: string;
+  content_th?: string;
+  content_vi?: string;
   
   // Related data
   tags?: ArticleTag[];
@@ -432,13 +448,13 @@ class ArticleService {
         content_blocks_th: article.content_blocks_th,
         content_blocks_vi: article.content_blocks_vi,
         
-        // Legacy multilingual fields (for backward compatibility)
-        titles: article.titles,
-        contents: article.contents,
-        excerpts: article.excerpts,
-        authors_multilingual: article.authors_multilingual,
-        categories_multilingual: article.categories_multilingual,
-        content_blocks: article.content_blocks,
+        // Content fields for each language
+        content_en: article.content_en,
+        content_zh_hant: article.content_zh_hant,
+        content_ja: article.content_ja,
+        content_ko: article.content_ko,
+        content_th: article.content_th,
+        content_vi: article.content_vi,
         
         related_products: article.related_products,
         related_links: article.related_links,
@@ -519,13 +535,13 @@ class ArticleService {
       if (updates.content_blocks_th !== undefined) validUpdates.content_blocks_th = updates.content_blocks_th;
       if (updates.content_blocks_vi !== undefined) validUpdates.content_blocks_vi = updates.content_blocks_vi;
       
-      // Legacy multilingual fields (for backward compatibility)
-      if (updates.titles !== undefined) validUpdates.titles = updates.titles;
-      if (updates.contents !== undefined) validUpdates.contents = updates.contents;
-      if (updates.excerpts !== undefined) validUpdates.excerpts = updates.excerpts;
-      if (updates.authors_multilingual !== undefined) validUpdates.authors_multilingual = updates.authors_multilingual;
-      if (updates.categories_multilingual !== undefined) validUpdates.categories_multilingual = updates.categories_multilingual;
-      if (updates.content_blocks !== undefined) validUpdates.content_blocks = updates.content_blocks;
+      // Content fields for each language
+      if (updates.content_en !== undefined) validUpdates.content_en = updates.content_en;
+      if (updates.content_zh_hant !== undefined) validUpdates.content_zh_hant = updates.content_zh_hant;
+      if (updates.content_ja !== undefined) validUpdates.content_ja = updates.content_ja;
+      if (updates.content_ko !== undefined) validUpdates.content_ko = updates.content_ko;
+      if (updates.content_th !== undefined) validUpdates.content_th = updates.content_th;
+      if (updates.content_vi !== undefined) validUpdates.content_vi = updates.content_vi;
       
       // Related content fields
       if (updates.related_products !== undefined) validUpdates.related_products = updates.related_products;
@@ -748,12 +764,36 @@ class ArticleService {
       is_published: dbArticle.is_published,
       created_at: dbArticle.created_at,
       updated_at: dbArticle.updated_at,
-      titles: dbArticle.titles || {},
-      contents: dbArticle.contents || {},
-      excerpts: dbArticle.excerpts || {},
-      authors_multilingual: dbArticle.authors_multilingual || {},
-      categories_multilingual: dbArticle.categories_multilingual || {},
-      content_blocks: dbArticle.content_blocks || [],
+      title_en: dbArticle.title_en || '',
+      title_zh_hant: dbArticle.title_zh_hant || '',
+      title_ja: dbArticle.title_ja || '',
+      title_ko: dbArticle.title_ko || '',
+      title_th: dbArticle.title_th || '',
+      title_vi: dbArticle.title_vi || '',
+      excerpt_en: dbArticle.excerpt_en || '',
+      excerpt_zh_hant: dbArticle.excerpt_zh_hant || '',
+      excerpt_ja: dbArticle.excerpt_ja || '',
+      excerpt_ko: dbArticle.excerpt_ko || '',
+      excerpt_th: dbArticle.excerpt_th || '',
+      excerpt_vi: dbArticle.excerpt_vi || '',
+      author_en: dbArticle.author_en || '',
+      author_zh_hant: dbArticle.author_zh_hant || '',
+      author_ja: dbArticle.author_ja || '',
+      author_ko: dbArticle.author_ko || '',
+      author_th: dbArticle.author_th || '',
+      author_vi: dbArticle.author_vi || '',
+      category_en: dbArticle.category_en || '',
+      category_zh_hant: dbArticle.category_zh_hant || '',
+      category_ja: dbArticle.category_ja || '',
+      category_ko: dbArticle.category_ko || '',
+      category_th: dbArticle.category_th || '',
+      category_vi: dbArticle.category_vi || '',
+      content_en: dbArticle.content_en || '',
+      content_zh_hant: dbArticle.content_zh_hant || '',
+      content_ja: dbArticle.content_ja || '',
+      content_ko: dbArticle.content_ko || '',
+      content_th: dbArticle.content_th || '',
+      content_vi: dbArticle.content_vi || '',
       tags: dbArticle.tags || [],
       images: dbArticle.images || []
     };
@@ -767,12 +807,36 @@ class ArticleService {
       read_time: article.read_time,
       published_at: article.published_at,
       is_published: article.is_published,
-      titles: article.titles,
-      contents: article.contents,
-      excerpts: article.excerpts,
-      authors_multilingual: article.authors_multilingual,
-      categories_multilingual: article.categories_multilingual,
-      content_blocks: article.content_blocks || []
+      title_en: article.title_en,
+      title_zh_hant: article.title_zh_hant,
+      title_ja: article.title_ja,
+      title_ko: article.title_ko,
+      title_th: article.title_th,
+      title_vi: article.title_vi,
+      excerpt_en: article.excerpt_en,
+      excerpt_zh_hant: article.excerpt_zh_hant,
+      excerpt_ja: article.excerpt_ja,
+      excerpt_ko: article.excerpt_ko,
+      excerpt_th: article.excerpt_th,
+      excerpt_vi: article.excerpt_vi,
+      author_en: article.author_en,
+      author_zh_hant: article.author_zh_hant,
+      author_ja: article.author_ja,
+      author_ko: article.author_ko,
+      author_th: article.author_th,
+      author_vi: article.author_vi,
+      category_en: article.category_en,
+      category_zh_hant: article.category_zh_hant,
+      category_ja: article.category_ja,
+      category_ko: article.category_ko,
+      category_th: article.category_th,
+      category_vi: article.category_vi,
+      content_en: article.content_en,
+      content_zh_hant: article.content_zh_hant,
+      content_ja: article.content_ja,
+      content_ko: article.content_ko,
+      content_th: article.content_th,
+      content_vi: article.content_vi
     };
   }
 }

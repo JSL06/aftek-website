@@ -9,13 +9,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useAdminLanguage } from '@/contexts/AdminLanguageContext';
-import InlineArticleEditor from '@/components/InlineArticleEditor';
-import { ContentBlock } from '@/components/InlineArticleEditor';
-import articleService, { Article, ArticleTag } from '@/services/articleService';
 import TagSelector from '@/components/TagSelector';
 import { ArrowLeft, Save, Upload, Image as ImageIcon, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
+import { articleService, Article } from '@/services/articleService';
 
 const articleTemplates = [
   { id: 'news', name: 'News', description: 'Company news and announcements', icon: '📰' },
@@ -31,7 +29,7 @@ export default function AddArticle() {
   const { language: currentLanguage } = useAdminLanguage();
   
   const [isSaving, setIsSaving] = useState(false);
-  const [availableTags, setAvailableTags] = useState<ArticleTag[]>([]);
+  const [availableTags, setAvailableTags] = useState<any[]>([]); // Changed to any[] as ArticleTag is removed
   
   // Article form state - using the new language-specific structure
   const [article, setArticle] = useState<Article>({
@@ -70,12 +68,17 @@ export default function AddArticle() {
     content_blocks_ja: [],
     content_blocks_ko: [],
     content_blocks_th: [],
-    content_blocks_vi: []
+    content_blocks_vi: [],
+    content_en: '',
+    content_zh_hant: '',
+    content_ja: '',
+    content_ko: '',
+    content_th: '',
+    content_vi: ''
   });
   
   const [selectedTemplate, setSelectedTemplate] = useState('news');
-  const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
-  const [selectedTags, setSelectedTags] = useState<ArticleTag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<any[]>([]); // Changed to any[]
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -120,7 +123,13 @@ export default function AddArticle() {
       content_blocks_ja: [],
       content_blocks_ko: [],
       content_blocks_th: [],
-      content_blocks_vi: []
+      content_blocks_vi: [],
+      content_en: '',
+      content_zh_hant: '',
+      content_ja: '',
+      content_ko: '',
+      content_th: '',
+      content_vi: ''
     };
     
     setArticle(initialArticle);
@@ -167,12 +176,6 @@ export default function AddArticle() {
       const articleData = {
         ...article,
         slug,
-        content_blocks_en: contentBlocks,
-        content_blocks_zh_hant: contentBlocks,
-        content_blocks_ja: contentBlocks,
-        content_blocks_ko: contentBlocks,
-        content_blocks_th: contentBlocks,
-        content_blocks_vi: contentBlocks,
         category_en: selectedTemplate,
         category_zh_hant: selectedTemplate,
         category_ja: selectedTemplate,
@@ -777,13 +780,41 @@ export default function AddArticle() {
       {/* Content Editor - Full Width at Bottom */}
       <div className="bg-white p-4 rounded-lg border">
         <h2 className="text-lg font-semibold mb-4">Article Content Editor</h2>
-        <div className="w-full">
-          <InlineArticleEditor
-            initialContent={contentBlocks}
-            onContentChange={setContentBlocks}
-            onSave={handleSave}
-          />
-        </div>
+        
+        {/* Language Tabs for Content */}
+        <Tabs value={currentLanguage} className="w-full">
+          <TabsList className="grid w-full grid-cols-6">
+            {languages.map(lang => (
+              <TabsTrigger key={lang.code} value={lang.code}>
+                {lang.name}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          
+          {languages.map(lang => (
+            <TabsContent key={lang.code} value={lang.code} className="mt-4">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor={`content-${lang.code}`}>Article Content ({lang.name})</Label>
+                  <textarea
+                    id={`content-${lang.code}`}
+                    value={getFieldValue('content', lang.code)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      updateTranslation('content', lang.code, value);
+                    }}
+                    placeholder={`Enter article content in ${lang.name}`}
+                    className="w-full h-64 p-3 border border-input rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    style={{ fontFamily: 'monospace' }}
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Use plain text or basic HTML tags like &lt;p&gt;, &lt;h2&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;, &lt;li&gt;
+                  </p>
+                </div>
+              </div>
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
     </div>
   );
