@@ -328,10 +328,42 @@ export default function AddArticle() {
                     setIsUploading(true);
                     console.log('Starting featured image upload:', file.name, file.size, file.type);
                     
+                    // First, check if the article-images bucket exists
+                    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+                    if (bucketsError) {
+                      console.error('Error listing buckets:', bucketsError);
+                      throw new Error('Failed to check storage buckets');
+                    }
+                    
+                    // Find a suitable bucket for images
+                    let targetBucket = 'article-images';
+                    const availableBuckets = buckets || [];
+                    
+                    if (!availableBuckets.some(b => b.name === 'article-images')) {
+                      console.warn('article-images bucket not found, looking for alternatives...');
+                      
+                      // Try to find any existing image bucket
+                      const imageBucket = availableBuckets.find(b => 
+                        b.name.includes('image') || 
+                        b.name.includes('media') || 
+                        b.name.includes('upload') ||
+                        b.name.includes('product') // fallback to product-images if it exists
+                      );
+                      
+                      if (imageBucket) {
+                        targetBucket = imageBucket.name;
+                        console.log(`Using fallback bucket: ${targetBucket}`);
+                      } else {
+                        throw new Error('No suitable storage bucket found. Please create an article-images bucket in Supabase.');
+                      }
+                    }
+                    
                     // EXACT same upload logic as working projects
                     const fileName = `article-featured-${Date.now()}-${file.name}`;
+                    console.log(`Uploading to bucket: ${targetBucket}, path: ${fileName}`);
+                    
                     const { data, error } = await supabase.storage
-                      .from('article-images')
+                      .from(targetBucket)
                       .upload(fileName, file);
                     
                     if (error) {
@@ -341,7 +373,7 @@ export default function AddArticle() {
                     
                     // Get public URL - same as projects
                     const { data: { publicUrl } } = supabase.storage
-                      .from('article-images')
+                      .from(targetBucket)
                       .getPublicUrl(fileName);
                     
                     console.log('Featured image upload successful:', publicUrl);

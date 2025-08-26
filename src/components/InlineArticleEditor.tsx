@@ -167,10 +167,20 @@ export default function InlineArticleEditor({
   // Sync content with initialContent prop when it changes
   useEffect(() => {
     if (initialContent && initialContent.length > 0) {
+      console.log('InlineArticleEditor: initialContent changed, updating content:', initialContent);
       setContent(initialContent);
+    } else if (initialContent && initialContent.length === 0) {
+      console.log('InlineArticleEditor: initialContent is empty, clearing content');
+      setContent([]);
     }
   }, [initialContent]);
 
+  // Force re-render when onLanguageChange is called
+  useEffect(() => {
+    if (onLanguageChange) {
+      console.log('InlineArticleEditor: Language change handler available');
+    }
+  }, [onLanguageChange]);
 
 
   // Fetch products for selection
@@ -321,39 +331,75 @@ export default function InlineArticleEditor({
     const file = event.target.files?.[0];
     if (file) {
       try {
+        console.log('Starting image upload for block:', blockId, 'File:', file.name, file.size, file.type);
+        
+        // First, check if the article-images bucket exists
+        const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+        if (bucketsError) {
+          console.error('Error listing buckets:', bucketsError);
+          throw new Error('Failed to check storage buckets');
+        }
+        
+        // Find a suitable bucket for images
+        let targetBucket = 'article-images';
+        const availableBuckets = buckets || [];
+        
+        if (!availableBuckets.some(b => b.name === 'article-images')) {
+          console.warn('article-images bucket not found, looking for alternatives...');
+          
+          // Try to find any existing image bucket
+          const imageBucket = availableBuckets.find(b => 
+            b.name.includes('image') || 
+            b.name.includes('media') || 
+            b.name.includes('upload') ||
+            b.name.includes('product') // fallback to product-images if it exists
+          );
+          
+          if (imageBucket) {
+            targetBucket = imageBucket.name;
+            console.log(`Using fallback bucket: ${targetBucket}`);
+          } else {
+            throw new Error('No suitable storage bucket found. Please create an article-images bucket in Supabase.');
+          }
+        }
+        
+        // Simplified file path - just use timestamp and filename
         const fileName = `${Date.now()}-${file.name}`;
-        const filePath = `articles/${fileName}`;
+        
+        console.log(`Uploading to bucket: ${targetBucket}, path: ${fileName}`);
 
         const { data, error } = await supabase.storage
-          .from('article-images')
-          .upload(filePath, file, {
+          .from(targetBucket)
+          .upload(fileName, file, {
             contentType: file.type,
             upsert: false,
           });
 
         if (error) {
           console.error('Error uploading image to Supabase:', error);
-          alert('Failed to upload image. Please try again.');
-          return;
+          throw new Error(`Upload failed: ${error.message}`);
         }
 
+        console.log('Upload successful, getting public URL...');
+
         const { data: publicUrlData } = supabase.storage
-          .from('article-images')
-          .getPublicUrl(filePath);
+          .from(targetBucket)
+          .getPublicUrl(fileName);
 
         if (publicUrlData) {
+          console.log('Public URL generated:', publicUrlData.publicUrl);
           updateBlock(blockId, { 
             imageUrl: publicUrlData.publicUrl,
             content: file.name,
             type: 'image'
           });
         } else {
-          console.error('Error getting public URL for image:', publicUrlData);
-          alert('Failed to get image URL. Please try again.');
+          throw new Error('Failed to generate public URL for uploaded image');
         }
       } catch (error) {
         console.error('Error in image upload:', error);
-        alert('Failed to upload image. Please try again.');
+        const errorMessage = error instanceof Error ? error.message : 'Unknown upload error';
+        alert(`Failed to upload image: ${errorMessage}`);
       }
     }
   }, [updateBlock]);

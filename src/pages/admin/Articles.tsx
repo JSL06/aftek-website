@@ -709,13 +709,12 @@ export default function AdminArticles() {
     await new Promise(resolve => setTimeout(resolve, 0));
 
     console.log('Saving article with all language content blocks:', {
-      content_blocks_en: article.content_blocks_en,
-      content_blocks_zh_hant: article.content_blocks_zh_hant,
-      content_blocks_zh_hans: article.content_blocks_zh_hans,
-      content_blocks_ja: article.content_blocks_ja,
-      content_blocks_ko: article.content_blocks_ko,
-      content_blocks_th: article.content_blocks_th,
-      content_blocks_vi: article.content_blocks_vi
+              content_blocks_en: article.content_blocks_en,
+        content_blocks_zh_hant: article.content_blocks_zh_hant,
+        content_blocks_ja: article.content_blocks_ja,
+        content_blocks_ko: article.content_blocks_ko,
+        content_blocks_th: article.content_blocks_th,
+        content_blocks_vi: article.content_blocks_vi
     });
 
     setIsSaving(true);
@@ -733,7 +732,6 @@ export default function AdminArticles() {
         // Ensure all language content blocks are included
         content_blocks_en: article.content_blocks_en || [],
         content_blocks_zh_hant: article.content_blocks_zh_hant || [],
-        content_blocks_zh_hans: article.content_blocks_zh_hans || [],
         content_blocks_ja: article.content_blocks_ja || [],
         content_blocks_ko: article.content_blocks_ko || [],
         content_blocks_th: article.content_blocks_th || [],
@@ -778,28 +776,24 @@ export default function AdminArticles() {
             slug: '',
             title_en: '',
             title_zh_hant: '',
-            title_zh_hans: '',
             title_ja: '',
             title_ko: '',
             title_th: '',
             title_vi: '',
             excerpt_en: '',
             excerpt_zh_hant: '',
-            excerpt_zh_hans: '',
             excerpt_ja: '',
             excerpt_ko: '',
             excerpt_th: '',
             excerpt_vi: '',
             author_en: '',
             author_zh_hant: '',
-            author_zh_hans: '',
             author_ja: '',
             author_ko: '',
             author_th: '',
             author_vi: '',
             category_en: '',
             category_zh_hant: '',
-            category_zh_hans: '',
             category_ja: '',
             category_ko: '',
             category_th: '',
@@ -809,7 +803,6 @@ export default function AdminArticles() {
             featured_image: '',
             content_blocks_en: [],
             content_blocks_zh_hant: [],
-            content_blocks_zh_hans: [],
             content_blocks_ja: [],
             content_blocks_ko: [],
             content_blocks_th: [],
@@ -970,28 +963,28 @@ export default function AdminArticles() {
       slug: '',
       title_en: 'Test Article - All Components',
       title_zh_hant: '',
-      title_zh_hans: '',
+
       title_ja: '',
       title_ko: '',
       title_th: '',
       title_vi: '',
       excerpt_en: 'A comprehensive test article showcasing all editor components.',
       excerpt_zh_hant: '',
-      excerpt_zh_hans: '',
+
       excerpt_ja: '',
       excerpt_ko: '',
       excerpt_th: '',
       excerpt_vi: '',
       author_en: 'Test Author',
       author_zh_hant: '',
-      author_zh_hans: '',
+
       author_ja: '',
       author_ko: '',
       author_th: '',
       author_vi: '',
       category_en: 'Technical',
       category_zh_hant: '',
-      category_zh_hans: '',
+
       category_ja: '',
       category_ko: '',
       category_th: '',
@@ -1001,7 +994,7 @@ export default function AdminArticles() {
       featured_image: '',
       content_blocks_en: testBlocks,
       content_blocks_zh_hant: [],
-      content_blocks_zh_hans: [],
+
       content_blocks_ja: [],
       content_blocks_ko: [],
       content_blocks_th: [],
@@ -1179,6 +1172,7 @@ export default function AdminArticles() {
                     </span>
                   </div>
                   <InlineArticleEditor
+                    key={`${contentLanguage}-${article.id || 'new'}`}
                     initialContent={contentBlocks}
                     onContentChange={handleContentChange}
                     onLanguageChange={handleUnifiedLanguageChange}
