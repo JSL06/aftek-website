@@ -81,12 +81,12 @@ const ModernWysiwygEditor: React.FC<ModernWysiwygEditorProps> = ({
   ];
 
   const fontFamilies = [
+    { value: 'Open Sans', label: 'Open Sans' },
     { value: 'Arial', label: 'Arial' },
-    { value: 'Times New Roman', label: 'Times New Roman' },
-    { value: 'Courier New', label: 'Courier New' },
-    { value: 'Georgia', label: 'Georgia' },
+    { value: 'Helvetica', label: 'Helvetica' },
     { value: 'Verdana', label: 'Verdana' },
-    { value: 'Helvetica', label: 'Helvetica' }
+    { value: 'Georgia', label: 'Georgia' },
+    { value: 'Courier New', label: 'Courier New' }
   ];
 
   const colors = [

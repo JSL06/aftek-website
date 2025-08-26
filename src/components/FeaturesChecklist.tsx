@@ -62,7 +62,7 @@ export const FeaturesChecklist: React.FC<FeaturesChecklistProps> = ({
              id: 'environmental-resistance',
              name: 'Environmental Resistance',
              features: [
-               { id: 'abrasion-resistant', feature_key: 'abrasion-resistant', category: 'environmental-resistance', display_order: 1, is_active: true, translations: { en: 'Abrasion Resistant', 'zh-Hant': '耐磨', 'zh-Hans': '耐磨', ja: '耐摩耗', ko: '내마모성', th: 'ทนการขัดสี', vi: 'Chống mài mòn' } },
+               { id: 'abrasion-resistant', feature_key: 'abrasion-resistant', category: 'environmental-resistance', display_order: 1, is_active: true, translations: { en: 'Abrasion Resistant', 'zh-Hant': '耐磨', ja: '耐摩耗', ko: '내마모성', th: 'ทนการขัดสี', vi: 'Chống mài mòn' } },
                { id: 'chemical-exposure', feature_key: 'chemical-exposure', category: 'environmental-resistance', display_order: 2, is_active: true, translations: { en: 'Chemical Exposure', 'zh-Hant': '化學暴露', 'zh-Hans': '化学暴露', ja: '化学暴露', ko: '화학 노출', th: 'ทนสารเคมี', vi: 'Chống hóa chất' } },
                { id: 'dry-conditions', feature_key: 'dry-conditions', category: 'environmental-resistance', display_order: 3, is_active: true, translations: { en: 'Dry Conditions', 'zh-Hant': '乾燥條件', 'zh-Hans': '干燥条件', ja: '乾燥条件', ko: '건조 조건', th: 'สภาพแห้ง', vi: 'Điều kiện khô' } },
                { id: 'high-traffic-areas', feature_key: 'high-traffic-areas', category: 'environmental-resistance', display_order: 4, is_active: true, translations: { en: 'High Traffic Areas', 'zh-Hant': '高流量區域', 'zh-Hans': '高流量区域', ja: '高交通量エリア', ko: '고교통량 지역', th: 'พื้นที่ที่มีการใช้งานสูง', vi: 'Khu vực sử dụng cao' } },

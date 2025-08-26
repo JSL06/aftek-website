@@ -47,6 +47,7 @@ import UnsavedChangesWarning from './UnsavedChangesWarning';
 const LANGUAGES: { code: Language; name: string; flag: string; nativeName: string }[] = [
   { code: 'en', name: 'English', flag: '🇺🇸', nativeName: 'English' },
   { code: 'zh-Hant', name: '繁體中文', flag: '🇹🇼', nativeName: '繁體中文' },
+  
   { code: 'ja', name: '日本語', flag: '🇯🇵', nativeName: '日本語' },
   { code: 'ko', name: '한국어', flag: '🇰🇷', nativeName: '한국어' },
   { code: 'th', name: 'ไทย', flag: '🇹🇭', nativeName: 'ไทย' },
@@ -110,6 +111,7 @@ const UnifiedContentEditor: React.FC<UnifiedContentEditorProps> = ({
     multilingual: {
       en: { title: '', description: '', content: '' },
       'zh-Hant': { title: '', description: '', content: '' },
+  
       ja: { title: '', description: '', content: '' },
       ko: { title: '', description: '', content: '' },
       th: { title: '', description: '', content: '' },

@@ -1,4 +1,38 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap');
+
+/* Font loading optimization */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/opensans/v40/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4gaVI.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/opensans/v40/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4gaVI.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/opensans/v40/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4gaVI.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/opensans/v40/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4gaVI.woff2') format('woff2');
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -352,62 +386,306 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background-image: url('/aftek-website/assets/17580-CpV1zFPk.jpg');
     background-size: cover;
     background-attachment: fixed;
     background-position: center;
   }
   
-  /* Typography - Open Sans for ALL languages */
+  /* Universal font family override - Force Open Sans for ALL elements and ALL languages */
+  * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Typography - Open Sans for ALL languages with specific weights */
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Open Sans', sans-serif !important;
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
     font-weight: 600; /* Semibold */
   }
   
-  p, span, div, a, button, input, textarea, select {
-    font-family: 'Open Sans', sans-serif !important;
+  p, span, div, a, button, input, textarea, select, label {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
     font-weight: 400; /* Regular */
   }
   
-  /* Ensure Open Sans is used for all languages including Chinese */
-  :lang(ja), :lang(zh-Hant) {
-    font-family: 'Open Sans', sans-serif !important;
+  /* Ensure Open Sans is used for ALL languages including Chinese, Japanese, Korean, Thai, Vietnamese */
+  :lang(ja), :lang(zh-Hant), :lang(zh-Hans), :lang(ko), :lang(th), :lang(vi) {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
   }
   
-  /* Ensure all text elements use Open Sans for all languages */
-  :lang(ja) *, :lang(zh-Hant) * {
-    font-family: 'Open Sans', sans-serif !important;
+  /* Ensure all text elements use Open Sans for ALL languages */
+  :lang(ja) *, :lang(zh-Hant) *, :lang(zh-Hans) *, :lang(ko) *, :lang(th) *, :lang(vi) * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
   }
   
-  /* Additional specific styling for all Chinese variants */
-  html[lang="zh-Hant"], html[lang="zh-Hant"] * {
-    font-family: 'Open Sans', sans-serif !important;
-  }
-  
-  /* Force Open Sans for all text elements with maximum specificity */
-  * {
-    font-family: 'Open Sans', sans-serif !important;
+  /* Additional specific styling for all language variants */
+  html[lang="zh-Hant"], html[lang="zh-Hant"] *,
+  html[lang="zh-Hans"], html[lang="zh-Hans"] *,
+  html[lang="ja"], html[lang="ja"] *,
+  html[lang="ko"], html[lang="ko"] *,
+  html[lang="th"], html[lang="th"] *,
+  html[lang="vi"], html[lang="vi"] * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
   }
   
   /* Override any potential serif fonts */
   .prose, .prose * {
-    font-family: 'Open Sans', sans-serif !important;
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
   }
   
-  /* Ensure mission content uses Open Sans */
-  .text-lg, .text-xl, .text-foreground {
-    font-family: 'Open Sans', sans-serif !important;
+  /* Ensure all text classes use Open Sans */
+  .text-lg, .text-xl, .text-foreground, .text-sm, .text-base, .text-2xl, .text-3xl {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
   }
   
-  /* Specific override for mission content and any potential serif fonts */
-  [class*="text-lg"], [class*="text-xl"], [class*="text-foreground"] {
-    font-family: 'Open Sans', sans-serif !important;
+  /* Specific override for any potential serif fonts */
+  [class*="text-lg"], [class*="text-xl"], [class*="text-foreground"], [class*="text-sm"], [class*="text-base"] {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
   }
   
   /* Override any potential browser default fonts */
   body, html {
-    font-family: 'Open Sans', sans-serif !important;
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for form elements and interactive components */
+  input, textarea, select, button, label, option {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all UI components */
+  .ui-component, .ui-component *,
+  [class*="ui-"], [class*="ui-"] * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Additional font overrides for maximum compatibility */
+  /* Force Open Sans for all possible text elements */
+  .font-sans, .font-serif, .font-mono {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Override any potential serif font classes */
+  [class*="font-serif"] {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Ensure Open Sans for all button and form elements */
+  button, input, textarea, select, option, label, legend, fieldset {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all navigation elements */
+  nav, nav *, header, header *, footer, footer * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all content areas */
+  main, main *, article, article *, section, section *, aside, aside * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all table elements */
+  table, table *, th, td, caption {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all list elements */
+  ul, ol, li, dl, dt, dd {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all heading elements */
+  h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all paragraph and text elements */
+  p, span, div, a, em, strong, b, i, u, s, mark, small, sub, sup {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all form-related elements */
+  .form-input, .form-textarea, .form-select, .form-checkbox, .form-radio {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all button variants */
+  .btn, .button, [class*="btn-"], [class*="button-"] {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all card and container elements */
+  .card, .card *, .container, .container *, .wrapper, .wrapper * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all modal and overlay elements */
+  .modal, .modal *, .overlay, .overlay *, .popup, .popup * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all tooltip and dropdown elements */
+  .tooltip, .tooltip *, .dropdown, .dropdown *, .popover, .popover * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all notification and alert elements */
+  .notification, .notification *, .alert, .alert *, .toast, .toast * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all sidebar and navigation elements */
+  .sidebar, .sidebar *, .navbar, .navbar *, .menu, .menu * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all content editor elements */
+  .editor, .editor *, .wysiwyg, .wysiwyg *, [contenteditable], [contenteditable] * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all admin panel elements */
+  .admin, .admin *, .dashboard, .dashboard *, .panel, .panel * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all multilingual content */
+  .multilingual, .multilingual *, [lang], [lang] * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all Tailwind utility classes */
+  [class*="text-"], [class*="font-"], [class*="leading-"], [class*="tracking-"] {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all custom component classes */
+  [class*="component-"], [class*="ui-"], [class*="widget-"] {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all possible text content */
+  ::before, ::after {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all SVG text elements */
+  svg text, svg tspan {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all canvas text */
+  canvas {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all iframe content */
+  iframe, iframe * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all shadow DOM content */
+  *::part(*), *::theme(*), *::state(*) {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Final override with maximum specificity for any remaining font declarations */
+  html body * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for any dynamically created elements */
+  [data-font] {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Override any inline font-family styles */
+  [style*="font-family: Times"] {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  [style*="font-family: 'Times New Roman'"] {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  [style*="font-family: serif"] {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Final comprehensive override for any remaining font issues */
+  /* This ensures Open Sans is used for ALL text, including Chinese characters */
+  html, html *, body, body * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Specific override for heading elements to ensure consistent font rendering */
+  h1, h2, h3, h4, h5, h6,
+  .text-4xl, .text-5xl, .font-bold,
+  [class*="text-4xl"], [class*="text-5xl"], [class*="font-bold"] {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+    font-weight: 700 !important; /* Ensure consistent bold weight */
+  }
+  
+  /* Force Open Sans for specific Chinese text elements */
+  [class*="text-foreground"] {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Specific override for mission statement paragraph text */
+  .text-lg, .text-xl, .font-medium, .leading-relaxed {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for all paragraph text with specific classes */
+  p.text-lg, p.text-xl, p.font-medium, p.leading-relaxed,
+  p[class*="text-lg"], p[class*="text-xl"], p[class*="font-medium"], p[class*="leading-relaxed"] {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Additional override for any text elements that might have font inconsistencies */
+  .text-center p, .text-center span, .text-center div {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Maximum specificity override for mission statement text */
+  .text-center .text-lg, .text-center .text-xl, .text-center .font-medium,
+  .text-center p.text-lg, .text-center p.text-xl, .text-center p.font-medium,
+  .text-center .leading-relaxed, .text-center p.leading-relaxed {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for any text content that might be rendered with different fonts */
+  .text-center * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Force Open Sans for any elements that might have been missed */
+  [class] {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Ensure consistent font rendering for container and text elements */
+  .container, .container *,
+  .text-center, .text-center *,
+  .max-w-6xl, .max-w-6xl *,
+  .max-w-4xl, .max-w-4xl *,
+  .max-w-3xl, .max-w-3xl * {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  [id] {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  [data-font] {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  }
+  
+  /* Ensure Open Sans is used for all pseudo-elements */
+  *::before, *::after, *::first-line, *::first-letter {
+    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
   }
 }
 
@@ -422,7 +700,7 @@ All colors MUST be HSL.
   letter-spacing: 0.05em;
   border-bottom: 3px solid #9e1717;
   padding-bottom: 0.5rem;
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
   font-weight: 600;
   white-space: nowrap;
 }

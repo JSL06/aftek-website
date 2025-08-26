@@ -7,15 +7,15 @@ import { ArrowLeft, Calendar, User, Tag, Clock } from 'lucide-react';
 import bgMain from '@/assets/17580.jpg';
 import bgTitle from '@/assets/pexels-pixabay-159306.png';
 import articleService, { Article } from '@/services/articleService';
-import InlineArticleEditor from '@/components/InlineArticleEditor';
+import InlineArticleEditor, { ContentBlock } from '@/components/InlineArticleEditor';
 
 const ArticleDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { t, language: currentLanguage } = useTranslation();
+  const { t, currentLanguage } = useTranslation();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   useEffect(() => {
     const fetchArticle = async () => {
       if (!slug) {
@@ -26,18 +26,47 @@ const ArticleDetail = () => {
       
       setLoading(true);
       try {
+        console.log('Fetching article with slug:', slug);
         const data = await articleService.getArticle(slug);
-        if (data && data.is_published) {
-          console.log('Article loaded:', data);
-          console.log('Current language:', currentLanguage);
-          console.log('Content blocks:', data.content_blocks);
-          setArticle(data);
+        console.log('Article service response:', data);
+        
+        if (data) {
+          if (data.is_published) {
+            console.log('Article loaded successfully:', data);
+            console.log('Current language:', currentLanguage);
+            
+            // Get content blocks for the current language
+            const languageSuffix = currentLanguage === 'en' ? '_en' : 
+                                   currentLanguage === 'zh-Hant' ? '_zh_hant' :
+                                   currentLanguage === 'ja' ? '_ja' :
+                                   currentLanguage === 'ko' ? '_ko' :
+                                   currentLanguage === 'th' ? '_th' :
+                                   currentLanguage === 'vi' ? '_vi' : '_en';
+            
+            const contentBlocksField = `content_blocks${languageSuffix}` as keyof Article;
+            const contentBlocks = data[contentBlocksField] as any[];
+            
+            console.log(`Content blocks for language ${currentLanguage} (${contentBlocksField}):`, contentBlocks);
+            setArticle(data);
+          } else {
+            console.log('Article found but not published:', data);
+            setError('This article is not published yet');
+          }
         } else {
-          setError('Article not found or not published');
+          console.log('No article found with slug:', slug);
+          setError('Article not found');
         }
       } catch (error) {
         console.error('Error fetching article:', error);
-        setError('Article not found');
+        if (error && typeof error === 'object' && 'code' in error) {
+          if (error.code === 'PGRST116') {
+            setError('Article not found - this article may have been deleted or moved');
+          } else {
+            setError(`Database error: ${error.code}`);
+          }
+        } else {
+          setError('Failed to load article');
+        }
       } finally {
         setLoading(false);
       }
@@ -278,13 +307,28 @@ const ArticleDetail = () => {
               <Tag className="w-24 h-24 mx-auto" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Article Not Found</h1>
-            <p className="text-gray-600 mb-6">{error || 'The article you are looking for does not exist.'}</p>
-            <Link to="/articles">
-              <Button variant="outline">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Articles
-              </Button>
-            </Link>
+            <p className="text-gray-600 mb-4">{error || 'The article you are looking for does not exist.'}</p>
+            {slug && (
+              <p className="text-sm text-gray-500 mb-6">
+                Requested slug: <code className="bg-gray-100 px-2 py-1 rounded">{slug}</code>
+              </p>
+            )}
+            <div className="space-y-3">
+              <Link to="/articles">
+                <Button variant="outline">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Articles
+                </Button>
+              </Link>
+              <div className="text-sm text-gray-500">
+                <p>This could happen if:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>The article was deleted or moved</li>
+                  <li>The URL is incorrect</li>
+                  <li>The article hasn't been published yet</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -294,15 +338,12 @@ const ArticleDetail = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="relative text-white" style={{
+      <div className="relative text-white min-h-[400px] flex items-center mt-20" style={{
         background: article.featured_image 
           ? `linear-gradient(rgba(37, 99, 235, 0.8), rgba(79, 70, 229, 0.8)), url(${article.featured_image})`
           : 'linear-gradient(to right, rgb(37, 99, 235), rgb(79, 70, 229))'
       }}>
-        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{
-          backgroundImage: article.featured_image ? `url(${article.featured_image})` : 'none'
-        }}></div>
-        <div className="relative container mx-auto px-4 py-20">
+        <div className="container mx-auto px-4 py-20">
           {/* Back Button - Positioned at top left */}
           <div className="absolute top-4 left-4 z-10">
             <Link to="/articles">
@@ -316,7 +357,7 @@ const ArticleDetail = () => {
           <div className="text-center">
                          <h1 className="text-4xl md:text-6xl font-bold mb-6">
                {getLocalizedText(article, 'title', 'Untitled Article')}
-             </h1>
+          </h1>
              <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
                {getLocalizedText(article, 'excerpt', 'No excerpt available')}
              </p>
@@ -330,26 +371,26 @@ const ArticleDetail = () => {
           {/* Article Meta */}
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
             <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600 mb-4">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
                 <span>
                   {new Date(article.published_at || article.created_at || '').toLocaleDateString()}
                 </span>
-              </div>
-              <div className="flex items-center gap-2">
+            </div>
+            <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4" />
                 <span>{article.read_time || 5} min read</span>
-              </div>
-                             <div className="flex items-center gap-2">
+            </div>
+            <div className="flex items-center gap-2">
                  <User className="w-4 h-4" />
                  <span>{getLocalizedText(article, 'author', 'Unknown Author')}</span>
-               </div>
+            </div>
                <div className="flex items-center gap-2">
                  <Tag className="w-4 h-4" />
                  <span>{getLocalizedText(article, 'category', 'Uncategorized')}</span>
-               </div>
-            </div>
-
+        </div>
+      </div>
+      
             {article.tags && article.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {article.tags.map(tag => (
@@ -357,11 +398,11 @@ const ArticleDetail = () => {
                     {tag.name}
                   </Badge>
                 ))}
-              </div>
-            )}
+            </div>
+          )}
           </div>
 
-                     {/* Article Content */}
+          {/* Article Content */}
            <div className="bg-white rounded-lg shadow-md p-6">
              {(() => {
                // Get content blocks for the current language
@@ -374,6 +415,8 @@ const ArticleDetail = () => {
                
                const contentBlocksField = `content_blocks${languageSuffix}` as keyof Article;
                const contentBlocks = article[contentBlocksField] as ContentBlock[];
+               
+               console.log(`Rendering content blocks for language ${currentLanguage} (${contentBlocksField}):`, contentBlocks);
                
                if (contentBlocks && contentBlocks.length > 0) {
                  return (
@@ -400,10 +443,10 @@ const ArticleDetail = () => {
                }
              })()}
            </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+         </div>
+       </div>
+     </div>
+   );
+ };
 
-export default ArticleDetail; 
+ export default ArticleDetail;

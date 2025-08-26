@@ -13,7 +13,8 @@ import InlineArticleEditor from '@/components/InlineArticleEditor';
 import { ContentBlock } from '@/components/InlineArticleEditor';
 import articleService, { Article, ArticleTag } from '@/services/articleService';
 import TagSelector from '@/components/TagSelector';
-import { ArrowLeft, Save, Upload, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Save, Upload, Image as ImageIcon, X } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const articleTemplates = [
   { id: 'news', name: 'News', description: 'Company news and announcements', icon: '📰' },
@@ -31,24 +32,49 @@ export default function AddArticle() {
   const [isSaving, setIsSaving] = useState(false);
   const [availableTags, setAvailableTags] = useState<ArticleTag[]>([]);
   
-  // Article form state
+  // Article form state - using the new language-specific structure
   const [article, setArticle] = useState<Article>({
     slug: '',
-    titles: {},
-    contents: {},
-    excerpts: {},
-    authors_multilingual: {},
-    categories_multilingual: {},
+    title_en: '',
+    title_zh_hant: '',
+    title_ja: '',
+    title_ko: '',
+    title_th: '',
+    title_vi: '',
+    excerpt_en: '',
+    excerpt_zh_hant: '',
+    excerpt_ja: '',
+    excerpt_ko: '',
+    excerpt_th: '',
+    excerpt_vi: '',
+    author_en: '',
+    author_zh_hant: '',
+    author_ja: '',
+    author_ko: '',
+    author_th: '',
+    author_vi: '',
+    category_en: '',
+    category_zh_hant: '',
+    category_ja: '',
+    category_ko: '',
+    category_th: '',
+    category_vi: '',
     read_time: 5,
     is_published: false,
     featured_image: '',
-    content_blocks: []
+    content_blocks_en: [],
+    content_blocks_zh_hant: [],
+    content_blocks_ja: [],
+    content_blocks_ko: [],
+    content_blocks_th: [],
+    content_blocks_vi: []
   });
   
   const [selectedTemplate, setSelectedTemplate] = useState('news');
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
   const [selectedTags, setSelectedTags] = useState<ArticleTag[]>([]);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     loadTags();
@@ -64,10 +90,10 @@ export default function AddArticle() {
   };
 
   const handleSave = async () => {
-    if (!article.titles?.en) {
+    if (!article.title_en) {
       toast({
         title: "Error",
-        description: "Article title is required",
+        description: "Article title in English is required",
         variant: "destructive"
       });
       return;
@@ -76,16 +102,23 @@ export default function AddArticle() {
     setIsSaving(true);
     try {
       // Generate slug from English title
-      const slug = articleService.generateSlug(article.titles.en);
+      const slug = articleService.generateSlug(article.title_en);
       
       const articleData = {
         ...article,
         slug,
-        content_blocks: contentBlocks,
-        categories_multilingual: {
-          ...article.categories_multilingual,
-          en: selectedTemplate
-        }
+        content_blocks_en: contentBlocks,
+        content_blocks_zh_hant: contentBlocks,
+        content_blocks_ja: contentBlocks,
+        content_blocks_ko: contentBlocks,
+        content_blocks_th: contentBlocks,
+        content_blocks_vi: contentBlocks,
+        category_en: selectedTemplate,
+        category_zh_hant: selectedTemplate,
+        category_ja: selectedTemplate,
+        category_ko: selectedTemplate,
+        category_th: selectedTemplate,
+        category_vi: selectedTemplate
       };
 
       const savedArticle = await articleService.addArticle(articleData);
@@ -122,37 +155,13 @@ export default function AddArticle() {
   const updateTranslation = (field: string, language: string, value: string) => {
     setArticle(prev => ({
       ...prev,
-      [field]: {
-        ...prev[field as keyof Article] as Record<string, string>,
-        [language]: value
-      }
+      [`${field}_${language}`]: value
     }));
-  };
-
-  const handleImageUpload = async (file: File) => {
-    try {
-      const imageUrl = await articleService.uploadImage(file);
-      if (imageUrl) {
-        setUploadedImages(prev => [...prev, imageUrl]);
-        toast({
-          title: "Success",
-          description: "Image uploaded successfully"
-        });
-      }
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      toast({
-        title: "Error",
-        description: "Failed to upload image",
-        variant: "destructive"
-      });
-    }
   };
 
   const languages = [
     { code: 'en', name: 'English' },
     { code: 'zh-Hant', name: '繁體中文' },
-    { code: 'zh-Hans', name: '简体中文' },
     { code: 'ja', name: '日本語' },
     { code: 'ko', name: '한국어' },
     { code: 'th', name: 'ไทย' },
@@ -179,7 +188,7 @@ export default function AddArticle() {
       <div className="bg-white p-4 rounded-lg border">
         <h2 className="text-lg font-semibold mb-4">Language Selection</h2>
         <Tabs value={currentLanguage} className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-6">
             {languages.map(lang => (
               <TabsTrigger key={lang.code} value={lang.code}>
                 {lang.name}
@@ -194,8 +203,8 @@ export default function AddArticle() {
                   <Label htmlFor={`title-${lang.code}`}>Article Title ({lang.name})</Label>
                   <Input
                     id={`title-${lang.code}`}
-                    value={article.titles?.[lang.code] || ''}
-                    onChange={(e) => updateTranslation('titles', lang.code, e.target.value)}
+                    value={article[`title_${lang.code}` as keyof Article] as string || ''}
+                    onChange={(e) => updateTranslation('title', lang.code, e.target.value)}
                     placeholder={`Enter title in ${lang.name}`}
                   />
                 </div>
@@ -204,8 +213,8 @@ export default function AddArticle() {
                   <Label htmlFor={`author-${lang.code}`}>Author ({lang.name})</Label>
                   <Input
                     id={`author-${lang.code}`}
-                    value={article.authors_multilingual?.[lang.code] || ''}
-                    onChange={(e) => updateTranslation('authors_multilingual', lang.code, e.target.value)}
+                    value={article[`author_${lang.code}` as keyof Article] as string || ''}
+                    onChange={(e) => updateTranslation('author', lang.code, e.target.value)}
                     placeholder={`Enter author in ${lang.name}`}
                   />
                 </div>
@@ -214,19 +223,9 @@ export default function AddArticle() {
                   <Label htmlFor={`excerpt-${lang.code}`}>Article Excerpt ({lang.name})</Label>
                   <Input
                     id={`excerpt-${lang.code}`}
-                    value={article.excerpts?.[lang.code] || ''}
-                    onChange={(e) => updateTranslation('excerpts', lang.code, e.target.value)}
+                    value={article[`excerpt_${lang.code}` as keyof Article] as string || ''}
+                    onChange={(e) => updateTranslation('excerpt', lang.code, e.target.value)}
                     placeholder={`Enter excerpt in ${lang.name}`}
-                  />
-                </div>
-                
-                <div className="md:col-span-2">
-                  <Label htmlFor={`content-${lang.code}`}>Article Content ({lang.code})</Label>
-                  <Input
-                    id={`content-${lang.code}`}
-                    value={article.contents?.[lang.code] || ''}
-                    onChange={(e) => updateTranslation('contents', lang.code, e.target.value)}
-                    placeholder={`Enter content in ${lang.code}`}
                   />
                 </div>
               </div>
@@ -293,30 +292,96 @@ export default function AddArticle() {
       {/* Image Upload */}
       <div className="bg-white p-4 rounded-lg border">
         <h2 className="text-lg font-semibold mb-4">Featured Image</h2>
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="image-upload">Upload Image</Label>
-            <Input
-              id="image-upload"
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleImageUpload(file);
-              }}
-            />
-          </div>
-          
+        <div className="space-y-3">
+          {/* Current Image Display */}
           {article.featured_image && (
-            <div>
-              <Label>Current Featured Image</Label>
-              <img 
-                src={article.featured_image} 
-                alt="Featured" 
-                className="w-32 h-32 object-cover rounded border"
+            <div className="relative">
+              <img
+                src={article.featured_image}
+                alt="Current featured image"
+                className="w-full h-32 object-cover rounded-lg border"
               />
+              <Button
+                variant="destructive"
+                size="sm"
+                className="absolute top-2 right-2 h-6 w-6 p-0"
+                onClick={() => {
+                  setArticle(prev => ({ ...prev, featured_image: '' }));
+                  setUploadedImages(prev => prev.filter(img => img !== article.featured_image));
+                }}
+              >
+                ×
+              </Button>
             </div>
           )}
+          
+          {/* File input and upload button - EXACT same pattern as working projects */}
+          <div className="flex items-center gap-2">
+            <input
+              type="file"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm flex-1"
+              accept="image/*"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  try {
+                    setIsUploading(true);
+                    console.log('Starting featured image upload:', file.name, file.size, file.type);
+                    
+                    // EXACT same upload logic as working projects
+                    const fileName = `article-featured-${Date.now()}-${file.name}`;
+                    const { data, error } = await supabase.storage
+                      .from('article-images')
+                      .upload(fileName, file);
+                    
+                    if (error) {
+                      console.error('Supabase upload error:', error);
+                      throw error;
+                    }
+                    
+                    // Get public URL - same as projects
+                    const { data: { publicUrl } } = supabase.storage
+                      .from('article-images')
+                      .getPublicUrl(fileName);
+                    
+                    console.log('Featured image upload successful:', publicUrl);
+                    
+                    // Update article state
+                    setArticle(prev => ({ ...prev, featured_image: publicUrl }));
+                    setUploadedImages(prev => [...prev, publicUrl]);
+                    
+                    toast({
+                      title: "Success",
+                      description: "Featured image uploaded successfully"
+                    });
+                    
+                  } catch (error) {
+                    console.error('Error uploading featured image:', error);
+                    toast({
+                      title: "Error",
+                      description: `Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                      variant: "destructive"
+                    });
+                  } finally {
+                    setIsUploading(false);
+                  }
+                }
+              }}
+              disabled={isUploading}
+            />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="px-3"
+              disabled={isUploading}
+            >
+              <Upload className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <p className="text-xs text-muted-foreground">
+            Upload a new featured image. Supported formats: JPG, PNG, GIF. Max size: 10MB
+          </p>
         </div>
       </div>
 

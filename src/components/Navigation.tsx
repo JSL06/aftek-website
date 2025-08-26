@@ -42,7 +42,7 @@ const Navigation = () => {
   const languageOptions = [
     { code: 'en', display: 'English' },
     { code: 'zh-Hant', display: '繁體中文' },
-    { code: 'zh-Hans', display: '简体中文' },
+
     { code: 'th', display: 'ไทย' },
     { code: 'ja', display: '日本語' },
     { code: 'ko', display: '한국어' },

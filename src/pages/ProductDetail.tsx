@@ -313,8 +313,7 @@ const ProductDetail = () => {
     switch (currentLanguage) {
       case 'zh-Hant':
         return '返回產品頁面';
-      case 'zh-Hans':
-        return '返回产品页面';
+
       case 'ja':
         return '製品ページに戻る';
       case 'ko':

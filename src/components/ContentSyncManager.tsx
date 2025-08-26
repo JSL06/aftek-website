@@ -36,7 +36,7 @@ interface SyncResult {
 
 const LANGUAGES = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'zh-Hans', name: '简体中文', flag: '🇨🇳' },
+  
   { code: 'zh-Hant', name: '繁體中文', flag: '🇹🇼' },
   { code: 'ja', name: '日本語', flag: '🇯🇵' },
   { code: 'ko', name: '한국어', flag: '🇰🇷' },

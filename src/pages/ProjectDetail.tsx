@@ -267,7 +267,7 @@ const ProjectDetail: React.FC = () => {
       'Sealant & Adhesive': {
         'en': 'Sealant & Adhesive',
         'zh-Hant': '密封膠與黏合劑',
-        'zh-Hans': '密封胶与黏合剂',
+
         'ja': 'シーラント・接着剤',
         'ko': '실런트 및 접착제',
         'th': 'ซีแลนท์และกาวยาแนว',
@@ -276,7 +276,7 @@ const ProjectDetail: React.FC = () => {
       'Waterproofing': {
         'en': 'Waterproofing',
         'zh-Hant': '防水',
-        'zh-Hans': '防水',
+
         'ja': '防水',
         'ko': '방수',
         'th': 'กันน้ำ',
@@ -285,7 +285,7 @@ const ProjectDetail: React.FC = () => {
       'Flooring': {
         'en': 'Flooring',
         'zh-Hant': '地板',
-        'zh-Hans': '地板',
+
         'ja': '床材',
         'ko': '바닥재',
         'th': 'พื้น',
@@ -294,7 +294,7 @@ const ProjectDetail: React.FC = () => {
       'Redi-Mix G&M': {
         'en': 'Redi-Mix G&M',
         'zh-Hant': 'Redi-Mix G&M',
-        'zh-Hans': 'Redi-Mix G&M',
+
         'ja': 'Redi-Mix G&M',
         'ko': 'Redi-Mix G&M',
         'th': 'Redi-Mix G&M',
@@ -303,7 +303,7 @@ const ProjectDetail: React.FC = () => {
       'Other Specialties': {
         'en': 'Other Specialties',
         'zh-Hant': '其他專業',
-        'zh-Hans': '其他专业',
+
         'ja': 'その他の専門',
         'ko': '기타 전문',
         'th': 'ความเชี่ยวชาญอื่นๆ',
@@ -349,7 +349,7 @@ const ProjectDetail: React.FC = () => {
       'Rapid Curing': {
         'en': 'Rapid Curing',
         'zh-Hant': '快速固化',
-        'zh-Hans': '快速固化',
+
         'ja': '急速硬化',
         'ko': '급속 경화',
         'th': 'การแข็งตัวเร็ว',
@@ -358,7 +358,7 @@ const ProjectDetail: React.FC = () => {
       'High Strength': {
         'en': 'High Strength',
         'zh-Hant': '高強度',
-        'zh-Hans': '高强度',
+
         'ja': '高強度',
         'ko': '고강도',
         'th': 'ความแข็งแรงสูง',
@@ -367,7 +367,7 @@ const ProjectDetail: React.FC = () => {
       'Waterproof': {
         'en': 'Waterproof',
         'zh-Hant': '防水',
-        'zh-Hans': '防水',
+
         'ja': '防水',
         'ko': '방수',
         'th': 'กันน้ำ',
@@ -376,7 +376,7 @@ const ProjectDetail: React.FC = () => {
       'Chemical Resistant': {
         'en': 'Chemical Resistant',
         'zh-Hant': '耐化學性',
-        'zh-Hans': '耐化学性',
+
         'ja': '耐薬品性',
         'ko': '화학 저항성',
         'th': 'ทนต่อสารเคมี',
@@ -385,7 +385,7 @@ const ProjectDetail: React.FC = () => {
       'Flexible': {
         'en': 'Flexible',
         'zh-Hant': '柔韌性',
-        'zh-Hans': '柔韧性',
+
         'ja': '柔軟性',
         'ko': '유연성',
         'th': 'ความยืดหยุ่น',

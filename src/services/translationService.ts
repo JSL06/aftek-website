@@ -131,7 +131,7 @@ const translateWithFallback = (text: string, targetLanguage: Language): Translat
       'ko': '홈',
       'th': 'หน้าแรก',
       'vi': 'Trang chủ',
-      'zh-Hans': '首页',
+
       'zh-Hant': '首頁'
     },
     'About': {
@@ -140,7 +140,7 @@ const translateWithFallback = (text: string, targetLanguage: Language): Translat
       'ko': '회사소개',
       'th': 'เกี่ยวกับเรา',
       'vi': 'Giới thiệu',
-      'zh-Hans': '关于我们',
+
       'zh-Hant': '關於我們'
     },
     'Products': {
@@ -149,7 +149,7 @@ const translateWithFallback = (text: string, targetLanguage: Language): Translat
       'ko': '제품',
       'th': 'ผลิตภัณฑ์',
       'vi': 'Sản phẩm',
-      'zh-Hans': '产品',
+
       'zh-Hant': '產品'
     },
     'Contact': {
@@ -158,7 +158,7 @@ const translateWithFallback = (text: string, targetLanguage: Language): Translat
       'ko': '연락처',
       'th': 'ติดต่อ',
       'vi': 'Liên hệ',
-      'zh-Hans': '联系',
+
       'zh-Hant': '聯絡'
     },
     'Loading...': {
@@ -167,7 +167,7 @@ const translateWithFallback = (text: string, targetLanguage: Language): Translat
       'ko': '로딩 중...',
       'th': 'กำลังโหลด...',
       'vi': 'Đang tải...',
-      'zh-Hans': '加载中...',
+
       'zh-Hant': '載入中...'
     },
     'Submit': {
@@ -176,7 +176,7 @@ const translateWithFallback = (text: string, targetLanguage: Language): Translat
       'ko': '제출',
       'th': 'ส่ง',
       'vi': 'Gửi',
-      'zh-Hans': '提交',
+
       'zh-Hant': '提交'
     },
     'Cancel': {
@@ -185,7 +185,7 @@ const translateWithFallback = (text: string, targetLanguage: Language): Translat
       'ko': '취소',
       'th': 'ยกเลิก',
       'vi': 'Hủy',
-      'zh-Hans': '取消',
+
       'zh-Hant': '取消'
     },
     'Save': {
@@ -194,7 +194,7 @@ const translateWithFallback = (text: string, targetLanguage: Language): Translat
       'ko': '저장',
       'th': 'บันทึก',
       'vi': 'Lưu',
-      'zh-Hans': '保存',
+
       'zh-Hant': '儲存'
     },
     'Edit': {
@@ -203,7 +203,7 @@ const translateWithFallback = (text: string, targetLanguage: Language): Translat
       'ko': '편집',
       'th': 'แก้ไข',
       'vi': 'Chỉnh sửa',
-      'zh-Hans': '编辑',
+
       'zh-Hant': '編輯'
     },
     'Delete': {
@@ -212,7 +212,7 @@ const translateWithFallback = (text: string, targetLanguage: Language): Translat
       'ko': '삭제',
       'th': 'ลบ',
       'vi': 'Xóa',
-      'zh-Hans': '删除',
+
       'zh-Hant': '刪除'
     }
   };

@@ -4,6 +4,7 @@
 -- 1. Add separate language columns for titles
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS title_en TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS title_zh_hant TEXT;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS title_zh_hans TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS title_ja TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS title_ko TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS title_th TEXT;
@@ -12,6 +13,7 @@ ALTER TABLE articles ADD COLUMN IF NOT EXISTS title_vi TEXT;
 -- 2. Add separate language columns for excerpts
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS excerpt_en TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS excerpt_zh_hant TEXT;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS excerpt_zh_hans TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS excerpt_ja TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS excerpt_ko TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS excerpt_th TEXT;
@@ -20,6 +22,7 @@ ALTER TABLE articles ADD COLUMN IF NOT EXISTS excerpt_vi TEXT;
 -- 3. Add separate language columns for authors
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS author_en TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS author_zh_hant TEXT;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS author_zh_hans TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS author_ja TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS author_ko TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS author_th TEXT;
@@ -28,6 +31,7 @@ ALTER TABLE articles ADD COLUMN IF NOT EXISTS author_vi TEXT;
 -- 4. Add separate language columns for categories
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS category_en TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS category_zh_hant TEXT;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS category_zh_hans TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS category_ja TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS category_ko TEXT;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS category_th TEXT;
@@ -36,6 +40,7 @@ ALTER TABLE articles ADD COLUMN IF NOT EXISTS category_vi TEXT;
 -- 5. Add separate language columns for content blocks
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS content_blocks_en JSONB;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS content_blocks_zh_hant JSONB;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS content_blocks_zh_hans JSONB;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS content_blocks_ja JSONB;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS content_blocks_ko JSONB;
 ALTER TABLE articles ADD COLUMN IF NOT EXISTS content_blocks_th JSONB;
@@ -45,6 +50,7 @@ ALTER TABLE articles ADD COLUMN IF NOT EXISTS content_blocks_vi JSONB;
 UPDATE articles SET 
     title_en = COALESCE(titles->>'en', ''),
     title_zh_hant = COALESCE(titles->>'zh-Hant', ''),
+    title_zh_hans = COALESCE(titles->>'zh-Hans', ''),
     title_ja = COALESCE(titles->>'ja', ''),
     title_ko = COALESCE(titles->>'ko', ''),
     title_th = COALESCE(titles->>'th', ''),
@@ -54,6 +60,7 @@ WHERE titles IS NOT NULL;
 UPDATE articles SET 
     excerpt_en = COALESCE(excerpts->>'en', ''),
     excerpt_zh_hant = COALESCE(excerpts->>'zh-Hant', ''),
+    excerpt_zh_hans = COALESCE(excerpts->>'zh-Hans', ''),
     excerpt_ja = COALESCE(excerpts->>'ja', ''),
     excerpt_ko = COALESCE(excerpts->>'ko', ''),
     excerpt_th = COALESCE(excerpts->>'th', ''),
@@ -63,6 +70,7 @@ WHERE excerpts IS NOT NULL;
 UPDATE articles SET 
     author_en = COALESCE(authors_multilingual->>'en', ''),
     author_zh_hant = COALESCE(authors_multilingual->>'zh-Hant', ''),
+    author_zh_hans = COALESCE(authors_multilingual->>'zh-Hans', ''),
     author_ja = COALESCE(authors_multilingual->>'ja', ''),
     author_ko = COALESCE(authors_multilingual->>'ko', ''),
     author_th = COALESCE(authors_multilingual->>'th', ''),
@@ -72,6 +80,7 @@ WHERE authors_multilingual IS NOT NULL;
 UPDATE articles SET 
     category_en = COALESCE(categories_multilingual->>'en', ''),
     category_zh_hant = COALESCE(categories_multilingual->>'zh-Hant', ''),
+    category_zh_hans = COALESCE(categories_multilingual->>'zh-Hans', ''),
     category_ja = COALESCE(categories_multilingual->>'ja', ''),
     category_ko = COALESCE(categories_multilingual->>'ko', ''),
     category_th = COALESCE(categories_multilingual->>'th', ''),
@@ -81,6 +90,7 @@ WHERE categories_multilingual IS NOT NULL;
 UPDATE articles SET 
     content_blocks_en = COALESCE(content_blocks, '[]'::jsonb),
     content_blocks_zh_hant = COALESCE(content_blocks, '[]'::jsonb),
+    content_blocks_zh_hans = COALESCE(content_blocks, '[]'::jsonb),
     content_blocks_ja = COALESCE(content_blocks, '[]'::jsonb),
     content_blocks_ko = COALESCE(content_blocks, '[]'::jsonb),
     content_blocks_th = COALESCE(content_blocks, '[]'::jsonb),
@@ -90,6 +100,7 @@ WHERE content_blocks IS NOT NULL;
 -- 7. Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_articles_title_en ON articles(title_en);
 CREATE INDEX IF NOT EXISTS idx_articles_title_zh_hant ON articles(title_zh_hant);
+CREATE INDEX IF NOT EXISTS idx_articles_title_zh_hans ON articles(title_zh_hans);
 CREATE INDEX IF NOT EXISTS idx_articles_title_ja ON articles(title_ja);
 CREATE INDEX IF NOT EXISTS idx_articles_title_ko ON articles(title_ko);
 CREATE INDEX IF NOT EXISTS idx_articles_title_th ON articles(title_th);
@@ -97,6 +108,7 @@ CREATE INDEX IF NOT EXISTS idx_articles_title_vi ON articles(title_vi);
 
 CREATE INDEX IF NOT EXISTS idx_articles_content_blocks_en ON articles USING GIN(content_blocks_en);
 CREATE INDEX IF NOT EXISTS idx_articles_content_blocks_zh_hant ON articles USING GIN(content_blocks_zh_hant);
+CREATE INDEX IF NOT EXISTS idx_articles_content_blocks_zh_hans ON articles USING GIN(content_blocks_zh_hans);
 CREATE INDEX IF NOT EXISTS idx_articles_content_blocks_ja ON articles USING GIN(content_blocks_ja);
 CREATE INDEX IF NOT EXISTS idx_articles_content_blocks_ko ON articles USING GIN(content_blocks_ko);
 CREATE INDEX IF NOT EXISTS idx_articles_content_blocks_th ON articles USING GIN(content_blocks_th);

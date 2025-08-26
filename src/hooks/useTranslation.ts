@@ -183,7 +183,7 @@ export const useTranslation = () => {
       const newLanguage = event.detail as Language;
       if (newLanguage && newLanguage !== currentLanguage) {
         // Only change if the new language is valid
-        if (['en', 'ja', 'ko', 'th', 'vi', 'zh-Hans', 'zh-Hant'].includes(newLanguage)) {
+        if (['en', 'ja', 'ko', 'th', 'vi', 'zh-Hant'].includes(newLanguage)) {
           setCurrentLanguage(newLanguage);
         }
       }

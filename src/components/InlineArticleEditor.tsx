@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -28,9 +28,11 @@ import {
   ExternalLink,
   X,
   Search,
-  Edit
+  Edit,
+  Globe
 } from 'lucide-react';
 import { productService, UnifiedProduct } from '@/services/productService';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface ContentBlock {
   id: string;
@@ -59,6 +61,7 @@ interface InlineArticleEditorProps {
   onSave?: () => void;
   onPreview?: () => void;
   readOnly?: boolean;
+  onLanguageChange?: (language: string) => void; // New prop for language changes
   // Related content props
   relatedProducts?: string[];
   onRelatedProductsChange?: (products: string[]) => void;
@@ -98,11 +101,12 @@ const columnLayoutOptions = [
 ];
 
 export default function InlineArticleEditor({ 
-  initialContent = [], 
-  onContentChange, 
-  onSave, 
+  initialContent,
+  onContentChange,
+  onSave,
   onPreview,
   readOnly = false,
+  onLanguageChange,
   relatedProducts = [],
   onRelatedProductsChange,
   relatedLinks = [],
@@ -118,30 +122,14 @@ export default function InlineArticleEditor({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   
-  // Language selection state
-  const [currentLanguage, setCurrentLanguage] = useState('en');
-  const languages = [
-    { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'zh-Hant', name: '繁體中文', flag: '🇹🇼' },
-    { code: 'ja', name: '日本語', flag: '🇯🇵' },
-    { code: 'ko', name: '한국어', flag: '🇰🇷' },
-    { code: 'th', name: 'ไทย', flag: '🇹🇭' },
-    { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' }
-  ];
+
   
   // Product selection state
   const [products, setProducts] = useState<UnifiedProduct[]>([]);
   const [showProductSelector, setShowProductSelector] = useState(false);
   const [productSearch, setProductSearch] = useState('');
 
-  // Helper function to get localized content for a block
-  const getLocalizedContent = (block: ContentBlock, language: string): string => {
-    // Since we're now using separate language columns, we just return the content
-    // The parent component will handle switching between different language content arrays
-    return block.content;
-  };
-
-  // Helper function to update localized content for a block
+  // Helper function to update content for a block
   const updateLocalizedContent = (blockId: string, language: string, newContent: string) => {
     setContent(prevContent => {
       const updatedContent = prevContent.map(block => {
@@ -175,6 +163,15 @@ export default function InlineArticleEditor({
       onContentChange([defaultBlock]);
     }
   }, []);
+
+  // Sync content with initialContent prop when it changes
+  useEffect(() => {
+    if (initialContent && initialContent.length > 0) {
+      setContent(initialContent);
+    }
+  }, [initialContent]);
+
+
 
   // Fetch products for selection
   useEffect(() => {
@@ -317,18 +314,47 @@ export default function InlineArticleEditor({
   }, [content]);
 
   const handleTextChange = useCallback((blockId: string, newContent: string) => {
-    updateLocalizedContent(blockId, currentLanguage, newContent);
-  }, [currentLanguage]);
+    updateLocalizedContent(blockId, 'en', newContent);
+  }, []);
 
-  const handleImageUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>, blockId: string) => {
+  const handleImageUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>, blockId: string) => {
     const file = event.target.files?.[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      updateBlock(blockId, { 
-        imageUrl, 
-        content: file.name,
-        type: 'image'
-      });
+      try {
+        const fileName = `${Date.now()}-${file.name}`;
+        const filePath = `articles/${fileName}`;
+
+        const { data, error } = await supabase.storage
+          .from('article-images')
+          .upload(filePath, file, {
+            contentType: file.type,
+            upsert: false,
+          });
+
+        if (error) {
+          console.error('Error uploading image to Supabase:', error);
+          alert('Failed to upload image. Please try again.');
+          return;
+        }
+
+        const { data: publicUrlData } = supabase.storage
+          .from('article-images')
+          .getPublicUrl(filePath);
+
+        if (publicUrlData) {
+          updateBlock(blockId, { 
+            imageUrl: publicUrlData.publicUrl,
+            content: file.name,
+            type: 'image'
+          });
+        } else {
+          console.error('Error getting public URL for image:', publicUrlData);
+          alert('Failed to get image URL. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error in image upload:', error);
+        alert('Failed to upload image. Please try again.');
+      }
     }
   }, [updateBlock]);
 
@@ -513,13 +539,61 @@ export default function InlineArticleEditor({
                     Selected
                   </div>
                 )}
+                {/* Remove image button when selected */}
+                {!readOnly && block.isSelected && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="absolute top-2 left-2 h-6 w-6 p-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      updateBlock(block.id, { 
+                        imageUrl: undefined, 
+                        content: '',
+                        type: 'image'
+                      });
+                    }}
+                  >
+                    ×
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="w-full h-32 bg-gray-200 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
-                <div className="text-center">
-                  <ImageIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500">Click to add image or paste from clipboard</p>
-                </div>
+                {!readOnly && block.isSelected ? (
+                  <div className="w-full p-4">
+                    {/* File input and upload button - same pattern as projects */}
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="file"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm flex-1"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            console.log('Image file selected:', file.name, file.size, file.type);
+                            await handleImageUpload(e, block.id);
+                          }
+                        }}
+                      />
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="px-3"
+                      >
+                        <Upload className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2 text-center">
+                      Supported formats: JPG, PNG, GIF. Max size: 10MB
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <ImageIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500">Click to add image or paste from clipboard</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -536,15 +610,9 @@ export default function InlineArticleEditor({
             onDragOver={!readOnly ? handleDragOver : undefined}
             onDrop={!readOnly ? (e) => handleDrop(e, index) : undefined}
           >
-            {/* Language Indicator */}
-            {!readOnly && (
-              <div className="absolute top-1 right-1 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
-                {languages.find(lang => lang.code === currentLanguage)?.flag} {currentLanguage.toUpperCase()}
-              </div>
-            )}
             {!readOnly && block.isSelected ? (
               <Input
-                value={getLocalizedContent(block, currentLanguage)}
+                value={block.content}
                 onChange={(e) => handleTextChange(block.id, e.target.value)}
                 className={`${textClasses} border-2 border-blue-500 focus:border-blue-600`}
                 placeholder="Enter heading..."
@@ -552,7 +620,7 @@ export default function InlineArticleEditor({
               />
             ) : (
               <h2 className={textClasses}>
-                {getLocalizedContent(block, currentLanguage) || 'Click to edit heading...'}
+                {block.content || 'Click to edit heading...'}
               </h2>
             )}
           </div>
@@ -570,15 +638,9 @@ export default function InlineArticleEditor({
             onDragOver={!readOnly ? handleDragOver : undefined}
             onDrop={!readOnly ? (e) => handleDrop(e, index) : undefined}
           >
-            {/* Language Indicator */}
-            {!readOnly && (
-              <div className="absolute top-1 right-1 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
-                {languages.find(lang => lang.code === currentLanguage)?.flag} {currentLanguage.toUpperCase()}
-              </div>
-            )}
             {!readOnly && block.isSelected ? (
               <Input
-                value={getLocalizedContent(block, currentLanguage)}
+                value={block.content}
                 onChange={(e) => handleTextChange(block.id, e.target.value)}
                 className={`${textClasses} border-2 border-blue-500 focus:border-blue-600`}
                 placeholder="Enter text content..."
@@ -586,7 +648,7 @@ export default function InlineArticleEditor({
               />
             ) : (
               <p className={textClasses}>
-                {getLocalizedContent(block, currentLanguage) || 'Click to edit text...'}
+                {block.content || 'Click to edit text...'}
               </p>
             )}
           </div>
@@ -603,14 +665,8 @@ export default function InlineArticleEditor({
             onDragOver={!readOnly ? handleDragOver : undefined}
             onDrop={!readOnly ? (e) => handleDrop(e, index) : undefined}
           >
-            {/* Language Indicator */}
-            {!readOnly && (
-              <div className="absolute top-1 right-1 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
-                {languages.find(lang => lang.code === currentLanguage)?.flag} {currentLanguage.toUpperCase()}
-              </div>
-            )}
             <ul className={textClasses}>
-              <li>{getLocalizedContent(block, currentLanguage)}</li>
+              <li>{block.content}</li>
             </ul>
           </div>
         );
@@ -693,51 +749,38 @@ export default function InlineArticleEditor({
     return (
       <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4 shadow-sm">
         {/* First Row - Main Controls */}
-        <div className="flex items-center gap-4 mb-3">
-          <h2 className="text-lg font-semibold">Article Editor</h2>
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <h2 className="text-lg font-semibold mr-4">Article Editor</h2>
           
-          {/* Language Selector */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-600">Language:</span>
-            <div className="flex gap-1">
-              {languages.map(lang => (
-                <Button
-                  key={lang.code}
-                  variant={currentLanguage === lang.code ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setCurrentLanguage(lang.code)}
-                  className="px-2 py-1 text-xs"
-                >
-                  <span className="mr-1">{lang.flag}</span>
-                  <span className="hidden sm:inline">{lang.code.toUpperCase()}</span>
-                </Button>
-              ))}
-            </div>
-          </div>
+
           
           {/* Block Type Selector */}
-          <Select 
-            value={selectedBlockData?.type || 'paragraph'} 
-            onValueChange={(value: any) => {
-              if (selectedBlock) {
-                updateBlock(selectedBlock, { type: value });
-              }
-            }}
-          >
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="paragraph">Paragraph</SelectItem>
-              <SelectItem value="heading">Heading</SelectItem>
-              <SelectItem value="image">Image</SelectItem>
-              <SelectItem value="list">List</SelectItem>
-              <SelectItem value="row">Row (Multi-column)</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2 mr-4">
+            <span className="text-sm font-medium text-gray-600 whitespace-nowrap">Type:</span>
+            <Select 
+              value={selectedBlockData?.type || 'paragraph'} 
+              onValueChange={(value: any) => {
+                if (selectedBlock) {
+                  updateBlock(selectedBlock, { type: value });
+                }
+              }}
+            >
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="paragraph">Paragraph</SelectItem>
+                <SelectItem value="heading">Heading</SelectItem>
+                <SelectItem value="image">Image</SelectItem>
+                <SelectItem value="list">List</SelectItem>
+                <SelectItem value="row">Row (Multi-column)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           {/* Alignment Controls */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 mr-4">
+            <span className="text-sm font-medium text-gray-600 mr-2 whitespace-nowrap">Align:</span>
             <Button
               variant={selectedBlockData?.alignment === 'left' ? 'default' : 'outline'}
               size="sm"
@@ -767,63 +810,69 @@ export default function InlineArticleEditor({
               <AlignJustify className="h-4 w-4" />
             </Button>
           </div>
-
-          {/* Font Size */}
-          <Select 
-            value={selectedBlockData?.fontSize || 'normal'} 
-            onValueChange={(value: any) => {
-              if (selectedBlock) {
-                updateBlock(selectedBlock, { fontSize: value });
-              }
-            }}
-          >
-            <SelectTrigger className="w-24">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {fontSizeOptions.map(option => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Text Formatting */}
-          <Button
-            variant={selectedBlockData?.fontWeight === 'bold' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => selectedBlock && updateBlock(selectedBlock, { 
-              fontWeight: selectedBlockData?.fontWeight === 'bold' ? 'normal' : 'bold' 
-            })}
-          >
-            <Bold className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={selectedBlockData?.fontStyle === 'italic' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => selectedBlock && updateBlock(selectedBlock, { 
-              fontStyle: selectedBlockData?.fontStyle === 'italic' ? 'normal' : 'italic' 
-            })}
-          >
-            <Italic className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={selectedBlockData?.textDecoration === 'underline' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => selectedBlock && updateBlock(selectedBlock, { 
-              textDecoration: selectedBlockData?.textDecoration === 'underline' ? 'none' : 'underline' 
-            })}
-          >
-            <Underline className="h-4 w-4" />
-          </Button>
         </div>
 
         {/* Second Row - Additional Controls */}
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Font Size */}
+          <div className="flex items-center gap-2 mr-4">
+            <span className="text-sm font-medium text-gray-600 whitespace-nowrap">Size:</span>
+            <Select 
+              value={selectedBlockData?.fontSize || 'normal'} 
+              onValueChange={(value: any) => {
+                if (selectedBlock) {
+                  updateBlock(selectedBlock, { fontSize: value });
+                }
+              }}
+            >
+              <SelectTrigger className="w-24">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {fontSizeOptions.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Text Formatting */}
+          <div className="flex items-center gap-1 mr-4">
+            <span className="text-sm font-medium text-gray-600 mr-2 whitespace-nowrap">Style:</span>
+            <Button
+              variant={selectedBlockData?.fontWeight === 'bold' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => selectedBlock && updateBlock(selectedBlock, { 
+                fontWeight: selectedBlockData?.fontWeight === 'bold' ? 'normal' : 'bold' 
+              })}
+            >
+              <Bold className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={selectedBlockData?.fontStyle === 'italic' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => selectedBlock && updateBlock(selectedBlock, { 
+                fontStyle: selectedBlockData?.fontStyle === 'italic' ? 'normal' : 'italic' 
+              })}
+            >
+              <Italic className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={selectedBlockData?.textDecoration === 'underline' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => selectedBlock && updateBlock(selectedBlock, { 
+                textDecoration: selectedBlockData?.textDecoration === 'underline' ? 'none' : 'underline' 
+              })}
+            >
+              <Underline className="h-4 w-4" />
+            </Button>
+          </div>
+
           {/* Width Control */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-600">Width:</span>
+          <div className="flex items-center gap-2 mr-4">
+            <span className="text-sm font-medium text-gray-600 whitespace-nowrap">Width:</span>
             <Select 
               value={selectedBlockData?.width || 'full'} 
               onValueChange={(value: any) => {
@@ -846,8 +895,8 @@ export default function InlineArticleEditor({
           </div>
 
           {/* Margin Control */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-600">Margin:</span>
+          <div className="flex items-center gap-2 mr-4">
+            <span className="text-sm font-medium text-gray-600 whitespace-nowrap">Margin:</span>
             <Select 
               value={selectedBlockData?.margin || 'normal'} 
               onValueChange={(value: any) => {
@@ -885,23 +934,10 @@ export default function InlineArticleEditor({
               size="sm"
               onClick={() => selectedBlock && deleteBlock(selectedBlock)}
               disabled={!selectedBlock || content.length <= 1}
-              className="text-red-600 hover:text-red-700"
             >
               <Trash2 className="h-4 w-4 mr-1" />
               Delete
             </Button>
-            {onPreview && (
-              <Button variant="outline" size="sm" onClick={onPreview}>
-                <Eye className="h-4 w-4 mr-1" />
-                Preview
-              </Button>
-            )}
-            {onSave && (
-              <Button variant="default" size="sm" onClick={onSave}>
-                <Save className="h-4 w-4 mr-1" />
-                Save
-              </Button>
-            )}
           </div>
         </div>
       </div>
@@ -988,7 +1024,7 @@ export default function InlineArticleEditor({
         {/* Content Editor */}
         <div 
           ref={editorRef}
-          className="min-h-[600px] bg-white border border-gray-200 rounded-lg p-6"
+          className="min-h-[600px] bg-white border border-gray-200 rounded-lg p-6 relative"
           onPaste={!readOnly ? (e) => {
             // Handle pasting images into the editor
             const items = e.clipboardData.items;
@@ -1021,7 +1057,21 @@ export default function InlineArticleEditor({
             }
           } : undefined}
         >
-          {content.map((block, index) => renderBlock(block, index))}
+          {/* Language Indicator */}
+
+
+          {/* Content Blocks */}
+          {content.length === 0 ? (
+            <div className="text-center py-20 text-gray-500">
+              <Type className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <p className="text-lg font-medium">No content yet</p>
+              <p className="text-sm">Start adding content blocks using the Quick Add buttons above</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {content.map((block, index) => renderBlock(block, index))}
+            </div>
+          )}
           
           {/* Related Products Display */}
           {relatedProducts && relatedProducts.length > 0 && (

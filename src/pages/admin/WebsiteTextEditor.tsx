@@ -17,10 +17,10 @@ import jaTranslations from '@/locales/ja';
 import koTranslations from '@/locales/ko';
 import thTranslations from '@/locales/th';
 import viTranslations from '@/locales/vi';
-import zhHansTranslations from '@/locales/zh-Hans';
+
 import zhHantTranslations from '@/locales/zh-Hant';
 
-type Language = 'en' | 'ja' | 'ko' | 'th' | 'vi' | 'zh-Hans' | 'zh-Hant';
+type Language = 'en' | 'ja' | 'ko' | 'th' | 'vi' | 'zh-Hant';
 
 interface WebsiteText {
   key: string;
@@ -44,7 +44,7 @@ const LANGUAGES: { code: Language; name: string; flag: string; nativeName: strin
   { code: 'ko', name: '한국어', flag: '🇰🇷', nativeName: '한국어' },
   { code: 'th', name: 'ไทย', flag: '🇹🇭', nativeName: 'ไทย' },
   { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳', nativeName: 'Tiếng Việt' },
-  { code: 'zh-Hans', name: '简体中文', flag: '🇨🇳', nativeName: '简体中文' },
+
   { code: 'zh-Hant', name: '繁體中文', flag: '🇹🇼', nativeName: '繁體中文' },
 ];
 
@@ -2008,7 +2008,7 @@ function WebsiteTextEditor() {
         'ko': koTranslations,
         'th': thTranslations,
         'vi': viTranslations,
-        'zh-Hans': zhHansTranslations,
+
         'zh-Hant': zhHantTranslations,
       };
       
@@ -2042,7 +2042,7 @@ function WebsiteTextEditor() {
       'ko': koTranslations,
       'th': thTranslations,
       'vi': viTranslations,
-      'zh-Hans': zhHansTranslations,
+
       'zh-Hant': zhHantTranslations,
     };
     

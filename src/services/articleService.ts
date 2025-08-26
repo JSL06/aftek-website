@@ -445,8 +445,8 @@ class ArticleService {
     try {
       // Generate slug from English title if not provided
       let slug = article.slug;
-      if (!slug && article.titles?.en) {
-        slug = this.generateSlug(article.titles.en);
+      if (!slug && article.title_en) {
+        slug = this.generateSlug(article.title_en);
       }
 
       // Only send fields that exist in the database
@@ -456,12 +456,56 @@ class ArticleService {
         read_time: article.read_time,
         published_at: article.published_at,
         is_published: article.is_published,
+        
+        // New language-specific fields
+        title_en: article.title_en,
+        title_zh_hant: article.title_zh_hant,
+
+        title_ja: article.title_ja,
+        title_ko: article.title_ko,
+        title_th: article.title_th,
+        title_vi: article.title_vi,
+        
+        excerpt_en: article.excerpt_en,
+        excerpt_zh_hant: article.excerpt_zh_hant,
+
+        excerpt_ja: article.excerpt_ja,
+        excerpt_ko: article.excerpt_ko,
+        excerpt_th: article.excerpt_th,
+        excerpt_vi: article.excerpt_vi,
+        
+        author_en: article.author_en,
+        author_zh_hant: article.author_zh_hant,
+
+        author_ja: article.author_ja,
+        author_ko: article.author_ko,
+        author_th: article.author_th,
+        author_vi: article.author_vi,
+        
+        category_en: article.category_en,
+        category_zh_hant: article.category_zh_hant,
+
+        category_ja: article.category_ja,
+        category_ko: article.category_ko,
+        category_th: article.category_th,
+        category_vi: article.category_vi,
+        
+        content_blocks_en: article.content_blocks_en,
+        content_blocks_zh_hant: article.content_blocks_zh_hant,
+
+        content_blocks_ja: article.content_blocks_ja,
+        content_blocks_ko: article.content_blocks_ko,
+        content_blocks_th: article.content_blocks_th,
+        content_blocks_vi: article.content_blocks_vi,
+        
+        // Legacy multilingual fields (for backward compatibility)
         titles: article.titles,
         contents: article.contents,
         excerpts: article.excerpts,
         authors_multilingual: article.authors_multilingual,
         categories_multilingual: article.categories_multilingual,
         content_blocks: article.content_blocks,
+        
         related_products: article.related_products,
         related_links: article.related_links,
         custom_buttons: article.custom_buttons
@@ -499,14 +543,54 @@ class ArticleService {
       if (updates.published_at !== undefined) validUpdates.published_at = updates.published_at;
       if (updates.is_published !== undefined) validUpdates.is_published = updates.is_published;
       
-      // Multilingual fields
+      // New language-specific fields
+      if (updates.title_en !== undefined) validUpdates.title_en = updates.title_en;
+      if (updates.title_zh_hant !== undefined) validUpdates.title_zh_hant = updates.title_zh_hant;
+
+      if (updates.title_ja !== undefined) validUpdates.title_ja = updates.title_ja;
+      if (updates.title_ko !== undefined) validUpdates.title_ko = updates.title_ko;
+      if (updates.title_th !== undefined) validUpdates.title_th = updates.title_th;
+      if (updates.title_vi !== undefined) validUpdates.title_vi = updates.title_vi;
+      
+      if (updates.excerpt_en !== undefined) validUpdates.excerpt_en = updates.excerpt_en;
+      if (updates.excerpt_zh_hant !== undefined) validUpdates.excerpt_zh_hant = updates.excerpt_zh_hant;
+
+      if (updates.excerpt_ja !== undefined) validUpdates.excerpt_ja = updates.excerpt_ja;
+      if (updates.excerpt_ko !== undefined) validUpdates.excerpt_ko = updates.excerpt_ko;
+      if (updates.excerpt_th !== undefined) validUpdates.excerpt_th = updates.excerpt_th;
+      if (updates.excerpt_vi !== undefined) validUpdates.excerpt_vi = updates.excerpt_vi;
+      
+      if (updates.author_en !== undefined) validUpdates.author_en = updates.author_en;
+      if (updates.author_zh_hant !== undefined) validUpdates.author_zh_hant = updates.author_zh_hant;
+
+      if (updates.author_ja !== undefined) validUpdates.author_ja = updates.author_ja;
+      if (updates.author_ko !== undefined) validUpdates.author_ko = updates.author_ko;
+      if (updates.author_th !== undefined) validUpdates.author_th = updates.author_th;
+      if (updates.author_vi !== undefined) validUpdates.author_vi = updates.author_vi;
+      
+      if (updates.category_en !== undefined) validUpdates.category_en = updates.category_en;
+      if (updates.category_zh_hant !== undefined) validUpdates.category_zh_hant = updates.category_zh_hant;
+
+      if (updates.category_ja !== undefined) validUpdates.category_ja = updates.category_ja;
+      if (updates.category_ko !== undefined) validUpdates.category_ko = updates.category_ko;
+      if (updates.category_th !== undefined) validUpdates.category_th = updates.category_th;
+      if (updates.category_vi !== undefined) validUpdates.category_vi = updates.category_vi;
+      
+      // Content blocks for each language
+      if (updates.content_blocks_en !== undefined) validUpdates.content_blocks_en = updates.content_blocks_en;
+      if (updates.content_blocks_zh_hant !== undefined) validUpdates.content_blocks_zh_hant = updates.content_blocks_zh_hant;
+
+      if (updates.content_blocks_ja !== undefined) validUpdates.content_blocks_ja = updates.content_blocks_ja;
+      if (updates.content_blocks_ko !== undefined) validUpdates.content_blocks_ko = updates.content_blocks_ko;
+      if (updates.content_blocks_th !== undefined) validUpdates.content_blocks_th = updates.content_blocks_th;
+      if (updates.content_blocks_vi !== undefined) validUpdates.content_blocks_vi = updates.content_blocks_vi;
+      
+      // Legacy multilingual fields (for backward compatibility)
       if (updates.titles !== undefined) validUpdates.titles = updates.titles;
       if (updates.contents !== undefined) validUpdates.contents = updates.contents;
       if (updates.excerpts !== undefined) validUpdates.excerpts = updates.excerpts;
       if (updates.authors_multilingual !== undefined) validUpdates.authors_multilingual = updates.authors_multilingual;
       if (updates.categories_multilingual !== undefined) validUpdates.categories_multilingual = updates.categories_multilingual;
-      
-      // Content blocks
       if (updates.content_blocks !== undefined) validUpdates.content_blocks = updates.content_blocks;
       
       // Related content fields
@@ -564,9 +648,25 @@ class ArticleService {
 
   async uploadImage(file: File, articleId?: string): Promise<string | null> {
     try {
+      console.log('Starting image upload to Supabase storage...');
+      
+      // Check if the storage bucket exists
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+      if (bucketsError) {
+        console.error('Error listing storage buckets:', bucketsError);
+        return null;
+      }
+      
+      const bucketExists = buckets?.some(bucket => bucket.name === 'article-images');
+      if (!bucketExists) {
+        console.error('Storage bucket "article-images" does not exist');
+        return null;
+      }
+      
       const fileName = `${Date.now()}-${file.name}`;
       const filePath = `article-images/${fileName}`;
 
+      console.log('Uploading file to path:', filePath);
       const { error: uploadError } = await supabase.storage
         .from('article-images')
         .upload(filePath, file);
@@ -576,9 +676,12 @@ class ArticleService {
         return null;
       }
 
+      console.log('File uploaded successfully, getting public URL...');
       const { data: { publicUrl } } = supabase.storage
         .from('article-images')
         .getPublicUrl(filePath);
+
+      console.log('Public URL generated:', publicUrl);
 
       // If articleId is provided, save image record
       if (articleId) {

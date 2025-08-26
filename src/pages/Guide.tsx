@@ -279,8 +279,7 @@ const Guide = () => {
             <Card className="h-[600px] relative overflow-hidden">
               <CardHeader>
                 <CardTitle className="text-center">
-                  {currentLanguage === 'zh-Hans' ? '建筑结构图' :
-                   currentLanguage === 'zh-Hant' ? '建築結構圖' :
+                  {currentLanguage === 'zh-Hant' ? '建築結構圖' :
                    currentLanguage === 'ja' ? '建築構造図' :
                    currentLanguage === 'ko' ? '건축 구조도' :
                    currentLanguage === 'th' ? 'แผนภาพโครงสร้างอาคาร' :
@@ -294,8 +293,7 @@ const Guide = () => {
                   <div className="text-center text-muted-foreground">
                     <Building2 className="h-24 w-24 mx-auto mb-4 opacity-50" />
                     <p className="text-lg font-medium">
-                      {currentLanguage === 'zh-Hans' ? '建筑结构图' :
-                       currentLanguage === 'zh-Hant' ? '建築結構圖' :
+                      {currentLanguage === 'zh-Hant' ? '建築結構圖' :
                        currentLanguage === 'ja' ? '建築構造図' :
                        currentLanguage === 'ko' ? '건축 구조도' :
                        currentLanguage === 'th' ? 'แผนภาพโครงสร้างอาคาร' :
@@ -303,8 +301,7 @@ const Guide = () => {
                        'Building Structure Diagram'}
                     </p>
                     <p className="text-sm">
-                      {currentLanguage === 'zh-Hans' ? '点击红色热点探索产品' :
-                       currentLanguage === 'zh-Hant' ? '點擊紅色熱點探索產品' :
+                      {currentLanguage === 'zh-Hant' ? '點擊紅色熱點探索產品' :
                        currentLanguage === 'ja' ? '赤いホットスポットをクリックして製品を探索' :
                        currentLanguage === 'ko' ? '빨간색 핫스팟을 클릭하여 제품 탐색' :
                        currentLanguage === 'th' ? 'คลิกที่จุดร้อนสีแดงเพื่อสำรวจผลิตภัณฑ์' :
@@ -379,8 +376,7 @@ const Guide = () => {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <ArrowRight className="h-5 w-5" />
-                    {currentLanguage === 'zh-Hans' ? 'AI 解决方案生成器' :
-                     currentLanguage === 'zh-Hant' ? 'AI 解決方案生成器' :
+                    {currentLanguage === 'zh-Hant' ? 'AI 解決方案生成器' :
                      currentLanguage === 'ja' ? 'AI ソリューションジェネレーター' :
                      currentLanguage === 'ko' ? 'AI 솔루션 생성기' :
                      currentLanguage === 'th' ? 'เครื่องสร้างโซลูชัน AI' :
