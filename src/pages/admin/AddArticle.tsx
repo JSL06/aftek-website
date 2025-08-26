@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -79,6 +79,9 @@ export default function AddArticle() {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
+  // Debounce timer for input updates
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
   // Initialize article state with empty values for all languages
   useEffect(() => {
     const initialArticle: Article = {
@@ -122,6 +125,15 @@ export default function AddArticle() {
     
     setArticle(initialArticle);
     console.log('Article state initialized');
+  }, []);
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -201,14 +213,18 @@ export default function AddArticle() {
   };
 
   const updateTranslation = useCallback((field: string, language: string, value: string) => {
-    setArticle(prev => {
-      const newState = {
+    // Clear existing debounce timer
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    // Debounce the update to handle fast typing
+    debounceTimer.current = setTimeout(() => {
+      setArticle(prev => ({
         ...prev,
         [`${field}_${language}`]: value
-      };
-      console.log(`Updating ${field}_${language} to:`, value);
-      return newState;
-    });
+      }));
+    }, 100); // 100ms debounce delay
   }, []);
 
   // Helper function to get current field value
